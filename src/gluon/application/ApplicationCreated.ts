@@ -195,11 +195,11 @@ export class ApplicationCreated implements HandleEvent<any> {
                             .then(repos => {
 
                                 logger.info(`Got Bitbucket repos in project: ${JSON.stringify(repos.data)}`);
-                                const repo = repos.data.values.find(repo => {
+                                const repo = repos.data.values.find(existingRepo => {
                                     // _.find(repo.links.clone, clone => {
                                     //     return (clone as any).href === applicationCreatedEvent.bitbucketRepository.repoUrl;
                                     // })
-                                    return repo.name === applicationCreatedEvent.bitbucketRepository.name;
+                                    return existingRepo.name === applicationCreatedEvent.bitbucketRepository.name;
                                 });
                                 const remoteUrl = _.find(repo.links.clone, clone => {
                                     return (clone as any).name === "ssh";

@@ -34,9 +34,9 @@ export class AddSlackDetails implements HandleCommand<HandlerResult> {
                             userId: this.userId,
                     },
                 })
-                .then(member => {
+                .then(gluonMember => {
                     return ctx.messageClient.respond({
-                        text: `Thanks *${member.data.firstName}*, your Slack details have been added to your Subatomic profile. 👍`,
+                        text: `Thanks *${gluonMember.data.firstName}*, your Slack details have been added to your Subatomic profile. 👍`,
                     });
 
                     // TODO check if they've been added to any teams?
