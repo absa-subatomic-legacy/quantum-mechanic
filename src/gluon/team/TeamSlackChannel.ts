@@ -121,7 +121,6 @@ export class LinkExistingTeamSlackChannel implements HandleCommand {
     public teamChannel: string;
 
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
-
         return associateSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, this.docs());
     }
 
