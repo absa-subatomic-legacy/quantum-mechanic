@@ -27,9 +27,14 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     public teamChannel: string;
 
     @Parameter({
-        description: "teamId",
+        description: "Gluon team id",
     })
     public teamId: string;
+
+    @Parameter({
+        description: "Name of the team",
+    })
+    public teamName: string;
 
     @Parameter({
         description: "Membership request id",
@@ -77,13 +82,13 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
                             this.userSlackId)
                             .then(() => {
                                 const msg: SlackMessage = {
-                                    text: `Welcome to the team *${this.userScreenName}*!`,
+                                    text: `Welcome to the team *@${this.userScreenName}*!`,
                                 };
 
                                 return ctx.messageClient.addressChannels(msg, this.teamChannel);
                             }, reason => logger.error(reason));
                     } else {
-                        return ctx.messageClient.send(`Your membership request to team '${this.teamChannel}' has been rejected by @${this.approverUserName}`,
+                        return ctx.messageClient.send(`Your membership request to team '${this.teamName}' has been rejected by @${this.approverUserName}`,
                             addressSlackUsers(config.get("teamId"), this.userScreenName))
                             .then(() => {
                                 return ctx.messageClient.addressChannels("Membership request rejected", this.teamChannel);

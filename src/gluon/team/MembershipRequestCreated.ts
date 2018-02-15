@@ -62,6 +62,7 @@ export class MembershipRequestCreated implements HandleEvent<any> {
                                 {
                                     membershipRequestId: membershipRequestCreatedEvent.membershipRequestId,
                                     teamId: membershipRequestCreatedEvent.team.teamId,
+                                    teamName: membershipRequestCreatedEvent.team.name,
                                     userScreenName: membershipRequestCreatedEvent.requestedBy.slackIdentity.screenName,
                                     userSlackId: membershipRequestCreatedEvent.requestedBy.slackIdentity.userId,
                                     approvalStatus: "APPROVED",
@@ -72,6 +73,7 @@ export class MembershipRequestCreated implements HandleEvent<any> {
                                 {
                                     membershipRequestId: membershipRequestCreatedEvent.membershipRequestId,
                                     teamId: membershipRequestCreatedEvent.team.teamId,
+                                    teamName: membershipRequestCreatedEvent.team.name,
                                     userScreenName: membershipRequestCreatedEvent.requestedBy.slackIdentity.screenName,
                                     userSlackId: membershipRequestCreatedEvent.requestedBy.slackIdentity.userId,
                                     approvalStatus: "REJECTED",
