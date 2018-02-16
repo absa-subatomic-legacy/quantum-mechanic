@@ -57,7 +57,6 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     public approvalStatus: string;
 
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
-
         logger.info(`Attempting approval from user: ${this.approverUserName}`);
 
         return axios.get(`http://localhost:8080/members?slackScreenName=${this.approverUserName}`)

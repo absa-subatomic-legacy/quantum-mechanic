@@ -234,14 +234,14 @@ export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResul
     public screenName: string;
 
     @Parameter({
-        description: "slack name of the member to add",
+        description: "Gluon team id to create a membership request to.",
         displayable: false,
 
     })
     public teamId: string;
 
     @Parameter({
-        description: "slack name of the member to add",
+        description: "Slack name of the member to add.",
     })
     public slackName: string;
 
