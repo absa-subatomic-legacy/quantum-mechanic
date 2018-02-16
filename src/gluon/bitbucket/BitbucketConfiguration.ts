@@ -1,9 +1,9 @@
-import {bitbucketAxios, bitbucketUserFromUsername} from "./Bitbucket";
 import {logger} from "@atomist/automation-client";
 import {AxiosInstance, AxiosPromise} from "axios-https-proxy-fix";
 import * as config from "config";
 import * as _ from "lodash";
 import {usernameFromDomainUsername} from "../member/Members";
+import {bitbucketAxios, bitbucketUserFromUsername} from "./Bitbucket";
 
 export class BitbucketConfiguration {
 
@@ -30,7 +30,7 @@ export class BitbucketConfiguration {
                 return Promise.all([
                     this.addDefaultReviewers(bitbucketProjectKey, owner),
                     this.addDefaultReviewers(bitbucketProjectKey, member),
-                ])
+                ]);
             }),
         ]);
     }
@@ -45,7 +45,7 @@ export class BitbucketConfiguration {
 
     private addProjectPermission(projectKey: string, user: string, permission: string = "PROJECT_READ"): AxiosPromise {
         return this.axios.put(`${config.get("subatomic").bitbucket.baseUrl}/api/1.0/projects/${projectKey}/permissions/users?name=${user}&permission=${permission}`,
-            {})
+            {});
     }
 
     private addBranchPermissions(bitbucketProjectKey: string, owners: string[]): Promise<[any]> {
@@ -88,7 +88,7 @@ export class BitbucketConfiguration {
                         },
                     },
                     users: owners,
-                })
+                }),
         ]);
     }
 
@@ -104,7 +104,7 @@ export class BitbucketConfiguration {
             this.axios.put(`${config.get("subatomic").bitbucket.baseUrl}/api/1.0/projects/${bitbucketProjectKey}/settings/hooks/com.atlassian.bitbucket.server.bitbucket-build:requiredBuildsMergeCheck/enabled`,
                 {
                     requiredCount: 1,
-                })
+                }),
         ]);
     }
 

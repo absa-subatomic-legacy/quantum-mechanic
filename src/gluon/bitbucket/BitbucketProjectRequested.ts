@@ -8,13 +8,13 @@ import {
     success,
     SuccessPromise,
 } from "@atomist/automation-client";
+import {url} from "@atomist/slack-messages";
 import axios from "axios";
-import {bitbucketAxios, bitbucketProjectFromKey} from "./Bitbucket";
 import {AxiosInstance} from "axios-https-proxy-fix";
 import * as config from "config";
-import {url} from "@atomist/slack-messages";
-import {BitbucketConfiguration} from "./BitbucketConfiguration";
 import * as _ from "lodash";
+import {bitbucketAxios, bitbucketProjectFromKey} from "./Bitbucket";
+import {BitbucketConfiguration} from "./BitbucketConfiguration";
 
 @EventHandler("Receive BitbucketProjectRequestedEvent events", `
 subscription BitbucketProjectRequestedEvent {
@@ -44,7 +44,7 @@ subscription BitbucketProjectRequestedEvent {
         slackIdentity {
           screenName
         }
-      }      
+      }
     }
     bitbucketProjectRequest {
       key
@@ -84,7 +84,7 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
             teamMembers = _.union(teamMembers, team.members.map(member => member.domainUsername));
         });
 
-        let bitbucketConfiguration = new BitbucketConfiguration(
+        const bitbucketConfiguration = new BitbucketConfiguration(
             teamOwners,
             teamMembers,
         );
@@ -108,7 +108,7 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
                         .then(bitbucketProject => {
                             this.bitbucketProjectId = bitbucketProject.id;
                             this.bitbucketProjectUrl = bitbucketProject.links.self[0].href;
-                        })
+                        });
 
                     return bitbucketConfiguration.configureBitbucketProject(key);
                 } else {

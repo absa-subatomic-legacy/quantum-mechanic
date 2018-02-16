@@ -1,9 +1,9 @@
-import * as fs from "fs";
-import * as path from "path";
-import * as https from "https";
-import * as config from "config";
 import axios from "axios";
 import {AxiosInstance} from "axios-https-proxy-fix";
+import * as config from "config";
+import * as fs from "fs";
+import * as https from "https";
+import * as path from "path";
 
 export function bitbucketAxios(): AxiosInstance {
     const caFile = path.resolve(__dirname, config.get("subatomic").bitbucket.ca);
@@ -12,7 +12,7 @@ export function bitbucketAxios(): AxiosInstance {
             rejectUnauthorized: true,
             ca: fs.readFileSync(caFile),
         }),
-        auth: config.get("subatomic").bitbucket.auth
+        auth: config.get("subatomic").bitbucket.auth,
     });
 }
 

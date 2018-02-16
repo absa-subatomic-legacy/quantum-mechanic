@@ -8,8 +8,8 @@ import {
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
-import {NewProjectEnvironments} from "../project/ProjectEnvironments";
 import * as config from "config";
+import {NewProjectEnvironments} from "../project/ProjectEnvironments";
 
 @EventHandler("Receive BitbucketProjectAddedEvent events", `
 subscription BitbucketProjectAddedEvent {

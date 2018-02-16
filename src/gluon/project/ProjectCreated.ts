@@ -10,7 +10,7 @@ import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageCl
 import {url} from "@atomist/slack-messages";
 import {
     ListExistingBitbucketProject,
-    NewBitbucketProject
+    NewBitbucketProject,
 } from "../bitbucket/BitbucketProject";
 import {NewProjectEnvironments} from "./ProjectEnvironments";
 
@@ -65,7 +65,7 @@ This can be a new Bitbucket project that will be created and configured accordin
                         {text: "Link existing Bitbucket project"},
                         new ListExistingBitbucketProject(), {
                             projectName: projectCreatedEvent.project.name,
-                        })
+                        }),
                 ],
             }, {
                 text: `

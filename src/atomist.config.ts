@@ -9,7 +9,7 @@ import {
 } from "./gluon/bitbucket/bitbucketIngester";
 import {
     ListExistingBitbucketProject,
-    NewBitbucketProject
+    NewBitbucketProject,
 } from "./gluon/bitbucket/BitbucketProject";
 import {BitbucketProjectAdded} from "./gluon/bitbucket/BitbucketProjectAdded";
 import {BitbucketProjectRequested} from "./gluon/bitbucket/BitbucketProjectRequested";

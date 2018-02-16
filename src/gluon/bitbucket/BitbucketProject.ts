@@ -10,14 +10,14 @@ import {
     Parameter,
     success,
 } from "@atomist/automation-client";
-import axios from "axios";
-import * as config from "config";
-import {gluonMemberFromScreenName} from "../member/Members";
-import {gluonProjectFromProjectName} from "../project/Projects";
-import * as _ from "lodash";
 import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
+import axios from "axios";
 import {AxiosInstance} from "axios-https-proxy-fix";
+import * as config from "config";
+import * as _ from "lodash";
+import {gluonMemberFromScreenName} from "../member/Members";
+import {gluonProjectFromProjectName} from "../project/Projects";
 import {bitbucketAxios} from "./Bitbucket";
 
 @CommandHandler("Create a new Bitbucket project", config.get("subatomic").commandPrefix + " create bitbucket project")
@@ -118,7 +118,7 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
 
                     return ctx.messageClient.respond(msg)
                         .then(success);
-                })
+                });
         } else {
             // get memberId for createdBy
             return gluonMemberFromScreenName(ctx, this.screenName)
