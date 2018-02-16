@@ -16,7 +16,7 @@ import {SlackMessage} from "@atomist/slack-messages";
 import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
 
-@CommandHandler("Close a membership request", QMConfig.subatomic().commandPrefix + " close membership request")
+@CommandHandler("Close a membership request")
 @Tags("subatomic", "team", "membership")
 export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
 
