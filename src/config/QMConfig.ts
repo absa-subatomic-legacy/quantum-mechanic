@@ -1,8 +1,9 @@
 import * as config from "config";
+import {SubAtomicConfig} from "./SubAtomicConfig";
 
 export class QMConfig {
 
-    public static subatomic(): any {
+    public static subatomic(): SubAtomicConfig {
         return config.get("subatomic");
     }
 
