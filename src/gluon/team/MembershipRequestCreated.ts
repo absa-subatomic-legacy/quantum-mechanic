@@ -45,7 +45,7 @@ export class MembershipRequestCreated implements HandleEvent<any> {
 
         const membershipRequestCreatedEvent = event.data.MembershipRequestCreatedEvent[0];
         return ctx.messageClient.send(`A membership request to team '${membershipRequestCreatedEvent.team.name}' has been sent for approval`,
-            addressSlackUsers(QMConfig.teamId(), membershipRequestCreatedEvent.requestedBy.slackIdentity.screenName))
+            addressSlackUsers(QMConfig.teamId, membershipRequestCreatedEvent.requestedBy.slackIdentity.screenName))
             .then(() => {
                 logger.info("Team: " + membershipRequestCreatedEvent.team.slackIdentity.teamChannel);
                 const msg: SlackMessage = {

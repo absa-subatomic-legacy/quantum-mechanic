@@ -3,15 +3,10 @@ import {SubAtomicConfig} from "./SubAtomicConfig";
 
 export class QMConfig {
 
-    public static subatomic(): SubAtomicConfig {
-        return config.get("subatomic");
-    }
+    public static subatomic: SubAtomicConfig = config.get("subatomic");
 
-    public static teamId(): string {
-        return config.get("teamId");
-    }
+    public static teamId: string = config.get("teamId");
 
-    public static token(): string {
-        return config.get("token");
-    }
+    public static token: string = config.get("token");
+
 }

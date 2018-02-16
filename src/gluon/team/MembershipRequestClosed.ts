@@ -94,7 +94,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
                             }, reason => logger.error(reason));
                     } else {
                         return ctx.messageClient.send(`Your membership request to team '${this.teamName}' has been rejected by @${this.approverUserName}`,
-                            addressSlackUsers(QMConfig.teamId(), this.userScreenName))
+                            addressSlackUsers(QMConfig.teamId, this.userScreenName))
                             .then(() => {
                                 return ctx.messageClient.addressChannels("Membership request rejected", this.teamChannel);
                             });

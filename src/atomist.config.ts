@@ -47,12 +47,12 @@ import {
 
 const pj = require(`${appRoot.path}/package.json`);
 
-const token = QMConfig.token();
+const token = QMConfig.token;
 
 export const configuration: any = {
     name: pj.name,
     version: pj.version,
-    teamIds: [QMConfig.teamId()],
+    teamIds: [QMConfig.teamId],
     commands: [
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,

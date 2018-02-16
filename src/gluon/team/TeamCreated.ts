@@ -68,7 +68,7 @@ Next you should configure your team Slack channel and OpenShift DevOps environme
 
         // TODO fix the below if not created from Slack
         return ctx.messageClient.send(msg,
-            addressSlackUsers(QMConfig.teamId(), teamCreatedEvent.createdBy.slackIdentity.screenName));
+            addressSlackUsers(QMConfig.teamId, teamCreatedEvent.createdBy.slackIdentity.screenName));
     }
 
     private docs(): string {
