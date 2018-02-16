@@ -1,14 +1,23 @@
 import {
-    CommandHandler, failure, HandleCommand, HandlerContext, HandlerResult,
-    logger, MappedParameter, MappedParameters, Parameter, success, Tags,
+    CommandHandler,
+    failure,
+    HandleCommand,
+    HandlerContext,
+    HandlerResult,
+    logger,
+    MappedParameter,
+    MappedParameters,
+    Parameter,
+    success,
+    Tags,
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {addBotToSlackChannel} from "@atomist/lifecycle-automation/handlers/command/slack/AddBotToChannel";
 import {createChannel} from "@atomist/lifecycle-automation/handlers/command/slack/CreateChannel";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
-import * as config from "config";
 import * as _ from "lodash";
+import {QMConfig} from "../../config/QMConfig";
 import {CreateTeam} from "./CreateTeam";
 import {NewDevOpsEnvironment} from "./DevOpsEnvironment";
 import {AddMemberToTeam} from "./JoinTeam";
@@ -67,7 +76,7 @@ rather use that instead?\
     }
 }
 
-@CommandHandler("Create team channel", config.get("subatomic").commandPrefix + " create team channel")
+@CommandHandler("Create team channel", QMConfig.subatomic().commandPrefix + " create team channel")
 @Tags("subatomic", "slack", "channel", "team")
 export class NewTeamSlackChannel implements HandleCommand {
 
@@ -102,7 +111,7 @@ export class NewTeamSlackChannel implements HandleCommand {
     }
 }
 
-@CommandHandler("Create team channel", config.get("subatomic").commandPrefix + " link team channel")
+@CommandHandler("Create team channel", QMConfig.subatomic().commandPrefix + " link team channel")
 @Tags("subatomic", "slack", "channel", "team")
 export class LinkExistingTeamSlackChannel implements HandleCommand {
 

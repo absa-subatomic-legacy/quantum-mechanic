@@ -1,15 +1,22 @@
 import {
-    CommandHandler, HandleCommand, HandlerContext, HandlerResult, logger,
-    MappedParameter, MappedParameters, Parameter, success,
+    CommandHandler,
+    HandleCommand,
+    HandlerContext,
+    HandlerResult,
+    logger,
+    MappedParameter,
+    MappedParameters,
+    Parameter,
+    success,
 } from "@atomist/automation-client";
 import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import axios from "axios";
-import * as config from "config";
 import * as _ from "lodash";
+import {QMConfig} from "../../config/QMConfig";
 import {memberFromScreenName} from "../member/Members";
 import {teamsWhoScreenNameBelongsToo} from "../team/Teams";
 
-@CommandHandler("Create a new project", config.get("subatomic").commandPrefix + " create project")
+@CommandHandler("Create a new project", QMConfig.subatomic().commandPrefix + " create project")
 export class CreateProject implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
