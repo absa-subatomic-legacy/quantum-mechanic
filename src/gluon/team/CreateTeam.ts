@@ -9,7 +9,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {OnboardMember} from "../member/Onboard";
 
-@CommandHandler("Create a new team", QMConfig.subatomic().commandPrefix + " create team")
+@CommandHandler("Create a new team", QMConfig.subatomic.commandPrefix + " create team")
 @Tags("subatomic", "team")
 export class CreateTeam implements HandleCommand<HandlerResult> {
 

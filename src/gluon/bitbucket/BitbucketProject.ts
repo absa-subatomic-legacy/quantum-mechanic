@@ -14,7 +14,7 @@ import {QMConfig} from "../../config/QMConfig";
 import {memberFromScreenName} from "../member/Members";
 import {projectFromProjectName} from "../project/Projects";
 
-@CommandHandler("Create a new Bitbucket project", QMConfig.subatomic().commandPrefix + " create bitbucket project")
+@CommandHandler("Create a new Bitbucket project", QMConfig.subatomic.commandPrefix + " create bitbucket project")
 export class NewBitbucketProject implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)

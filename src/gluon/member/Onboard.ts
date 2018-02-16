@@ -16,7 +16,7 @@ import {QMConfig} from "../../config/QMConfig";
 import {CreateTeam} from "../team/CreateTeam";
 import {JoinTeam} from "../team/JoinTeam";
 
-@CommandHandler("Onboard a new team member", QMConfig.subatomic().commandPrefix + " onboard me")
+@CommandHandler("Onboard a new team member", QMConfig.subatomic.commandPrefix + " onboard me")
 @Tags("subatomic", "slack", "member")
 export class OnboardMember implements HandleCommand<HandlerResult> {
 

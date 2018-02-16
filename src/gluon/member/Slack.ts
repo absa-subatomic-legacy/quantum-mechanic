@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
 
-@CommandHandler("Add Slack details to an existing team member", QMConfig.subatomic().commandPrefix + " add slack")
+@CommandHandler("Add Slack details to an existing team member", QMConfig.subatomic.commandPrefix + " add slack")
 export class AddSlackDetails implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
@@ -57,7 +57,7 @@ export class AddSlackDetails implements HandleCommand<HandlerResult> {
     }
 }
 
-@CommandHandler("Display your Slack user details", QMConfig.subatomic().commandPrefix + " whoami")
+@CommandHandler("Display your Slack user details", QMConfig.subatomic.commandPrefix + " whoami")
 export class Whoami implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)

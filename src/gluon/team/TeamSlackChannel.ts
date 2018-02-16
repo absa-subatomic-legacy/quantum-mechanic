@@ -76,7 +76,7 @@ rather use that instead?\
     }
 }
 
-@CommandHandler("Create team channel", QMConfig.subatomic().commandPrefix + " create team channel")
+@CommandHandler("Create team channel", QMConfig.subatomic.commandPrefix + " create team channel")
 @Tags("subatomic", "slack", "channel", "team")
 export class NewTeamSlackChannel implements HandleCommand {
 
@@ -111,7 +111,7 @@ export class NewTeamSlackChannel implements HandleCommand {
     }
 }
 
-@CommandHandler("Create team channel", QMConfig.subatomic().commandPrefix + " link team channel")
+@CommandHandler("Create team channel", QMConfig.subatomic.commandPrefix + " link team channel")
 @Tags("subatomic", "slack", "channel", "team")
 export class LinkExistingTeamSlackChannel implements HandleCommand {
 

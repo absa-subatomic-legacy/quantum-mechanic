@@ -14,7 +14,7 @@ import {QMConfig} from "../../config/QMConfig";
 import {memberFromScreenName} from "../member/Members";
 import {projectFromProjectName} from "./Projects";
 
-@CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic().commandPrefix + " request project environments")
+@CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
 @Tags("subatomic", "openshift", "project")
 export class NewProjectEnvironments implements HandleCommand {
 

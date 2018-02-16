@@ -16,7 +16,7 @@ import {QMConfig} from "../../config/QMConfig";
 import {memberFromScreenName} from "../member/Members";
 import {teamsWhoScreenNameBelongsToo} from "../team/Teams";
 
-@CommandHandler("Create a new project", QMConfig.subatomic().commandPrefix + " create project")
+@CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
 export class CreateProject implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
