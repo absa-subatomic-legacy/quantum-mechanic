@@ -47,7 +47,7 @@ export class ProjectCreated implements HandleEvent<any> {
 
         const projectCreatedEvent = event.data.ProjectCreatedEvent[0];
         return ctx.messageClient.addressChannels({
-            text: `The ${projectCreatedEvent.project.name} project has been created successfully.`,
+            text: `The *${projectCreatedEvent.project.name}* project has been created successfully.`,
             attachments: [{
                 text: `
 A Subatomic project is linked to a Bitbucket project. \
