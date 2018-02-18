@@ -55,6 +55,7 @@ rather use that instead?\
                         {
                             teamId: ctx.teamId,
                             teamName: this.teamName,
+                            teamChannel: this.teamChannel,
                         }),
                     buttonForCommand(
                         {text: "Use an existing channel"},
@@ -90,8 +91,6 @@ export class NewTeamSlackChannel implements HandleCommand {
 
     @Parameter({
         description: "team channel name",
-        required: false,
-        displayable: false,
     })
     public teamChannel: string;
 
@@ -167,8 +166,7 @@ function linkSlackChannelToGluonTeam(ctx: HandlerContext,
                                 logger.error(`Error creating Slack channel: ${JSON.stringify(error)}`);
 
                                 if (error.networkError.response.status === 400) {
-                                    logger.error(`Most likely trying to link a private Slack channel: ${error.message}. This is currently NOT SUPPORTED`);
-                                    // return addBotToSlackChannel(ctx, slackTeamId, "?");
+                                    logger.warn(`Most likely trying to link a private Slack channel: ${error.message}. This is currently NOT SUPPORTED`);
                                 } else {
                                     return Promise.reject(`Slack channel could not be created: ${error.message}`);
                                 }
