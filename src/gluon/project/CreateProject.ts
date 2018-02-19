@@ -9,7 +9,6 @@ import {
 } from "@atomist/automation-client";
 import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import axios from "axios";
-import * as config from "config";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
@@ -96,10 +95,10 @@ export class CreateProject implements HandleCommand<HandlerResult> {
                               teamChannel: string): Promise<any> {
         return gluonMemberFromScreenName(ctx, screenName)
             .then(member => {
-                axios.get(`${config.get("subatomic").gluon.baseUrl}/teams?name=${teamName}`)
+                axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`)
                     .then(team => {
                         if (!_.isEmpty(team.data._embedded)) {
-                            return axios.post(`${config.get("subatomic").gluon.baseUrl}/projects`,
+                            return axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
                                 {
                                     name: this.name,
                                     description: this.description,

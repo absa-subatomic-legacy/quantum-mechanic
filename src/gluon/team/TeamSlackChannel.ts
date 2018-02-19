@@ -72,7 +72,7 @@ rather use that instead?\
     }
 
     private docs(): string {
-        return `${url(`${config.get("subatomic").docs.baseUrl}/teams#slack`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/teams#slack`,
             "documentation")}`;
     }
 }
@@ -107,7 +107,7 @@ export class NewTeamSlackChannel implements HandleCommand {
     }
 
     private docs(): string {
-        return `${url(`${config.get("subatomic").docs.baseUrl}/teams`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
             "documentation")}`;
     }
 }
@@ -135,7 +135,7 @@ export class LinkExistingTeamSlackChannel implements HandleCommand {
     }
 
     private docs(): string {
-        return `${url(`${config.get("subatomic").docs.baseUrl}/teams`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
             "documentation")}`;
     }
 }
@@ -146,11 +146,11 @@ function linkSlackChannelToGluonTeam(ctx: HandlerContext,
                                      slackChannelName: string,
                                      documentationLink: string): Promise<HandlerResult> {
     const kebabbedTeamChannel: string = _.kebabCase(slackChannelName);
-    return axios.get(`${config.get("subatomic").gluon.baseUrl}/teams?name=${gluonTeamName}`)
+    return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${gluonTeamName}`)
         .then(team => {
             if (!_.isEmpty(team.data._embedded)) {
                 logger.info(`Updating team channel [${kebabbedTeamChannel}]: ${team.data._embedded.teamResources[0].teamId}`);
-                return axios.put(`${config.get("subatomic").gluon.baseUrl}/teams/${team.data._embedded.teamResources[0].teamId}`,
+                return axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${team.data._embedded.teamResources[0].teamId}`,
                     {
                         slack: {
                             teamChannel: kebabbedTeamChannel,

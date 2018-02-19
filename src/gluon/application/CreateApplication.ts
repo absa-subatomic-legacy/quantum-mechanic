@@ -9,7 +9,6 @@ import {
 } from "@atomist/automation-client";
 import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
-import * as config from "config";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {gluonProjectFromProjectName} from "../project/Projects";
 
