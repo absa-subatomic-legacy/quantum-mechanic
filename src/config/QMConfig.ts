@@ -1,9 +1,9 @@
 import * as config from "config";
-import {SubAtomicConfig} from "./SubAtomicConfig";
+import {SubatomicConfig} from "./SubatomicConfig";
 
 export class QMConfig {
 
-    public static subatomic: SubAtomicConfig = config.get("subatomic");
+    public static subatomic: SubatomicConfig = config.get("subatomic");
 
     public static teamId: string = config.get("teamId");
 

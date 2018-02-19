@@ -1,6 +1,6 @@
 import {BitbucketConfig} from "./BitbucketConfig";
 
-export interface SubAtomicConfig {
+export interface SubatomicConfig {
     commandPrefix: string;
     gluonBaseUrl: string;
     openshiftHost: string;
