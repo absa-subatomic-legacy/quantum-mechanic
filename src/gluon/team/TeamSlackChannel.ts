@@ -260,7 +260,7 @@ If you haven't already, you might want to:
                                 // opportunity to create OpenShift Dev environment?
                             })
                             .catch(err => {
-                                logger.error(JSON.stringify(err));
+                                logger.error(`An error occurred configuring the team slack channel: ${JSON.stringify(err)}`);
                                 return failure(err);
                             });
                     });
