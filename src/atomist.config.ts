@@ -21,6 +21,7 @@ import {
     CreateApplication,
     LinkExistingApplication,
 } from "./gluon/packages/CreateApplication";
+import {LinkExistingLibrary} from "./gluon/packages/CreateLibrary";
 import {CreateProject} from "./gluon/project/CreateProject";
 import {ProjectCreated} from "./gluon/project/ProjectCreated";
 import {NewProjectEnvironments} from "./gluon/project/ProjectEnvironments";
@@ -51,7 +52,6 @@ import {
     NewOrUseTeamSlackChannel,
     NewTeamSlackChannel,
 } from "./gluon/team/TeamSlackChannel";
-import {BotJoinedChannel} from "./gluon/team/BotJoinedChannel";
 
 const pj = require(`${appRoot.path}/package.json`);
 
@@ -80,6 +80,7 @@ export const configuration: any = {
         MembershipRequestClosed,
         ListExistingBitbucketProject,
         LinkExistingApplication,
+        LinkExistingLibrary,
         KickOffJenkinsBuild,
     ],
     events: [
@@ -92,7 +93,6 @@ export const configuration: any = {
         ProjectEnvironmentsRequested,
         ApplicationCreated,
         MembershipRequestCreated,
-        BotJoinedChannel
     ],
     ingesters: [
         SlackIdentity,

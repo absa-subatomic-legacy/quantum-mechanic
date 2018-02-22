@@ -20,6 +20,7 @@ import {SimpleOption} from "../../openshift/base/options/SimpleOption";
 import {OCClient} from "../../openshift/OCClient";
 import {OCCommon} from "../../openshift/OCCommon";
 import {LinkExistingApplication} from "../packages/CreateApplication";
+import {LinkExistingLibrary} from "../packages/CreateLibrary";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
 subscription ProjectEnvironmentsRequestedEvent {
@@ -77,9 +78,12 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                 const projectId = `${_.kebabCase(environmentsRequestedEvent.project.name).toLowerCase()}-${environment[0]}`;
                 logger.info(`Working with OpenShift project Id: ${projectId}`);
 
-                return OCClient.newProject(projectId,
-                    `${environmentsRequestedEvent.project.name} ${environment[0].toUpperCase()}`,
-                    `${environment[1]} environment for ${environmentsRequestedEvent.project.name} [managed by Subatomic]`)
+                return OCClient.login(QMConfig.subatomic.openshift.masterUrl, QMConfig.subatomic.openshift.auth.token)
+                    .then(() => {
+                        return OCClient.newProject(projectId,
+                            `${environmentsRequestedEvent.project.name} ${environment[0].toUpperCase()}`,
+                            `${environment[1]} environment for ${environmentsRequestedEvent.project.name} [managed by Subatomic]`);
+                    })
                     .then(() => {
                         // 2. Add permissions to projects based on owners (admin) and members (edit) - future will use roles
                         return this.addMembershipPermissions(projectId,
@@ -334,7 +338,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                 const msg: SlackMessage = {
                     text: `
 Since you have Subatomic project environments ready, you can now add packages.
-A package is either an application or a shared library, click the button below to create an application now.`,
+A package is either an application or a library, click the button below to create an application now.`,
                     attachments: [{
                         fallback: "Create or link existing package",
                         footer: `For more information, please read the ${this.docs()}`, // TODO use actual icon
@@ -348,15 +352,19 @@ A package is either an application or a shared library, click the button below t
                             buttonForCommand(
                                 {text: "Link existing application"},
                                 new LinkExistingApplication(),
-                                {}),
+                                {
+                                    projectName: environmentsRequestedEvent.project.name,
+                                }),
                             // buttonForCommand(
                             //     {text: "Create shared library"},
                             //     this,
                             //     {}),
-                            // buttonForCommand(
-                            //     {text: "Link existing shared library"},
-                            //     this,
-                            //     {}),
+                            buttonForCommand(
+                                {text: "Link existing library"},
+                                new LinkExistingLibrary(),
+                                {
+                                    projectName: environmentsRequestedEvent.project.name,
+                                }),
                         ],
                     }],
                 };

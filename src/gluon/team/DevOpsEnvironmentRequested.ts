@@ -10,15 +10,16 @@ import {
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
-import axios from "axios";
-import * as https from "https";
 import * as _ from "lodash";
 import {timeout, TimeoutError} from "promise-timeout";
-import * as qs from "query-string";
 import {QMConfig} from "../../config/QMConfig";
 import {SimpleOption} from "../../openshift/base/options/SimpleOption";
 import {OCClient} from "../../openshift/OCClient";
 import {OCCommon} from "../../openshift/OCCommon";
+import {
+    createGlobalCredentials,
+    createGlobalCredentialsWithFile,
+} from "../jenkins/Jenkins";
 import {CreateProject} from "../project/CreateProject";
 
 @EventHandler("Receive DevOpsEnvironmentRequestedEvent events", `
@@ -65,9 +66,12 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
         const projectId = `${_.kebabCase(devOpsRequestedEvent.team.name).toLowerCase()}-devops`;
         logger.info(`Working with OpenShift project Id: ${projectId}`);
 
-        return OCClient.newProject(projectId,
-            `${devOpsRequestedEvent.team.name} DevOps`,
-            `DevOps environment for ${devOpsRequestedEvent.team.name} [managed by Subatomic]`)
+        return OCClient.login(QMConfig.subatomic.openshift.masterUrl, QMConfig.subatomic.openshift.auth.token)
+            .then(() => {
+                return OCClient.newProject(projectId,
+                    `${devOpsRequestedEvent.team.name} DevOps`,
+                    `DevOps environment for ${devOpsRequestedEvent.team.name} [managed by Subatomic]`);
+            })
             .then(() => {
                 return this.addMembershipPermissions(projectId,
                     devOpsRequestedEvent.team);
@@ -165,13 +169,13 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                     [],
                     [
                         new SimpleOption("p", `NAMESPACE=${projectId}`),
-                        new SimpleOption("p", `JENKINS_IMAGE_STREAM_TAG=jenkins-subatomic:2.0`),
-                        new SimpleOption("p", `BITBUCKET_NAME=ABSA Bitbucket`),
+                        new SimpleOption("p", "JENKINS_IMAGE_STREAM_TAG=jenkins-subatomic:2.0"),
+                        new SimpleOption("p", "BITBUCKET_NAME=Subatomic Bitbucket"),
                         new SimpleOption("p", `BITBUCKET_URL=${QMConfig.subatomic.bitbucket.baseUrl}`),
                         new SimpleOption("p", `BITBUCKET_CREDENTIALS_ID=${projectId}-bitbucket`),
                         // TODO this should be a property on Team. I.e. teamEmail
                         // If no team email then the address of the createdBy member
-                        new SimpleOption("p", `JENKINS_ADMIN_EMAIL=test@absa.co.za`),
+                        new SimpleOption("p", "JENKINS_ADMIN_EMAIL=subatomic@local"),
                         // TODO the registry Cluster IP we will have to get by introspecting the registry Service
                         new SimpleOption("p", `MAVEN_SLAVE_IMAGE=172.30.1.1:5000/${projectId}/jenkins-slave-maven-subatomic:2.0`),
                         new SimpleOption("-namespace", projectId),
@@ -273,41 +277,55 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                                     .then(jenkinsHost => {
                                         logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to add Bitbucket credentials`);
 
-                                        const jenkinsAxios = axios.create({
-                                            httpsAgent: new https.Agent({
-                                                rejectUnauthorized: false,
-                                            }),
-                                        });
-
-                                        jenkinsAxios.interceptors.request.use(request => {
-                                            if (request.data && (request.headers["Content-Type"].indexOf("application/x-www-form-urlencoded") !== -1)) {
-                                                logger.debug(`Stringifying URL encoded data: ${qs.stringify(request.data)}`);
-                                                request.data = qs.stringify(request.data);
-                                            }
-                                            return request;
-                                        });
-
-                                        const jenkinsCredentials = {
-                                            "": "0",
-                                            "credentials": {
-                                                scope: "GLOBAL",
-                                                id: `${projectId}-bitbucket`,
-                                                username: QMConfig.subatomic.bitbucket.auth.username,
-                                                password: QMConfig.subatomic.bitbucket.auth.password,
-                                                description: `${projectId}-bitbucket`,
-                                                $class: "com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl",
-                                            },
-                                        };
-
-                                        return jenkinsAxios.post(`https://${jenkinsHost.output}/credentials/store/system/domain/_/createCredentials`,
+                                        return createGlobalCredentials(
+                                            jenkinsHost.output,
+                                            token.output,
+                                            projectId,
                                             {
-                                                json: `${JSON.stringify(jenkinsCredentials)}`,
-                                            },
-                                            {
-                                                headers: {
-                                                    "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-                                                    "Authorization": `Bearer ${token.output}`,
+                                                "": "0",
+                                                "credentials": {
+                                                    scope: "GLOBAL",
+                                                    id: `${projectId}-bitbucket`,
+                                                    username: QMConfig.subatomic.bitbucket.auth.username,
+                                                    password: QMConfig.subatomic.bitbucket.auth.password,
+                                                    description: `${projectId}-bitbucket`,
+                                                    $class: "com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl",
                                                 },
+                                            })
+                                            .then(() => {
+                                                return createGlobalCredentials(
+                                                    jenkinsHost.output,
+                                                    token.output,
+                                                    projectId,
+                                                    {
+                                                        "": "0",
+                                                        "credentials": {
+                                                            scope: "GLOBAL",
+                                                            id: "nexus-base-url",
+                                                            secret: QMConfig.subatomic.nexus.baseUrl,
+                                                            description: "Nexus base URL",
+                                                            $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
+                                                        },
+                                                    })
+                                                    .then(() => {
+                                                        return createGlobalCredentialsWithFile(
+                                                            jenkinsHost.output,
+                                                            token.output,
+                                                            projectId,
+                                                            {
+                                                                "": "0",
+                                                                "credentials": {
+                                                                    scope: "GLOBAL",
+                                                                    id: "maven-settings",
+                                                                    file: "file",
+                                                                    fileName: "settings.xml",
+                                                                    description: "Maven settings.xml",
+                                                                    $class: "org.jenkinsci.plugins.plaincredentials.impl.FileCredentialsImpl",
+                                                                },
+                                                            },
+                                                            QMConfig.subatomic.maven.settingsPath,
+                                                            "settings.xml");
+                                                    });
                                             });
                                     });
                             })
@@ -332,7 +350,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                                     "bitbucket-ssh",
                                     [],
                                     [
-                                        new SimpleOption("-ssh-privatekey", QMConfig.subatomic.bitbucket.cicdKey),
+                                        new SimpleOption("-ssh-privatekey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
                                         new SimpleOption("-ca-cert", QMConfig.subatomic.bitbucket.caPath),
                                         new SimpleOption("-namespace", projectId),
                                     ]);
