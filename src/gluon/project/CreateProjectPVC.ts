@@ -40,48 +40,52 @@ export class CreateProjectPVC implements HandleCommand<HandlerResult> {
     public gluonProject: string;
 
     @Parameter({
-        description: "Gluon project to create pvc's for",
+        description: "Enter the name of the pvc you wish to create",
         required: true,
     })
     public pvcName: string;
 
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
         if (this.gluonProject == null) {
-
-            if (this.teamChannel == null) {
-                return this.presentMenuToSelectProjectAssociatedTeam(ctx);
+            if (this.gluonTeamName != null) {
+                return this.presentMenuToSelectProjectToCreatePVCFor(ctx, this.gluonTeamName);
             } else {
-                return gluonTeamForSlackTeamChannel(this.teamChannel).then(team => {
-                    if (team !== null) {
-                        return this.presentMenuToSelectProjectToCreatePVCFor(ctx);
-                    } else {
+                return gluonTeamForSlackTeamChannel(this.teamChannel).then(
+                    team => {
+                        return this.presentMenuToSelectProjectToCreatePVCFor(ctx, team.name);
+                    },
+                    () => {
                         return this.presentMenuToSelectProjectAssociatedTeam(ctx);
-                    }
-                });
+                    },
+                );
             }
         }
 
         this.pvcName = _.kebabCase(this.pvcName);
-        let response = "The following PVC's have been created:\n";
+        let response = "The following PVC's have been created:\n*Environment*\tPVC Name\n";
+        const kebabbedProjectName = _.kebabCase(this.gluonProject);
         return OCClient.login(QMConfig.subatomic.openshift.masterUrl, QMConfig.subatomic.openshift.auth.token)
             .then(() => {
-                    return Promise.all([["dev"],
-                        ["sit"],
-                        ["uat"]]
-                        .map(environment => {
-                            const project = `${this.gluonTeamName}-${environment}`;
-                            const fullPVCName = `${this.gluonTeamName}-${environment}-${this.pvcName}`;
-                            return OCClient.selectProject(project).then(() => {
-                                return OCClient.createPVC(fullPVCName, fullPVCName).then(() => {
-                                    response += `\t${environment}: ${fullPVCName}\n`;
-                                });
-                                // TODO: maybe we need error messages for PVC's that fail to create?
-                            });
-                        })).then(() => {
-                        return ctx.messageClient.respond(response);
-                    });
-                },
-            );
+                let promiseChain: Promise<any> = Promise.resolve();
+                for (const env of ["dev", "sit", "uat"]) {
+                    const project = `${kebabbedProjectName}-${env}`;
+                    const fullPVCName = `${kebabbedProjectName}-${env}-${this.pvcName}`;
+                    promiseChain = promiseChain
+                        .then(() => {
+                            return OCClient.selectProject(project);
+                        })
+                        .then(() => {
+                            return OCClient.createPVC(fullPVCName);
+                        })
+                        .then(() => {
+                            response += `*${project}:*\t${fullPVCName}\n`;
+                        });
+                }
+                // TODO: maybe we need error messages for PVC's that fail to create?
+                return promiseChain.then(() => {
+                    return ctx.messageClient.respond(response);
+                });
+            });
     }
 
     private presentMenuToSelectProjectAssociatedTeam(ctx: HandlerContext): Promise<HandlerResult> {
@@ -101,17 +105,19 @@ export class CreateProjectPVC implements HandleCommand<HandlerResult> {
                                     }),
                             },
                             this, "gluonTeamName",
-                            {pvcName: this.pvcName}),
+                            {
+                                pvcName: this.pvcName,
+                            }),
                     ],
                 }],
             };
 
-            return ctx.messageClient.addressUsers(msg, this.screenName)
+            return ctx.messageClient.respond(msg)
                 .then(success);
         });
     }
 
-    private presentMenuToSelectProjectToCreatePVCFor(ctx: HandlerContext): Promise<HandlerResult> {
+    private presentMenuToSelectProjectToCreatePVCFor(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
         return gluonProjectsWhichBelongToGluonTeam(ctx, this.gluonTeamName).then(teams => {
             const msg: SlackMessage = {
                 text: "Please select the project you wish to create a PVC for",
@@ -122,21 +128,21 @@ export class CreateProjectPVC implements HandleCommand<HandlerResult> {
                                 text: "Select Project", options:
                                     teams.map(project => {
                                         return {
-                                            value: project.projectId,
+                                            value: project.name,
                                             text: project.name,
                                         };
                                     }),
                             },
-                            this, "gluonProjectId",
+                            this, "gluonProject",
                             {
-                                gluonTeamName: this.gluonTeamName,
+                                gluonTeamName: teamName,
                                 pvcName: this.pvcName,
                             }),
                     ],
                 }],
             };
 
-            return ctx.messageClient.addressUsers(msg, this.screenName)
+            return ctx.messageClient.respond(msg)
                 .then(success);
         });
     }
