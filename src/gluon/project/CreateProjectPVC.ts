@@ -16,7 +16,7 @@ import {
 } from "../team/Teams";
 import {gluonProjectsWhichBelongToGluonTeam} from "./Projects";
 
-@CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
+@CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create pvc")
 export class CreateProjectPVC implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
@@ -63,18 +63,25 @@ export class CreateProjectPVC implements HandleCommand<HandlerResult> {
 
         this.pvcName = _.kebabCase(this.pvcName);
         let response = "The following PVC's have been created:\n";
-        return Promise.all([["dev"],
-            ["sit"],
-            ["uat"]]
-            .map(environment => {
-                const fullPVCName = `${this.gluonTeamName}-${this.pvcName}-${environment}`;
-                return OCClient.createPVC(fullPVCName, fullPVCName).then(() => {
-                    response += `\t${environment}: ${fullPVCName}\n`;
-                });
-                // TODO: maybe we need error messages for PVC's that fail to create?
-            })).then(() => {
-            return ctx.messageClient.respond(response);
-        });
+        return OCClient.login(QMConfig.subatomic.openshift.masterUrl, QMConfig.subatomic.openshift.auth.token)
+            .then(() => {
+                    return Promise.all([["dev"],
+                        ["sit"],
+                        ["uat"]]
+                        .map(environment => {
+                            const project = `${this.gluonTeamName}-${environment}`;
+                            const fullPVCName = `${this.gluonTeamName}-${environment}-${this.pvcName}`;
+                            return OCClient.selectProject(project).then(() => {
+                                return OCClient.createPVC(fullPVCName, fullPVCName).then(() => {
+                                    response += `\t${environment}: ${fullPVCName}\n`;
+                                });
+                                // TODO: maybe we need error messages for PVC's that fail to create?
+                            });
+                        })).then(() => {
+                        return ctx.messageClient.respond(response);
+                    });
+                },
+            );
     }
 
     private presentMenuToSelectProjectAssociatedTeam(ctx: HandlerContext): Promise<HandlerResult> {
