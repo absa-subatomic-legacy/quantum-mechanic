@@ -44,4 +44,23 @@ export class OCClient {
     public static createServiceAccount(serviceAccountName: string) {
         return OCCommon.createStdIn("serviceaccount", [serviceAccountName]);
     }
+
+    public static createPVC(pvcName: string, volumeName: string, size: string = "10Gi", accessModes: string[] = ["ReadWriteMany"]) {
+        return OCCommon.createFromData({
+            kind: "PersistentVolumeClaim",
+            apiVersion: "v1",
+            metadata: {
+                name: pvcName,
+            },
+            spec: {
+                accessModes,
+                resources: {
+                    requests: {
+                        storage: size,
+                    },
+                },
+                volumeName,
+            },
+        });
+    }
 }
