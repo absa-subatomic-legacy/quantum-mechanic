@@ -1,5 +1,6 @@
 import {OCCommand} from "./base/OCCommand";
 import {OCCommandResult} from "./base/OCCommandResult";
+import {SimpleOption} from "./base/options/SimpleOption";
 import {StandardOption} from "./base/options/StandardOption";
 import {OCCommon} from "./OCCommon";
 import {OCPolicy} from "./OCPolicy";
@@ -45,7 +46,7 @@ export class OCClient {
         return OCCommon.createStdIn("serviceaccount", [serviceAccountName]);
     }
 
-    public static createPVC(pvcName: string, size: string = "10Gi", accessModes: string[] = ["ReadWriteMany"]) {
+    public static createPvc(pvcName: string, project: string, size: string = "10Gi", accessModes: string[] = ["ReadWriteMany"]) {
         return OCCommon.createFromData({
             kind: "PersistentVolumeClaim",
             apiVersion: "v1",
@@ -60,6 +61,8 @@ export class OCClient {
                     },
                 },
             },
-        });
+        }, [
+            new SimpleOption("-namespace", project),
+        ]);
     }
 }
