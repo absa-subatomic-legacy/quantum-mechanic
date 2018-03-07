@@ -22,6 +22,8 @@ import {
     LinkExistingApplication,
 } from "./gluon/packages/CreateApplication";
 import {LinkExistingLibrary} from "./gluon/packages/CreateLibrary";
+import {AddConfigServer} from "./gluon/project/AddConfigServer";
+import {CreateOpenShiftPvc} from "./gluon/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/project/CreateProject";
 import {ProjectCreated} from "./gluon/project/ProjectCreated";
 import {NewProjectEnvironments} from "./gluon/project/ProjectEnvironments";
@@ -82,6 +84,8 @@ export const configuration: any = {
         LinkExistingApplication,
         LinkExistingLibrary,
         KickOffJenkinsBuild,
+        CreateOpenShiftPvc,
+        AddConfigServer,
     ],
     events: [
         TeamCreated,
