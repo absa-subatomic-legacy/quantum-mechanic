@@ -4,6 +4,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {usernameFromDomainUsername} from "../member/Members";
 import {bitbucketAxios, bitbucketUserFromUsername} from "./Bitbucket";
+
 export class BitbucketConfiguration {
 
     private axios: AxiosInstance = bitbucketAxios();
@@ -28,17 +29,17 @@ export class BitbucketConfiguration {
             _.zipWith(this.owners, this.teamMembers, (owner, member) => {
                 this.axios.get(`${QMConfig.subatomic.bitbucket.restUrl}/default-reviewers/1.0/projects/${bitbucketProjectKey}/conditions`)
                     .then(reviewers => {
-                        var jsonLength = reviewers.data.length;
-                        var reviewerExists = false;
+                        const jsonLength = reviewers.data.length;
+                        let reviewerExists = false;
 
-                        for(var i = 0;i<jsonLength;i++) {
-                            if( reviewers.data[i].reviewers[0].name === owner){
+                        for ( let i = 0; i < jsonLength; i++) {
+                            if (reviewers.data[i].reviewers[0].name === owner) {
                                 logger.info(`Reviewer ${owner} already exists!!`);
                                 reviewerExists = true;
                                 break;
                             }
                         }
-                        if(reviewerExists !== true ){
+                        if (reviewerExists !== true ) {
                             logger.info(`Adding reviewer ${owner}`);
                             return Promise.all([
                                 this.addDefaultReviewers(bitbucketProjectKey, owner),
