@@ -34,7 +34,7 @@ export class BitbucketConfiguration {
 
                         for ( let i = 0; i < jsonLength; i++) {
                             if (reviewers.data[i].reviewers[0].name === owner) {
-                                reviewerExists = true;break;
+                                reviewerExists = true; break;
                             }
                         }
                         if (reviewerExists !== true ) {
