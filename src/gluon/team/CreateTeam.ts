@@ -1,4 +1,4 @@
-import {
+    import {
     CommandHandler,
     failure,
     HandleCommand,

@@ -197,7 +197,9 @@ function linkSlackChannelToGluonTeam(ctx: HandlerContext,
                     .then(() => {
                         return createChannel(ctx, slackTeamId, kebabbedTeamChannel)
                             .then(channel => {
+                                logger.info("there");
                                 if (channel && channel.createSlackChannel) {
+                                    logger.info(`here!!! ${channel}`);
                                     return addBotToSlackChannel(ctx, slackTeamId, channel.createSlackChannel.id)
                                         .then(() => {
                                                 const members: Array<Promise<any>> = [];
@@ -219,7 +221,6 @@ function linkSlackChannelToGluonTeam(ctx: HandlerContext,
                                 }
                             }, error => {
                                 logger.error(`Error creating Slack channel: ${JSON.stringify(error)}`);
-
                                 if (error.networkError.response.status === 400) {
                                     logger.warn(`Most likely trying to link a private Slack channel: ${error.message}. This is currently NOT SUPPORTED`);
                                 } else {

@@ -2,7 +2,7 @@ import {
     CommandHandler,
     HandleCommand,
     HandlerContext,
-    HandlerResult,
+    HandlerResult, logger,
     MappedParameter,
     MappedParameters,
     Parameter,
