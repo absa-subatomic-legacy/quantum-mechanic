@@ -18,7 +18,7 @@ export const ProjectCreatedEvent: Ingester = {
                     name: "team",
                     type: {
                         kind: "OBJECT",
-                        name: "Team",
+                        name: "GluonTeam",
                     },
                 },
                 {
@@ -121,7 +121,7 @@ export const ProjectEnvironmentsRequestedEvent: Ingester = {
                         kind: "LIST",
                         ofType: {
                             kind: "OBJECT",
-                            name: "Team",
+                            name: "GluonTeam",
                         },
                     },
                 },

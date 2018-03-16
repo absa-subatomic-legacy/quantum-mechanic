@@ -11,7 +11,7 @@ export const TeamCreatedEvent: Ingester = {
                     name: "team",
                     type: {
                         kind: "OBJECT",
-                        name: "Team",
+                        name: "GluonTeam",
                     },
                 },
                 {
@@ -78,7 +78,7 @@ export const DevOpsEnvironmentRequestedEvent: Ingester = {
                     name: "team",
                     type: {
                         kind: "OBJECT",
-                        name: "Team",
+                        name: "GluonTeam",
                     },
                 },
                 {
@@ -152,7 +152,7 @@ export const MembershipRequestCreatedEvent: Ingester = {
                     name: "team",
                     type: {
                         kind: "OBJECT",
-                        name: "Team",
+                        name: "GluonTeam",
                     },
                 },
                 {

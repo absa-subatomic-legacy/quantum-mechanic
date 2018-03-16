@@ -27,7 +27,7 @@ export const BitbucketProjectRequestedEvent: Ingester = {
                         kind: "LIST",
                         ofType: {
                             kind: "OBJECT",
-                            name: "Team",
+                            name: "GluonTeam",
                         },
                     },
                 },
@@ -165,7 +165,7 @@ export const BitbucketProjectAddedEvent: Ingester = {
                         kind: "LIST",
                         ofType: {
                             kind: "OBJECT",
-                            name: "Team",
+                            name: "GluonTeam",
                         },
                     },
                 },

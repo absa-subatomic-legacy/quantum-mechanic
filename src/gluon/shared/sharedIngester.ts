@@ -33,12 +33,12 @@ export const SlackIdentity: Ingester = {
     ],
 };
 
-export const Team: Ingester = {
-    root_type: "Team",
+export const GluonTeam: Ingester = {
+    root_type: "GluonTeam",
     types: [
         {
             kind: "OBJECT",
-            name: "Team",
+            name: "GluonTeam",
             fields: [
                 {
                     name: "teamId",

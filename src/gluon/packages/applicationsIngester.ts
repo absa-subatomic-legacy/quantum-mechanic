@@ -11,7 +11,7 @@ export const ApplicationCreatedEvent: Ingester = {
                     name: "application",
                     type: {
                         kind: "OBJECT",
-                        name: "Application",
+                        name: "GluonApplication",
                     },
                 },
                 {
@@ -39,7 +39,7 @@ export const ApplicationCreatedEvent: Ingester = {
                     name: "owningTeam",
                     type: {
                         kind: "OBJECT",
-                        name: "Team",
+                        name: "GluonTeam",
                     },
                 },
                 {
@@ -48,7 +48,7 @@ export const ApplicationCreatedEvent: Ingester = {
                         kind: "LIST",
                         ofType: {
                             kind: "OBJECT",
-                            name: "Team",
+                            name: "GluonTeam",
                         },
                     },
                 },
@@ -63,7 +63,7 @@ export const ApplicationCreatedEvent: Ingester = {
         },
         {
             kind: "OBJECT",
-            name: "Application",
+            name: "GluonApplication",
             fields: [
                 {
                     name: "applicationId",
