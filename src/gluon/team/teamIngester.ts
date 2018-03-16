@@ -18,48 +18,7 @@ export const TeamCreatedEvent: Ingester = {
                     name: "createdBy",
                     type: {
                         kind: "OBJECT",
-                        name: "CreatedBy",
-                    },
-                },
-            ],
-        },
-        {
-            kind: "OBJECT",
-            name: "CreatedBy",
-            fields: [
-                {
-                    name: "firstName",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "lastName",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "email",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "domainUsername",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "slackIdentity",
-                    type: {
-                        kind: "OBJECT",
-                        name: "SlackIdentity",
+                        name: "ActionedBy",
                     },
                 },
             ],
@@ -85,48 +44,7 @@ export const DevOpsEnvironmentRequestedEvent: Ingester = {
                     name: "requestedBy",
                     type: {
                         kind: "OBJECT",
-                        name: "RequestedBy",
-                    },
-                },
-            ],
-        },
-        {
-            kind: "OBJECT",
-            name: "RequestedBy",
-            fields: [
-                {
-                    name: "firstName",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "lastName",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "email",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "domainUsername",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "slackIdentity",
-                    type: {
-                        kind: "OBJECT",
-                        name: "SlackIdentity",
+                        name: "ActionedBy",
                     },
                 },
             ],
@@ -159,48 +77,7 @@ export const MembershipRequestCreatedEvent: Ingester = {
                     name: "requestedBy",
                     type: {
                         kind: "OBJECT",
-                        name: "RequestedBy",
-                    },
-                },
-            ],
-        },
-        {
-            kind: "OBJECT",
-            name: "RequestedBy",
-            fields: [
-                {
-                    name: "firstName",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "lastName",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "email",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "domainUsername",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "slackIdentity",
-                    type: {
-                        kind: "OBJECT",
-                        name: "SlackIdentity",
+                        name: "ActionedBy",
                     },
                 },
             ],
