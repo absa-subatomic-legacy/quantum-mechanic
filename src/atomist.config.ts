@@ -35,7 +35,7 @@ import {
 import {
     ActionedBy,
     BitbucketProject, GluonTeam, Project,
-    SlackIdentity
+    SlackIdentity,
 } from "./gluon/shared/sharedIngester";
 import {CreateTeam} from "./gluon/team/CreateTeam";
 import {NewDevOpsEnvironment} from "./gluon/team/DevOpsEnvironment";
