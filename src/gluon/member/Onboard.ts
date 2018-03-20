@@ -3,7 +3,7 @@ import {
     failure,
     HandleCommand,
     HandlerContext,
-    HandlerResult, logger,
+    HandlerResult,
     MappedParameter,
     MappedParameters,
     Parameter,
