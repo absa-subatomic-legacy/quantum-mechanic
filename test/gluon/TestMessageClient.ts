@@ -2,8 +2,6 @@ import {
     Destination, MessageClient, MessageOptions,
     SlackMessageClient,
 } from "@atomist/automation-client/spi/message/MessageClient";
-import {SlackMessage} from "@atomist/slack-messages";
-import {logger} from "@atomist/automation-client";
 
 export class TestMessageClient implements MessageClient, SlackMessageClient {
     public textMsg: any; // it can store what we care to verify

@@ -1,7 +1,5 @@
-import {HandlerContext, logger} from "@atomist/automation-client";
-import "mocha"; // this is the test framework
-import * as assert from "power-assert"; // this makes the test failures highly informational
-
+import "mocha";
+import * as assert from "power-assert";
 const MockAdapter = require("axios-mock-adapter");
 import axios from "axios";
 import {QMConfig} from "../../../src/config/QMConfig";
@@ -72,8 +70,8 @@ describe("Create a new or use an existing Openshift DevOps environment", () => {
 
         const subject = new NewDevOpsEnvironment();
         subject.teamName = `${teamName}`;
-        subject.teamChannel = `${teamChannel}`
-        subject.screenName = `${screenName}`
+        subject.teamChannel = `${teamChannel}`;
+        subject.screenName = `${screenName}`;
 
         const fakeContext = {
             teamId: `${teamId}`,
@@ -149,7 +147,7 @@ describe("Create a new or use an existing Openshift DevOps environment", () => {
         });
 
         const subject = new NewDevOpsEnvironment();
-        subject.screenName = `${screenName}`
+        subject.screenName = `${screenName}`;
 
         const fakeContext = {
             teamId: `${teamId}`,

@@ -1,11 +1,10 @@
-import "mocha"; // this is the test framework
-import * as assert from "power-assert"; // this makes the test failures highly informational
-
+import "mocha";
+import * as assert from "power-assert";
 const MockAdapter = require("axios-mock-adapter");
 import axios from "axios";
 import {QMConfig} from "../../../src/config/QMConfig";
-import {TestMessageClient} from "../TestMessageClient";
 import {CreateTeam} from "../../../src/gluon/team/CreateTeam";
+import {TestMessageClient} from "../TestMessageClient";
 
 describe("Create Team test", () => {
     it("should create team", done => {
