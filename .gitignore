@@ -173,7 +173,6 @@ target/
 
 /release
 graphql.config.json
-/config/default.json
 git-info.json
 
 # Do not commit local configuration
