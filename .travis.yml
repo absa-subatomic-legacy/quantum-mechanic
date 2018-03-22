@@ -2,7 +2,7 @@ language: node_js
 node_js:
   - 8.7.0
 script:
-  - cp .travis/default.json config
+  - cp /home/travis/build/absa-subatomic/quantum-mechanic/.travis/default.json /home/travis/build/absa-subatomic/quantum-mechanic/config
   - npm run tscSourceMap
   - npm run build
   - npm run sendCodeCoverage
