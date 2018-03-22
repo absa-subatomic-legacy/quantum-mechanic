@@ -1,4 +1,3 @@
-import "mocha";
 import * as assert from "power-assert";
 const MockAdapter = require("axios-mock-adapter");
 import axios from "axios";
