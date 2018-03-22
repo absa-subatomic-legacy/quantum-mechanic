@@ -1,11 +1,11 @@
 {
   "subatomic": {
-    "commandPrefix": "sub",
-    "openshiftHost": "",
+    "commandPrefix" : "sub",
+    "openshiftHost" : "",
     "gluon": {
       "baseUrl": "http://localhost:8080"
-    }
-  },
+    },
+
   // lifecycle configuration
   "lifecycles": {
     "push": {
