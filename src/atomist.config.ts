@@ -51,7 +51,7 @@ import {MembershipRequestClosed} from "./gluon/team/MembershipRequestClosed";
 import {MembershipRequestCreated} from "./gluon/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/team/TeamCreated";
 import {
-    DevOpsEnvironmentRequestedEvent,
+    DevOpsEnvironmentRequestedEvent, MembersAddedToTeamEvent,
     MembershipRequestCreatedEvent,
     TeamCreatedEvent,
 } from "./gluon/team/teamIngester";
@@ -119,6 +119,7 @@ export const configuration: any = {
         Project,
         BitbucketProject,
         ActionedBy,
+        MembersAddedToTeamEvent,
     ],
     token,
     http: {
