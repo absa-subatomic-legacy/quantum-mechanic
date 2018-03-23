@@ -124,6 +124,7 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
                     });
             })
             .catch(error => {
+                logger.warn(`Full error: ${JSON.stringify(error.response)}`);
                 logger.warn(`Could not add SSH keys to Bitbucket project: [${error.response.status}-${JSON.stringify(error.response.data)}]`);
                 if (error.response.status === 409) {
                     // it's ok, it's already done 👍
