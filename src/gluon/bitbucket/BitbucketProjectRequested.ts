@@ -98,6 +98,8 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
 
                 return bitbucketConfiguration.configureBitbucketProject(key);
             }, error => {
+                logger.info(`Error: ${error}`);
+                logger.info(`Stringy Error: ${JSON.stringify(error)}`);
                 logger.warn(`Error creating project: ${error.response.status}`);
                 if (error.response.status === 201 || error.response.status === 409) {
                     bitbucketProjectFromKey(key)
@@ -124,6 +126,8 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
                     });
             })
             .catch(error => {
+                logger.info(`Error: ${error}`);
+                logger.info(`Stringy Error: ${JSON.stringify(error)}`);
                 logger.warn(`Could not add SSH keys to Bitbucket project: [${error.response.status}-${JSON.stringify(error.response.data)}]`);
                 if (error.response.status === 409) {
                     // it's ok, it's already done 👍
