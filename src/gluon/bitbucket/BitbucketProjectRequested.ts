@@ -84,21 +84,13 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
             teamOwners,
             teamMembers,
         );
-        const bitbucketAxiosInstance = bitbucketAxios();
-        logger.info("Trying to create bitbucket project.");
-        const options = {
-            method: "POST",
-            uri: `${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`,
-            body: {
+
+        return bitbucketAxios().post(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`,
+            {
                 key,
                 name,
                 description,
-            },
-            json: true, // Automatically stringifies the body to JSON
-        };
-        const rp = require("request-promise");
-
-        return rp(options)
+            })
             .then(project => {
                 logger.info(`Created project: ${JSON.stringify(project.data)} -> ${project.data.id} + ${project.data.links.self[0].href}`);
                 this.bitbucketProjectId = project.data.id;
@@ -132,7 +124,6 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
                     });
             })
             .catch(error => {
-                logger.warn(`Full error: ${JSON.stringify(error)}`);
                 logger.warn(`Could not add SSH keys to Bitbucket project: [${error.response.status}-${JSON.stringify(error.response.data)}]`);
                 if (error.response.status === 409) {
                     // it's ok, it's already done 👍
