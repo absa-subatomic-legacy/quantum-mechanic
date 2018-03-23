@@ -4,9 +4,12 @@ import * as fs from "fs";
 import * as https from "https";
 import * as path from "path";
 import {QMConfig} from "../../config/QMConfig";
+import {logger} from "@atomist/automation-client";
 
 export function bitbucketAxios(): AxiosInstance {
+    logger.info(`Finding certs: ${path.resolve(__dirname, QMConfig.subatomic.bitbucket.caPath)}`);
     const caFile = path.resolve(__dirname, QMConfig.subatomic.bitbucket.caPath);
+    logger.info("Creating axios instance");
     return axios.create({
         httpsAgent: new https.Agent({
             rejectUnauthorized: true,
