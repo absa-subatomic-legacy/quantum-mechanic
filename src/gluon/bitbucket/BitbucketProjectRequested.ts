@@ -84,8 +84,9 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
             teamOwners,
             teamMembers,
         );
+        const bitbucketAxiosInstance = bitbucketAxios();
         logger.info("Trying to create bitbucket project.");
-        return bitbucketAxios().post(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`,
+        return bitbucketAxiosInstance.post(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`,
             {
                 key,
                 name,
