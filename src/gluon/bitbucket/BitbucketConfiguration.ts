@@ -1,5 +1,5 @@
 import {logger} from "@atomist/automation-client";
-import {AxiosInstance, AxiosPromise} from "axios-https-proxy-fix";
+import {AxiosInstance, AxiosPromise} from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {usernameFromDomainUsername} from "../member/Members";

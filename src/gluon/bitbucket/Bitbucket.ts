@@ -1,5 +1,5 @@
 import axios from "axios";
-import {AxiosInstance} from "axios-https-proxy-fix";
+import {AxiosInstance} from "axios";
 import * as fs from "fs";
 import * as https from "https";
 import * as path from "path";
