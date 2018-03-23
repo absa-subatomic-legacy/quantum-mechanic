@@ -86,12 +86,19 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
         );
         const bitbucketAxiosInstance = bitbucketAxios();
         logger.info("Trying to create bitbucket project.");
-        return bitbucketAxiosInstance.post(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`,
-            {
+        const options = {
+            method: "POST",
+            uri: `${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`,
+            body: {
                 key,
                 name,
                 description,
-            })
+            },
+            json: true, // Automatically stringifies the body to JSON
+        };
+        const rp = require("request-promise");
+
+        return rp(options)
             .then(project => {
                 logger.info(`Created project: ${JSON.stringify(project.data)} -> ${project.data.id} + ${project.data.links.self[0].href}`);
                 this.bitbucketProjectId = project.data.id;

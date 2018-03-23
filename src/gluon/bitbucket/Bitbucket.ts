@@ -1,6 +1,6 @@
 import {logger} from "@atomist/automation-client";
 import axios from "axios";
-import {AxiosInstance} from "axios";
+import {AxiosInstance} from "axios-https-proxy-fix";
 import * as fs from "fs";
 import * as https from "https";
 import * as path from "path";
@@ -17,7 +17,6 @@ export function bitbucketAxios(): AxiosInstance {
         }),
         auth: QMConfig.subatomic.bitbucket.auth,
         timeout: 20000,
-        proxy: false,
     });
 }
 
