@@ -17,6 +17,7 @@ export function bitbucketAxios(): AxiosInstance {
         }),
         auth: QMConfig.subatomic.bitbucket.auth,
         timeout: 20000,
+        proxy: false,
     });
 }
 
