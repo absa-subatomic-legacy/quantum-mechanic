@@ -16,6 +16,7 @@ export function bitbucketAxios(): AxiosInstance {
             ca: fs.readFileSync(caFile),
         }),
         auth: QMConfig.subatomic.bitbucket.auth,
+        timeout: 20000,
     });
 }
 
