@@ -47,3 +47,31 @@ export function bitbucketRepositoryForSlug(bitbucketProjectKey: string, slug: st
             return repo.data;
         });
 }
+
+export function requestPromiseOptions(uri, method = "GET", includeCa = true): RequestPomiseOptionSet {
+    const caFile = path.resolve(__dirname, QMConfig.subatomic.bitbucket.caPath);
+    const options: RequestPomiseOptionSet = {
+        method,
+        uri,
+    };
+    if (includeCa) {
+        options.agentOptions = {
+            ca: fs.readFileSync(caFile),
+        };
+    }
+    if (method === "POST" || method === "PUT") {
+        options.body = {};
+        options.json = true;
+    }
+    return options;
+}
+
+export interface RequestPomiseOptionSet {
+    method: string;
+    uri: string;
+    agentOptions?: {
+        ca: any,
+    };
+
+    [key: string]: any;
+}
