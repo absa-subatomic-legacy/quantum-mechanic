@@ -21,39 +21,31 @@ export function bitbucketAxios(): AxiosInstance {
 }
 
 export function bitbucketUserFromUsername(username: string): Promise<any> {
-    const options = requestPromiseOptions(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/admin/users?filter=${username}`);
-    return rp(options)
+    return bitbucketAxios().get(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/admin/users?filter=${username}`)
         .then(user => {
-            return user.body;
+            return user.data;
         });
 }
 
 export function bitbucketProjectFromKey(bitbucketProjectKey: string): Promise<any> {
-    const options = requestPromiseOptions(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${bitbucketProjectKey}`);
-    return rp(options)
+    return bitbucketAxios().get(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${bitbucketProjectKey}`)
         .then(project => {
-            return project.body;
+            return project.data;
         });
 }
 
 export function bitbucketRepositoriesForProjectKey(bitbucketProjectKey: string): Promise<any> {
-    const options = requestPromiseOptions(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${bitbucketProjectKey}/repos`);
-    return rp(options)
+    return bitbucketAxios().get(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${bitbucketProjectKey}/repos`)
         .then(repos => {
-            return repos.body;
+            return repos.data;
         });
 }
 
 export function bitbucketRepositoryForSlug(bitbucketProjectKey: string, slug: string): Promise<any> {
-    const options = requestPromiseOptions(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${bitbucketProjectKey}/repos/${slug}`);
-    return rp(options)
+    return bitbucketAxios().get(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${bitbucketProjectKey}/repos/${slug}`)
         .then(repo => {
-            return repo.body;
+            return repo.data;
         });
-}
-
-function rp(options) {
-    return require("request-promise")(options);
 }
 
 export function requestPromiseOptions(uri, method = "GET", includeCa = true): RequestPomiseOptionSet {
@@ -61,7 +53,6 @@ export function requestPromiseOptions(uri, method = "GET", includeCa = true): Re
     const options: RequestPomiseOptionSet = {
         method,
         uri,
-        json: true,
     };
     if (includeCa) {
         options.agentOptions = {
@@ -70,7 +61,7 @@ export function requestPromiseOptions(uri, method = "GET", includeCa = true): Re
     }
     if (method === "POST" || method === "PUT") {
         options.body = {};
-
+        options.json = true;
     }
     return options;
 }
