@@ -10,14 +10,11 @@ import {
 } from "@atomist/automation-client";
 import {url} from "@atomist/slack-messages";
 import axios from "axios";
+import * as fs from "fs";
 import * as _ from "lodash";
 import * as path from "path";
 import {QMConfig} from "../../config/QMConfig";
-import {
-    bitbucketAxios,
-    bitbucketProjectFromKey,
-    requestPromiseOptions,
-} from "./Bitbucket";
+import {bitbucketAxios, bitbucketProjectFromKey} from "./Bitbucket";
 import {BitbucketConfiguration} from "./BitbucketConfiguration";
 
 @EventHandler("Receive BitbucketProjectRequestedEvent events", `
@@ -91,11 +88,18 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
             teamMembers,
         );
 
-        const options = requestPromiseOptions(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`, "POST");
-        options.body = {
-            key,
-            name,
-            description,
+        const options = {
+            method: "POST",
+            uri: `${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`,
+            body: {
+                key,
+                name,
+                description,
+            },
+            agentOptions: {
+                ca: fs.readFileSync(caFile),
+            },
+            json: true, // Automatically stringifies the body to JSON
         };
         const rp = require("request-promise");
 
