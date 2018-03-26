@@ -10,9 +10,7 @@ import {
 } from "@atomist/automation-client";
 import {url} from "@atomist/slack-messages";
 import axios from "axios";
-import * as fs from "fs";
 import * as _ from "lodash";
-import * as path from "path";
 import {QMConfig} from "../../config/QMConfig";
 import {bitbucketAxios, bitbucketProjectFromKey} from "./Bitbucket";
 import {BitbucketConfiguration} from "./BitbucketConfiguration";
@@ -74,7 +72,6 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
         const key: string = bitbucketProjectRequestedEvent.bitbucketProjectRequest.key;
         const name: string = bitbucketProjectRequestedEvent.bitbucketProjectRequest.name;
         const description: string = bitbucketProjectRequestedEvent.bitbucketProjectRequest.description;
-        const caFile = path.resolve(__dirname, QMConfig.subatomic.bitbucket.caPath);
 
         let teamOwners: string[] = [];
         let teamMembers: string[] = [];
@@ -88,22 +85,12 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
             teamMembers,
         );
 
-        const options = {
-            method: "POST",
-            uri: `${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`,
-            body: {
+        return bitbucketAxios().post(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`,
+            {
                 key,
                 name,
                 description,
-            },
-            agentOptions: {
-                ca: fs.readFileSync(caFile),
-            },
-            json: true, // Automatically stringifies the body to JSON
-        };
-        const rp = require("request-promise");
-
-        return rp(options)
+            })
             .then(project => {
                 logger.info(`Created project: ${JSON.stringify(project.data)} -> ${project.data.id} + ${project.data.links.self[0].href}`);
                 this.bitbucketProjectId = project.data.id;
