@@ -6,7 +6,6 @@ import {QMConfig} from "../../../src/config/QMConfig";
 import {MembershipRequestClosed} from "../../../src/gluon/team/MembershipRequestClosed";
 import {TestGraphClient} from "../TestGraphClient";
 import {TestMessageClient} from "../TestMessageClient";
-import {logger} from "@atomist/automation-client";
 
 describe("Close a membership request", () => {
     it("should approve team member", done => {

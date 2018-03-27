@@ -15,7 +15,7 @@ export class TestGraphClient implements GraphClient {
          ChatId: [
              {
              userId: "U967SDE6",
-             screenName: "Test.User"// Throws error with variables.userId
+             screenName: "Test.User", // Throws error with variables.userId
             },
          ],
         };
