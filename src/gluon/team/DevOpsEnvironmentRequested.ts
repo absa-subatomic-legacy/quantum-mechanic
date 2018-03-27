@@ -148,7 +148,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                             [
                                 new SimpleOption("-namespace", projectId),
                             ]
-                            ,);
+                            , );
                     });
             }).then(() => {
                 return Promise.all([OCCommon.commonCommand("tag",
