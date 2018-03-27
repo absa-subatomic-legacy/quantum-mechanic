@@ -10,14 +10,35 @@ export function bitbucketAxios(): AxiosInstance {
     logger.info(`Finding certs: ${path.resolve(__dirname, QMConfig.subatomic.bitbucket.caPath)}`);
     const caFile = path.resolve(__dirname, QMConfig.subatomic.bitbucket.caPath);
     logger.info("Creating axios instance");
-    return axios.create({
+    const instance = axios.create({
         httpsAgent: new https.Agent({
             rejectUnauthorized: true,
             ca: fs.readFileSync(caFile),
         }),
         auth: QMConfig.subatomic.bitbucket.auth,
-        timeout: 20000,
+        timeout: 30000,
+        proxy: false,
     });
+    instance.interceptors.request.use(request => {
+        if (request.proxy !== false) {
+            console.log("Proxy: " + request.proxy);
+        }
+        console.log(`=> Bitbucket ${request.method} ${request.url} ${request.data}`);
+        return request;
+    });
+
+    instance.interceptors.response.use(response => {
+        console.log(`<= Bitbucket ${response.status} ${response.request.url} ${response.data}`);
+        return response;
+    }, error => {
+        if (error && error.response) {
+            console.log(`<= Bitbucket ${error.response.status} ${error.response.request.url} ${error.response.data}`);
+        } else {
+            console.warn(`<= Bitbucket ${error}`);
+        }
+        return error;
+    });
+    return instance;
 }
 
 export function bitbucketUserFromUsername(username: string): Promise<any> {
