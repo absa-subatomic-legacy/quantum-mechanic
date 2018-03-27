@@ -1,7 +1,6 @@
 import {
     GraphClient,
 } from "@atomist/automation-client/spi/graph/GraphClient";
-import {logger} from "@atomist/automation-client";
 
 export class TestGraphClient implements GraphClient {
     public endpoint: string;
@@ -12,12 +11,11 @@ export class TestGraphClient implements GraphClient {
 
     public executeQueryFromFile<T, Q>(path: string, variables?: Q, options?: any, current?: string): Promise<any> {
         this.path = path;
-        this.var = variables;
         const json = {
          ChatId: [
              {
              userId: "U967SDE6",
-             screenName: variables.userId // can ignore error
+             screenName: "Test.User"// Throws error with variables.userId
             },
          ],
         };
