@@ -68,7 +68,6 @@ describe("Create Team test", () => {
         subject.handle(fakeContext)
             .then(() => {
                 assert(fakeContext.messageClient.textMsg.text === "There was an error creating your undefined team");
-                return Promise.resolve();
             })
             .then(done, done);
     });

@@ -48,7 +48,6 @@ describe("Create a new team channel", () => {
         subject.handle(fakeContext)
             .then(() => {
                 assert(JSON.stringify(fakeContext.messageClient) === "{}");
-                return Promise.resolve();
             })
             .then(done, done);
     });
@@ -84,7 +83,6 @@ describe("Create a new team channel", () => {
         subject.handle(fakeContext)
             .then(() => {
                 assert(fakeContext.messageClient.textMsg.text === `There was an error creating your *${teamName}* team channel`);
-                return Promise.resolve();
             })
             .then(done, done);
     });

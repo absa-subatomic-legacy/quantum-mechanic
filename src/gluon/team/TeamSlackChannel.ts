@@ -201,9 +201,7 @@ function linkSlackChannelToGluonTeam(ctx: HandlerContext,
                     .then(() => {
                         return createChannel(ctx, slackTeamId, finalisedSlackChannelName)
                             .then(channel => {
-                                logger.info("there");
                                 if (channel && channel.createSlackChannel) {
-                                    logger.info(`here!!! ${channel}`);
                                     return addBotToSlackChannel(ctx, slackTeamId, channel.createSlackChannel.id)
                                         .then(() => {
                                                 const members: Array<Promise<any>> = [];
