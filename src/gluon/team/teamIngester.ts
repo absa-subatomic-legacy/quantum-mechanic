@@ -95,7 +95,7 @@ export const MembersAddedToTeamEvent: Ingester = {
                 {
                     name: "team",
                     type: {
-                        kind: "SCALAR",
+                        kind: "OBJECT",
                         name: "GluonTeam",
                     },
                 },
@@ -104,7 +104,7 @@ export const MembersAddedToTeamEvent: Ingester = {
                     type: {
                         kind: "LIST",
                         ofType: {
-                            kind: "SCALAR",
+                            kind: "OBJECT",
                             name: "Member",
                         },
                     },
@@ -114,7 +114,7 @@ export const MembersAddedToTeamEvent: Ingester = {
                     type: {
                         kind: "LIST",
                         ofType: {
-                            kind: "SCALAR",
+                            kind: "OBJECT",
                             name: "Member",
                         },
                     },
