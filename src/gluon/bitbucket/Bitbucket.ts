@@ -31,10 +31,7 @@ export function bitbucketProjectFromKey(bitbucketProjectKey: string): Promise<an
 }
 
 export function bitbucketRepositoriesForProjectKey(bitbucketProjectKey: string): Promise<any> {
-    return bitbucketAxios().get(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${bitbucketProjectKey}/repos`)
-        .then(repos => {
-            return repos.data;
-        });
+    return getBitbucketResources(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${bitbucketProjectKey}/repos`);
 }
 
 export function bitbucketRepositoryForSlug(bitbucketProjectKey: string, slug: string): Promise<any> {
@@ -42,6 +39,10 @@ export function bitbucketRepositoryForSlug(bitbucketProjectKey: string, slug: st
         .then(repo => {
             return repo.data;
         });
+}
+
+export function bitbucketProjects() {
+    return getBitbucketResources(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`);
 }
 
 export function getBitbucketResources(resourceUri: string, axiosInstance: AxiosInstance = null, currentResources = []) {
