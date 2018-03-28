@@ -43,3 +43,16 @@ export function bitbucketRepositoryForSlug(bitbucketProjectKey: string, slug: st
             return repo.data;
         });
 }
+
+export function bitbucketProjects(axiosInstance: AxiosInstance, currentProjects = []): Promise<any> {
+    return axiosInstance.get(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects?start=${currentProjects.length}`).then(
+        projects => {
+            currentProjects.push(projects.data.values);
+            if (projects.data.isLastPage) {
+                return Promise.resolve(currentProjects);
+            }
+
+            return bitbucketProjects(axiosInstance, currentProjects);
+        },
+    );
+}
