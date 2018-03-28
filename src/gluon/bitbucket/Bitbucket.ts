@@ -47,8 +47,8 @@ export function bitbucketRepositoryForSlug(bitbucketProjectKey: string, slug: st
 export function bitbucketProjects(axiosInstance: AxiosInstance, currentProjects = []): Promise<any> {
     return axiosInstance.get(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects?start=${currentProjects.length}`).then(
         projects => {
-            currentProjects.push(projects.data.values);
-            if (projects.data.isLastPage) {
+            currentProjects = currentProjects.concat(projects.data.values);
+            if (projects.data.isLastPage === true) {
                 return Promise.resolve(currentProjects);
             }
 

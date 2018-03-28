@@ -91,7 +91,7 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
             // then get a list of projects that the member has access too
             return bitbucketProjects(bitbucketAxios())
                 .then(projects => {
-                    logger.info(`Got Bitbucket projects: ${JSON.stringify(projects.data)}`);
+                    logger.info(`Got Bitbucket projects: ${JSON.stringify(projects)}`);
 
                     const msg: SlackMessage = {
                         text: `Please select the Bitbucket project to link to ${this.projectName}`,
@@ -100,7 +100,7 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                             actions: [
                                 menuForCommand({
                                         text: "Select Bitbucket project", options:
-                                            projects.data.values.map(bitbucketProject => {
+                                            projects.map(bitbucketProject => {
                                                 return {
                                                     value: bitbucketProject.key,
                                                     text: bitbucketProject.name,
