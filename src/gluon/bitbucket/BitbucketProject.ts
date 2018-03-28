@@ -17,7 +17,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {gluonProjectFromProjectName} from "../project/Projects";
-import {bitbucketAxios, bitbucketProjects} from "./Bitbucket";
+import {bitbucketAxios, getBitbucketResources} from "./Bitbucket";
 
 @CommandHandler("Create a new Bitbucket project", QMConfig.subatomic.commandPrefix + " create bitbucket project")
 export class NewBitbucketProject implements HandleCommand<HandlerResult> {
@@ -89,7 +89,7 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.bitbucketProjectKey)) {
             // then get a list of projects that the member has access too
-            return bitbucketProjects(bitbucketAxios())
+            return getBitbucketResources(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`)
                 .then(projects => {
                     logger.info(`Got Bitbucket projects: ${JSON.stringify(projects)}`);
 
