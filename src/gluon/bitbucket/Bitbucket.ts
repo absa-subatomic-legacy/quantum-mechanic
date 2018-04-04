@@ -23,16 +23,16 @@ export function bitbucketAxios(): AxiosInstance {
         if (request.proxy !== false) {
             console.log("Proxy: " + request.proxy);
         }
-        console.log(`=> Bitbucket ${request.method} ${request.url} ${request.data}`);
+        console.log(`=> Bitbucket ${request.method} ${request.url} ${JSON.stringify(request.data)}`);
         return request;
     });
 
     instance.interceptors.response.use(response => {
-        console.log(`<= Bitbucket ${response.status} ${response.request.url} ${response.data}`);
+        console.log(`<= Bitbucket ${response.status} ${response.request.url} ${JSON.stringify(response.data)}`);
         return response;
     }, error => {
         if (error && error.response) {
-            console.log(`<= Bitbucket ${error.response.status} ${error.response.request.url} ${error.response.data}`);
+            console.log(`<= Bitbucket ${error.response.status} ${error.response.request.url} ${JSON.stringify(error.response.data)}`);
         } else {
             console.warn(`<= Bitbucket ${error}`);
         }
