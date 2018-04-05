@@ -21,6 +21,7 @@ import {OCClient} from "../../openshift/OCClient";
 import {OCCommon} from "../../openshift/OCCommon";
 import {LinkExistingApplication} from "../packages/CreateApplication";
 import {LinkExistingLibrary} from "../packages/CreateLibrary";
+import {getJenkinsAxios} from "../jenkins/Jenkins";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
 subscription ProjectEnvironmentsRequestedEvent {
@@ -203,12 +204,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                             .then(jenkinsHost => {
                                 logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to add Bitbucket credentials`);
 
-                                const jenkinsAxios = axios.create({
-                                    httpsAgent: new https.Agent({
-                                        rejectUnauthorized: false,
-                                    }),
-                                });
-
+                                const jenkinsAxios = getJenkinsAxios();
                                 return jenkinsAxios.post(`https://${jenkinsHost.output}/createItem?name=${_.kebabCase(environmentsRequestedEvent.project.name).toLowerCase()}`,
                                     `
 <com.cloudbees.hudson.plugins.folder.Folder plugin="cloudbees-folder@6.0.4">
@@ -307,12 +303,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                             },
                         };
 
-                        const jenkinsAxios = axios.create({
-                            httpsAgent: new https.Agent({
-                                rejectUnauthorized: false,
-                            }),
-                        });
-
+                        const jenkinsAxios = getJenkinsAxios();
                         jenkinsAxios.interceptors.request.use(request => {
                             if (request.data && (request.headers["Content-Type"].indexOf("application/x-www-form-urlencoded") !== -1)) {
                                 logger.debug(`Stringifying URL encoded data: ${qs.stringify(request.data)}`);

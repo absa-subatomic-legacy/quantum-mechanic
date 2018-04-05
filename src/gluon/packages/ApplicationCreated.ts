@@ -19,6 +19,7 @@ import {SimpleOption} from "../../openshift/base/options/SimpleOption";
 import {OCCommon} from "../../openshift/OCCommon";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 import {ApplicationType} from "./Applications";
+import {getJenkinsAxios} from "../jenkins/Jenkins";
 
 @EventHandler("Receive ApplicationCreatedEvent events", `
 subscription ApplicationCreatedEvent {
@@ -283,12 +284,7 @@ You can kick off the build pipeline for your library by clicking the button belo
                     .then(jenkinsHost => {
                         logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to add Bitbucket credentials`);
 
-                        const jenkinsAxios = axios.create({
-                            httpsAgent: new https.Agent({
-                                rejectUnauthorized: false,
-                            }),
-                        });
-
+                        const jenkinsAxios = getJenkinsAxios();
                         return jenkinsAxios.post(`https://${jenkinsHost.output}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/createItem?name=${_.kebabCase(gluonApplicationName).toLowerCase()}`,
                             `
 <org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject plugin="workflow-multibranch@2.14">
