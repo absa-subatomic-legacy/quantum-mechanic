@@ -120,7 +120,7 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                                     }, this.teamChannel)
                                         .then(failure);
                                 } else {
-                                    throw error;
+                                    return failure(error);
                                 }
                             });
                     });
