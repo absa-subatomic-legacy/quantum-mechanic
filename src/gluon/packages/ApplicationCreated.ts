@@ -338,7 +338,7 @@ You can kick off the build pipeline for your library by clicking the button belo
                                 },
                             })
                             .then(success, error => {
-                                if (error.response.status === 400) {
+                                if (error.response && error.response.status === 400) {
                                     logger.warn(`Multibranch job for [${gluonApplicationName}] probably already created`);
                                     return SuccessPromise;
                                 } else {

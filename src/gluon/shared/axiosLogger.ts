@@ -15,7 +15,7 @@ export function addAxiosLogger(instance: AxiosInstance, descriptor: string): Axi
         logger.debug(`<= ${descriptor} ${response.status} ${response.request.url} ${JSON.stringify(response.data)}`);
         return response;
     }, error => {
-        if (error && error.response) {
+        if (error.response) {
             logger.debug(`<= ${descriptor} ${error.response.status} ${error.response.request.url} ${JSON.stringify(error.response.data)}`);
         } else {
             logger.debug(`<= ${descriptor} ${error}`);
