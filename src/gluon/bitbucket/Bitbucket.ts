@@ -7,9 +7,7 @@ import * as path from "path";
 import {QMConfig} from "../../config/QMConfig";
 
 export function bitbucketAxios(): AxiosInstance {
-    logger.info(`Finding certs: ${path.resolve(__dirname, QMConfig.subatomic.bitbucket.caPath)}`);
     const caFile = path.resolve(__dirname, QMConfig.subatomic.bitbucket.caPath);
-    logger.info("Creating axios instance");
     const instance = axios.create({
         httpsAgent: new https.Agent({
             rejectUnauthorized: true,
@@ -21,20 +19,20 @@ export function bitbucketAxios(): AxiosInstance {
     });
     instance.interceptors.request.use(request => {
         if (request.proxy !== false) {
-            console.log("Proxy: " + request.proxy);
+            logger.debug("Proxy: " + request.proxy);
         }
-        console.log(`=> Bitbucket ${request.method} ${request.url} ${JSON.stringify(request.data)}`);
+        logger.debug(`=> Bitbucket ${request.method} ${request.url} ${JSON.stringify(request.data)}`);
         return request;
     });
 
     instance.interceptors.response.use(response => {
-        console.log(`<= Bitbucket ${response.status} ${response.request.url} ${JSON.stringify(response.data)}`);
+        logger.debug(`<= Bitbucket ${response.status} ${response.request.url} ${JSON.stringify(response.data)}`);
         return response;
     }, error => {
         if (error && error.response) {
-            console.log(`<= Bitbucket ${error.response.status} ${error.response.request.url} ${JSON.stringify(error.response.data)}`);
+            logger.debug(`<= Bitbucket ${error.response.status} ${error.response.request.url} ${JSON.stringify(error.response.data)}`);
         } else {
-            console.warn(`<= Bitbucket ${error}`);
+            logger.debug(`<= Bitbucket ${error}`);
         }
         return error;
     });
