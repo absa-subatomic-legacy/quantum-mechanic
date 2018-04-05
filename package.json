@@ -18,7 +18,6 @@
     "@atomist/slack-messages": "^0.12.1",
     "app-root-path": "^2.0.1",
     "axios-https-proxy-fix": "^0.17.1",
-    "request-promise": "^4.2.2",
     "graphql": "^0.8.2",
     "promise-timeout": "^1.1.1",
     "query-string": "^5.0.1"
