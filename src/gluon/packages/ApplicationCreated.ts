@@ -17,9 +17,9 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {SimpleOption} from "../../openshift/base/options/SimpleOption";
 import {OCCommon} from "../../openshift/OCCommon";
+import {getJenkinsAxios} from "../jenkins/Jenkins";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 import {ApplicationType} from "./Applications";
-import {getJenkinsAxios} from "../jenkins/Jenkins";
 
 @EventHandler("Receive ApplicationCreatedEvent events", `
 subscription ApplicationCreatedEvent {
