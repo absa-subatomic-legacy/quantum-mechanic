@@ -23,6 +23,8 @@ import {
 import {AddConfigServer} from "../project/AddConfigServer";
 import {CreateProject} from "../project/CreateProject";
 
+const promiseRetry = require("promise-retry");
+
 @EventHandler("Receive DevOpsEnvironmentRequestedEvent events", `
 subscription DevOpsEnvironmentRequestedEvent {
   DevOpsEnvironmentRequestedEvent {
@@ -249,14 +251,25 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                     .then(token => {
                         logger.info(`Using Service Account token: ${token.output}`);
 
-                        return timeout(OCCommon.commonCommand(
-                            "rollout status",
-                            "dc/jenkins",
-                            [],
-                            [
-                                new SimpleOption("-namespace", projectId),
-                            ], false)
-                            , 180000) // TODO configurable
+                        return promiseRetry( (retryFunction, attemptCount: number) => {
+                            logger.debug(`Jenkins rollout status check attempt number ${attemptCount}`);
+
+                            return OCCommon.commonCommand(
+                                "rollout status",
+                                "dc/jenkins",
+                                [],
+                                [
+                                    new SimpleOption("-namespace", projectId),
+                                    new SimpleOption("-watch=false"),
+                                ], true)
+                                .then( rolloutStatus => {
+                                    logger.debug(JSON.stringify(rolloutStatus.output));
+
+                                    if (rolloutStatus.output.indexOf("successfully rolled out") === -1) {
+                                        retryFunction();
+                                    }
+                                });
+                            })
                             .then(() => {
                                 return OCCommon.commonCommand("annotate route",
                                     "jenkins",
