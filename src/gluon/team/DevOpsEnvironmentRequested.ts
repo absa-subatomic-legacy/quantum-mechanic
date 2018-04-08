@@ -255,8 +255,8 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                             [],
                             [
                                 new SimpleOption("-namespace", projectId),
-                            ], true)
-                            , 60000) // TODO configurable
+                            ], false)
+                            , 180000) // TODO configurable
                             .then(() => {
                                 return OCCommon.commonCommand("annotate route",
                                     "jenkins",
@@ -333,6 +333,8 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                             .catch(err => {
                                 if (err instanceof TimeoutError) {
                                     logger.error(`Waiting for dc/jenkins deployment timed out`);
+                                } else {
+                                    failure(err);
                                 }
                             });
                     })
