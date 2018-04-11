@@ -22,6 +22,7 @@ import {
 } from "../jenkins/Jenkins";
 import {AddConfigServer} from "../project/AddConfigServer";
 import {CreateProject} from "../project/CreateProject";
+import {createLogstashEndpoint} from "./absa/DevOpsEnvironment";
 
 const promiseRetry = require("promise-retry");
 
@@ -377,6 +378,9 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                                     ]);
                             });
                     });
+            })
+            .then(() => {
+                return createLogstashEndpoint(projectId);
             })
             .then(() => {
                 const msg: SlackMessage = {
