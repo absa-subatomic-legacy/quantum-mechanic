@@ -22,7 +22,7 @@ import {
 } from "../jenkins/Jenkins";
 import {AddConfigServer} from "../project/AddConfigServer";
 import {CreateProject} from "../project/CreateProject";
-import {createLogstashEndpoint} from "./absa/DevOpsEnvironment";
+import {createLogstashEndpoint} from "../shared/absa/Logstash";
 
 const promiseRetry = require("promise-retry");
 

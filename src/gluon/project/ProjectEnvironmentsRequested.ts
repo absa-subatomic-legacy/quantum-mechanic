@@ -20,6 +20,7 @@ import {OCCommon} from "../../openshift/OCCommon";
 import {jenkinsAxios} from "../jenkins/Jenkins";
 import {LinkExistingApplication} from "../packages/CreateApplication";
 import {LinkExistingLibrary} from "../packages/CreateLibrary";
+import {createLogstashEndpoint} from "../shared/absa/Logstash";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
 subscription ProjectEnvironmentsRequestedEvent {
@@ -162,7 +163,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                                     [
                                         new SimpleOption("-namespace", projectId),
                                     ]
-                                    , );
+                                    ,);
                             });
                     })
                     .then(() => {
@@ -175,6 +176,8 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                             ], [
                                 new SimpleOption("-namespace", projectId),
                             ]);
+                    }).then(() => {
+                        return createLogstashEndpoint(projectId);
                     });
             }))
             .then(() => {
