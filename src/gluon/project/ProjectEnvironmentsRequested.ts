@@ -163,7 +163,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                                     [
                                         new SimpleOption("-namespace", projectId),
                                     ]
-                                    ,);
+                                    , );
                             });
                     })
                     .then(() => {
