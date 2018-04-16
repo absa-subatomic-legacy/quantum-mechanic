@@ -368,8 +368,8 @@ node('maven') {
         file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')
       ]) {
         sh ': Maven build &&' +
-           " ./mvnw --batch-mode test --settings MVN_SETTINGS" +
-           " || mvn --batch-mode test --settings MVN_SETTINGS" +
+           " ./mvnw --batch-mode test --settings $MVN_SETTINGS" +
+           " || mvn --batch-mode test --settings $MVN_SETTINGS" +
            ' -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' +
            ' -Dmaven.test.redirectTestOutputToFile=true'
       }
@@ -394,11 +394,10 @@ node('maven') {
         // GIT_PREVIOUS_SUCCESSFUL_COMMIT:5fb1ae6d0fbc67fb437cdaafca2f485ef22855fe,
         // GIT_URL:https://bitbucket.subatomic.local/scm/TEST/full-test.git] with BuildConfig test-project-full-test
 
-        try {
+        if (buildConfig.spec.output.to.name != "\${appBuildConfig}:\${tag}") {
             bc.patch("\\'{ \\"spec\\": { \\"output\\": { \\"to\\": { \\"name\\": \\"\${appBuildConfig}:\${tag}\\" } } } }\\'")
-        } catch ( e ) {
-            "Unable to patch with error: \${e}"
         }
+
         def build = bc.startBuild();
 
         timeout(5) {
