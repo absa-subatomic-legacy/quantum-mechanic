@@ -5,8 +5,8 @@ import {QMConfig} from "../../../src/config/QMConfig";
 import {DevOpsEnvironmentRequested} from "../../../src/gluon/team/DevOpsEnvironmentRequested";
 import {TestMessageClient} from "../TestMessageClient";
 
-describe("Onboard new member test", () => {
-    it("should welcome new user", done => {
+describe("DevOps environment test", () => {
+    it.skip("should provision an environment", done => {
         const mock = new MockAdapter(axios);
 
         mock.onPost(`${QMConfig.subatomic.gluon.baseUrl}/members`).reply(200, {
@@ -21,18 +21,54 @@ describe("Onboard new member test", () => {
         });
 
         const subject = new DevOpsEnvironmentRequested();
+        const json = {
+            DevOpsEnvironmentRequestedEvent: [
+                {
+                    team: {
+                        name: "test-team",
+                        slackIdentity: {
+                            teamChannel: "test-channel",
+                        },
+                        owners: [
+                            {
+                                firstName: "Owner",
+                                domainUsername: "domain/owner",
+                                slackIdentity: {
+                                    screenName: "owner.user",
+                                },
+                            },
+                        ],
+                        members: [
+                            {
+                                firstName: "Test",
+                                domainUsername: "domain/test",
+                                slackIdentity: {
+                                    screenName: "test.user",
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+        };
 
+        const fakeEventFired = {
+            data: json,
+            extensions: {
+                operationName: "test",
+            },
+        };
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
             messageClient: new TestMessageClient(),
         };
 
-        subject.handle(fakeContext)
+        subject.handle(fakeEventFired, fakeContext)
             .then(() => {
-                assert(fakeContext.messageClient.textMsg.text.trim() === "Welcome to the Subatomic environment *Test*!\nNext steps are to either join an existing team or create a new one.");
+                assert(fakeContext.messageClient.textMsg.text.trim() === "Your DevOps environment has been provisioned successfully");
                 return Promise.resolve();
             })
             .then(done, done);
-    });
+    }); // timeout(10000);
 });

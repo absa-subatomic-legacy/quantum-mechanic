@@ -43,7 +43,6 @@ describe("Create Team test", () => {
         subject.handle(fakeContext)
             .then(() => {
                 assert(JSON.stringify(fakeContext.messageClient) === "{}");
-                return Promise.resolve();
             })
             .then(done, done);
     });
