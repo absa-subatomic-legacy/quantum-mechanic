@@ -1,0 +1,40 @@
+{
+  "subatomic": {
+    "commandPrefix" : "sub",
+    "openshiftHost" : "",
+    "gluon": {
+      "baseUrl": "http://localhost:8080"
+    },
+    "docs": {
+      "baseUrl": "http://localhost:8080"
+    }
+  },
+  "teamId": "F7E6GGR63A",
+  "token": "88agdfgdf8afg7f7d88g9aeadga8sd89cj",
+  "lifecycles": {
+    "push": {
+      "configuration": {
+        "emoji-style": "default",
+        "show-statuses-on-push": true,
+        "build": {
+          "style": "decorator"
+        },
+        "fingerprints": {
+          "about-hint": false,
+          "render-unchanged": true,
+          "style": "fingerprint-inline"
+        }
+      }
+    },
+    "pull_request": {
+      "configuration": {
+        "emoji-style": "default"
+      }
+    }
+  },
+  "fingerprints": {
+    "data": {
+
+    }
+  }
+}

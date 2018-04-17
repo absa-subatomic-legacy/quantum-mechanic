@@ -1,5 +1,5 @@
 import * as assert from "power-assert";
-import {SimpleOption} from "../../src/openshift/base/options/SimpleOption";
+import {SimpleOption} from "../../../../src/openshift/base/options/SimpleOption";
 
 describe("Openshift SimpleOption Test", () => {
 

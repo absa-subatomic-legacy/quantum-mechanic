@@ -367,12 +367,11 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                                 logger.warn("Bitbucket SSH secret must already exist");
                                 return SuccessPromise;
                             }, () => {
-                                return OCCommon.commonCommand("secrets new-sshauth",
+                                return OCCommon.commonCommand("create secret generic",
                                     "bitbucket-ssh",
                                     [],
                                     [
-                                        new SimpleOption("-ssh-privatekey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
-                                        new SimpleOption("-ca-cert", QMConfig.subatomic.bitbucket.caPath),
+                                        new SimpleOption("-from-file", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
                                         new SimpleOption("-namespace", projectId),
                                     ]);
                             });
