@@ -1,4 +1,3 @@
-import * as appRoot from "app-root-path";
 import {QMConfig} from "./config/QMConfig";
 import {
     BitbucketProjectAddedEvent,
@@ -26,6 +25,10 @@ import {AddConfigServer} from "./gluon/project/AddConfigServer";
 import {CreateOpenShiftPvc} from "./gluon/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/project/CreateProject";
 import {ProjectCreated} from "./gluon/project/ProjectCreated";
+import {
+    ListProjectDetails,
+    ListTeamProjects,
+} from "./gluon/project/ProjectDetails";
 import {NewProjectEnvironments} from "./gluon/project/ProjectEnvironments";
 import {ProjectEnvironmentsRequested} from "./gluon/project/ProjectEnvironmentsRequested";
 import {
@@ -34,9 +37,12 @@ import {
 } from "./gluon/project/projectIngester";
 import {
     ActionedBy,
-    BitbucketProject, GluonTeam, Project,
+    BitbucketProject,
+    GluonTeam,
+    Project,
     SlackIdentity,
 } from "./gluon/shared/sharedIngester";
+import {BotJoinedChannel} from "./gluon/team/BotJoinedChannel";
 import {CreateTeam} from "./gluon/team/CreateTeam";
 import {NewDevOpsEnvironment} from "./gluon/team/DevOpsEnvironment";
 import {DevOpsEnvironmentRequested} from "./gluon/team/DevOpsEnvironmentRequested";
@@ -45,11 +51,13 @@ import {
     CreateMembershipRequestToTeam,
     JoinTeam,
 } from "./gluon/team/JoinTeam";
+import {MembersAddedToTeam} from "./gluon/team/MembersAddedToTeam";
 import {MembershipRequestClosed} from "./gluon/team/MembershipRequestClosed";
 import {MembershipRequestCreated} from "./gluon/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/team/TeamCreated";
 import {
     DevOpsEnvironmentRequestedEvent,
+    MembersAddedToTeamEvent,
     MembershipRequestCreatedEvent,
     TeamCreatedEvent,
 } from "./gluon/team/teamIngester";
@@ -59,14 +67,13 @@ import {
     NewTeamSlackChannel,
 } from "./gluon/team/TeamSlackChannel";
 
-const pj = require(`${appRoot.path}/package.json`);
-
 const token = QMConfig.token;
 
 export const configuration: any = {
-    name: pj.name,
-    version: pj.version,
     teamIds: [QMConfig.teamId],
+    // running durable will store and forward events when the client is disconnected
+    // this should only be used in production envs
+    policy: process.env.NODE_ENV === "production" ? "durable" : "ephemeral",
     commands: [
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,
@@ -90,6 +97,8 @@ export const configuration: any = {
         KickOffJenkinsBuild,
         CreateOpenShiftPvc,
         AddConfigServer,
+        ListTeamProjects,
+        ListProjectDetails,
     ],
     events: [
         TeamCreated,
@@ -101,6 +110,8 @@ export const configuration: any = {
         ProjectEnvironmentsRequested,
         ApplicationCreated,
         MembershipRequestCreated,
+        BotJoinedChannel,
+        MembersAddedToTeam,
     ],
     ingesters: [
         SlackIdentity,
@@ -117,6 +128,7 @@ export const configuration: any = {
         Project,
         BitbucketProject,
         ActionedBy,
+        MembersAddedToTeamEvent,
     ],
     token,
     http: {
@@ -129,5 +141,14 @@ export const configuration: any = {
                 enabled: false,
             },
         },
+    },
+    logging: {
+        level: "debug",
+        file: false,
+        banner: true,
+    },
+    cluster: {
+        // This will run the client in cluster mode; master and workers
+        enabled: process.env.NODE_ENV === "production",
     },
 };

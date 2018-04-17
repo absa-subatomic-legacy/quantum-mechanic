@@ -4,16 +4,20 @@ import * as fs from "fs";
 import * as https from "https";
 import * as path from "path";
 import {QMConfig} from "../../config/QMConfig";
+import {addAxiosLogger} from "../shared/axiosLogger";
 
 export function bitbucketAxios(): AxiosInstance {
     const caFile = path.resolve(__dirname, QMConfig.subatomic.bitbucket.caPath);
-    return axios.create({
+    const instance = axios.create({
         httpsAgent: new https.Agent({
             rejectUnauthorized: true,
             ca: fs.readFileSync(caFile),
         }),
         auth: QMConfig.subatomic.bitbucket.auth,
+        timeout: 30000,
+        proxy: false,
     });
+    return addAxiosLogger(instance, "Bitbucket");
 }
 
 export function bitbucketUserFromUsername(username: string): Promise<any> {
@@ -31,10 +35,7 @@ export function bitbucketProjectFromKey(bitbucketProjectKey: string): Promise<an
 }
 
 export function bitbucketRepositoriesForProjectKey(bitbucketProjectKey: string): Promise<any> {
-    return bitbucketAxios().get(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${bitbucketProjectKey}/repos`)
-        .then(repos => {
-            return repos.data;
-        });
+    return getBitbucketResources(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${bitbucketProjectKey}/repos`);
 }
 
 export function bitbucketRepositoryForSlug(bitbucketProjectKey: string, slug: string): Promise<any> {
@@ -42,4 +43,24 @@ export function bitbucketRepositoryForSlug(bitbucketProjectKey: string, slug: st
         .then(repo => {
             return repo.data;
         });
+}
+
+export function bitbucketProjects() {
+    return getBitbucketResources(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`);
+}
+
+export function getBitbucketResources(resourceUri: string, axiosInstance: AxiosInstance = null, currentResources = []) {
+    if (axiosInstance === null) {
+        axiosInstance = bitbucketAxios();
+    }
+    return axiosInstance.get(`${resourceUri}?start=${currentResources.length}`).then(
+        resources => {
+            currentResources = currentResources.concat(resources.data.values);
+            if (resources.data.isLastPage === true) {
+                return Promise.resolve(currentResources);
+            }
+
+            return getBitbucketResources(resourceUri, axiosInstance, currentResources);
+        },
+    );
 }

@@ -196,7 +196,7 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                 } else {
                     return bitbucketRepositoriesForProjectKey(project.bitbucketProject.key)
                         .then(bitbucketRepos => {
-                            logger.debug(`Bitbucket project [${project.bitbucketProject.name}] has repositories: ${JSON.stringify(bitbucketRepos.values)}`);
+                            logger.debug(`Bitbucket project [${project.bitbucketProject.name}] has repositories: ${JSON.stringify(bitbucketRepos)}`);
                             return ctx.messageClient.respond({
                                 text: "Please select the Bitbucket repository which contains the library you want to link",
                                 attachments: [{
@@ -205,7 +205,7 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                         menuForCommand({
                                                 text: "Select Bitbucket repository",
                                                 options:
-                                                    bitbucketRepos.values.map(bitbucketRepo => {
+                                                    bitbucketRepos.map(bitbucketRepo => {
                                                         return {
                                                             value: bitbucketRepo.name,
                                                             text: bitbucketRepo.name,
@@ -257,7 +257,11 @@ node('maven') {
             checkout(scm)
 
             try {
-                sh ': Maven build && ./mvnw --batch-mode verify --settings $MVN_SETTINGS'
+                sh ': Maven build &&' +
+                     ' ./mvnw --batch-mode verify --settings $MVN_SETTINGS' +
+                     ' || mvn --batch-mode verify --settings $MVN_SETTINGS' +
+                     ' -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' +
+                     ' -Dmaven.test.redirectTestOutputToFile=true'
             } finally {
                 junit 'target/surefire-reports/*.xml'
             }
@@ -271,9 +275,12 @@ node('maven') {
                     repository = 'snapshots'
                 }
 
-                sh ': Maven deploy && ./mvnw --batch-mode deploy -DskipTests ' +
-                        "-DaltDeploymentRepository=nexus::default::\${env.NEXUS_BASE_URL}/\${repository}/ " +
-                        '--settings $MVN_SETTINGS'
+                sh ': Maven deploy &&' +
+                     ' ./mvnw --batch-mode deploy --settings $MVN_SETTINGS -DskipTests' +
+                     ' -DaltDeploymentRepository=nexus::default::\${env.NEXUS_BASE_URL}/\${repository}/' +
+                     ' || mvn --batch-mode deploy --settings $MVN_SETTINGS -DskipTests' +
+                     ' -DaltDeploymentRepository=nexus::default::\${env.NEXUS_BASE_URL}/\${repository}/' +
+                     ' -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
             }
         }
     }

@@ -17,7 +17,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {gluonProjectFromProjectName} from "../project/Projects";
-import {bitbucketAxios} from "./Bitbucket";
+import {bitbucketAxios, bitbucketProjects} from "./Bitbucket";
 
 @CommandHandler("Create a new Bitbucket project", QMConfig.subatomic.commandPrefix + " create bitbucket project")
 export class NewBitbucketProject implements HandleCommand<HandlerResult> {
@@ -81,66 +81,49 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
     public projectName: string;
 
     @Parameter({
-        description: "bitbucket project name",
-        required: false,
+        description: "bitbucket project key",
     })
     public bitbucketProjectKey: string;
 
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
-        if (_.isEmpty(this.bitbucketProjectKey)) {
-            // then get a list of projects that the member has access too
-            return bitbucketAxios().get(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`)
-                .then(projects => {
-                    logger.info(`Got Bitbucket projects: ${JSON.stringify(projects.data)}`);
-
-                    const msg: SlackMessage = {
-                        text: `Please select the Bitbucket project to link to ${this.projectName}`,
-                        attachments: [{
-                            fallback: "Link Bitbucket project",
-                            actions: [
-                                menuForCommand({
-                                        text: "Select Bitbucket project", options:
-                                            projects.data.values.map(bitbucketProject => {
-                                                return {
-                                                    value: bitbucketProject.key,
-                                                    text: bitbucketProject.name,
-                                                };
-                                            }),
-                                    },
-                                    "ListExistingBitbucketProject", "bitbucketProjectKey",
-                                    {projectName: this.projectName}),
-                            ],
-                        }],
-                    };
-
-                    return ctx.messageClient.respond(msg)
-                        .then(success);
-                });
-        } else {
-            // get memberId for createdBy
-            return gluonMemberFromScreenName(ctx, this.screenName)
-                .then(member => {
-                    return gluonProjectFromProjectName(ctx, this.projectName)
-                        .then(gluonProject => {
-                            // get the selected project's details
-                            return bitbucketAxios().get(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${this.bitbucketProjectKey}`)
-                                .then(project => {
-                                    return axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${gluonProject.projectId}`,
-                                        {
-                                            bitbucketProject: {
-                                                name: project.data.name,
-                                                description: project.data.description,
-                                            },
-                                            createdBy: member.memberId,
-                                        });
-                                });
-                        });
-                })
-                .then(() => {
-                    return ctx.messageClient.addressChannels({
-                        text: `🚀 The Bitbucket project with key ${this.bitbucketProjectKey} is being configured...`,
-                    }, this.teamChannel);
-                });
-        }
+        // get memberId for createdBy
+        return gluonMemberFromScreenName(ctx, this.screenName)
+            .then(member => {
+                return gluonProjectFromProjectName(ctx, this.projectName)
+                    .then(gluonProject => {
+                        // get the selected project's details
+                        const projectRestUrl = `${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${this.bitbucketProjectKey}`;
+                        const projectUiUrl = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.bitbucketProjectKey}`;
+                        return bitbucketAxios().get(projectRestUrl)
+                            .then(project => {
+                                return axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${gluonProject.projectId}`,
+                                    {
+                                        bitbucketProject: {
+                                            bitbucketProjectId: project.data.id,
+                                            name: project.data.name,
+                                            description: project.data.description,
+                                            key: this.bitbucketProjectKey,
+                                            url: projectUiUrl,
+                                        },
+                                        createdBy: member.memberId,
+                                    });
+                            })
+                            .then(() => {
+                                return ctx.messageClient.addressChannels({
+                                    text: `🚀 The Bitbucket project with key ${this.bitbucketProjectKey} is being configured...`,
+                                }, this.teamChannel);
+                            })
+                            .catch(error => {
+                                if (error.response && error.response.status === 404) {
+                                    return ctx.messageClient.addressChannels({
+                                        text: `⚠️ The Bitbucket project with key ${this.bitbucketProjectKey} was not found`,
+                                    }, this.teamChannel)
+                                        .then(failure);
+                                } else {
+                                    return failure(error);
+                                }
+                            });
+                    });
+            });
     }
 }

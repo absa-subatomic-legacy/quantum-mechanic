@@ -9,11 +9,15 @@ import {StandardOption} from "./base/options/StandardOption";
 export class OCCommon {
 
     public static commonCommand(command: string, type: string, parameters: string[] = [],
-                                options: AbstractOption[] = []): Promise<OCCommandResult> {
+                                options: AbstractOption[] = [], useAsync = false): Promise<OCCommandResult> {
         const commandCommandInstance = new OCCommand(`${command} ${type}`, parameters,
             options,
         );
-        return commandCommandInstance.execute();
+        if (useAsync === true) {
+            return commandCommandInstance.executeAsync();
+        } else {
+            return commandCommandInstance.execute();
+        }
     }
 
     public static createStdIn(type: string, parameters: string[] = [],

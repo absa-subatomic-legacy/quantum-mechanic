@@ -23,6 +23,8 @@ import {
 import {AddConfigServer} from "../project/AddConfigServer";
 import {CreateProject} from "../project/CreateProject";
 
+const promiseRetry = require("promise-retry");
+
 @EventHandler("Receive DevOpsEnvironmentRequestedEvent events", `
 subscription DevOpsEnvironmentRequestedEvent {
   DevOpsEnvironmentRequestedEvent {
@@ -74,14 +76,14 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                     `DevOps environment for ${devOpsRequestedEvent.team.name} [managed by Subatomic]`);
             })
             .then(() => {
-                return this.addMembershipPermissions(projectId,
+                return addOpenshiftMembershipPermissions(projectId,
                     devOpsRequestedEvent.team);
             }, err => {
                 logger.warn(err);
                 // TODO what do we do with existing projects?
                 // We should probably make sure the name, display name etc. is consistent
 
-                return this.addMembershipPermissions(projectId,
+                return addOpenshiftMembershipPermissions(projectId,
                     devOpsRequestedEvent.team);
             })
             .then(() => {
@@ -178,7 +180,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                         // If no team email then the address of the createdBy member
                         new SimpleOption("p", "JENKINS_ADMIN_EMAIL=subatomic@local"),
                         // TODO the registry Cluster IP we will have to get by introspecting the registry Service
-                        new SimpleOption("p", `MAVEN_SLAVE_IMAGE=172.30.1.1:5000/${projectId}/jenkins-slave-maven-subatomic:2.0`),
+                        new SimpleOption("p", `MAVEN_SLAVE_IMAGE=${QMConfig.subatomic.openshift.dockerRepoUrl}/${projectId}/jenkins-slave-maven-subatomic:2.0`),
                         new SimpleOption("-namespace", projectId),
                     ],
                 )
@@ -249,14 +251,30 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                     .then(token => {
                         logger.info(`Using Service Account token: ${token.output}`);
 
-                        return timeout(OCCommon.commonCommand(
-                            "rollout status",
-                            "dc/jenkins",
-                            [],
-                            [
-                                new SimpleOption("-namespace", projectId),
-                            ])
-                            , 60000) // TODO configurable
+                        return promiseRetry( (retryFunction, attemptCount: number) => {
+                            logger.debug(`Jenkins rollout status check attempt number ${attemptCount}`);
+
+                            return OCCommon.commonCommand(
+                                "rollout status",
+                                "dc/jenkins",
+                                [],
+                                [
+                                    new SimpleOption("-namespace", projectId),
+                                    new SimpleOption("-watch=false"),
+                                ], true)
+                                .then( rolloutStatus => {
+                                    logger.debug(JSON.stringify(rolloutStatus.output));
+
+                                    if (rolloutStatus.output.indexOf("successfully rolled out") === -1) {
+                                        retryFunction();
+                                    }
+                                });
+                            }, {
+                                // Retry for up to 3 mins
+                                factor : 1,
+                                retries : 9,
+                                minTimeout : 20000,
+                            })
                             .then(() => {
                                 return OCCommon.commonCommand("annotate route",
                                     "jenkins",
@@ -333,6 +351,8 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                             .catch(err => {
                                 if (err instanceof TimeoutError) {
                                     logger.error(`Waiting for dc/jenkins deployment timed out`);
+                                } else {
+                                    failure(err);
                                 }
                             });
                     })
@@ -396,29 +416,29 @@ If your applications will require a Spring Cloud Config Server, you can add a Su
             });
     }
 
-    private addMembershipPermissions(projectId: string, team: any): Promise<any> {
-        return Promise.all(
-            team.owners.map(owner => {
-                const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
-                logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
-                return OCClient.policy.addRoleToUser(ownerUsername,
-                    "admin",
-                    projectId);
-            }))
-            .then(() => {
-                return Promise.all(
-                    team.members.map(member => {
-                        const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
-                        logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
-                        return OCClient.policy.addRoleToUser(memberUsername,
-                            "view",
-                            projectId);
-                    }));
-            });
-    }
-
     private docs(): string {
         return `${url(`${QMConfig.subatomic.docs.baseUrl}/devops`,
             "documentation")}`;
     }
+}
+
+export function addOpenshiftMembershipPermissions(projectId: string, team: { owners: Array<{ domainUsername }>, members: Array<{ domainUsername }> }): Promise<any> {
+    return Promise.all(
+        team.owners.map(owner => {
+            const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
+            logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
+            return OCClient.policy.addRoleToUser(ownerUsername,
+                "admin",
+                projectId);
+        }))
+        .then(() => {
+            return Promise.all(
+                team.members.map(member => {
+                    const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
+                    logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
+                    return OCClient.policy.addRoleToUser(memberUsername,
+                        "view",
+                        projectId);
+                }));
+        });
 }

@@ -26,8 +26,11 @@ export type _EmailOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "address_asc" 
 /* Ordering Enum for GitHubId */
 export type _GitHubIdOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "login_asc" | "login_desc" | "name_asc" | "name_desc";
 
+/* Enum for ProviderType */
+export type ProviderType = "bitbucket_cloud" | "github_com" | "ghe" | "bitbucket";
+
 /* Ordering Enum for GitHubProvider */
-export type _GitHubProviderOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "id_asc" | "id_desc" | "url_asc" | "url_desc" | "providerId_asc" | "providerId_desc" | "apiUrl_asc" | "apiUrl_desc" | "gitUrl_asc" | "gitUrl_desc";
+export type _GitHubProviderOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "id_asc" | "id_desc" | "url_asc" | "url_desc" | "providerId_asc" | "providerId_desc" | "apiUrl_asc" | "apiUrl_desc" | "gitUrl_asc" | "gitUrl_desc" | "providerType_asc" | "providerType_desc";
 
 /* Ordering Enum for Team */
 export type _TeamOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "id_asc" | "id_desc" | "name_asc" | "name_desc";
@@ -41,11 +44,17 @@ export type OwnerType = "user" | "organization";
 /* Ordering Enum for Org */
 export type _OrgOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "id_asc" | "id_desc" | "owner_asc" | "owner_desc" | "ownerType_asc" | "ownerType_desc";
 
+/* Ordering Enum for SCMProvider */
+export type _SCMProviderOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "id_asc" | "id_desc" | "url_asc" | "url_desc" | "providerId_asc" | "providerId_desc" | "apiUrl_asc" | "apiUrl_desc" | "gitUrl_asc" | "gitUrl_desc" | "providerType_asc" | "providerType_desc";
+
 /* Enum for WebhookType */
 export type WebhookType = "organization" | "repository";
 
 /* Ordering Enum for GitHubOrgWebhook */
 export type _GitHubOrgWebhookOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "id_asc" | "id_desc" | "url_asc" | "url_desc" | "webhookType_asc" | "webhookType_desc";
+
+/* Ordering Enum for Webhook */
+export type _WebhookOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "id_asc" | "id_desc" | "url_asc" | "url_desc" | "webhookType_asc" | "webhookType_desc";
 
 /* Ordering Enum for ChatTeam */
 export type _ChatTeamOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "id_asc" | "id_desc" | "name_asc" | "name_desc" | "provider_asc" | "provider_desc" | "domain_asc" | "domain_desc" | "messageCount_asc" | "messageCount_desc" | "emailDomain_asc" | "emailDomain_desc";
@@ -84,7 +93,7 @@ export type _DockerImageOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "image_a
 export type _K8PodOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "name_asc" | "name_desc" | "phase_asc" | "phase_desc" | "environment_asc" | "environment_desc" | "timestamp_asc" | "timestamp_desc" | "baseName_asc" | "baseName_desc" | "namespace_asc" | "namespace_desc" | "statusJSON_asc" | "statusJSON_desc" | "host_asc" | "host_desc" | "state_asc" | "state_desc" | "specsJSON_asc" | "specsJSON_desc" | "envJSON_asc" | "envJSON_desc" | "metadataJSON_asc" | "metadataJSON_desc" | "resourceVersion_asc" | "resourceVersion_desc";
 
 /* Ordering Enum for K8Container */
-export type _K8ContainerOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "name_asc" | "name_desc" | "imageName_asc" | "imageName_desc" | "timestamp_asc" | "timestamp_desc" | "environment_asc" | "environment_desc" | "containerJSON_asc" | "containerJSON_desc" | "state_asc" | "state_desc" | "ready_asc" | "ready_desc" | "restartCount_asc" | "restartCount_desc" | "statusJSON_asc" | "statusJSON_desc" | "resourceVersion_asc" | "resourceVersion_desc";
+export type _K8ContainerOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "name_asc" | "name_desc" | "imageName_asc" | "imageName_desc" | "timestamp_asc" | "timestamp_desc" | "environment_asc" | "environment_desc" | "containerJSON_asc" | "containerJSON_desc" | "state_asc" | "state_desc" | "ready_asc" | "ready_desc" | "restartCount_asc" | "restartCount_desc" | "statusJSON_asc" | "statusJSON_desc" | "resourceVersion_asc" | "resourceVersion_desc" | "containerID_asc" | "containerID_desc";
 
 /* Ordering Enum for SpinnakerPipeline */
 export type _SpinnakerPipelineOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "executionId_asc" | "executionId_desc" | "application_asc" | "application_desc" | "eventType_asc" | "eventType_desc" | "taskName_asc" | "taskName_desc" | "stageName_asc" | "stageName_desc" | "stageType_asc" | "stageType_desc" | "waitingForJudgement_asc" | "waitingForJudgement_desc";
@@ -143,6 +152,9 @@ export type _PullRequestImpactOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "i
 /* Ordering Enum for UserJoinedChannel */
 export type _UserJoinedChannelOrdering = "atmTeamId_asc" | "atmTeamId_desc" | "id_asc" | "id_desc";
 
+/* asc or desc ordering. Must be used with orderBy */
+export type _Ordering = "desc" | "asc";
+
 export namespace ChatId {
   export type Variables = {
     userId: string;
@@ -155,5 +167,67 @@ export namespace ChatId {
   export type ChatId = {
     userId?: string | null; 
     screenName?: string | null; 
+  } 
+}
+export namespace BotJoinedChannel {
+  export type Variables = {
+  }
+
+  export type Subscription = {
+    UserJoinedChannel?: UserJoinedChannel[] | null; 
+  } 
+
+  export type UserJoinedChannel = {
+    user?: User | null; 
+    channel?: Channel | null; 
+  } 
+
+  export type User = {
+    isAtomistBot?: string | null; 
+    screenName?: string | null; 
+    userId?: string | null; 
+  } 
+
+  export type Channel = {
+    botInvitedSelf?: boolean | null; 
+    channelId?: string | null; 
+    name?: string | null; 
+    repos?: Repos[] | null; 
+    team?: Team | null; 
+  } 
+
+  export type Repos = {
+    name?: string | null; 
+    owner?: string | null; 
+    org?: Org | null; 
+  }
+
+  export type Org = {
+    provider?: Provider | null; 
+  } 
+
+  export type Provider = {
+    url?: string | null; 
+  } 
+
+  export type Team = {
+    id?: string | null; 
+    orgs?: Orgs[] | null; 
+  } 
+
+  export type Orgs = {
+    owner?: string | null; 
+    ownerType?: OwnerType | null; 
+    provider?: _Provider | null; 
+    repo?: Repo[] | null; 
+  } 
+
+  export type _Provider = {
+    apiUrl?: string | null; 
+  } 
+
+  export type Repo = {
+    name?: string | null; 
+    owner?: string | null; 
   } 
 }

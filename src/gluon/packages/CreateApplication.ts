@@ -267,7 +267,7 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                 } else {
                     return bitbucketRepositoriesForProjectKey(project.bitbucketProject.key)
                         .then(bitbucketRepos => {
-                            logger.debug(`Bitbucket project [${project.bitbucketProject.name}] has repositories: ${JSON.stringify(bitbucketRepos.values)}`);
+                            logger.debug(`Bitbucket project [${project.bitbucketProject.name}] has repositories: ${JSON.stringify(bitbucketRepos)}`);
                             return ctx.messageClient.respond({
                                 text: "Please select the Bitbucket repository which contains the application you want to link",
                                 attachments: [{
@@ -276,7 +276,7 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                         menuForCommand({
                                                 text: "Select Bitbucket repository",
                                                 options:
-                                                    bitbucketRepos.values.map(bitbucketRepo => {
+                                                    bitbucketRepos.map(bitbucketRepo => {
                                                         return {
                                                             value: bitbucketRepo.name,
                                                             text: bitbucketRepo.name,
@@ -342,6 +342,8 @@ node('maven') {
       string(credentialsId: 'dev-project', variable: 'DEV_PROJECT_ID'),
       string(credentialsId: 'sit-project', variable: 'SIT_PROJECT_ID'),
       string(credentialsId: 'uat-project', variable: 'UAT_PROJECT_ID'),
+      string(credentialsId: 'nexus-base-url', variable: 'NEXUS_BASE_URL'),
+      file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS'),
     ]) {
     teamDevOpsProject = "\${env.DEVOPS_PROJECT_ID}"
     projectDevProject = "\${env.DEV_PROJECT_ID}"
@@ -364,7 +366,11 @@ node('maven') {
     echo "Building application \${app}:\${tag} from commit \${scmVars} with BuildConfig \${appBuildConfig}"
 
     try {
-      sh ': Maven build && ./mvnw --batch-mode test'
+      sh ': Maven build &&' +
+         ' ./mvnw --batch-mode test --settings $MVN_SETTINGS' +
+         ' || mvn --batch-mode test --settings $MVN_SETTINGS' +
+         ' -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' +
+         ' -Dmaven.test.redirectTestOutputToFile=true'
     } finally {
       junit 'target/surefire-reports/*.xml'
     }
