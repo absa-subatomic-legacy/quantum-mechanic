@@ -4,20 +4,29 @@ import {SimpleOption} from "./base/options/SimpleOption";
 import {StandardOption} from "./base/options/StandardOption";
 import {OCCommon} from "./OCCommon";
 import {OCPolicy} from "./OCPolicy";
+import {logger} from "@atomist/automation-client";
 
 export class OCClient {
 
     public static policy = OCPolicy;
 
+    public static getInstance(): OCClient {
+        logger.info("Getting client instance");
+        if (this.instance === null) {
+            logger.info("Creating client instance");
+            this.instance = new OCClient();
+        }
+        return this.instance;
+    }
+
+    public static setInstance(newInstance: OCClient): void {
+        this.instance = newInstance;
+    }
+
     public static login(host: string, token: string): Promise<OCCommandResult> {
-        const loginCommand = new OCCommand("login", [host],
-            [
-                new StandardOption("token", token, true),
-                new StandardOption("insecure-skip-tls-verify", "true"),
-            ],
-            )
-        ;
-        return loginCommand.execute();
+        const result = OCClient.getInstance().login(host, token);
+        logger.info(JSON.stringify(result));
+        return result;
     }
 
     public static logout(): Promise<OCCommandResult> {
@@ -26,14 +35,7 @@ export class OCClient {
     }
 
     public static newProject(projectName: string, displayName: string, description: string = ""): Promise<OCCommandResult> {
-        const newProjectCommand = new OCCommand("new-project", [projectName],
-            [
-                new StandardOption("display-name", displayName),
-                new StandardOption("description", description),
-            ],
-        );
-
-        return newProjectCommand.execute();
+        return OCClient.getInstance().newProject(projectName, displayName, description);
     }
 
     public static selectProject(projectName: string): Promise<OCCommandResult> {
@@ -64,5 +66,30 @@ export class OCClient {
         }, [
             new SimpleOption("-namespace", project),
         ]);
+    }
+
+    private static instance: OCClient;
+
+    public login(host: string, token: string): Promise<OCCommandResult> {
+        logger.info("Logging in");
+        const loginCommand = new OCCommand("login", [host],
+            [
+                new StandardOption("token", token, true),
+                new StandardOption("insecure-skip-tls-verify", "true"),
+            ],
+            )
+        ;
+        return loginCommand.execute();
+    }
+
+    public newProject(projectName: string, displayName: string, description: string = ""): Promise<OCCommandResult> {
+        const newProjectCommand = new OCCommand("new-project", [projectName],
+            [
+                new StandardOption("display-name", displayName),
+                new StandardOption("description", description),
+            ],
+        );
+
+        return newProjectCommand.execute();
     }
 }
