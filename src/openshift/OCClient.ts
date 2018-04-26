@@ -4,16 +4,13 @@ import {SimpleOption} from "./base/options/SimpleOption";
 import {StandardOption} from "./base/options/StandardOption";
 import {OCCommon} from "./OCCommon";
 import {OCPolicy} from "./OCPolicy";
-import {logger} from "@atomist/automation-client";
 
 export class OCClient {
 
     public static policy = OCPolicy;
 
     public static getInstance(): OCClient {
-        logger.info("Getting client instance");
         if (this.instance === null) {
-            logger.info("Creating client instance");
             this.instance = new OCClient();
         }
         return this.instance;
@@ -24,9 +21,7 @@ export class OCClient {
     }
 
     public static login(host: string, token: string): Promise<OCCommandResult> {
-        const result = OCClient.getInstance().login(host, token);
-        logger.info(JSON.stringify(result));
-        return result;
+        return OCClient.getInstance().login(host, token);
     }
 
     public static logout(): Promise<OCCommandResult> {
@@ -71,7 +66,6 @@ export class OCClient {
     private static instance: OCClient;
 
     public login(host: string, token: string): Promise<OCCommandResult> {
-        logger.info("Logging in");
         const loginCommand = new OCCommand("login", [host],
             [
                 new StandardOption("token", token, true),

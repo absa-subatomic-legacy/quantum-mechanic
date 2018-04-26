@@ -11,6 +11,10 @@ import {OCClient} from "../../../src/openshift/OCClient";
 import {TestMessageClient} from "../TestMessageClient";
 import {anyString, anything, instance, mock, when} from "ts-mockito";
 import {OCCommon} from "../../../src/openshift/OCCommon";
+import {OCPolicy} from "../../../src/openshift/OCPolicy";
+import {any} from "async";
+import * as fs from "fs";
+import * as path from "path";
 
 const superagent = require("superagent");
 const mockServer = require("mockttp").getLocal();
@@ -77,13 +81,10 @@ describe("DevOps environment test", () => {
             messageClient: new TestMessageClient(),
         };
 
-        logger.info("hello2");
-
         // Creating mock
         const mockedOCClient: OCClient = mock(OCClient);
 
         when(mockedOCClient.login(anyString(), anyString())).thenReturn(new Promise((resolve, reject) => {
-            logger.verbose(`Executing oc command sync: login}`);
             const response = new OCCommandResult();
             response.command = "oc login";
             response.output = "success";
@@ -92,10 +93,7 @@ describe("DevOps environment test", () => {
             return resolve(response);
         }));
 
-        logger.info("3");
-
         when(mockedOCClient.newProject(anyString(), anyString(), anyString())).thenReturn(new Promise((resolve, reject) => {
-            logger.verbose(`Executing oc command sync: login}`);
             const response = new OCCommandResult();
             response.command = "oc new-project";
             response.output = "success";
@@ -107,21 +105,37 @@ describe("DevOps environment test", () => {
         // Getting instance from mock
         const stubbedOCClient: OCClient = instance(mockedOCClient);
 
-        logger.info("hello");
         const mockedOCCommon: OCCommon = mock(OCCommon);
 
         when(mockedOCCommon.commonCommand(anyString(), anyString(), anything(), anything(), anything())).thenReturn(new Promise((resolve, reject) => {
-            logger.verbose(`Executing oc command sync: login}`);
             const response = new OCCommandResult();
-            response.command = "oc common";
+            response.command = "oc other";
             response.output = "success";
             response.status = true;
 
             return resolve(response);
         }));
 
+        when(mockedOCCommon.commonCommand("get", "templates", anything(), anything(), anything())).thenReturn(new Promise((resolve, reject) => {
+            const templateFile = path.resolve(__dirname, "./OCGetJenkinsTemplate.txt");
+            const response = new OCCommandResult();
+            response.command = "oc get";
+            response.output = fs.readFileSync(templateFile, "utf8");
+            response.status = true;
+
+            return resolve(response);
+        }));
+
+        when(mockedOCCommon.commonCommand("rollout status", "dc/jenkins", anything(), anything(), anything())).thenReturn(new Promise((resolve, reject) => {
+            const response = new OCCommandResult();
+            response.command = "oc get";
+            response.output = "successfully rolled out";
+            response.status = true;
+
+            return resolve(response);
+        }));
+
         when(mockedOCCommon.createFromFile(anyString(), anything(), anything())).thenReturn(new Promise((resolve, reject) => {
-            logger.verbose(`Executing oc command sync: login}`);
             const response = new OCCommandResult();
             response.command = "oc create-from-file";
             response.output = "success";
@@ -130,21 +144,42 @@ describe("DevOps environment test", () => {
             return resolve(response);
         }));
 
+        when(mockedOCCommon.createFromData(anything(), anything(), anything())).thenReturn(new Promise((resolve, reject) => {
+            const response = new OCCommandResult();
+            response.command = "oc create-from-data";
+            response.output = "success";
+            response.status = true;
+
+            return resolve(response);
+        }));
+
         const stubbedOCCommon: OCCommon = instance(mockedOCCommon);
+
+        const mockedOCPolicy: OCPolicy = mock(OCPolicy);
+
+        when(mockedOCPolicy.addRoleToUser(anyString(), anyString(), anyString(), anything(), anything())).thenReturn(new Promise((resolve, reject) => {
+            const response = new OCCommandResult();
+            response.command = "oc create-from-file";
+            response.output = "success";
+            response.status = true;
+
+            return resolve(response);
+        }));
+
+        when(mockedOCPolicy.policyCommand(anyString(), anything(), anything())).thenReturn(new Promise((resolve, reject) => {
+            const response = new OCCommandResult();
+            response.command = "oc create-from-file";
+            response.output = "success";
+            response.status = true;
+
+            return resolve(response);
+        }));
+
+        const stubbedOCPolicy: OCPolicy = instance(mockedOCPolicy);
 
         OCCommon.setInstance(stubbedOCCommon);
         OCClient.setInstance(stubbedOCClient);
-
-        /*
-        mockServer.get("/mocked-path").thenReply(200, "A mocked response")
-            .then(() => {
-                // Make a request
-                return superagent.get("http://localhost:8443/mocked-path");
-            }).then(response => {
-            // Assert on the results
-            assert(response.text === "A mocked response");
-        }).then(done);
-        */
+        OCPolicy.setInstance(stubbedOCPolicy);
 
         subject.handle(fakeEventFired, fakeContext)
             .then(() => {

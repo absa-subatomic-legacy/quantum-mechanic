@@ -10,9 +10,7 @@ import {instance} from "ts-mockito";
 export class OCCommon {
 
     public static getInstance(): OCCommon {
-        logger.info("Getting instance");
         if (this.instance === null) {
-            logger.info("Creating instance");
             this.instance = new OCCommon();
         }
         return this.instance;
