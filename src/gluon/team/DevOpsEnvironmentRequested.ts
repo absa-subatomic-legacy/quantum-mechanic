@@ -22,7 +22,6 @@ import {
 } from "../jenkins/Jenkins";
 import {AddConfigServer} from "../project/AddConfigServer";
 import {CreateProject} from "../project/CreateProject";
-import template = Handlebars.template;
 
 const promiseRetry = require("promise-retry");
 

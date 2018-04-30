@@ -1,18 +1,16 @@
 import * as assert from "power-assert";
 
 const MockAdapter = require("axios-mock-adapter");
-import {logger} from "@atomist/automation-client";
 import axios from "axios";
+import {anyString, anything, instance, mock, when} from "ts-mockito";
 import {QMConfig} from "../../../src/config/QMConfig";
 import {DevOpsEnvironmentRequested} from "../../../src/gluon/team/DevOpsEnvironmentRequested";
-import {OCCommand} from "../../../src/openshift/base/OCCommand";
 import {OCCommandResult} from "../../../src/openshift/base/OCCommandResult";
 import {OCClient} from "../../../src/openshift/OCClient";
-import {TestMessageClient} from "../TestMessageClient";
-import {anyString, anything, instance, mock, when} from "ts-mockito";
 import {OCCommon} from "../../../src/openshift/OCCommon";
 import {OCPolicy} from "../../../src/openshift/OCPolicy";
-import {any} from "async";
+import {TestMessageClient} from "../TestMessageClient";
+
 import * as fs from "fs";
 import * as path from "path";
 

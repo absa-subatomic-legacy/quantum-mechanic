@@ -5,7 +5,6 @@ import {OCCommandResult} from "./base/OCCommandResult";
 import {AbstractOption} from "./base/options/AbstractOption";
 import {SimpleOption} from "./base/options/SimpleOption";
 import {StandardOption} from "./base/options/StandardOption";
-import {instance} from "ts-mockito";
 
 export class OCCommon {
 

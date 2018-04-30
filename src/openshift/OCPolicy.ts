@@ -2,7 +2,6 @@ import {OCCommand} from "./base/OCCommand";
 import {OCCommandResult} from "./base/OCCommandResult";
 import {AbstractOption} from "./base/options/AbstractOption";
 import {StandardOption} from "./base/options/StandardOption";
-import {logger} from "@atomist/automation-client";
 
 export class OCPolicy {
 
@@ -48,7 +47,7 @@ export class OCPolicy {
     }
 
     public addRoleToUser(username: string, role: string, namespace: string, parameters: string[] = [],
-                          options: AbstractOption[] = []): Promise<OCCommandResult> {
+                         options: AbstractOption[] = []): Promise<OCCommandResult> {
         return this.policyCommand("add-role-to-user", [role, username].concat(parameters),
             [new StandardOption("namespace", namespace)].concat(options));
     }
