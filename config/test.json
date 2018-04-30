@@ -1,7 +1,7 @@
 {
   "subatomic": {
     "commandPrefix" : "sub",
-    "openshiftHost" : {
+    "openshift" : {
       "dockerRepoUrl": "123.123.0.0:5000",
       "masterUrl": "https://000.000.00.0:8443",
       "auth": {
