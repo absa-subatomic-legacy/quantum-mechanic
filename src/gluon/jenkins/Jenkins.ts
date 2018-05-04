@@ -35,12 +35,6 @@ export function kickOffBuild(jenkinsHost: string,
                              gluonProjectName: string,
                              gluonApplicationName: string): AxiosPromise {
     const axios = jenkinsAxios();
-    logger.info(`???${JSON.stringify(axios.post(`https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/job/${_.kebabCase(gluonApplicationName).toLowerCase()}/job/master/build?delay=0sec`,
-         "", {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        }))}`);
     return axios.post(`https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/job/${_.kebabCase(gluonApplicationName).toLowerCase()}/job/master/build?delay=0sec`,
         "", {
             headers: {

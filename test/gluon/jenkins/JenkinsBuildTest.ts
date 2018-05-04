@@ -28,10 +28,6 @@ describe("Jenkins build test", () => {
         subject.projectName = `${projectName}`;
         subject.applicationName = `${applicationName}`;
 
-        mockedAxios.onPost(`https://success/job/test-project/job/test-application/job/master/build?delay=0sec`).reply(200, {
-            data: "asdas",
-        });
-
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
@@ -60,5 +56,4 @@ describe("Jenkins build test", () => {
             })
             .then(done, done);
     });
-});
-*/
+});*/
