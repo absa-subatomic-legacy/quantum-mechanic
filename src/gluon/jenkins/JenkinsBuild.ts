@@ -164,7 +164,6 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                                 gluonApplicationName,
                             )
                                 .then(() => {
-                                    logger.info("here");
                                     return ctx.messageClient.respond({
                                         text: `🚀 *${gluonApplicationName}* is being built...`,
                                     });
