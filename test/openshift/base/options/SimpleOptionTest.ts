@@ -7,4 +7,9 @@ describe("Openshift SimpleOption Test", () => {
         const simpleOption = new SimpleOption("file");
         assert(simpleOption.build() === "-file");
     });
+
+    it("create a build display", () => {
+        const simpleOption = new SimpleOption("file", "value");
+        assert(simpleOption.buildDisplayCommand() === "-file \"value\"");
+    });
 });
