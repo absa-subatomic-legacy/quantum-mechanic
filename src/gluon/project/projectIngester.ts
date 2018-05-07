@@ -58,6 +58,13 @@ export const ProjectEnvironmentsRequestedEvent: Ingester = {
                     },
                 },
                 {
+                    name: "owningTenant",
+                    type: {
+                        kind: "OBJECT",
+                        name: "GluonTenant",
+                    },
+                },
+                {
                     name: "requestedBy",
                     type: {
                         kind: "OBJECT",

@@ -273,3 +273,36 @@ export const ActionedBy: Ingester = {
         },
     ],
 };
+
+export const GluonTenant: Ingester = {
+    root_type: "GluonTenant",
+    types: [
+        {
+            kind: "OBJECT",
+            name: "GluonTenant",
+            fields: [
+                {
+                    name: "tenantId",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+                {
+                    name: "name",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+                {
+                    name: "description",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+            ],
+        },
+    ],
+};
