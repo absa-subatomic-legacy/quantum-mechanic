@@ -13,6 +13,7 @@ import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageCl
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {NewDevOpsEnvironment} from "./DevOpsEnvironment";
 import {AddMemberToTeam} from "./JoinTeam";
+import {QMConfig} from "../../config/QMConfig";
 
 @EventHandler("Display a helpful message when the bot joins a channel",
     `subscription BotJoinedChannel {
@@ -97,7 +98,7 @@ If you haven't already, you might want to:
     }
 
     private docs(): string {
-        return `${url("https://subatomic.bison.absa.co.za/docs/teams#slack",
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/new-to-subatomic.md`,
             "documentation")}`;
     }
 }
