@@ -11,9 +11,9 @@ import {
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
+import {QMConfig} from "../../config/QMConfig";
 import {NewDevOpsEnvironment} from "./DevOpsEnvironment";
 import {AddMemberToTeam} from "./JoinTeam";
-import {QMConfig} from "../../config/QMConfig";
 
 @EventHandler("Display a helpful message when the bot joins a channel",
     `subscription BotJoinedChannel {
