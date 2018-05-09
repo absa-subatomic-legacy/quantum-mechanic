@@ -44,7 +44,7 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
     public email: string;
 
     @Parameter({
-        description: "your username",
+        description: "your username including domain",
         validInput: "Domain username in the following format: domain\\username",
     })
     public domainUsername: string;
@@ -97,10 +97,11 @@ Next steps are to either join an existing team or create a new one.
                         ],
                     }],
                 };
-
                 return ctx.messageClient.addressUsers(msg, this.userId);
             })
-            .catch(err => failure(err));
+            .catch(err => {
+                return failure(err);
+            });
     }
 
     private docs(): string {
