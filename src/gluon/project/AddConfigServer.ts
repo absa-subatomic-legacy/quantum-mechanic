@@ -183,7 +183,7 @@ spring:
     }
 
     private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/config-server.md`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/config-server`,
             "documentation")}`;
     }
 }

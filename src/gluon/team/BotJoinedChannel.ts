@@ -98,7 +98,7 @@ If you haven't already, you might want to:
     }
 
     private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/new-to-subatomic.md`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/new-to-subatomic`,
             "documentation")}`;
     }
 }

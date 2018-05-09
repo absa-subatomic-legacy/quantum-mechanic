@@ -50,7 +50,7 @@ Next you should configure your team Slack channel and OpenShift DevOps environme
             text,
             attachments: [{
                 fallback: "Next you should configure your team Slack channel and OpenShift DevOps environment",
-                footer: `For more information, please read the ${this.docs()}#associate-a-slack-channel`, // TODO use actual icon
+                footer: `For more information, please read the ${this.docs()}`, // TODO use actual icon
                 actions: [
                     buttonForCommand(
                         {text: "Team Slack channel"},
@@ -72,7 +72,7 @@ Next you should configure your team Slack channel and OpenShift DevOps environme
     }
 
     private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/user-guide/create-a-team.md`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/user-guide/create-a-team#associate-a-slack-channel`,
             "documentation")}`;
     }
 }

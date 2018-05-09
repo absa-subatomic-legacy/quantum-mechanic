@@ -207,7 +207,7 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
     }
 
     private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/storage.md`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/storage`,
             "documentation")}`;
     }
 }

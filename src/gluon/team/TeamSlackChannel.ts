@@ -50,7 +50,7 @@ rather use that instead?\
             text,
             attachments: [{
                 fallback: `Do you want to create a new team channel (${this.teamChannel}) or link an existing one?`,
-                footer: `For more information, please read the ${this.docs()}#associate-a-slack-channel`,
+                footer: `For more information, please read the ${this.docs()}`,
                 actions: [
                     buttonForCommand(
                         {text: `Create channel ${this.teamChannel}`},
@@ -75,7 +75,7 @@ rather use that instead?\
     }
 
     private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/user-guide/create-a-team.md`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/user-guide/create-a-team#associate-a-slack-channel`,
             "documentation")}`;
     }
 }
@@ -110,7 +110,7 @@ export class NewTeamSlackChannel implements HandleCommand {
     }
 
     private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference.md#create-team-channel`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-team-channel`,
             "documentation")}`;
     }
 }
@@ -171,7 +171,7 @@ export class LinkExistingTeamSlackChannel implements HandleCommand {
     }
 
     private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference.md#link-team-channel`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#link-team-channel`,
             "documentation")}`;
     }
 }
