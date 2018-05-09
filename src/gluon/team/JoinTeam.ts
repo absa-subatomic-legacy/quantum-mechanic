@@ -138,8 +138,9 @@ Welcome *${newTeamMember.firstName}*, you have been added to the *${teamSlackCha
 Click the button below to become familiar with the projects this team is involved in.
                                                                               `,
                                                                         fallback: `Welcome to the team ${newTeamMember.firstName}`,
-                                                                        footer: `For more information, please read the ${this.docs()}`, // TODO use actual icon
+                                                                        footer: `For more information, please read the ${this.docs()}`,
                                                                         mrkdwn_in: ["text"],
+                                                                        thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                                                                         actions: [
                                                                             buttonForCommand(
                                                                                 {text: "Show team projects"},
@@ -185,9 +186,10 @@ It appears ${this.slackName} is not onboarded onto Subatomic.
 They must first be onboarded onto Subatomic _before_ they can be added to a team. Please ask them to onboard by asking them to type \`@atomist ${QMConfig.subatomic.commandPrefix} onboard me\`
                             `,
                                         fallback: `${this.slackName} is not onboarded onto Subatomic`,
-                                        footer: `For more information, please read the ${this.docs()}`, // TODO use actual icon
+                                        footer: `For more information, please read the ${this.docs()}`,
                                         color: "#D94649",
                                         mrkdwn_in: ["text"],
+                                        thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                                     }],
                                 };
 
@@ -202,9 +204,10 @@ They must first be onboarded onto Subatomic _before_ they can be added to a team
 Adding a team member from Slack requires typing their \`@mention\` name or using their actual Slack screen name.
                                   `,
                             fallback: `${this.slackName} is not onboarded onto Subatomic`,
-                            footer: `For more information, please read the ${this.docs()}`, // TODO use actual icon
+                            footer: `For more information, please read the ${this.docs()}`,
                             color: "#D94649",
                             mrkdwn_in: ["text"],
+                            thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                         }, {
                             text: `Tip: You can get your Slack screen name by typing \`@atomist ${QMConfig.subatomic.commandPrefix} whoami\``,
                             color: "#00a5ff",
