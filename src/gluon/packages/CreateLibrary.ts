@@ -108,9 +108,9 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                     return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName)
                         .then(teams => {
                             return ctx.messageClient.respond({
-                                text: "Please select a team, whose project you would like to link an library to",
+                                text: "Please select a team, whose project you would like to link a library to",
                                 attachments: [{
-                                    fallback: "Please select a team, whose project you would like to link an library to",
+                                    fallback: "Please select a team, whose project you would like to link a library to",
                                     actions: [
                                         menuForCommand({
                                                 text: "Select Team", options:
@@ -152,9 +152,9 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
             return gluonProjectsWhichBelongToGluonTeam(ctx, gluonTeamName)
                 .then(projects => {
                     return ctx.messageClient.respond({
-                        text: "Please select a project to which you would like to link an library to",
+                        text: "Please select a project to which you would like to link a library to",
                         attachments: [{
-                            fallback: "Please select a project to which you would like to link an library to",
+                            fallback: "Please select a project to which you would like to link a library to",
                             actions: [
                                 menuForCommand({
                                         text: "Select Project", options:
@@ -201,6 +201,7 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                 text: "Please select the Bitbucket repository which contains the library you want to link",
                                 attachments: [{
                                     fallback: "Please select the Bitbucket repository which contains the library you want to link",
+                                    thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
                                     actions: [
                                         menuForCommand({
                                                 text: "Select Bitbucket repository",

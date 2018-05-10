@@ -145,7 +145,7 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
     }
 
     private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/projects#bitbucket`,
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference`,
             "documentation")}`;
     }
 }

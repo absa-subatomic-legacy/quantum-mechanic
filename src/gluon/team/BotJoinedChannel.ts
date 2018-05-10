@@ -11,6 +11,7 @@ import {
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
+import {QMConfig} from "../../config/QMConfig";
 import {NewDevOpsEnvironment} from "./DevOpsEnvironment";
 import {AddMemberToTeam} from "./JoinTeam";
 
@@ -71,7 +72,7 @@ export class BotJoinedChannel implements HandleEvent<any> {
                 text: `Welcome to ${channelNameString} team channel!`,
                 attachments: [{
                     fallback: `Welcome to the ${channelNameString} team channel!`,
-                    footer: `For more information, please read the ${this.docs()}`, // TODO use actual icon
+                    footer: `For more information, please read the ${this.docs()}`,
                     text: `
 If you haven't already, you might want to:
 
@@ -79,6 +80,7 @@ If you haven't already, you might want to:
 • add new team members
                                                           `,
                     mrkdwn_in: ["text"],
+                    thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                     actions: [
                         buttonForCommand(
                             {text: "Create DevOps environment"},
@@ -97,7 +99,7 @@ If you haven't already, you might want to:
     }
 
     private docs(): string {
-        return `${url("https://subatomic.bison.absa.co.za/docs/teams#slack",
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/new-to-subatomic`,
             "documentation")}`;
     }
 }
