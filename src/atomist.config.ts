@@ -38,7 +38,7 @@ import {
 import {
     ActionedBy,
     BitbucketProject,
-    GluonTeam, GluonTenant,
+    GluonTeam, GluonTenant, GluonTenantId,
     Project,
     SlackIdentity,
 } from "./gluon/shared/sharedIngester";
@@ -130,6 +130,7 @@ export const configuration: any = {
         ActionedBy,
         MembersAddedToTeamEvent,
         GluonTenant,
+        GluonTenantId,
     ],
     token,
     http: {

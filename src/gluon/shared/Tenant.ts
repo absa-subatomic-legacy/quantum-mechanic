@@ -23,3 +23,10 @@ export function gluonTenantFromTenantName(tenantName: string): Promise<any> {
             }
         });
 }
+
+export function gluonTenantFromTenantId(tenantId: string): Promise<any> {
+    return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/tenants/${tenantId}`)
+        .then(tenant => {
+            return Promise.resolve(tenant.data);
+        });
+}

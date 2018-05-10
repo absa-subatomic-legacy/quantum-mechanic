@@ -61,6 +61,13 @@ export const Project: Ingester = {
                         name: "String",
                     },
                 },
+                {
+                    name: "tenant",
+                    type: {
+                        kind: "OBJECT",
+                        name: "GluonTenantId",
+                    },
+                },
             ],
         },
     ],
@@ -297,6 +304,25 @@ export const GluonTenant: Ingester = {
                 },
                 {
                     name: "description",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+            ],
+        },
+    ],
+};
+
+export const GluonTenantId: Ingester = {
+    root_type: "GluonTenantId",
+    types: [
+        {
+            kind: "OBJECT",
+            name: "GluonTenantId",
+            fields: [
+                {
+                    name: "tenantId",
                     type: {
                         kind: "SCALAR",
                         name: "String",

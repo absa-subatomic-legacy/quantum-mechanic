@@ -22,6 +22,13 @@ export const ProjectCreatedEvent: Ingester = {
                     },
                 },
                 {
+                    name: "tenant",
+                    type: {
+                        kind: "OBJECT",
+                        name: "GluonTenant",
+                    },
+                },
+                {
                     name: "createdBy",
                     type: {
                         kind: "OBJECT",
