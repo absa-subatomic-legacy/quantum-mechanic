@@ -90,7 +90,6 @@ export class AddConfigServer implements HandleCommand<HandlerResult> {
     private addConfigServer(ctx: HandlerContext,
                             gluonTeamName: string,
                             gitUri: string): Promise<any> {
-
         const devOpsProjectId = `${_.kebabCase(gluonTeamName).toLowerCase()}-devops`;
         return OCCommon.commonCommand("create secret generic",
             "subatomic-config-server",
