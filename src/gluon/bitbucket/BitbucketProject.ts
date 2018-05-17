@@ -97,7 +97,7 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                                 ctx,
                                 teams,
                                 this,
-                                "Please select a team associated with the project you wish to create a bitbucket project for",
+                                "Please select a team associated with the project you wish to create a Bitbucket project for",
                             );
                         });
                     },
@@ -110,7 +110,7 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                         ctx,
                         projects,
                         this,
-                        "Please select the project you wish to create a bitbucket project for",
+                        "Please select the project you wish to create a Bitbucket project for",
                     );
                 });
         }
@@ -209,7 +209,7 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                                 ctx,
                                 teams,
                                 this,
-                                "Please select a team associated with the project you wish to link a bitbucket project to",
+                                "Please select a team associated with the project you wish to link a Bitbucket project to",
                             );
                         });
                     },
@@ -222,7 +222,7 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                         ctx,
                         projects,
                         this,
-                        "Please select the project you wish to link a bitbucket project to",
+                        "Please select the project you wish to link a Bitbucket project to",
                     );
                 });
         }
