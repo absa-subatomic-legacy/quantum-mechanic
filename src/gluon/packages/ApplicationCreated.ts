@@ -243,7 +243,7 @@ You can kick off the build pipeline for your library by clicking the button belo
                             [
                                 new SimpleOption("-namespace", projectId),
                             ]
-                            ,);
+                            , );
                     })
                     .then(() => {
                         return OCCommon.commonCommand("process",
