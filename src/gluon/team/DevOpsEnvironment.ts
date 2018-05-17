@@ -2,7 +2,7 @@ import {
     CommandHandler,
     HandleCommand,
     HandlerContext,
-    HandlerResult,
+    HandlerResult, logger,
     MappedParameter,
     MappedParameters,
     Parameter,
@@ -36,7 +36,6 @@ export class NewDevOpsEnvironment implements HandleCommand {
     public teamName: string;
 
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
-
         if (_.isEmpty(this.teamName)) {
             return this.requestUnsetParameters(ctx);
         }
@@ -55,7 +54,7 @@ export class NewDevOpsEnvironment implements HandleCommand {
                 .then(
                     team => {
                         this.teamName = team.name;
-                        return this.requestUnsetParameters(ctx);
+                        return this.requestDevOpsEnvironment(ctx, this.screenName, this.teamName, this.teamChannel);
                     },
                     () => {
                         return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
@@ -78,6 +77,7 @@ export class NewDevOpsEnvironment implements HandleCommand {
                 axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`)
                     .then(team => {
                         if (!_.isEmpty(team.data._embedded)) {
+                            logger.info("Requesting DevOps environment for team: " + teamName);
                             return axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${team.data._embedded.teamResources[0].teamId}`,
                                 {
                                     devOpsEnvironment: {
