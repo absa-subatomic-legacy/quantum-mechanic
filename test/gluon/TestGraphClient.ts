@@ -8,6 +8,16 @@ export class TestGraphClient implements GraphClient {
     public queryString: string;
     public var: any;
 
+    public query<T, Q>(optionsOrName: any | string): Promise<any> {
+        this.queryString = optionsOrName;
+        return Promise.resolve();
+    }
+
+    public mutate<T, Q>(optionsOrName: any | string): Promise<any> {
+        this.queryString = optionsOrName;
+        return Promise.resolve();
+    }
+
     public executeQueryFromFile<T, Q>(path: string, variables?: Q, options?: any, current?: string): Promise<any> {
         this.path = path;
         const json = {
