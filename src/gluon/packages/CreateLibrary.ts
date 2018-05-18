@@ -11,22 +11,25 @@ import {
 import {BitBucketServerRepoRef} from "@atomist/automation-client/operations/common/BitBucketServerRepoRef";
 import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
 import {GitProject} from "@atomist/automation-client/project/git/GitProject";
-import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
+import {QMTemplate} from "../../template/QMTemplate";
 import {
     bitbucketRepositoriesForProjectKey,
     bitbucketRepositoryForSlug,
+    menuForBitbucketRepositories,
 } from "../bitbucket/Bitbucket";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {
     gluonProjectFromProjectName,
     gluonProjectsWhichBelongToGluonTeam,
+    menuForProjects,
 } from "../project/Projects";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
+    menuForTeams,
 } from "../team/Teams";
 import {ApplicationType} from "./Applications";
 
@@ -64,13 +67,6 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
     public projectName: string;
 
     @Parameter({
-        description: "Bitbucket repository name",
-        displayable: false,
-        required: false,
-    })
-    public bitbucketRepositoryName: string;
-
-    @Parameter({
         description: "Bitbucket repository slug",
         displayable: false,
         required: false,
@@ -78,99 +74,72 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
     public bitbucketRepositorySlug: string;
 
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
-        return gluonTeamForSlackTeamChannel(this.teamChannel)
-            .then(team => {
-                return this.linkLibraryForGluonTeam(
-                    ctx,
-                    this.screenName,
-                    this.teamChannel,
-                    this.name,
-                    this.description,
-                    this.bitbucketRepositorySlug,
-                    this.projectName,
-                    team.name,
-                );
-            }, () => {
-                if (!_.isEmpty(this.teamName)) {
-                    logger.debug(`Linking existing library to projects for team: ${this.teamName}`);
+        if (_.isEmpty(this.projectName) || _.isEmpty(this.bitbucketRepositorySlug)) {
+            return this.requestUnsetParameters(ctx);
+        }
 
-                    return this.linkLibraryForGluonTeam(
-                        ctx,
-                        this.screenName,
-                        this.teamChannel,
-                        this.name,
-                        this.description,
-                        this.bitbucketRepositorySlug,
-                        this.projectName,
-                        this.teamName,
-                    );
-                } else {
-                    return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName)
-                        .then(teams => {
-                            return ctx.messageClient.respond({
-                                text: "Please select a team, whose project you would like to link a library to",
-                                attachments: [{
-                                    fallback: "Please select a team, whose project you would like to link a library to",
-                                    actions: [
-                                        menuForCommand({
-                                                text: "Select Team", options:
-                                                    teams.map(team => {
-                                                        return {
-                                                            value: team.name,
-                                                            text: team.name,
-                                                        };
-                                                    }),
-                                            },
-                                            this, "teamName"),
-                                    ],
-                                }],
-                            });
-                        });
-                }
-            });
+        return this.linkLibraryForGluonProject(
+            ctx,
+            this.screenName,
+            this.teamChannel,
+            this.name,
+            this.description,
+            this.bitbucketRepositorySlug,
+            this.projectName,
+        );
     }
 
-    private linkLibraryForGluonTeam(ctx: HandlerContext,
-                                    slackScreeName: string,
-                                    teamSlackChannel: string,
-                                    libraryName: string,
-                                    libraryDescription: string,
-                                    bitbucketRepositorySlug: string,
-                                    gluonProjectName: string,
-                                    gluonTeamName: string): Promise<HandlerResult> {
-        if (!_.isEmpty(gluonProjectName)) {
-            logger.debug(`Linking to Gluon project: ${gluonProjectName}`);
-
-            return this.linkLibraryForGluonProject(ctx,
-                slackScreeName,
-                teamSlackChannel,
-                libraryName,
-                libraryDescription,
-                bitbucketRepositorySlug,
-                gluonProjectName);
-        } else {
-            return gluonProjectsWhichBelongToGluonTeam(ctx, gluonTeamName)
+    private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+        if (_.isEmpty(this.teamName)) {
+            return gluonTeamForSlackTeamChannel(this.teamChannel)
+                .then(
+                    team => {
+                        this.teamName = team.name;
+                        return this.requestUnsetParameters(ctx);
+                    },
+                    () => {
+                        return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
+                            return menuForTeams(
+                                ctx,
+                                teams,
+                                this,
+                                "Please select a team, whose project you would like to link a library to");
+                        });
+                    },
+                );
+        }
+        if (_.isEmpty(this.projectName)) {
+            return gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName)
                 .then(projects => {
-                    return ctx.messageClient.respond({
-                        text: "Please select a project to which you would like to link a library to",
-                        attachments: [{
-                            fallback: "Please select a project to which you would like to link a library to",
-                            actions: [
-                                menuForCommand({
-                                        text: "Select Project", options:
-                                            projects.map(project => {
-                                                return {
-                                                    value: project.name,
-                                                    text: project.name,
-                                                };
-                                            }),
-                                    },
-                                    this, "projectName"),
-                            ],
-                        }],
-                    });
+                    return menuForProjects(
+                        ctx,
+                        projects,
+                        this,
+                        "Please select a project to which you would like to link a library to");
                 });
         }
+        if (_.isEmpty(this.bitbucketRepositorySlug)) {
+            return gluonProjectFromProjectName(ctx, this.projectName)
+                .then(project => {
+                    if (_.isEmpty(project.bitbucketProject)) {
+                        return ctx.messageClient.respond(`❗The selected project does not have an associated bitbucket project. Please first associate a bitbucket project using the \`${QMConfig.subatomic.commandPrefix} link bitbucket project\` command.`);
+                    }
+                    return bitbucketRepositoriesForProjectKey(project.bitbucketProject.key)
+                        .then(bitbucketRepos => {
+                            logger.debug(`Bitbucket project [${project.bitbucketProject.name}] has repositories: ${JSON.stringify(bitbucketRepos)}`);
+
+                            return menuForBitbucketRepositories(
+                                ctx,
+                                bitbucketRepos,
+                                this,
+                                "Please select the Bitbucket repository which contains the library you want to link",
+                                "bitbucketRepositorySlug",
+                                "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
+                            );
+                        });
+                });
+        }
+
     }
 
     private linkLibraryForGluonProject(ctx: HandlerContext,
@@ -182,43 +151,16 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                        gluonProjectName: string): Promise<HandlerResult> {
         return gluonProjectFromProjectName(ctx, gluonProjectName)
             .then(project => {
-                if (!_.isEmpty(bitbucketRepositorySlug)) {
-                    logger.debug(`Linking Bitbucket repository: ${bitbucketRepositorySlug}`);
+                logger.debug(`Linking Bitbucket repository: ${bitbucketRepositorySlug}`);
 
-                    return this.linkBitbucketRepository(ctx,
-                        slackScreeName,
-                        teamSlackChannel,
-                        libraryName,
-                        libraryDescription,
-                        bitbucketRepositorySlug,
-                        project.bitbucketProject.key,
-                        project.projectId);
-                } else {
-                    return bitbucketRepositoriesForProjectKey(project.bitbucketProject.key)
-                        .then(bitbucketRepos => {
-                            logger.debug(`Bitbucket project [${project.bitbucketProject.name}] has repositories: ${JSON.stringify(bitbucketRepos)}`);
-                            return ctx.messageClient.respond({
-                                text: "Please select the Bitbucket repository which contains the library you want to link",
-                                attachments: [{
-                                    fallback: "Please select the Bitbucket repository which contains the library you want to link",
-                                    thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
-                                    actions: [
-                                        menuForCommand({
-                                                text: "Select Bitbucket repository",
-                                                options:
-                                                    bitbucketRepos.map(bitbucketRepo => {
-                                                        return {
-                                                            value: bitbucketRepo.name,
-                                                            text: bitbucketRepo.name,
-                                                        };
-                                                    }),
-                                            },
-                                            this, "bitbucketRepositorySlug"),
-                                    ],
-                                }],
-                            });
-                        });
-                }
+                return this.linkBitbucketRepository(ctx,
+                    slackScreeName,
+                    teamSlackChannel,
+                    libraryName,
+                    libraryDescription,
+                    bitbucketRepositorySlug,
+                    project.bitbucketProject.key,
+                    project.projectId);
             });
     }
 
@@ -246,47 +188,10 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                         return project.findFile("Jenkinsfile")
                             .catch(() => {
                                 logger.warn("Doesn't exist, add it!");
+
+                                const jenkinsTemplate: QMTemplate = new QMTemplate("templates/jenkins/jenkinsfile-library.groovy", true);
                                 return project.addFile("Jenkinsfile",
-                                    `
-node('maven') {
-
-    withCredentials([
-            string(credentialsId: 'nexus-base-url', variable: 'NEXUS_BASE_URL'),
-            file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS'),
-    ]) {
-        stage('Checks and Tests') {
-            checkout(scm)
-
-            try {
-                sh ': Maven build &&' +
-                     ' ./mvnw --batch-mode verify --settings $MVN_SETTINGS' +
-                     ' || mvn --batch-mode verify --settings $MVN_SETTINGS' +
-                     ' -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' +
-                     ' -Dmaven.test.redirectTestOutputToFile=true'
-            } finally {
-                junit 'target/surefire-reports/*.xml'
-            }
-        }
-
-        if (env.BRANCH_NAME == 'master' || !env.BRANCH_NAME) {
-            stage('Publish to Nexus') {
-                repository = 'releases'
-                pom = readMavenPom file: 'pom.xml'
-                if (pom.version.endsWith('SNAPSHOT')) {
-                    repository = 'snapshots'
-                }
-
-                sh ': Maven deploy &&' +
-                     ' ./mvnw --batch-mode deploy --settings $MVN_SETTINGS -DskipTests' +
-                     ' -DaltDeploymentRepository=nexus::default::\${env.NEXUS_BASE_URL}/\${repository}/' +
-                     ' || mvn --batch-mode deploy --settings $MVN_SETTINGS -DskipTests' +
-                     ' -DaltDeploymentRepository=nexus::default::\${env.NEXUS_BASE_URL}/\${repository}/' +
-                     ' -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
-            }
-        }
-    }
-}
-`);
+                                    jenkinsTemplate.build({}));
                             })
                             .then(() => {
                                 return project.isClean()

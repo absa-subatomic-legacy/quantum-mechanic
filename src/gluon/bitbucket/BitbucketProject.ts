@@ -3,16 +3,24 @@ import {
     failure,
     HandleCommand,
     HandlerContext,
-    HandlerResult,
+    HandlerResult, logger,
     MappedParameter,
     MappedParameters,
     Parameter,
     success,
 } from "@atomist/automation-client";
 import axios from "axios";
+import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
-import {gluonProjectFromProjectName} from "../project/Projects";
+import {
+    gluonProjectFromProjectName,
+    gluonProjectsWhichBelongToGluonTeam, menuForProjects,
+} from "../project/Projects";
+import {
+    gluonTeamForSlackTeamChannel,
+    gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
+} from "../team/Teams";
 import {bitbucketAxios} from "./Bitbucket";
 
 @CommandHandler("Create a new Bitbucket project", QMConfig.subatomic.commandPrefix + " create bitbucket project")
@@ -25,24 +33,43 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
     public teamChannel: string;
 
     @Parameter({
-        description: "project name",
+        description: "bitbucket project key",
     })
-    public name: string;
+    public bitbucketProjectKey: string;
+
+    @Parameter({
+        description: "project name",
+        displayable: false,
+        required: false,
+    })
+    public projectName: string;
+
+    @Parameter({
+        description: "team name",
+        displayable: false,
+        required: false,
+    })
+    public teamName: string;
 
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
 
+        if (_.isEmpty(this.projectName)) {
+            return this.requestUnsetParameters(ctx);
+        }
+
+        logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
         // get memberId for createdBy
         return gluonMemberFromScreenName(ctx, this.screenName)
             .then(member => {
 
                 // get project by project name
-                return gluonProjectFromProjectName(ctx, this.name)
+                return gluonProjectFromProjectName(ctx, this.projectName)
                     .then(project => {
                         // update project by creating new Bitbucket project (new domain concept)
                         axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${project.projectId}`,
                             {
                                 bitbucketProject: {
-                                    name: this.name,
+                                    name: this.projectName,
                                     description: `${project.description} [managed by Subatomic]`,
                                 },
                                 createdBy: member.memberId,
@@ -56,6 +83,43 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                 }, this.teamChannel);
             })
             .catch(err => failure(err));
+    }
+
+    private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+        if (_.isEmpty(this.teamName)) {
+            logger.info("Team name is empty");
+            return gluonTeamForSlackTeamChannel(this.teamChannel)
+                .then(
+                    team => {
+                        this.teamName = team.name;
+                        return this.requestUnsetParameters(ctx);
+                    },
+                    () => {
+                        return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
+                            return menuForTeams(
+                                ctx,
+                                teams,
+                                this,
+                                "Please select a team associated with the project you wish to create a Bitbucket project for",
+                            );
+                        });
+                    },
+                );
+        }
+        if (_.isEmpty(this.projectName)) {
+            logger.info("Project name is empty");
+            return gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName)
+                .then(projects => {
+                    return menuForProjects(
+                        ctx,
+                        projects,
+                        this,
+                        "Please select the project you wish to create a Bitbucket project for",
+                    );
+                });
+        }
+
+        logger.info("Nothing was empty");
     }
 }
 
@@ -72,16 +136,32 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
     public teamChannel: string;
 
     @Parameter({
-        description: "project name",
-    })
-    public projectName: string;
-
-    @Parameter({
         description: "bitbucket project key",
     })
     public bitbucketProjectKey: string;
 
+    @Parameter({
+        description: "project name",
+        displayable: false,
+        required: false,
+    })
+    public projectName: string;
+
+    @Parameter({
+        description: "team name",
+        displayable: false,
+        required: false,
+    })
+    public teamName: string;
+
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
+
+        if (_.isEmpty(this.projectName)) {
+            return this.requestUnsetParameters(ctx);
+        }
+
+        logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
+
         // get memberId for createdBy
         return gluonMemberFromScreenName(ctx, this.screenName)
             .then(member => {
@@ -121,5 +201,41 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                             });
                     });
             });
+    }
+
+    private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+        if (_.isEmpty(this.teamName)) {
+            logger.info("Team name is empty");
+            return gluonTeamForSlackTeamChannel(this.teamChannel)
+                .then(
+                    team => {
+                        this.teamName = team.name;
+                        return this.requestUnsetParameters(ctx);
+                    },
+                    () => {
+                        return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
+                            return menuForTeams(
+                                ctx,
+                                teams,
+                                this,
+                                "Please select a team associated with the project you wish to link a Bitbucket project to",
+                            );
+                        });
+                    },
+                );
+        }
+        if (_.isEmpty(this.projectName)) {
+            logger.info("Project name is empty");
+            return gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName)
+                .then(projects => {
+                    return menuForProjects(
+                        ctx,
+                        projects,
+                        this,
+                        "Please select the project you wish to link a Bitbucket project to",
+                    );
+                });
+        }
+        logger.info("Nothing was empty");
     }
 }

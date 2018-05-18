@@ -38,7 +38,9 @@ import {
 import {
     ActionedBy,
     BitbucketProject,
-    GluonTeam, GluonTenant, GluonTenantId,
+    GluonTeam,
+    GluonTenant,
+    GluonTenantId,
     Project,
     SlackIdentity,
 } from "./gluon/shared/sharedIngester";
@@ -68,6 +70,7 @@ import {
 } from "./gluon/team/TeamSlackChannel";
 
 const token = QMConfig.token;
+const http = QMConfig.http;
 
 export const configuration: any = {
     teamIds: [QMConfig.teamId],
@@ -133,17 +136,7 @@ export const configuration: any = {
         GluonTenantId,
     ],
     token,
-    http: {
-        enabled: true,
-        auth: {
-            basic: {
-                enabled: false,
-            },
-            bearer: {
-                enabled: false,
-            },
-        },
-    },
+    http,
     logging: {
         level: "debug",
         file: false,
