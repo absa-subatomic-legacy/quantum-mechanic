@@ -1,6 +1,4 @@
-import {
-    GraphClient, MutationOptions, QueryOptions,
-} from "@atomist/automation-client/spi/graph/GraphClient";
+import {GraphClient} from "@atomist/automation-client/spi/graph/GraphClient";
 
 export class TestGraphClient implements GraphClient {
 
@@ -26,24 +24,6 @@ export class TestGraphClient implements GraphClient {
     public executeMutationFromFile<T, Q>(path: string, variables?: Q, options?: any, current?: string): Promise<any> {
         this.path = path;
         return Promise.resolve();
-    }
-
-    public query<T, Q>(options: QueryOptions<Q> | string): Promise<T> {
-        if (typeof options === "string") {
-            options = {
-                name: options,
-            };
-        }
-        return this.executeQuery<T, Q>(options.name);
-    }
-
-    public mutate<T, Q>(options: MutationOptions<Q> | string): Promise<T> {
-        if (typeof options === "string") {
-            options = {
-                name: options,
-            };
-        }
-        return this.executeMutation<T, Q>(options.name);
     }
 
     public executeQuery<T, Q>(query: string, variables?: Q, options?: any): Promise<any> {
