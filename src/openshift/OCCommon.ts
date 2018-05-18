@@ -9,7 +9,7 @@ import {StandardOption} from "./base/options/StandardOption";
 export class OCCommon {
 
     public static getInstance(): OCCommon {
-        if (this.instance === null) {
+        if (this.instance === null || this.instance === undefined) {
             this.instance = new OCCommon();
         }
         return this.instance;

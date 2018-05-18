@@ -6,7 +6,7 @@ import {StandardOption} from "./base/options/StandardOption";
 export class OCPolicy {
 
     public static getInstance(): OCPolicy {
-        if (this.instance === null) {
+        if (this.instance === null || this.instance === undefined) {
             this.instance = new OCPolicy();
         }
         return this.instance;

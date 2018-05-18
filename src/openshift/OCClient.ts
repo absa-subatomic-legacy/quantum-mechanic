@@ -10,7 +10,7 @@ export class OCClient {
     public static policy = OCPolicy;
 
     public static getInstance(): OCClient {
-        if (this.instance === null) {
+        if (this.instance === null || this.instance === undefined) {
             this.instance = new OCClient();
         }
         return this.instance;
