@@ -21,6 +21,7 @@ import {
     LinkExistingApplication,
 } from "./gluon/packages/CreateApplication";
 import {LinkExistingLibrary} from "./gluon/packages/CreateLibrary";
+import {ProvisionApplication} from "./gluon/packages/ProvisionApplication";
 import {AddConfigServer} from "./gluon/project/AddConfigServer";
 import {CreateOpenShiftPvc} from "./gluon/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/project/CreateProject";
@@ -102,6 +103,7 @@ export const configuration: any = {
         AddConfigServer,
         ListTeamProjects,
         ListProjectDetails,
+        ProvisionApplication,
     ],
     events: [
         TeamCreated,
