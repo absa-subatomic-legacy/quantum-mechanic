@@ -55,7 +55,7 @@
     }
   },
   "http": {
-    "enabled": true,
+    "enabled": false,
     "auth": {
       "basic": {
         "enabled": true,

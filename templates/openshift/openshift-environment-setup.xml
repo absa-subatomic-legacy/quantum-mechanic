@@ -1,5 +1,4 @@
 <com.cloudbees.hudson.plugins.folder.Folder plugin="cloudbees-folder@6.0.4">
-    <description>Folder for {{projectName}} project [[managed by Subatomic]({{docsUrl}}/projects/{{projectName}})]</description>
     <displayName>{{projectName}}</displayName>
     <properties>
         <com.cloudbees.hudson.plugins.folder.properties.FolderCredentialsProvider_-FolderCredentialsProperty>
