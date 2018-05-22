@@ -157,6 +157,9 @@ export class ApplicationCreated implements HandleEvent<any> {
                                     logger.info(`Found tenant: ${tenant}`);
                                     return this.createApplicationOpenshiftResources(tenant.name, project.name, applicationCreatedEvent.application.name);
                                 });
+                            }).catch(() => {
+                                // Don't display the error - gluonProjectFromProjectName already handles it.
+                                return success();
                             });
 
                         });

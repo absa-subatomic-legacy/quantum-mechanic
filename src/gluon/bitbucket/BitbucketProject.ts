@@ -75,6 +75,9 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                                 createdBy: member.memberId,
                             })
                             .then(success);
+                    }).catch(() => {
+                        // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
+                        return success();
                     });
             })
             .then(() => {
@@ -116,6 +119,9 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                         this,
                         "Please select the project you wish to create a Bitbucket project for",
                     );
+                }).catch(() => {
+                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
+                    return success();
                 });
         }
 
@@ -199,6 +205,9 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                                         }
                                     });
                             });
+                    }).catch(() => {
+                        // Don't display the error - gluonProjectFromProjectName already handles it.
+                        return success();
                     });
             });
     }
@@ -234,6 +243,9 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                         this,
                         "Please select the project you wish to link a Bitbucket project to",
                     );
+                }).catch(() => {
+                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
+                    return success();
                 });
         }
         logger.info("Nothing was empty");

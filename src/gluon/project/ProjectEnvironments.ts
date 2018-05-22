@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -68,6 +68,9 @@ export class NewProjectEnvironments implements HandleCommand {
                         return ctx.messageClient.addressChannels({
                             text: "🚀 Your team's project environment is being provisioned...",
                         }, this.teamChannel);
+                    }).catch(() => {
+                        // Don't display the error - gluonProjectFromProjectName already handles it.
+                        return success();
                     });
             });
     }
@@ -101,6 +104,9 @@ export class NewProjectEnvironments implements HandleCommand {
                         this,
                         "Please select the projects you wish to provision the environments for",
                     );
+                }).catch(() => {
+                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
+                    return success();
                 });
         }
     }

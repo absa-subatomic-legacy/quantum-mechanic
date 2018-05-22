@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
     SuccessPromise,
 } from "@atomist/automation-client";
 import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
@@ -203,6 +203,9 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
             };
 
             return ctx.messageClient.respond(msg);
+        }).catch(() => {
+            // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
+            return success();
         });
     }
 

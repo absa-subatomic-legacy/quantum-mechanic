@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
 } from "@atomist/automation-client";
 import {BitBucketServerRepoRef} from "@atomist/automation-client/operations/common/BitBucketServerRepoRef";
 import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
@@ -116,6 +116,9 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                         projects,
                         this,
                         "Please select a project to which you would like to link a library to");
+                }).catch(() => {
+                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
+                    return success();
                 });
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
@@ -137,6 +140,9 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                 "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
                             );
                         });
+                }).catch(() => {
+                    // Don't display the error - gluonProjectFromProjectName already handles it.
+                    return success();
                 });
         }
 
@@ -161,6 +167,9 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                     bitbucketRepositorySlug,
                     project.bitbucketProject.key,
                     project.projectId);
+            }).catch(() => {
+                // Don't display the error - gluonProjectFromProjectName already handles it.
+                return success();
             });
     }
 

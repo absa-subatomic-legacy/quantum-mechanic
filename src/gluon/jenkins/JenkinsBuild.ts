@@ -7,7 +7,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
@@ -96,6 +96,9 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                         projects,
                         this,
                         "Please select a project which contains the application you would like to build");
+                }).catch(() => {
+                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
+                    return success();
                 });
         }
         if (_.isEmpty(this.applicationName)) {

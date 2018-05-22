@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
 } from "@atomist/automation-client";
 import {BitBucketServerRepoRef} from "@atomist/automation-client/operations/common/BitBucketServerRepoRef";
 import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
@@ -110,6 +110,9 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                                         createdBy: member.memberId,
                                     });
                             });
+                    }).catch(() => {
+                        // Don't display the error - gluonProjectFromProjectName already handles it.
+                        return success();
                     });
             })
             .then(() => {
@@ -138,6 +141,9 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
             return gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName)
                 .then(projects => {
                     return menuForProjects(ctx, projects, this);
+                }).catch(() => {
+                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
+                    return success();
                 });
         }
     }
@@ -227,6 +233,9 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                         projects,
                         this,
                         "Please select a project to which you would like to link an application to");
+                }).catch(() => {
+                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
+                    return success();
                 });
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
@@ -248,6 +257,9 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                 "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
                             );
                         });
+                }).catch(() => {
+                    // Don't display the error - gluonProjectFromProjectName already handles it.
+                    return success();
                 });
         }
 
@@ -272,6 +284,9 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                     bitbucketRepositorySlug,
                     project.bitbucketProject.key,
                     project.projectId);
+            }).catch(() => {
+                // Don't display the error - gluonProjectFromProjectName already handles it.
+                return success();
             });
     }
 
