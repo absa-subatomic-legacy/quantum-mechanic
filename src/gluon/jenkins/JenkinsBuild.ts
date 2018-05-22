@@ -62,7 +62,7 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
     public applicationName: string;
 
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
-        if (_.isEmpty(this.teamName) || _.isEmpty(this.projectName) || _.isEmpty(this.applicationName)) {
+        if (_.isEmpty(this.projectName) || _.isEmpty(this.applicationName)) {
             return this.requestUnsetParameters(ctx);
         }
 
@@ -84,6 +84,9 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                                 teams,
                                 this,
                                 "Please select the team which contains the owning project of the application you would like to build");
+                        }).catch(() => {
+                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                            return success();
                         });
                     },
                 );
@@ -108,6 +111,9 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                     applications,
                     this,
                     "Please select the application you would like to build");
+            }).catch(() => {
+                // Don't display the error - gluonApplicationsLinkedToGluonProjectId already handles it.
+                return success();
             });
         }
 

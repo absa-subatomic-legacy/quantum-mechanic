@@ -72,6 +72,9 @@ export class NewProjectEnvironments implements HandleCommand {
                         // Don't display the error - gluonProjectFromProjectName already handles it.
                         return success();
                     });
+            }).catch(() => {
+                // Don't display the error - gluonMemberFromScreenName already handles it.
+                return success();
             });
     }
 
@@ -91,6 +94,9 @@ export class NewProjectEnvironments implements HandleCommand {
                                 this,
                                 "Please select a team associated with the project you wish to provision the environments for",
                             );
+                        }).catch(() => {
+                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                            return success();
                         });
                     },
                 );

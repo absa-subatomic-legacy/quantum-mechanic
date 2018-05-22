@@ -119,6 +119,9 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                 return ctx.messageClient.addressChannels({
                     text: "🚀 Your new application is being provisioned...",
                 }, this.teamChannel);
+            }).catch(() => {
+                // Don't display the error - gluonMemberFromScreenName already handles it.
+                return success();
             });
     }
 
@@ -133,6 +136,9 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                     () => {
                         return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
                             return menuForTeams(ctx, teams, this);
+                        }).catch(() => {
+                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                            return success();
                         });
                     },
                 );
@@ -221,6 +227,9 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                 teams,
                                 this,
                                 "Please select a team, whose project you would like to link an application to");
+                        }).catch(() => {
+                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                            return success();
                         });
                     },
                 );
@@ -371,6 +380,9 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                 return ctx.messageClient.addressChannels({
                                     text: "🚀 Your new application is being provisioned...",
                                 }, teamSlackChannel);
+                            }).catch(() => {
+                                // Don't display the error - gluonMemberFromScreenName already handles it.
+                                return success();
                             });
                     });
             });

@@ -174,6 +174,9 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
             };
 
             return ctx.messageClient.respond(msg);
+        }).catch(() => {
+            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+            return success();
         });
     }
 

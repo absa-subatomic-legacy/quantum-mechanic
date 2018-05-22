@@ -61,6 +61,9 @@ export class ListTeamProjects implements HandleCommand<HandlerResult> {
                                 this,
                                 "Please select the team you would like to list the projects for",
                             );
+                        }).catch(() => {
+                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                            return success();
                         });
                     },
                 );
@@ -180,6 +183,9 @@ export class ListProjectDetails implements HandleCommand<HandlerResult> {
                 attachments,
             };
             return ctx.messageClient.respond(msg);
+        }).catch(() => {
+            // Don't display the error - gluonApplicationsLinkedToGluonProjectId already handles it.
+            return success();
         });
 
     }

@@ -150,6 +150,9 @@ export class LinkExistingTeamSlackChannel implements HandleCommand {
                     teams,
                     this,
                     "Please select the team you would like to link the slack channel to");
+            }).catch(() => {
+                // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                return success();
             });
         }
     }

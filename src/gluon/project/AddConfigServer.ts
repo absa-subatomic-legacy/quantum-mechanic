@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
     SuccessPromise,
 } from "@atomist/automation-client";
 import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
@@ -73,6 +73,9 @@ export class AddConfigServer implements HandleCommand<HandlerResult> {
                                 "Please select a team, whose DevOps project the Subatomic Config Server will be added to",
                                 "gluonTeamName",
                             );
+                        }).catch(() => {
+                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                            return success();
                         });
                     },
                 );

@@ -104,6 +104,9 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                 teams,
                                 this,
                                 "Please select a team, whose project you would like to link a library to");
+                        }).catch(() => {
+                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                            return success();
                         });
                     },
                 );
@@ -255,6 +258,9 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                 return ctx.messageClient.addressChannels({
                                     text: "🚀 Your new library is being provisioned...",
                                 }, teamSlackChannel);
+                            }).catch(() => {
+                                // Don't display the error - gluonMemberFromScreenName already handles it.
+                                return success();
                             });
                     });
             });

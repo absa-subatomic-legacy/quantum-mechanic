@@ -5,7 +5,7 @@ import {
     HandlerResult, logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
 } from "@atomist/automation-client";
 import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import axios from "axios";
@@ -79,6 +79,9 @@ export class CreateProject implements HandleCommand<HandlerResult> {
                                 this,
                                 "Please select a team you would like to associate this project with",
                             );
+                        }).catch(() => {
+                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                            return success();
                         });
                     },
                 );
@@ -119,6 +122,9 @@ export class CreateProject implements HandleCommand<HandlerResult> {
                             });
                         }
                     });
+            }).catch(() => {
+                // Don't display the error - gluonMemberFromScreenName already handles it.
+                return success();
             });
     }
 }

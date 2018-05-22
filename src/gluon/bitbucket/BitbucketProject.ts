@@ -85,7 +85,10 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                     text: "🚀 Your new project is being provisioned...",
                 }, this.teamChannel);
             })
-            .catch(err => failure(err));
+            .catch(() => {
+                // Don't display the error - gluonMemberFromScreenName already handles it.
+                return success();
+            });
     }
 
     private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
@@ -105,6 +108,9 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                                 this,
                                 "Please select a team associated with the project you wish to create a Bitbucket project for",
                             );
+                        }).catch(() => {
+                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                            return success();
                         });
                     },
                 );
@@ -209,6 +215,9 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                         // Don't display the error - gluonProjectFromProjectName already handles it.
                         return success();
                     });
+            }).catch(() => {
+                // Don't display the error - gluonMemberFromScreenName already handles it.
+                return success();
             });
     }
 
@@ -229,6 +238,9 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                                 this,
                                 "Please select a team associated with the project you wish to link a Bitbucket project to",
                             );
+                        }).catch(() => {
+                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
+                            return success();
                         });
                     },
                 );
