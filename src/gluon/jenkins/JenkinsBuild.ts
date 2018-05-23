@@ -14,7 +14,7 @@ import {QMConfig} from "../../config/QMConfig";
 import {SimpleOption} from "../../openshift/base/options/SimpleOption";
 import {OCCommon} from "../../openshift/OCCommon";
 import {
-    gluonApplicationsLinkedToGluonProject, gluonApplicationsLinkedToGluonProjectId,
+    gluonApplicationsLinkedToGluonProject,
     menuForApplications,
 } from "../packages/Applications";
 import {
@@ -111,7 +111,7 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                     this,
                     "Please select the application you would like to build");
             }).catch(error => {
-                logErrorAndReturnSuccess(gluonApplicationsLinkedToGluonProjectId.name, error);
+                logErrorAndReturnSuccess(gluonApplicationsLinkedToGluonProject.name, error);
             });
         }
 
