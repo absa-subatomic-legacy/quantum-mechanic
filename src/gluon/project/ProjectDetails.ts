@@ -13,6 +13,7 @@ import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
 import {gluonApplicationsLinkedToGluonProjectId} from "../packages/Applications";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -61,9 +62,8 @@ export class ListTeamProjects implements HandleCommand<HandlerResult> {
                                 this,
                                 "Please select the team you would like to list the projects for",
                             );
-                        }).catch(() => {
-                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
-                            return success();
+                        }).catch(error => {
+                            logErrorAndReturnSuccess("gluonTeamForSlackTeamChannel", error);
                         });
                     },
                 );
@@ -111,9 +111,8 @@ export class ListTeamProjects implements HandleCommand<HandlerResult> {
                 };
 
                 return ctx.messageClient.respond(msg);
-            }).catch(() => {
-                // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-                return success();
+            }).catch(error => {
+                logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
             });
     }
 
@@ -183,9 +182,8 @@ export class ListProjectDetails implements HandleCommand<HandlerResult> {
                 attachments,
             };
             return ctx.messageClient.respond(msg);
-        }).catch(() => {
-            // Don't display the error - gluonApplicationsLinkedToGluonProjectId already handles it.
-            return success();
+        }).catch(error => {
+            logErrorAndReturnSuccess("gluonApplicationsLinkedToGluonProjectId", error);
         });
 
     }

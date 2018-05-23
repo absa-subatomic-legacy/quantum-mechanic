@@ -19,6 +19,7 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {CreateTeam} from "./CreateTeam";
 import {gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams} from "./Teams";
 
@@ -150,9 +151,8 @@ export class LinkExistingTeamSlackChannel implements HandleCommand {
                     teams,
                     this,
                     "Please select the team you would like to link the slack channel to");
-            }).catch(() => {
-                // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
-                return success();
+            }).catch(error => {
+                logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
             });
         }
     }

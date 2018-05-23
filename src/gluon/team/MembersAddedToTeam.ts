@@ -9,6 +9,7 @@ import {
 import * as _ from "lodash";
 import {BitbucketConfiguration} from "../bitbucket/BitbucketConfiguration";
 import {gluonProjectsWhichBelongToGluonTeam} from "../project/Projects";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {addOpenshiftMembershipPermissions} from "./DevOpsEnvironmentRequested";
 
 @EventHandler("Receive MembershipRequestCreated events", `
@@ -77,9 +78,8 @@ export class MembersAddedToTeam implements HandleEvent<any> {
             },
         ).then(() => {
             return ctx.messageClient.addressChannels("New user permissions successfully added to associated projects.", team.slackIdentity.teamChannel);
-        }).catch(() => {
-            // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-            return success();
+        }).catch(error => {
+            logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
         });
     }
 }

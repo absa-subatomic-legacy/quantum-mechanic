@@ -15,6 +15,7 @@ import {Attachment} from "@atomist/slack-messages/SlackMessages";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {OCClient} from "../../openshift/OCClient";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -174,9 +175,8 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
             };
 
             return ctx.messageClient.respond(msg);
-        }).catch(() => {
-            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
-            return success();
+        }).catch(error => {
+            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
         });
     }
 
@@ -206,9 +206,8 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
             };
 
             return ctx.messageClient.respond(msg);
-        }).catch(() => {
-            // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-            return success();
+        }).catch(error => {
+            logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
         });
     }
 

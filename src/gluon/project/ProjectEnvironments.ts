@@ -13,6 +13,7 @@ import axios from "axios";
 import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
@@ -68,13 +69,11 @@ export class NewProjectEnvironments implements HandleCommand {
                         return ctx.messageClient.addressChannels({
                             text: "🚀 Your team's project environment is being provisioned...",
                         }, this.teamChannel);
-                    }).catch(() => {
-                        // Don't display the error - gluonProjectFromProjectName already handles it.
-                        return success();
+                    }).catch(error => {
+                        logErrorAndReturnSuccess("gluonProjectFromProjectName", error);
                     });
-            }).catch(() => {
-                // Don't display the error - gluonMemberFromScreenName already handles it.
-                return success();
+            }).catch(error => {
+                logErrorAndReturnSuccess("gluonMemberFromScreenName", error);
             });
     }
 
@@ -94,9 +93,8 @@ export class NewProjectEnvironments implements HandleCommand {
                                 this,
                                 "Please select a team associated with the project you wish to provision the environments for",
                             );
-                        }).catch(() => {
-                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
-                            return success();
+                        }).catch(error => {
+                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
                         });
                     },
                 );
@@ -110,9 +108,8 @@ export class NewProjectEnvironments implements HandleCommand {
                         this,
                         "Please select the projects you wish to provision the environments for",
                     );
-                }).catch(() => {
-                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-                    return success();
+                }).catch(error => {
+                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
                 });
         }
     }

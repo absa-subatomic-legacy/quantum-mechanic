@@ -21,6 +21,7 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -84,9 +85,8 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                                 teams,
                                 this,
                                 "Please select the team which contains the owning project of the application you would like to build");
-                        }).catch(() => {
-                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
-                            return success();
+                        }).catch(error => {
+                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
                         });
                     },
                 );
@@ -99,9 +99,8 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                         projects,
                         this,
                         "Please select a project which contains the application you would like to build");
-                }).catch(() => {
-                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-                    return success();
+                }).catch(error => {
+                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
                 });
         }
         if (_.isEmpty(this.applicationName)) {
@@ -111,9 +110,8 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                     applications,
                     this,
                     "Please select the application you would like to build");
-            }).catch(() => {
-                // Don't display the error - gluonApplicationsLinkedToGluonProjectId already handles it.
-                return success();
+            }).catch(error => {
+                logErrorAndReturnSuccess("gluonApplicationsLinkedToGluonProjectId", error);
             });
         }
 

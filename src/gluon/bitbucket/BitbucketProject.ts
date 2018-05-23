@@ -17,6 +17,7 @@ import {
     gluonProjectFromProjectName,
     gluonProjectsWhichBelongToGluonTeam, menuForProjects,
 } from "../project/Projects";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
@@ -75,9 +76,8 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                                 createdBy: member.memberId,
                             })
                             .then(success);
-                    }).catch(() => {
-                        // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-                        return success();
+                    }).catch(error => {
+                        logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
                     });
             })
             .then(() => {
@@ -85,9 +85,8 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                     text: "🚀 Your new project is being provisioned...",
                 }, this.teamChannel);
             })
-            .catch(() => {
-                // Don't display the error - gluonMemberFromScreenName already handles it.
-                return success();
+            .catch(error => {
+                logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
             });
     }
 
@@ -108,9 +107,8 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                                 this,
                                 "Please select a team associated with the project you wish to create a Bitbucket project for",
                             );
-                        }).catch(() => {
-                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
-                            return success();
+                        }).catch(error => {
+                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
                         });
                     },
                 );
@@ -125,9 +123,8 @@ export class NewBitbucketProject implements HandleCommand<HandlerResult> {
                         this,
                         "Please select the project you wish to create a Bitbucket project for",
                     );
-                }).catch(() => {
-                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-                    return success();
+                }).catch(error => {
+                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
                 });
         }
 
@@ -211,13 +208,7 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                                         }
                                     });
                             });
-                    }).catch(() => {
-                        // Don't display the error - gluonProjectFromProjectName already handles it.
-                        return success();
                     });
-            }).catch(() => {
-                // Don't display the error - gluonMemberFromScreenName already handles it.
-                return success();
             });
     }
 
@@ -238,9 +229,8 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                                 this,
                                 "Please select a team associated with the project you wish to link a Bitbucket project to",
                             );
-                        }).catch(() => {
-                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
-                            return success();
+                        }).catch(error => {
+                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
                         });
                     },
                 );
@@ -255,9 +245,8 @@ export class ListExistingBitbucketProject implements HandleCommand<HandlerResult
                         this,
                         "Please select the project you wish to link a Bitbucket project to",
                     );
-                }).catch(() => {
-                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-                    return success();
+                }).catch(error => {
+                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
                 });
         }
         logger.info("Nothing was empty");

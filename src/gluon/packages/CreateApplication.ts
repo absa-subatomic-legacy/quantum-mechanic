@@ -26,6 +26,7 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -110,18 +111,16 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                                         createdBy: member.memberId,
                                     });
                             });
-                    }).catch(() => {
-                        // Don't display the error - gluonProjectFromProjectName already handles it.
-                        return success();
+                    }).catch(error => {
+                        logErrorAndReturnSuccess("gluonProjectFromProjectName", error);
                     });
             })
             .then(() => {
                 return ctx.messageClient.addressChannels({
                     text: "🚀 Your new application is being provisioned...",
                 }, this.teamChannel);
-            }).catch(() => {
-                // Don't display the error - gluonMemberFromScreenName already handles it.
-                return success();
+            }).catch(error => {
+                logErrorAndReturnSuccess("gluonMemberFromScreenName", error);
             });
     }
 
@@ -136,9 +135,8 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                     () => {
                         return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
                             return menuForTeams(ctx, teams, this);
-                        }).catch(() => {
-                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
-                            return success();
+                        }).catch(error => {
+                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
                         });
                     },
                 );
@@ -147,9 +145,8 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
             return gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName)
                 .then(projects => {
                     return menuForProjects(ctx, projects, this);
-                }).catch(() => {
-                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-                    return success();
+                }).catch(error => {
+                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
                 });
         }
     }
@@ -227,9 +224,8 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                 teams,
                                 this,
                                 "Please select a team, whose project you would like to link an application to");
-                        }).catch(() => {
-                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
-                            return success();
+                        }).catch(error => {
+                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
                         });
                     },
                 );
@@ -242,9 +238,8 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                         projects,
                         this,
                         "Please select a project to which you would like to link an application to");
-                }).catch(() => {
-                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-                    return success();
+                }).catch(error => {
+                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
                 });
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
@@ -266,9 +261,8 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                 "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
                             );
                         });
-                }).catch(() => {
-                    // Don't display the error - gluonProjectFromProjectName already handles it.
-                    return success();
+                }).catch(error => {
+                    logErrorAndReturnSuccess("gluonProjectFromProjectName", error);
                 });
         }
 
@@ -293,9 +287,6 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                     bitbucketRepositorySlug,
                     project.bitbucketProject.key,
                     project.projectId);
-            }).catch(() => {
-                // Don't display the error - gluonProjectFromProjectName already handles it.
-                return success();
             });
     }
 
@@ -380,9 +371,8 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                 return ctx.messageClient.addressChannels({
                                     text: "🚀 Your new application is being provisioned...",
                                 }, teamSlackChannel);
-                            }).catch(() => {
-                                // Don't display the error - gluonMemberFromScreenName already handles it.
-                                return success();
+                            }).catch(error => {
+                                logErrorAndReturnSuccess("gluonMemberFromScreenName", error);
                             });
                     });
             });

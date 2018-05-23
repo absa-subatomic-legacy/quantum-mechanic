@@ -26,6 +26,7 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -104,9 +105,8 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                 teams,
                                 this,
                                 "Please select a team, whose project you would like to link a library to");
-                        }).catch(() => {
-                            // Don't display the error - gluonTeamsWhoSlackScreenNameBelongsTo already handles it.
-                            return success();
+                        }).catch(error => {
+                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
                         });
                     },
                 );
@@ -119,9 +119,8 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                         projects,
                         this,
                         "Please select a project to which you would like to link a library to");
-                }).catch(() => {
-                    // Don't display the error - gluonProjectsWhichBelongToGluonTeam already handles it.
-                    return success();
+                }).catch(error => {
+                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
                 });
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
@@ -143,9 +142,8 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                 "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
                             );
                         });
-                }).catch(() => {
-                    // Don't display the error - gluonProjectFromProjectName already handles it.
-                    return success();
+                }).catch(error => {
+                    logErrorAndReturnSuccess("gluonProjectFromProjectName", error);
                 });
         }
 
@@ -170,9 +168,6 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                     bitbucketRepositorySlug,
                     project.bitbucketProject.key,
                     project.projectId);
-            }).catch(() => {
-                // Don't display the error - gluonProjectFromProjectName already handles it.
-                return success();
             });
     }
 
@@ -258,9 +253,8 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                 return ctx.messageClient.addressChannels({
                                     text: "🚀 Your new library is being provisioned...",
                                 }, teamSlackChannel);
-                            }).catch(() => {
-                                // Don't display the error - gluonMemberFromScreenName already handles it.
-                                return success();
+                            }).catch(error => {
+                                logErrorAndReturnSuccess("gluonMemberFromScreenName", error);
                             });
                     });
             });
