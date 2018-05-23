@@ -407,7 +407,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                     text: `Your DevOps environment has been provisioned successfully`,
                     attachments: [{
                         fallback: `Create a project`,
-                        footer: `For more information, please read the ${this.docs() + "#create-project"}`,
+                        footer: `For more information, please read the ${this.docs("create-project")}`,
                         text: `
 If you haven't already, you might want to create a Project for your team to work on.`,
                         mrkdwn_in: ["text"],
@@ -420,7 +420,7 @@ If you haven't already, you might want to create a Project for your team to work
                         ],
                     }, {
                         fallback: `Add a Subatomic Config Server`,
-                        footer: `For more information, please read the ${this.docs() + "#add-config-server"}`,
+                        footer: `For more information, please read the ${this.docs("add-config-server")}`,
                         text: `
 If your applications will require a Spring Cloud Config Server, you can add a Subatomic Config Server to your DevOps project now`,
                         mrkdwn_in: ["text"],
@@ -441,8 +441,8 @@ If your applications will require a Spring Cloud Config Server, you can add a Su
             });
     }
 
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference`,
+    private docs(extension): string {
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
             "documentation")}`;
     }
 }

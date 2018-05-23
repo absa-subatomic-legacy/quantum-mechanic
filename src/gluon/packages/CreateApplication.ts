@@ -26,6 +26,7 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -108,9 +109,16 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                                         requestConfiguration: true,
                                     });
                             });
+                    }).catch(error => {
+                        logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
                     });
             },
-        ).then(success);
+        )
+            .then(success)
+            .catch(error => {
+                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+            });
+        ;
     }
 
     private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
@@ -124,6 +132,8 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                     () => {
                         return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
                             return menuForTeams(ctx, teams, this);
+                        }).catch(error => {
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );
@@ -132,6 +142,8 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
             return gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName)
                 .then(projects => {
                     return menuForProjects(ctx, projects, this);
+                }).catch(error => {
+                    logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
                 });
         }
     }
@@ -214,6 +226,8 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                 teams,
                                 this,
                                 "Please select a team, whose project you would like to link an application to");
+                        }).catch(error => {
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );
@@ -226,6 +240,8 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                         projects,
                         this,
                         "Please select a project to which you would like to link an application to");
+                }).catch(error => {
+                    logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
                 });
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
@@ -247,6 +263,8 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                 "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
                             );
                         });
+                }).catch(error => {
+                    logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
                 });
         }
 
@@ -341,7 +359,10 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                         requestConfiguration: true,
                                     });
                             })
-                            .then(success);
+                            .then(success)
+                            .catch(error => {
+                                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+                            });
                     });
             });
     }

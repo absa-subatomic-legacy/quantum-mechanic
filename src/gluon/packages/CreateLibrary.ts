@@ -26,6 +26,7 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -107,6 +108,8 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                 teams,
                                 this,
                                 "Please select a team, whose project you would like to link a library to");
+                        }).catch(error => {
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );
@@ -119,6 +122,8 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                         projects,
                         this,
                         "Please select a project to which you would like to link a library to");
+                }).catch(error => {
+                    logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
                 });
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
@@ -140,6 +145,8 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                 "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
                             );
                         });
+                }).catch(error => {
+                    logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
                 });
         }
 
@@ -235,7 +242,11 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                         },
                                         requestConfiguration: true,
                                     });
-                            }).then(success);
+                            })
+                            .then(success)
+                            .catch(error => {
+                                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+                            });
                     });
             });
     }
