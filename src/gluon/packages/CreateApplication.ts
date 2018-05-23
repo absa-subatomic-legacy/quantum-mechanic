@@ -116,9 +116,9 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
         )
             .then(success)
             .catch(error => {
-                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+                return logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
             });
-        ;
+
     }
 
     private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
@@ -143,7 +143,7 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                 .then(projects => {
                     return menuForProjects(ctx, projects, this);
                 }).catch(error => {
-                    logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
+                    return logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
                 });
         }
     }
@@ -361,7 +361,7 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                             })
                             .then(success)
                             .catch(error => {
-                                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+                                return logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
                             });
                     });
             });

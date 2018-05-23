@@ -245,7 +245,7 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                             })
                             .then(success)
                             .catch(error => {
-                                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+                                return logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
                             });
                     });
             });

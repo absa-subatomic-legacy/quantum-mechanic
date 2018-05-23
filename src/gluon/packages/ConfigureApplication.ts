@@ -1,5 +1,4 @@
 import {
-    EventHandler,
     failure,
     HandleCommand,
     HandlerContext,
@@ -26,6 +25,7 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
+import {logErrorAndReturnSuccess} from "../shared/Error";
 import {gluonTenantFromTenantId} from "../shared/Tenant";
 import {
     gluonTeamForSlackTeamChannel,
@@ -125,7 +125,11 @@ export class ConfigureApplication implements HandleCommand<HandlerResult> {
                             project.owningTeam.name,
                             project.teams,
                         );
+                    }).catch(error => {
+                        return logErrorAndReturnSuccess(gluonApplicationForNameAndProjectName.name, error);
                     });
+            }).catch(error => {
+                return logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
             });
     }
 
