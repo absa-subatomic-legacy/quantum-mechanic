@@ -5,7 +5,7 @@ import {
     HandlerResult, logger,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -65,7 +65,7 @@ export class NewDevOpsEnvironment implements HandleCommand {
                                 this,
                                 "Please select a team you would like to create a DevOps environment for");
                         }).catch(error => {
-                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );
@@ -95,7 +95,7 @@ export class NewDevOpsEnvironment implements HandleCommand {
                         }, teamChannel);
                     });
             }).catch(error => {
-                logErrorAndReturnSuccess("gluonMemberFromScreenName", error);
+                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
             });
     }
 }

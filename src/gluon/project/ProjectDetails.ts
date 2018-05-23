@@ -6,7 +6,6 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
-    success,
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
@@ -63,7 +62,7 @@ export class ListTeamProjects implements HandleCommand<HandlerResult> {
                                 "Please select the team you would like to list the projects for",
                             );
                         }).catch(error => {
-                            logErrorAndReturnSuccess("gluonTeamForSlackTeamChannel", error);
+                            logErrorAndReturnSuccess(gluonTeamForSlackTeamChannel.name, error);
                         });
                     },
                 );
@@ -112,7 +111,7 @@ export class ListTeamProjects implements HandleCommand<HandlerResult> {
 
                 return ctx.messageClient.respond(msg);
             }).catch(error => {
-                logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
+                logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
             });
     }
 
@@ -183,7 +182,7 @@ export class ListProjectDetails implements HandleCommand<HandlerResult> {
             };
             return ctx.messageClient.respond(msg);
         }).catch(error => {
-            logErrorAndReturnSuccess("gluonApplicationsLinkedToGluonProjectId", error);
+            logErrorAndReturnSuccess(gluonApplicationsLinkedToGluonProjectId.name, error);
         });
 
     }

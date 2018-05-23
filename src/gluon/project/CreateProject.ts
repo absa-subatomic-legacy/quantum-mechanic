@@ -1,11 +1,11 @@
 import {
-    CommandHandler, failure,
+    CommandHandler,
     HandleCommand,
     HandlerContext,
-    HandlerResult, logger,
+    HandlerResult,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
 } from "@atomist/automation-client";
 import axios from "axios";
 import * as _ from "lodash";
@@ -80,7 +80,7 @@ export class CreateProject implements HandleCommand<HandlerResult> {
                                 "Please select a team you would like to associate this project with",
                             );
                         }).catch(error => {
-                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );
@@ -122,7 +122,7 @@ export class CreateProject implements HandleCommand<HandlerResult> {
                         }
                     });
             }).catch(error => {
-                logErrorAndReturnSuccess("gluonMemberFromScreenName", error);
+                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
             });
     }
 }

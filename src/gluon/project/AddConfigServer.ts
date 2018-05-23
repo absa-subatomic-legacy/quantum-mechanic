@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
     SuccessPromise,
 } from "@atomist/automation-client";
 import {SlackMessage, url} from "@atomist/slack-messages";
@@ -73,7 +73,7 @@ export class AddConfigServer implements HandleCommand<HandlerResult> {
                                 "gluonTeamName",
                             );
                         }).catch(error => {
-                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );

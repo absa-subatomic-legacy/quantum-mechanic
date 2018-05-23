@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
 } from "@atomist/automation-client";
 import {BitBucketServerRepoRef} from "@atomist/automation-client/operations/common/BitBucketServerRepoRef";
 import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
@@ -106,7 +106,7 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                 this,
                                 "Please select a team, whose project you would like to link a library to");
                         }).catch(error => {
-                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );
@@ -120,7 +120,7 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                         this,
                         "Please select a project to which you would like to link a library to");
                 }).catch(error => {
-                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
+                    logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
                 });
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
@@ -143,7 +143,7 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                             );
                         });
                 }).catch(error => {
-                    logErrorAndReturnSuccess("gluonProjectFromProjectName", error);
+                    logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
                 });
         }
 
@@ -254,7 +254,7 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                     text: "🚀 Your new library is being provisioned...",
                                 }, teamSlackChannel);
                             }).catch(error => {
-                                logErrorAndReturnSuccess("gluonMemberFromScreenName", error);
+                                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
                             });
                     });
             });

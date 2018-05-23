@@ -4,7 +4,7 @@ import {
     HandleEvent,
     HandlerContext,
     HandlerResult,
-    logger, success,
+    logger,
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {BitbucketConfiguration} from "../bitbucket/BitbucketConfiguration";
@@ -79,7 +79,7 @@ export class MembersAddedToTeam implements HandleEvent<any> {
         ).then(() => {
             return ctx.messageClient.addressChannels("New user permissions successfully added to associated projects.", team.slackIdentity.teamChannel);
         }).catch(error => {
-            logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
+            logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
         });
     }
 }

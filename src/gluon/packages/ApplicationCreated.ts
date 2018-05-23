@@ -159,7 +159,7 @@ export class ApplicationCreated implements HandleEvent<any> {
                                     return this.createApplicationOpenshiftResources(tenant.name, project.name, applicationCreatedEvent.application.name);
                                 });
                             }).catch(error  => {
-                                logErrorAndReturnSuccess("gluonProjectFromProjectName", error);
+                                logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
                             });
 
                         });

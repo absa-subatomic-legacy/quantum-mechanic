@@ -7,14 +7,14 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {SimpleOption} from "../../openshift/base/options/SimpleOption";
 import {OCCommon} from "../../openshift/OCCommon";
 import {
-    gluonApplicationsLinkedToGluonProject,
+    gluonApplicationsLinkedToGluonProject, gluonApplicationsLinkedToGluonProjectId,
     menuForApplications,
 } from "../packages/Applications";
 import {
@@ -86,7 +86,7 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                                 this,
                                 "Please select the team which contains the owning project of the application you would like to build");
                         }).catch(error => {
-                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );
@@ -100,7 +100,7 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                         this,
                         "Please select a project which contains the application you would like to build");
                 }).catch(error => {
-                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
+                    logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
                 });
         }
         if (_.isEmpty(this.applicationName)) {
@@ -111,7 +111,7 @@ export class KickOffJenkinsBuild implements HandleCommand<HandlerResult> {
                     this,
                     "Please select the application you would like to build");
             }).catch(error => {
-                logErrorAndReturnSuccess("gluonApplicationsLinkedToGluonProjectId", error);
+                logErrorAndReturnSuccess(gluonApplicationsLinkedToGluonProjectId.name, error);
             });
         }
 

@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
 } from "@atomist/automation-client";
 import {BitBucketServerRepoRef} from "@atomist/automation-client/operations/common/BitBucketServerRepoRef";
 import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
@@ -112,7 +112,7 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                                     });
                             });
                     }).catch(error => {
-                        logErrorAndReturnSuccess("gluonProjectFromProjectName", error);
+                        logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
                     });
             })
             .then(() => {
@@ -120,7 +120,7 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                     text: "🚀 Your new application is being provisioned...",
                 }, this.teamChannel);
             }).catch(error => {
-                logErrorAndReturnSuccess("gluonMemberFromScreenName", error);
+                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
             });
     }
 
@@ -136,7 +136,7 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                         return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
                             return menuForTeams(ctx, teams, this);
                         }).catch(error => {
-                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );
@@ -146,7 +146,7 @@ export class CreateApplication implements HandleCommand<HandlerResult> {
                 .then(projects => {
                     return menuForProjects(ctx, projects, this);
                 }).catch(error => {
-                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
+                    logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
                 });
         }
     }
@@ -225,7 +225,7 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                 this,
                                 "Please select a team, whose project you would like to link an application to");
                         }).catch(error => {
-                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );
@@ -239,7 +239,7 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                         this,
                         "Please select a project to which you would like to link an application to");
                 }).catch(error => {
-                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
+                    logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
                 });
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
@@ -262,7 +262,7 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                             );
                         });
                 }).catch(error => {
-                    logErrorAndReturnSuccess("gluonProjectFromProjectName", error);
+                    logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
                 });
         }
 
@@ -372,7 +372,7 @@ export class LinkExistingApplication implements HandleCommand<HandlerResult> {
                                     text: "🚀 Your new application is being provisioned...",
                                 }, teamSlackChannel);
                             }).catch(error => {
-                                logErrorAndReturnSuccess("gluonMemberFromScreenName", error);
+                                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
                             });
                     });
             });

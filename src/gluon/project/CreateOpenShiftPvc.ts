@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
     SuccessPromise,
 } from "@atomist/automation-client";
 import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
@@ -176,7 +176,7 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
 
             return ctx.messageClient.respond(msg);
         }).catch(error => {
-            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
+            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
         });
     }
 
@@ -207,7 +207,7 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
 
             return ctx.messageClient.respond(msg);
         }).catch(error => {
-            logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
+            logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
         });
     }
 

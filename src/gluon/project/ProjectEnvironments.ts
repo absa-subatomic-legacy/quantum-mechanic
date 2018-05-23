@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -70,10 +70,10 @@ export class NewProjectEnvironments implements HandleCommand {
                             text: "🚀 Your team's project environment is being provisioned...",
                         }, this.teamChannel);
                     }).catch(error => {
-                        logErrorAndReturnSuccess("gluonProjectFromProjectName", error);
+                        logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
                     });
             }).catch(error => {
-                logErrorAndReturnSuccess("gluonMemberFromScreenName", error);
+                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
             });
     }
 
@@ -94,7 +94,7 @@ export class NewProjectEnvironments implements HandleCommand {
                                 "Please select a team associated with the project you wish to provision the environments for",
                             );
                         }).catch(error => {
-                            logErrorAndReturnSuccess("gluonTeamsWhoSlackScreenNameBelongsTo", error);
+                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
                         });
                     },
                 );
@@ -109,7 +109,7 @@ export class NewProjectEnvironments implements HandleCommand {
                         "Please select the projects you wish to provision the environments for",
                     );
                 }).catch(error => {
-                    logErrorAndReturnSuccess("gluonProjectsWhichBelongToGluonTeam", error);
+                    logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
                 });
         }
     }
