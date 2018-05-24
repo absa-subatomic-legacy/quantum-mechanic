@@ -1,4 +1,5 @@
 import {
+    CommandHandler,
     failure,
     HandleCommand,
     HandlerContext,
@@ -35,9 +36,10 @@ import {
 import {
     ApplicationType,
     gluonApplicationForNameAndProjectName,
-    gluonApplicationsLinkedToGluonProject,
+    gluonApplicationsLinkedToGluonProject, menuForApplications,
 } from "./Applications";
 
+@CommandHandler("Configure an existing application", QMConfig.subatomic.commandPrefix + " configure application")
 export class ConfigureApplication implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
@@ -47,7 +49,7 @@ export class ConfigureApplication implements HandleCommand<HandlerResult> {
     public teamChannel: string;
 
     @Parameter({
-        description: "project name",
+        description: "application name",
         displayable: false,
         required: false,
     })
@@ -104,7 +106,9 @@ export class ConfigureApplication implements HandleCommand<HandlerResult> {
                 });
         }
         if (_.isEmpty(this.applicationName)) {
-            return gluonApplicationsLinkedToGluonProject(ctx, this.projectName);
+            return gluonApplicationsLinkedToGluonProject(ctx, this.projectName).then(applications => {
+                return menuForApplications(ctx, applications, this);
+            });
         }
     }
 
@@ -146,6 +150,7 @@ export class ConfigureApplication implements HandleCommand<HandlerResult> {
 
         const teamDevOpsProjectId = `${_.kebabCase(owningTeamName).toLowerCase()}-devops`;
         logger.debug(`Using owning team DevOps project: ${teamDevOpsProjectId}`);
+        logger.debug(`Teams are: ${JSON.stringify(associatedTeams)}`);
 
         const jenkinsPromise: Promise<HandlerResult> = this.createJenkinsJob(
             teamDevOpsProjectId,
@@ -248,7 +253,7 @@ You can kick off the build pipeline for your application by clicking the button 
                             ],
                         }],
                     }, associatedTeams.map(team =>
-                        team.slackIdentity.teamChannel));
+                        team.slack.teamChannel));
                 });
         } else {
             return jenkinsPromise
@@ -275,7 +280,7 @@ You can kick off the build pipeline for your library by clicking the button belo
                                 ],
                             }],
                         }, associatedTeams.map(team =>
-                            team.slackIdentity.teamChannel));
+                            team.slack.teamChannel));
                     },
                 );
         }

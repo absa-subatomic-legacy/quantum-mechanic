@@ -7,6 +7,7 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
+import _ = require("lodash");
 import {ConfigureApplication} from "./ConfigureApplication";
 
 @EventHandler("Receive ApplicationCreatedEvent events", `
@@ -68,14 +69,19 @@ export class ApplicationCreated implements HandleEvent<any> {
 
         const applicationCreatedEvent = event.data.ApplicationCreatedEvent[0];
         if (applicationCreatedEvent.requestConfiguration === true) {
-            const configureApplication = new ConfigureApplication();
-            configureApplication.projectName = applicationCreatedEvent.project.name;
-            configureApplication.applicationName = applicationCreatedEvent.application.name;
-            configureApplication.screenName = applicationCreatedEvent.requestedBy.slackIdentity.screenName;
-            return configureApplication.handle(ctx);
+            if (!_.isEmpty(applicationCreatedEvent.owningTeam.slackIdentity)) {
+                const configureApplication = new ConfigureApplication();
+                configureApplication.projectName = applicationCreatedEvent.project.name;
+                configureApplication.applicationName = applicationCreatedEvent.application.name;
+                configureApplication.screenName = applicationCreatedEvent.requestedBy.slackIdentity.screenName;
+                configureApplication.teamChannel = applicationCreatedEvent.owningTeam.slackIdentity.teamChannel;
+                return configureApplication.handle(ctx);
+            } else {
+                logger.error("Team has no associated slack identity so not configuration can be performed.");
+            }
         }
 
-        logger.info(`ApplicationCreated event requested no configuration`);
+        logger.info(`ApplicationCreated event will not request configuration`);
 
         return Promise.resolve(success());
     }
