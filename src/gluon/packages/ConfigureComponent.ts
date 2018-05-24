@@ -27,6 +27,8 @@ import {
     menuForProjects,
 } from "../project/Projects";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {createMenu} from "../shared/GenericMenu";
+import {subatomicAppOpenshiftTemplates} from "../shared/SubatomicAppOpenshiftTemplates";
 import {gluonTenantFromTenantId} from "../shared/Tenant";
 import {
     gluonTeamForSlackTeamChannel,
@@ -36,11 +38,12 @@ import {
 import {
     ApplicationType,
     gluonApplicationForNameAndProjectName,
-    gluonApplicationsLinkedToGluonProject, menuForApplications,
+    gluonApplicationsLinkedToGluonProject,
+    menuForApplications,
 } from "./Applications";
 
-@CommandHandler("Configure an existing application", QMConfig.subatomic.commandPrefix + " configure application")
-export class ConfigureApplication implements HandleCommand<HandlerResult> {
+@CommandHandler("Configure an existing application/library", QMConfig.subatomic.commandPrefix + " configure component")
+export class ConfigureComponent implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
@@ -69,14 +72,21 @@ export class ConfigureApplication implements HandleCommand<HandlerResult> {
     })
     public teamName: string;
 
+    @Parameter({
+        description: "openshift template",
+        displayable: false,
+        required: false,
+    })
+    public openshiftTemplate: string;
+
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
 
-        if (_.isEmpty(this.projectName) || _.isEmpty(this.applicationName)) {
+        if (_.isEmpty(this.teamName) || _.isEmpty(this.projectName) || _.isEmpty(this.applicationName) || _.isEmpty(this.openshiftTemplate)) {
             return this.requestUnsetParameters(ctx);
         }
         // get memberId for createdBy
         return ctx.messageClient.addressChannels({
-            text: "🚀 Your new application is being provisioned...",
+            text: "🚀 Your project component is being configured...",
         }, this.teamChannel)
             .then(() => {
                     return this.configureApplication(ctx).then(success);
@@ -94,7 +104,11 @@ export class ConfigureApplication implements HandleCommand<HandlerResult> {
                     },
                     () => {
                         return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
-                            return menuForTeams(ctx, teams, this);
+                            return menuForTeams(
+                                ctx,
+                                teams,
+                                this,
+                                "Please select a team associated with the project you wish to configure the project component for");
                         });
                     },
                 );
@@ -102,13 +116,29 @@ export class ConfigureApplication implements HandleCommand<HandlerResult> {
         if (_.isEmpty(this.projectName)) {
             return gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName)
                 .then(projects => {
-                    return menuForProjects(ctx, projects, this);
+                    return menuForProjects(ctx, projects, this, "Please select the owning project of the component you wish to configure");
                 });
         }
         if (_.isEmpty(this.applicationName)) {
             return gluonApplicationsLinkedToGluonProject(ctx, this.projectName).then(applications => {
-                return menuForApplications(ctx, applications, this);
+                return menuForApplications(ctx, applications, this, "Please select the application/library describing the component you wish to configure");
             });
+        }
+        if (_.isEmpty(this.openshiftTemplate)) {
+            const namespace = `${_.kebabCase(this.teamName).toLowerCase()}-devops`;
+            return subatomicAppOpenshiftTemplates(namespace)
+                .then(templates => {
+                    return createMenu(ctx, templates.map(template => {
+                            return {
+                                value: template.metadata.name,
+                                text: template.metadata.name,
+                            };
+                        }),
+                        this,
+                        "Please select the correct template for you component",
+                        "Select a template",
+                        "openshiftTemplate");
+                });
         }
     }
 
@@ -297,7 +327,7 @@ You can kick off the build pipeline for your library by clicking the button belo
                 logger.info(`Processing app [${appName}] Template for: ${projectId}`);
 
                 return OCCommon.commonCommand("get", "templates",
-                    ["subatomic-app-template"],
+                    [this.openshiftTemplate],
                     [
                         new SimpleOption("-namespace", "subatomic"),
                         new SimpleOption("-output", "json"),
@@ -314,7 +344,7 @@ You can kick off the build pipeline for your library by clicking the button belo
                     })
                     .then(() => {
                         return OCCommon.commonCommand("process",
-                            "subatomic-app-template",
+                            this.openshiftTemplate,
                             [],
                             [
                                 new SimpleOption("p", `APP_NAME=${appName}`),

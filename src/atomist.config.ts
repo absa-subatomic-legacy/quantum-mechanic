@@ -16,13 +16,12 @@ import {TeamMemberCreated} from "./gluon/member/TeamMemberCreated";
 import {TeamMemberCreatedEvent} from "./gluon/member/teamMemberIngester";
 import {ApplicationCreated} from "./gluon/packages/ApplicationCreated";
 import {ApplicationCreatedEvent} from "./gluon/packages/applicationsIngester";
-import {ConfigureApplication} from "./gluon/packages/ConfigureApplication";
+import {ConfigureComponent} from "./gluon/packages/ConfigureComponent";
 import {
     CreateApplication,
     LinkExistingApplication,
 } from "./gluon/packages/CreateApplication";
 import {LinkExistingLibrary} from "./gluon/packages/CreateLibrary";
-import {ProvisionApplication} from "./gluon/packages/ProvisionApplication";
 import {AddConfigServer} from "./gluon/project/AddConfigServer";
 import {CreateOpenShiftPvc} from "./gluon/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/project/CreateProject";
@@ -104,8 +103,7 @@ export const configuration: any = {
         AddConfigServer,
         ListTeamProjects,
         ListProjectDetails,
-        ProvisionApplication,
-        ConfigureApplication,
+        ConfigureComponent,
     ],
     events: [
         TeamCreated,

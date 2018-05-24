@@ -7,8 +7,10 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
-import _ = require("lodash");
-import {ConfigureApplication} from "./ConfigureApplication";
+import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {url} from "@atomist/slack-messages";
+import {QMConfig} from "../../config/QMConfig";
+import {ConfigureComponent} from "./ConfigureComponent";
 
 @EventHandler("Receive ApplicationCreatedEvent events", `
 subscription ApplicationCreatedEvent {
@@ -69,20 +71,37 @@ export class ApplicationCreated implements HandleEvent<any> {
 
         const applicationCreatedEvent = event.data.ApplicationCreatedEvent[0];
         if (applicationCreatedEvent.requestConfiguration === true) {
-            if (!_.isEmpty(applicationCreatedEvent.owningTeam.slackIdentity)) {
-                const configureApplication = new ConfigureApplication();
-                configureApplication.projectName = applicationCreatedEvent.project.name;
-                configureApplication.applicationName = applicationCreatedEvent.application.name;
-                configureApplication.screenName = applicationCreatedEvent.requestedBy.slackIdentity.screenName;
-                configureApplication.teamChannel = applicationCreatedEvent.owningTeam.slackIdentity.teamChannel;
-                return configureApplication.handle(ctx);
-            } else {
-                logger.error("Team has no associated slack identity so not configuration can be performed.");
-            }
+            const applicationType = applicationCreatedEvent.application.applicationType.toLowerCase();
+            const attachmentText = `The ${applicationType} can now be configured. This determines what type of ${applicationType} it is and how it should be deployed/built within your environments.`;
+            return ctx.messageClient.addressChannels({
+                text: `The *${applicationCreatedEvent.application.name}* ${applicationType} in the project *${applicationCreatedEvent.project.name}* has been created successfully.`,
+                attachments: [{
+                    text: attachmentText,
+                    fallback: attachmentText,
+                    footer: `For more information, please read the ${this.docs("configure-component")}`,
+                    color: "#45B254",
+                    actions: [
+                        buttonForCommand(
+                            {text: "Configure Component"},
+                            new ConfigureComponent(),
+                            {
+                                projectName : applicationCreatedEvent.project.name,
+                                applicationName : applicationCreatedEvent.application.name,
+                                teamName: applicationCreatedEvent.owningTeam.name,
+                                screenName : applicationCreatedEvent.requestedBy.slackIdentity.screenName,
+                            }),
+                    ],
+                }],
+            },  applicationCreatedEvent.owningTeam.slackIdentity.teamChannel);
         }
 
         logger.info(`ApplicationCreated event will not request configuration`);
 
         return Promise.resolve(success());
+    }
+
+    private docs(extension): string {
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
+            "documentation")}`;
     }
 }
