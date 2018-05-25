@@ -1,7 +1,7 @@
 import {
     HandleCommand,
     HandlerContext,
-    HandlerResult,
+    HandlerResult, logger,
 } from "@atomist/automation-client";
 import {
     BaseParameter,
@@ -38,6 +38,7 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
         const dynamicClassInstance: any = this;
         for (const property of this.recursiveParameterProperties) {
             if (_.isEmpty(dynamicClassInstance[property])) {
+                logger.info(`Recursive parameter ${property} not set.`);
                 parametersAreSet = false;
                 break;
             }
@@ -46,12 +47,14 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
     }
 
     private requestUnsetParametersEntry(ctx: HandlerContext): Promise<HandlerResult> {
-
+        logger.info(`Requesting next unset recursive parameter.`);
         const result: Promise<HandlerResult> = this.requestUnsetParameters(ctx) || null;
 
         if (result !== null) {
             return result;
         }
+
+        logger.info(`Recursive parameter request returned a void result. Assuming all recursive parameters are set.`);
 
         return this.runCommand(ctx);
     }
