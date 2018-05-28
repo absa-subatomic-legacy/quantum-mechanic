@@ -24,7 +24,7 @@ import {QMTemplate} from "../../template/QMTemplate";
 import {bitbucketRepositoryForSlug} from "../bitbucket/Bitbucket";
 import {jenkinsAxios} from "../jenkins/Jenkins";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
-import {getProjectId} from "../project/Project";
+import {getProjectDevOpsId, getProjectId} from "../project/Project";
 import {
     gluonProjectFromProjectName,
     gluonProjectsWhichBelongToGluonTeam,
@@ -448,6 +448,7 @@ You can kick off the build pipeline for your library by clicking the button belo
             .map(environment => {
                 const projectId = getProjectId(tenantName, projectName, environment[0]);
                 const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
+                const devOpsProjectId = getProjectDevOpsId(tenantName, projectName);
                 logger.info(`Processing app [${appName}] Template for: ${projectId}`);
 
                 return OCCommon.commonCommand("get", "templates",
@@ -473,6 +474,7 @@ You can kick off the build pipeline for your library by clicking the button belo
                             [
                                 new SimpleOption("p", `APP_NAME=${appName}`),
                                 new SimpleOption("p", `IMAGE_STREAM_PROJECT=${projectId}`),
+                                new SimpleOption("p", `DEVOPS_NAMESPACE=${devOpsProjectId}`),
                                 new SimpleOption("-namespace", projectId),
                             ],
                         )
