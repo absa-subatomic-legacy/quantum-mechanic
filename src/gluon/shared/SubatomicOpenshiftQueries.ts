@@ -3,7 +3,7 @@ import {SimpleOption} from "../../openshift/base/options/SimpleOption";
 import {OCClient} from "../../openshift/OCClient";
 import {OCCommon} from "../../openshift/OCCommon";
 
-export function subatomicAppOpenshiftTemplates(namespace: string): Promise<any> {
+export function subatomicApplicationTemplates(namespace: string): Promise<any> {
     return OCClient.login(QMConfig.subatomic.openshift.masterUrl, QMConfig.subatomic.openshift.auth.token)
         .then(
             () => {

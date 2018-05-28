@@ -1,0 +1,5 @@
+{
+  "openshiftTemplate": "subatomic-spring-boot-1x-template",
+  "imageStream": "jdk8-maven3-newrelic-subatomic:2.0",
+  "jenkinsfile": "maven-spring-boot"
+}

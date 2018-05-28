@@ -1,0 +1,5 @@
+{
+  "openshiftTemplate": "subatomic-nodejs-template",
+  "imageStream": "nodejs8-nginx112-subatomic",
+  "jenkinsfile": "nodejs"
+}
