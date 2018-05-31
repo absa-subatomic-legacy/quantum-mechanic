@@ -22,6 +22,7 @@ import {
 } from "./gluon/packages/CreateApplication";
 import {LinkExistingLibrary} from "./gluon/packages/CreateLibrary";
 import {AddConfigServer} from "./gluon/project/AddConfigServer";
+import {AssociateTeam} from "./gluon/project/AssociateTeam";
 import {CreateOpenShiftPvc} from "./gluon/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/project/CreateProject";
 import {ProjectCreated} from "./gluon/project/ProjectCreated";
@@ -34,7 +35,9 @@ import {ProjectEnvironmentsRequested} from "./gluon/project/ProjectEnvironmentsR
 import {
     ProjectCreatedEvent,
     ProjectEnvironmentsRequestedEvent,
+    TeamAssociatedEvent,
 } from "./gluon/project/projectIngester";
+import {TeamAssociated} from "./gluon/project/TeamAssociated";
 import {
     ActionedBy,
     BitbucketProject,
@@ -86,6 +89,7 @@ export const configuration: any = {
         AddSlackDetails,
         JoinTeam,
         AddMemberToTeam,
+        AssociateTeam,
         CreateTeam,
         CreateProject,
         NewBitbucketProject,
@@ -104,6 +108,7 @@ export const configuration: any = {
         ListProjectDetails,
     ],
     events: [
+        TeamAssociated,
         TeamCreated,
         TeamMemberCreated,
         ProjectCreated,
@@ -134,6 +139,7 @@ export const configuration: any = {
         MembersAddedToTeamEvent,
         GluonTenant,
         GluonTenantId,
+        TeamAssociatedEvent,
     ],
     token,
     http,

@@ -16,10 +16,8 @@ import {
     gluonTenantFromTenantName, gluonTenantList,
     menuForTenants,
 } from "../shared/Tenant";
-import {
-    gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
-} from "../team/Teams";
+import {gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams} from "../team/Teams";
+import {gluonProjectFromProjectName, gluonProjects, menuForProjects} from "./Projects";
 
 @CommandHandler("Add additional team/s to a project", QMConfig.subatomic.commandPrefix + " associate team")
 export class AssociateTeam implements HandleCommand<HandlerResult> {
@@ -31,21 +29,25 @@ export class AssociateTeam implements HandleCommand<HandlerResult> {
     public teamChannel: string;
 
     @Parameter({
-        description: "project name",
-    })
-    public name: string;
-
-    @Parameter({
-        description: "project description",
-    })
-    public description: string;
-
-    @Parameter({
         description: "team name",
         required: false,
         displayable: false,
     })
     public teamName: string;
+
+    @Parameter({
+        description: "project name",
+        required: false,
+        displayable: false,
+    })
+    public projectName: string;
+
+    @Parameter({
+        description: "project description",
+        required: false,
+        displayable: false,
+    })
+    public projectDescription: string;
 
     @Parameter({
         description: "tenant name",
@@ -54,71 +56,83 @@ export class AssociateTeam implements HandleCommand<HandlerResult> {
     })
     public tenantName: string;
 
+    public constructor(projectName: string, projectDescription: string) {
+        this.projectName = projectName;
+        this.projectDescription = projectDescription;
+    }
+
     public handle(ctx: HandlerContext): Promise<HandlerResult> {
-        if (_.isEmpty(this.teamName) || _.isEmpty(this.tenantName)) {
+        if (_.isEmpty(this.projectName) || _.isEmpty(this.teamName) || _.isEmpty(this.tenantName)) {
             return this.requestUnsetParameters(ctx);
         }
         return gluonTenantFromTenantName(this.tenantName).then(tenant => {
-            return this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
+            return this.linkProjectForTeam(ctx, this.screenName, this.teamName);
         });
     }
 
     private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
-        if (_.isEmpty(this.teamName)) {
-            return gluonTeamForSlackTeamChannel(this.teamChannel)
-                .then(
-                    team => {
-                        this.teamName = team.name;
-                        return this.requestUnsetParameters(ctx);
-                    },
-                    () => {
-                        return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
-                            return menuForTeams(
-                                ctx,
-                                teams,
-                                this,
-                                "Please select a team you would like to associate this project with",
-                            );
-                        }).catch(error => {
-                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
-                        });
-                    },
+        if (_.isEmpty(this.projectName)) {
+            return gluonProjects(ctx).then(projects => {
+                return menuForProjects(
+                    ctx,
+                    projects,
+                    this,
+                    `Please select a project you would like to associate this team to.`,
                 );
+            }).catch(error => {
+                logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
+            });
+        }
+        if (_.isEmpty(this.teamName)) {
+            return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
+                return menuForTeams(
+                    ctx,
+                    teams,
+                    this,
+                    `Please select a team you would like to associate to *${this.projectName}*.`,
+                );
+            }).catch(error => {
+                logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
+            });
         }
         if (_.isEmpty(this.tenantName)) {
             return gluonTenantList().then(tenants => {
-                return menuForTenants(ctx,
+                return menuForTenants(
+                    ctx,
                     tenants,
                     this,
-                    "Please select a tenant you would like to associate this project with. Choose Default if you have no tenant specified for this project.",
+                    `Please select a tenant you would like to associate to *${this.projectName}* with. Choose Default if you have no tenant specified for this project.`,
                 );
             });
         }
     }
 
-    private requestNewProjectForTeamAndTenant(ctx: HandlerContext, screenName: string,
-                                              teamName: string, tenantId: string): Promise<any> {
+    private linkProjectForTeam(ctx: HandlerContext, screenName: string,
+                               teamName: string): Promise<any> {
         return gluonMemberFromScreenName(ctx, screenName)
             .then(member => {
                 axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`)
                     .then(team => {
                         if (!_.isEmpty(team.data._embedded)) {
-                            return axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
-                                {
-                                    name: this.name,
-                                    description: this.description,
-                                    createdBy: member.memberId,
-                                    owningTenant: tenantId,
-                                    teams: [{
-                                        teamId: team.data._embedded.teamResources[0].teamId,
-                                    }],
+                            return gluonProjectFromProjectName(ctx, this.projectName)
+                                .then(gluonProject => {
+                                    return axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${gluonProject.projectId}`,
+                                        {
+                                            productId: gluonProject.projectId,
+                                            createdBy: gluonProject.createdBy,
+                                            teams: [{
+                                                teamId: team.data._embedded.teamResources[0].teamId,
+                                                name: team.data._embedded.teamResources[0].name,
+                                            }],
+                                        }).then( () => {
+                                        return ctx.messageClient.respond(`Linked project with ${team.data._embedded.teamResources[0].teamId}`);
+                                    })
+                                        .catch(error => {
+                                            return ctx.messageClient.respond(`❗Failed to link project with error: ${JSON.stringify(error.response.data)}.`);
+                                        });
                                 }).catch(error => {
-                                if (error.response.status === 409) {
-                                    return ctx.messageClient.respond(`❗Failed to create project since the project name is already in use. Please retry using a different project name.`);
-                                } else {
-                                    return ctx.messageClient.respond(`❗Failed to create project with error: ${JSON.stringify(error.response.data)}`);
-                                }
-                            });
+                                    return ctx.messageClient.respond(`❗Failed to link project with error: ${JSON.stringify(error.response.data)}`);
+                                });
                         }
                     });
             }).catch(error => {

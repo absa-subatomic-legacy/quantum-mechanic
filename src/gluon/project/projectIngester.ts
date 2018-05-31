@@ -82,3 +82,32 @@ export const ProjectEnvironmentsRequestedEvent: Ingester = {
         },
     ],
 };
+
+export const TeamAssociatedEvent: Ingester = {
+    root_type: "TeamAssociatedEvent",
+    types: [
+        {
+            kind: "OBJECT",
+            name: "TeamAssociatedEvent",
+            fields: [
+                {
+                    name: "team",
+                    type: {
+                        kind: "LIST",
+                        ofType: {
+                            kind: "OBJECT",
+                            name: "GluonTeam",
+                        },
+                    },
+                },
+                {
+                    name: "requestedBy",
+                    type: {
+                        kind: "OBJECT",
+                        name: "ActionedBy",
+                    },
+                },
+            ],
+        },
+    ],
+};

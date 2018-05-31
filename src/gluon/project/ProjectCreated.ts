@@ -104,7 +104,7 @@ If you would like to associate more teams to the *${projectCreatedEvent.project.
                         {
                             text: "Associate team",
                         },
-                        new AssociateTeam()),
+                        new AssociateTeam(projectCreatedEvent.project.name, projectCreatedEvent.project.description)),
                 ],
             }],
         }, projectCreatedEvent.team.slackIdentity.teamChannel);
