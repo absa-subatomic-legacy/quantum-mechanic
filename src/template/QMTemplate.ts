@@ -12,11 +12,8 @@ export class QMTemplate {
     }
 
     public build(parameters: { [k: string]: any }) {
-        logger.info("Hello");
         const safeParameters: { [k: string]: any } = Object.assign([], parameters);
-        logger.info("Hello2");
         this.toSafeStrings(safeParameters);
-        logger.info("Hello3");
         return this.template(safeParameters);
     }
 
