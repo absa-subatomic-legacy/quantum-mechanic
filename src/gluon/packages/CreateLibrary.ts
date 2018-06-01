@@ -7,14 +7,11 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
+    success,
 } from "@atomist/automation-client";
-import {BitBucketServerRepoRef} from "@atomist/automation-client/operations/common/BitBucketServerRepoRef";
-import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
-import {GitProject} from "@atomist/automation-client/project/git/GitProject";
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
-import {QMTemplate} from "../../template/QMTemplate";
 import {
     bitbucketRepositoriesForProjectKey,
     bitbucketRepositoryForSlug,
@@ -79,15 +76,18 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
             return this.requestUnsetParameters(ctx);
         }
 
-        return this.linkLibraryForGluonProject(
-            ctx,
-            this.screenName,
-            this.teamChannel,
-            this.name,
-            this.description,
-            this.bitbucketRepositorySlug,
-            this.projectName,
-        );
+        return ctx.messageClient.addressChannels({
+            text: "🚀 Your new library is being created...",
+        }, this.teamChannel).then(() => {
+            return this.linkLibraryForGluonProject(
+                ctx,
+                this.screenName,
+                this.name,
+                this.description,
+                this.bitbucketRepositorySlug,
+                this.projectName,
+            );
+        });
     }
 
     private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
@@ -151,7 +151,6 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
 
     private linkLibraryForGluonProject(ctx: HandlerContext,
                                        slackScreeName: string,
-                                       teamSlackChannel: string,
                                        libraryName: string,
                                        libraryDescription: string,
                                        bitbucketRepositorySlug: string,
@@ -162,7 +161,6 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
 
                 return this.linkBitbucketRepository(ctx,
                     slackScreeName,
-                    teamSlackChannel,
                     libraryName,
                     libraryDescription,
                     bitbucketRepositorySlug,
@@ -173,7 +171,6 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
 
     private linkBitbucketRepository(ctx: HandlerContext,
                                     slackScreeName: string,
-                                    teamSlackChannel: string,
                                     libraryName: string,
                                     libraryDescription: string,
                                     bitbucketRepositorySlug: string,
@@ -181,81 +178,32 @@ export class LinkExistingLibrary implements HandleCommand<HandlerResult> {
                                     gluonProjectId: string): Promise<HandlerResult> {
         return bitbucketRepositoryForSlug(bitbucketProjectKey, bitbucketRepositorySlug)
             .then(repo => {
-                const username = QMConfig.subatomic.bitbucket.auth.username;
-                const password = QMConfig.subatomic.bitbucket.auth.password;
-                return GitCommandGitProject.cloned({
-                        username,
-                        password,
-                    },
-                    new BitBucketServerRepoRef(
-                        QMConfig.subatomic.bitbucket.baseUrl.replace(/^(https?:|)\/\//, ""),
-                        bitbucketProjectKey,
-                        bitbucketRepositorySlug))
-                    .then((project: GitProject) => {
-                        return project.findFile("Jenkinsfile")
-                            .catch(() => {
-                                logger.warn("Doesn't exist, add it!");
+                return gluonMemberFromScreenName(ctx, slackScreeName)
+                    .then(member => {
+                        const remoteUrl = _.find(repo.links.clone, clone => {
+                            return (clone as any).name === "ssh";
+                        }) as any;
 
-                                const jenkinsTemplate: QMTemplate = new QMTemplate("templates/jenkins/jenkinsfile-library.groovy", true);
-                                return project.addFile("Jenkinsfile",
-                                    jenkinsTemplate.build({}));
-                            })
-                            .then(() => {
-                                return project.isClean()
-                                    .then(clean => {
-                                        logger.debug(`Jenkinsfile has been added: ${clean.success}`);
-
-                                        if (!clean.success) {
-                                            return project.setUserConfig(
-                                                QMConfig.subatomic.bitbucket.auth.username,
-                                                QMConfig.subatomic.bitbucket.auth.email,
-                                            )
-                                                .then(() => project.commit(`Added Jenkinsfile`))
-                                                .then(() => project.push());
-                                        } else {
-                                            logger.debug("Jenkinsfile already exists");
-                                            return clean;
-                                        }
-                                    });
+                        return axios.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`,
+                            {
+                                name: libraryName,
+                                description: libraryDescription,
+                                applicationType: ApplicationType.LIBRARY,
+                                projectId: gluonProjectId,
+                                createdBy: member.memberId,
+                                bitbucketRepository: {
+                                    bitbucketId: repo.id,
+                                    name: repo.name,
+                                    slug: bitbucketRepositorySlug,
+                                    remoteUrl: remoteUrl.href,
+                                    repoUrl: repo.links.self[0].href,
+                                },
+                                requestConfiguration: true,
                             });
                     })
-                    .then(() => {
-                        return gluonMemberFromScreenName(ctx, slackScreeName)
-                            .then(member => {
-                                return axios.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`,
-                                    {
-                                        name: libraryName,
-                                        description: libraryDescription,
-                                        applicationType: ApplicationType.LIBRARY,
-                                        projectId: gluonProjectId,
-                                        createdBy: member.memberId,
-                                    })
-                                    .then(library => {
-                                        const remoteUrl = _.find(repo.links.clone, clone => {
-                                            return (clone as any).name === "ssh";
-                                        }) as any;
-
-                                        return axios.put(library.headers.location,
-                                            {
-                                                projectId: gluonProjectId,
-                                                bitbucketRepository: {
-                                                    bitbucketId: repo.id,
-                                                    name: repo.name,
-                                                    slug: bitbucketRepositorySlug,
-                                                    remoteUrl: remoteUrl.href,
-                                                    repoUrl: repo.links.self[0].href,
-                                                },
-                                                createdBy: member.memberId,
-                                            });
-                                    });
-                            })
-                            .then(() => {
-                                return ctx.messageClient.addressChannels({
-                                    text: "🚀 Your new library is being provisioned...",
-                                }, teamSlackChannel);
-                            }).catch(error => {
-                                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
-                            });
+                    .then(success)
+                    .catch(error => {
+                        return logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
                     });
             });
     }
