@@ -12,6 +12,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTenantFromTenantName, gluonTenantList,
     menuForTenants,
@@ -20,7 +21,7 @@ import {gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams} from "../team/Teams
 import {gluonProjectFromProjectName, gluonProjects, menuForProjects} from "./Projects";
 
 @CommandHandler("Add additional team/s to a project", QMConfig.subatomic.commandPrefix + " associate team")
-export class AssociateTeam implements HandleCommand<HandlerResult> {
+export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
@@ -28,14 +29,14 @@ export class AssociateTeam implements HandleCommand<HandlerResult> {
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "team name",
         required: false,
         displayable: false,
     })
     public teamName: string;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "project name",
         required: false,
         displayable: false,
@@ -49,7 +50,7 @@ export class AssociateTeam implements HandleCommand<HandlerResult> {
     })
     public projectDescription: string;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "tenant name",
         required: false,
         displayable: false,
@@ -57,20 +58,18 @@ export class AssociateTeam implements HandleCommand<HandlerResult> {
     public tenantName: string;
 
     public constructor(projectName: string, projectDescription: string) {
+        super();
         this.projectName = projectName;
         this.projectDescription = projectDescription;
     }
 
-    public handle(ctx: HandlerContext): Promise<HandlerResult> {
-        if (_.isEmpty(this.projectName) || _.isEmpty(this.teamName) || _.isEmpty(this.tenantName)) {
-            return this.requestUnsetParameters(ctx);
-        }
+    protected runCommand(ctx: HandlerContext) {
         return gluonTenantFromTenantName(this.tenantName).then(tenant => {
             return this.linkProjectForTeam(ctx, this.screenName, this.teamName);
         });
     }
 
-    private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+    protected setNextParameter(ctx: HandlerContext): Promise<HandlerResult> | void {
         if (_.isEmpty(this.projectName)) {
             return gluonProjects(ctx).then(projects => {
                 return menuForProjects(
