@@ -34,23 +34,4 @@ export class PublicQMConfig {
         this.subatomic.bitbucket.caPath = "";
         this.subatomic.openshift.auth.token = "";
     }
-
-    /*
-    public asDictionary(obj: any = this, stack = "", currentDictionary: { [key: string]: any } = {}) {
-        for (const property in obj) {
-            if (obj.hasOwnProperty(property)) {
-                if (typeof obj[property] === "object") {
-                    let prefix = stack + ".";
-                    if (stack === "") {
-                        prefix = "";
-                    }
-                    return this.asDictionary(obj[property], prefix + property);
-                } else {
-                    currentDictionary[stack + "." + property] = obj[property];
-                }
-            }
-        }
-        return currentDictionary;
-    }
-*/
 }
