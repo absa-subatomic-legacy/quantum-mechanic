@@ -200,6 +200,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                                         uatProjectId: getProjectId(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, "uat"),
                                     },
                                 );
+                                logger.info("Template: " + builtTemplate);
                                 return axios.post(`https://${jenkinsHost.output}/createItem?name=${_.kebabCase(environmentsRequestedEvent.project.name).toLowerCase()}`,
                                     builtTemplate,
                                     {
