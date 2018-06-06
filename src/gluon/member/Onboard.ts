@@ -49,14 +49,8 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
     })
     public domainUsername: string;
 
-    public handle(ctx: HandlerContext): Promise<HandlerResult> {
-
-        // check if the member hasn't been onboarded already?
-        // TODO in future...
-
-        // if NOT, then call Gluon to onboard him
-        // axios.post(...)
-        return axios.post(`${QMConfig.subatomic.gluon.baseUrl}/members`,
+    public async handle(ctx: HandlerContext): Promise<HandlerResult> {
+        const createMemberResult = await this.createGluonTeamMember(
             {
                 firstName: this.firstName,
                 lastName: this.lastName,
@@ -66,43 +60,48 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
                     screenName: this.screenName,
                     userId: this.userId,
                 },
-            })
-            .then(() => {
-                // if successful, then send him a message to welcome him to Subatomic
-                // present a message full of helpful messages (in future)
-                // then ask him if he'f like to apply to be invited onto existing teams?
-                // present with menu list of existing teams
-                // on selection, send a invitation request to the selected team
-                const text: string = `
-Welcome to the Subatomic environment *${this.firstName}*!
+            });
+
+        let result;
+        if (createMemberResult.status === 201) {
+            result = await this.presentTeamCreationAndApplicationOptions(ctx, this.firstName, this.userId);
+        } else {
+            result = await failure(createMemberResult.data);
+        }
+        return result;
+    }
+
+    private async createGluonTeamMember(teamMemberDetails: any): Promise<any> {
+        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/members`,
+            teamMemberDetails);
+    }
+
+    private async presentTeamCreationAndApplicationOptions(ctx: HandlerContext, firstName: string, userId: string): Promise<HandlerResult> {
+        const text: string = `
+Welcome to the Subatomic environment *${firstName}*!
 Next steps are to either join an existing team or create a new one.
                 `;
 
-                const msg: SlackMessage = {
-                    text,
-                    attachments: [{
-                        fallback: "Welcome to the Subatomic environment",
-                        footer: `For more information, please read the ${this.docs()}`,
-                        thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
-                        actions: [
-                            // TODO add support for this later
-                            buttonForCommand(
-                                {
-                                    text: "Apply to join a team",
-                                    style: "primary",
-                                },
-                                new JoinTeam()),
-                            buttonForCommand(
-                                {text: "Create a new team"},
-                                new CreateTeam()),
-                        ],
-                    }],
-                };
-                return ctx.messageClient.addressUsers(msg, this.userId);
-            })
-            .catch(err => {
-                return failure(err);
-            });
+        const msg: SlackMessage = {
+            text,
+            attachments: [{
+                fallback: "Welcome to the Subatomic environment",
+                footer: `For more information, please read the ${this.docs()}`,
+                thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
+                actions: [
+                    buttonForCommand(
+                        {
+                            text: "Apply to join a team",
+                            style: "primary",
+                        },
+                        new JoinTeam()),
+                    buttonForCommand(
+                        {text: "Create a new team"},
+                        new CreateTeam()),
+                ],
+            }],
+        };
+        return await ctx.messageClient.addressUsers(msg, userId);
     }
 
     private docs(): string {
