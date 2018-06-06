@@ -62,13 +62,11 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
                 },
             });
 
-        let result;
-        if (createMemberResult.status === 201) {
-            result = await this.presentTeamCreationAndApplicationOptions(ctx, this.firstName, this.userId);
-        } else {
-            result = await failure(createMemberResult.data);
+        if (createMemberResult.status !== 201) {
+            return await ctx.messageClient.respond(`❗Unable to onboard a member with provided details. Details of the user are already in use.`);
         }
-        return result;
+
+        return await this.presentTeamCreationAndApplicationOptions(ctx, this.firstName, this.userId);
     }
 
     private async createGluonTeamMember(teamMemberDetails: any): Promise<any> {
