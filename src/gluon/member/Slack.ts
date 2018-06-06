@@ -43,7 +43,7 @@ export class AddSlackDetails implements HandleCommand<HandlerResult> {
 
         if (updateMemberResult.status !== 200) {
             logger.error(`Unable to update slack details for gluon member with email ${this.email}. Http request failed with status ${updateMemberResult.status}`);
-            return await ctx.messageClient.respond(`❗No member with email ${this.email} exists.`);
+            return await ctx.messageClient.respond(`❗Unable to update slack details for the member specified`);
         }
 
         return ctx.messageClient.respond({
