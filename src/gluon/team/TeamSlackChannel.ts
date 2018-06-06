@@ -215,6 +215,7 @@ async function inviteListOfGluonMembersToChannel(ctx: HandlerContext, slackTeamI
         try {
             await tryInviteGluonMemberToChannel(ctx, member.memberId, slackTeamId, channelId);
         } catch (err) {
+            // Don't outright fail. Just alert the user.
             await ctx.messageClient.respond(`❗Unable to invite member "${member.firstName} ${member.lastName}" to channel ${slackChannelName}. Failed with error message: ${err.message}`);
         }
     }
