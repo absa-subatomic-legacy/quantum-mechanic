@@ -42,44 +42,48 @@ subscription MembersAddedToTeamEvent {
 `)
 export class MembersAddedToTeam implements HandleEvent<any> {
 
-    public handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
+    public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested MembersAddedToTeamEvent event: ${JSON.stringify(event.data)}`);
 
         const membersAddedToTeamEvent = event.data.MembersAddedToTeamEvent[0];
         const team = membersAddedToTeamEvent.team;
 
-        return gluonProjectsWhichBelongToGluonTeam(ctx, team.name).then(projects => {
-                let teamOwnersUsernames: string[] = [];
-                let teamMembersUsernames: string[] = [];
+        let projects;
+        try {
+            projects = await gluonProjectsWhichBelongToGluonTeam(ctx, team.name);
+        } catch (error) {
+            // TODO: We probably dont want to have the gluonProjectsWhichBelong to team thing catch these errors for events
+            return logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
+        }
 
-                teamOwnersUsernames = _.union(teamOwnersUsernames, membersAddedToTeamEvent.owners.map(owner => owner.domainUsername));
-                teamMembersUsernames = _.union(teamMembersUsernames, membersAddedToTeamEvent.members.map(member => member.domainUsername));
-                const bitbucketConfiguration = new BitbucketConfiguration(teamOwnersUsernames, teamMembersUsernames);
+        const bitbucketConfiguration = this.getBitbucketConfiguration(membersAddedToTeamEvent);
 
-                const permissionPromises: Array<Promise<any>> = [];
-                const devopsProject = `${_.kebabCase(team.name).toLowerCase()}-devops`;
-                permissionPromises.push(addOpenshiftMembershipPermissions(devopsProject, membersAddedToTeamEvent));
-                for (const project of projects) {
-                    logger.info(`Configuring permissions for project: ${project}`);
-                    // Add to bitbucket
-                    permissionPromises.push(
-                        bitbucketConfiguration.configureBitbucketProject(project.bitbucketProject.key),
-                    );
-                    // Add to openshift environments
-                    for (const environment of ["dev", "sit", "uat"]) {
-                        const projectId = `${_.kebabCase(project.name).toLowerCase()}-${environment}`;
-                        permissionPromises.push(
-                            addOpenshiftMembershipPermissions(projectId, membersAddedToTeamEvent),
-                        );
-                    }
+        await this.addPermissionsForUserToTeams(bitbucketConfiguration, team.name, projects, membersAddedToTeamEvent);
 
-                }
-                return Promise.all(permissionPromises);
-            },
-        ).then(() => {
-            return ctx.messageClient.addressChannels("New user permissions successfully added to associated projects.", team.slackIdentity.teamChannel);
-        }).catch(error => {
-            logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
-        });
+        return await ctx.messageClient.addressChannels("New user permissions successfully added to associated projects.", team.slackIdentity.teamChannel);
+    }
+
+    private getBitbucketConfiguration(membersAddedToTeamEvent): BitbucketConfiguration {
+        let teamOwnersUsernames: string[] = [];
+        let teamMembersUsernames: string[] = [];
+
+        teamOwnersUsernames = _.union(teamOwnersUsernames, membersAddedToTeamEvent.owners.map(owner => owner.domainUsername));
+        teamMembersUsernames = _.union(teamMembersUsernames, membersAddedToTeamEvent.members.map(member => member.domainUsername));
+        return new BitbucketConfiguration(teamOwnersUsernames, teamMembersUsernames);
+    }
+
+    private async addPermissionsForUserToTeams(bitbucketConfiguration: BitbucketConfiguration, teamName: string, projects, membersAddedToTeamEvent) {
+        const devopsProject = `${_.kebabCase(teamName).toLowerCase()}-devops`;
+        await addOpenshiftMembershipPermissions(devopsProject, membersAddedToTeamEvent);
+        for (const project of projects) {
+            logger.info(`Configuring permissions for project: ${project}`);
+            // Add to bitbucket
+            await bitbucketConfiguration.configureBitbucketProject(project.bitbucketProject.key);
+            // Add to openshift environments
+            for (const environment of ["dev", "sit", "uat"]) {
+                const projectId = `${_.kebabCase(project.name).toLowerCase()}-${environment}`;
+                await addOpenshiftMembershipPermissions(projectId, membersAddedToTeamEvent);
+            }
+        }
     }
 }
