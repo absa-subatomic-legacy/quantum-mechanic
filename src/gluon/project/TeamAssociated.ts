@@ -6,18 +6,20 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import {addressSlackUsers} from "@atomist/automation-client/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../config/QMConfig";
 
-@EventHandler("Receive TeamAssociated events", `
-subscription TeamAssociatedEvent {
-  TeamAssociatedEvent {
+@EventHandler("Receive TeamsLinkedToProject events", `
+subscription TeamsLinkedToProjectEvent {
+  TeamsLinkedToProjectEvent {
     id
     team {
       teamId
       name
       description
+      slackIdentity {
+        teamChannel
+      }
     }
     requestedBy {
       firstName
@@ -28,19 +30,15 @@ subscription TeamAssociatedEvent {
   }
 }
 `)
-export class TeamAssociated implements HandleEvent<any> {
+export class TeamsLinkedToProject implements HandleEvent<any> {
 
     public handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested TeamAssociated event: ${JSON.stringify(event.data)}`);
 
-        // TODO if team channel already exists, then send a message there about the new Subatomic team
-        // also update the Team with that existing team channel
+        const teamsLinkedToProjectEvent = event.data.TeamsLinkedToProjectEvent[0];
 
-        const teamAssociatedEvent = event.data.TeamAssociatedEvent[0];
-
-        // TODO fix the below if not created from Slack
-        return ctx.messageClient.send("asdas",
-            addressSlackUsers(QMConfig.teamId, teamAssociatedEvent.requestedBy.slackIdentity.screenName));
+        return ctx.messageClient.addressChannels(`Your team has been successfully associated with ${teamsLinkedToProjectEvent.id}`,
+            teamsLinkedToProjectEvent.team[0].slackIdentity.teamChannel);
     }
 
     private docs(): string {

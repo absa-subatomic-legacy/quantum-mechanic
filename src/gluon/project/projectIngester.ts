@@ -83,12 +83,12 @@ export const ProjectEnvironmentsRequestedEvent: Ingester = {
     ],
 };
 
-export const TeamAssociatedEvent: Ingester = {
-    root_type: "TeamAssociatedEvent",
+export const TeamsLinkedToProjectEvent: Ingester = {
+    root_type: "TeamsLinkedToProjectEvent",
     types: [
         {
             kind: "OBJECT",
-            name: "TeamAssociatedEvent",
+            name: "TeamsLinkedToProjectEvent",
             fields: [
                 {
                     name: "team",

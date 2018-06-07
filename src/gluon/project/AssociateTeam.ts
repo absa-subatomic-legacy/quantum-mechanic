@@ -1,6 +1,5 @@
 import {
     CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     MappedParameter,
@@ -13,10 +12,6 @@ import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
 import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
-import {
-    gluonTenantFromTenantName, gluonTenantList,
-    menuForTenants,
-} from "../shared/Tenant";
 import {gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams} from "../team/Teams";
 import {gluonProjectFromProjectName, gluonProjects, menuForProjects} from "./Projects";
 
@@ -50,13 +45,6 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
     })
     public projectDescription: string;
 
-    @RecursiveParameter({
-        description: "tenant name",
-        required: false,
-        displayable: false,
-    })
-    public tenantName: string;
-
     public constructor(projectName: string, projectDescription: string) {
         super();
         this.projectName = projectName;
@@ -64,7 +52,8 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
     }
 
     protected runCommand(ctx: HandlerContext) {
-        return gluonTenantFromTenantName(this.tenantName).then(tenant => {
+        return gluonProjectFromProjectName(ctx, this.projectName)
+            .then(() => {
             return this.linkProjectForTeam(ctx, this.screenName, this.teamName);
         });
     }
@@ -79,7 +68,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
                     `Please select a project you would like to associate this team to.`,
                 );
             }).catch(error => {
-                logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
+                logErrorAndReturnSuccess(gluonProjects.name, error);
             });
         }
         if (_.isEmpty(this.teamName)) {
@@ -92,16 +81,6 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
                 );
             }).catch(error => {
                 logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
-            });
-        }
-        if (_.isEmpty(this.tenantName)) {
-            return gluonTenantList().then(tenants => {
-                return menuForTenants(
-                    ctx,
-                    tenants,
-                    this,
-                    `Please select a tenant you would like to associate to *${this.projectName}* with. Choose Default if you have no tenant specified for this project.`,
-                );
             });
         }
     }
@@ -124,7 +103,9 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
                                                 name: team.data._embedded.teamResources[0].name,
                                             }],
                                         }).then( () => {
-                                        return ctx.messageClient.respond(`Linked project with ${team.data._embedded.teamResources[0].teamId}`);
+                                            if (this.teamChannel !== team.data._embedded.teamResources[0].name) {
+                                                return ctx.messageClient.respond(`Team *${team.data._embedded.teamResources[0].name}* has been successfully associated with ${gluonProject.projectId}`);
+                                            }
                                     })
                                         .catch(error => {
                                             return ctx.messageClient.respond(`❗Failed to link project with error: ${JSON.stringify(error.response.data)}.`);

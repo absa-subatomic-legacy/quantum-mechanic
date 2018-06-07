@@ -36,9 +36,9 @@ import {ProjectEnvironmentsRequested} from "./gluon/project/ProjectEnvironmentsR
 import {
     ProjectCreatedEvent,
     ProjectEnvironmentsRequestedEvent,
-    TeamAssociatedEvent,
+    TeamsLinkedToProjectEvent,
 } from "./gluon/project/projectIngester";
-import {TeamAssociated} from "./gluon/project/TeamAssociated";
+import {TeamsLinkedToProject} from "./gluon/project/TeamAssociated";
 import {
     ActionedBy,
     BitbucketProject,
@@ -110,7 +110,7 @@ export const configuration: any = {
         ConfigurePackage,
     ],
     events: [
-        TeamAssociated,
+        TeamsLinkedToProject,
         TeamCreated,
         TeamMemberCreated,
         ProjectCreated,
@@ -141,7 +141,7 @@ export const configuration: any = {
         MembersAddedToTeamEvent,
         GluonTenant,
         GluonTenantId,
-        TeamAssociatedEvent,
+        TeamsLinkedToProjectEvent,
     ],
     token,
     http,

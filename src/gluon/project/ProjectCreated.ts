@@ -52,6 +52,7 @@ export class ProjectCreated implements HandleEvent<any> {
         logger.info(`Ingested ProjectCreated event: ${JSON.stringify(event.data)}`);
 
         const projectCreatedEvent = event.data.ProjectCreatedEvent[0];
+
         return ctx.messageClient.addressChannels({
             text: `The *${projectCreatedEvent.project.name}* project has been created successfully.`,
             attachments: [{
