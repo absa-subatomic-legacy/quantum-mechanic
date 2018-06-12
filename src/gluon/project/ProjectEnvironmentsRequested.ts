@@ -22,6 +22,7 @@ import {jenkinsAxios} from "../jenkins/Jenkins";
 import {LinkExistingApplication} from "../packages/CreateApplication";
 import {LinkExistingLibrary} from "../packages/CreateLibrary";
 import {getProjectDisplayName, getProjectId} from "./Project";
+import {StandardOption} from "../../openshift/base/options/StandardOption";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
 subscription ProjectEnvironmentsRequestedEvent {
@@ -272,6 +273,19 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                                 },
                             });
                     });
+            })
+            .then(() => {
+                const teamDevOpsProjectId = `${_.kebabCase(environmentsRequestedEvent.teams[0].name).toLowerCase()}-devops`;
+                const projectIdDev = getProjectId(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, "dev");
+                const projectIdSit = getProjectId(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, "sit");
+                const projectIdUat = getProjectId(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, "uat");
+                return OCCommon.commonCommand(
+                    "adm pod-network",
+                    "join-projects",
+                    [projectIdDev, projectIdSit, projectIdUat],
+                    [
+                        new StandardOption("to", `${teamDevOpsProjectId}`),
+                    ]);
             })
             .then(() => {
 
