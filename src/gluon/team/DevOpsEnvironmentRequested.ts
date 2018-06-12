@@ -296,7 +296,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                         }, {
                             // Retry for up to 3 mins
                             factor: 1,
-                            retries: 9,
+                            retries: 19,
                             minTimeout: 20000,
                         })
                             .then(() => {
