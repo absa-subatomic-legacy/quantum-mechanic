@@ -279,20 +279,19 @@ function getScreenName(screenName: string) {
     return result;
 }
 
-export function loadScreenNameByUserId(ctx: HandlerContext, userId: string): Promise<graphql.ChatId.ChatId> {
-    return ctx.graphClient.executeQueryFromFile<graphql.ChatId.Query, graphql.ChatId.Variables>(
-        "graphql/query/chatIdByUserId",
-        {userId})
-        .then(result => {
-            if (result) {
-                if (result.ChatId && result.ChatId.length > 0) {
-                    return result.ChatId[0].screenName;
-                }
+async function loadScreenNameByUserId(ctx: HandlerContext, userId: string): Promise<string> {
+    try {
+        const result = await ctx.graphClient.executeQueryFromFile<graphql.ChatId.Query, graphql.ChatId.Variables>(
+            "graphql/query/chatIdByUserId",
+            {userId});
+
+        if (result) {
+            if (result.ChatId && result.ChatId.length > 0) {
+                return result.ChatId[0].screenName;
             }
-            return null;
-        })
-        .catch(err => {
-            logger.error("Error occurred running GraphQL query: %s", err);
-            return null;
-        });
+        }
+    } catch (error) {
+        logger.error("Error occurred running GraphQL query: %s", error);
+    }
+    return null;
 }
