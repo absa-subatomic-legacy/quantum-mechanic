@@ -101,7 +101,6 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                             "limits.memory": "4096Mi", // 4 * 1024Mi
                             "pods": "4",
                             "replicationcontrollers": "4",
-                            "services": "4",
                         },
                     },
                 }, [
