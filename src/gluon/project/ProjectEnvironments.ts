@@ -6,7 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -47,71 +47,73 @@ export class NewProjectEnvironments implements HandleCommand {
     })
     public teamName: string = null;
 
-    public handle(ctx: HandlerContext): Promise<HandlerResult> {
+    public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info("Creating new OpenShift environments...");
 
         if (_.isEmpty(this.projectName)) {
-            return this.requestUnsetParameters(ctx);
+            return await this.requestUnsetParameters(ctx);
         }
 
-        return gluonMemberFromScreenName(ctx, this.screenName)
-            .then(member => {
-                return gluonProjectFromProjectName(ctx, this.projectName)
-                    .then(project => {
-                        return axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${project.projectId}`,
-                            {
-                                projectEnvironment: {
-                                    requestedBy: member.memberId,
-                                },
-                            });
-                    })
-                    .then(() => {
-                        return ctx.messageClient.addressChannels({
-                            text: "🚀 Your team's project environment is being provisioned...",
-                        }, this.teamChannel);
-                    }).catch(error => {
-                        logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
-                    });
-            }).catch(error => {
-                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
-            });
+        let member;
+        try {
+            member = await gluonMemberFromScreenName(ctx, this.screenName);
+        } catch (error) {
+            return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+        }
+
+        let project;
+        try {
+            project = await gluonProjectFromProjectName(ctx, this.projectName);
+        } catch (error) {
+            return await logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
+        }
+
+        const projectEnvironmentRequestResult = await this.requestProjectEnvironment(project.projectId, member.memberId);
+
+        if (projectEnvironmentRequestResult.status !== 200) {
+            logger.error(`Failed to request project environment for project ${this.projectName}. Error: ${JSON.stringify(projectEnvironmentRequestResult)}`);
+            return await ctx.messageClient.respond("❗Failed to request project environment. Network error.");
+        }
+
+        return await ctx.messageClient.addressChannels({
+            text: "🚀 Your team's project environment is being provisioned...",
+        }, this.teamChannel);
     }
 
-    private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+    private async requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
-            return gluonTeamForSlackTeamChannel(this.teamChannel)
-                .then(
-                    team => {
-                        this.teamName = team.name;
-                        return this.requestUnsetParameters(ctx);
-                    },
-                    () => {
-                        return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
-                            return menuForTeams(
-                                ctx,
-                                teams,
-                                this,
-                                "Please select a team associated with the project you wish to provision the environments for",
-                            );
-                        }).catch(error => {
-                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
-                        });
-                    },
+            try {
+                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                this.teamName = team.name;
+                return await this.requestUnsetParameters(ctx);
+            } catch (error) {
+                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await menuForTeams(
+                    ctx,
+                    teams,
+                    this,
+                    "Please select a team associated with the project you wish to provision the environments for",
                 );
+            }
         }
         if (_.isEmpty(this.projectName)) {
-            return gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName)
-                .then(projects => {
-                    return menuForProjects(
-                        ctx,
-                        projects,
-                        this,
-                        "Please select the projects you wish to provision the environments for",
-                    );
-                }).catch(error => {
-                    logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
-                });
+            const projects = await gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
+            return await menuForProjects(
+                ctx,
+                projects,
+                this,
+                "Please select the projects you wish to provision the environments for",
+            );
         }
+        return await success();
     }
 
+    private async requestProjectEnvironment(projectId: string, memberId: string) {
+        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+            {
+                projectEnvironment: {
+                    requestedBy: memberId,
+                },
+            });
+    }
 }
