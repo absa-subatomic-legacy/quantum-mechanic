@@ -5,7 +5,7 @@ import {
     HandlerResult,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
@@ -36,83 +36,79 @@ export class ListTeamProjects implements HandleCommand<HandlerResult> {
     })
     public teamName: string;
 
-    public handle(ctx: HandlerContext): Promise<HandlerResult> {
+    public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
-            return this.requestUnsetParameters(ctx);
+            return await this.requestUnsetParameters(ctx);
         }
 
-        return this.listTeamProjects(ctx, this.teamName);
+        return await this.listTeamProjects(ctx, this.teamName);
 
     }
 
-    private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+    private async requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
-            return gluonTeamForSlackTeamChannel(this.teamChannel)
-                .then(
-                    team => {
-                        this.teamName = team.name;
-                        return this.listTeamProjects(ctx, this.teamName);
-                    },
-                    () => {
-                        return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
-                            return menuForTeams(
-                                ctx,
-                                teams,
-                                this,
-                                "Please select the team you would like to list the projects for",
-                            );
-                        }).catch(error => {
-                            logErrorAndReturnSuccess(gluonTeamForSlackTeamChannel.name, error);
-                        });
-                    },
+            try {
+                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                this.teamName = team.name;
+                return await this.requestUnsetParameters(ctx);
+            } catch (error) {
+                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await menuForTeams(
+                    ctx,
+                    teams,
+                    this,
+                    "Please select a team you wish to list associated projects for",
                 );
+            }
         }
+        return await success();
     }
 
-    private listTeamProjects(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
-        return gluonProjectsWhichBelongToGluonTeam(ctx, teamName)
-            .then(projects => {
-                const attachments = [];
+    private async listTeamProjects(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
+        let projects;
+        try {
+            projects = await gluonProjectsWhichBelongToGluonTeam(ctx, teamName);
+        } catch (error) {
+            return await logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
+        }
+        const attachments = [];
 
-                for (const project of projects) {
+        for (const project of projects) {
 
-                    const parameters = {
-                        projectId: project.projectId,
-                        projectName: project.name,
-                        projectDescription: project.description,
-                        projectBitbucketKey: null,
-                    };
+            const parameters = {
+                projectId: project.projectId,
+                projectName: project.name,
+                projectDescription: project.description,
+                projectBitbucketKey: null,
+            };
 
-                    if (project.bitbucketProject !== null) {
-                        parameters.projectBitbucketKey = project.bitbucketProject.key;
-                    }
+            if (project.bitbucketProject !== null) {
+                parameters.projectBitbucketKey = project.bitbucketProject.key;
+            }
 
-                    attachments.push(
-                        {
-                            text: `*Project:* ${project.name}\n*Description:* ${project.description}`,
-                            color: "#45B254",
-                            actions: [
-                                buttonForCommand(
-                                    {
-                                        text: "Show More",
-                                    },
-                                    new ListProjectDetails(),
-                                    parameters,
-                                ),
-                            ],
-                        },
-                    );
-                }
+            attachments.push(
+                {
+                    text: `*Project:* ${project.name}\n*Description:* ${project.description}`,
+                    color: "#45B254",
+                    actions: [
+                        buttonForCommand(
+                            {
+                                text: "Show More",
+                            },
+                            new ListProjectDetails(),
+                            parameters,
+                        ),
+                    ],
+                },
+            );
+        }
 
-                const msg: SlackMessage = {
-                    text: `The following projects are linked to the team *${teamName}*. Click on the "Show More" button to learn more about a particular project.`,
-                    attachments,
-                };
+        const msg: SlackMessage = {
+            text: `The following projects are linked to the team *${teamName}*. Click on the "Show More" button to learn more about a particular project.`,
+            attachments,
+        };
 
-                return ctx.messageClient.respond(msg);
-            }).catch(error => {
-                logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
-            });
+        return await ctx.messageClient.respond(msg);
     }
 
 }
@@ -148,42 +144,45 @@ export class ListProjectDetails implements HandleCommand<HandlerResult> {
     })
     public projectBitbucketKey: string;
 
-    public handle(ctx: HandlerContext): Promise<HandlerResult> {
-        return gluonApplicationsLinkedToGluonProjectId(this.projectId).then(applications => {
-            let bitbucketURL = "None";
-            if (this.projectBitbucketKey !== null) {
-                bitbucketURL = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.projectBitbucketKey}`;
+    public async handle(ctx: HandlerContext): Promise<HandlerResult> {
+
+        let applications;
+        try {
+            applications = gluonApplicationsLinkedToGluonProjectId(this.projectId);
+        } catch (error) {
+            return await logErrorAndReturnSuccess(gluonApplicationsLinkedToGluonProjectId.name, error);
+        }
+
+        let bitbucketURL = "None";
+        if (this.projectBitbucketKey !== null) {
+            bitbucketURL = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.projectBitbucketKey}`;
+        }
+        const attachments = [];
+        for (const application of applications) {
+            let applicationBitbucketUrl = "None";
+            if (application.bitbucketRepository !== null) {
+                applicationBitbucketUrl = application.bitbucketRepository.repoUrl;
             }
-            const attachments = [];
-            for (const application of applications) {
-                let applicationBitbucketUrl = "None";
-                if (application.bitbucketRepository !== null) {
-                    applicationBitbucketUrl = application.bitbucketRepository.repoUrl;
-                }
-                attachments.push(
-                    {
-                        text: `*Application:* ${application.name}\n*Description:* ${application.description}\n*Bitbucket URL:* ${applicationBitbucketUrl}`,
-                        color: "#45B254",
-                    },
-                );
-            }
+            attachments.push(
+                {
+                    text: `*Application:* ${application.name}\n*Description:* ${application.description}\n*Bitbucket URL:* ${applicationBitbucketUrl}`,
+                    color: "#45B254",
+                },
+            );
+        }
 
-            let headerMessage = `The current details of the project *${this.projectName}* are as follows.\n*Description:* ${this.projectDescription}\n*Bitbucket URL:* ${bitbucketURL}\n`;
+        let headerMessage = `The current details of the project *${this.projectName}* are as follows.\n*Description:* ${this.projectDescription}\n*Bitbucket URL:* ${bitbucketURL}\n`;
 
-            if (attachments.length > 0) {
-                headerMessage += "The below applications belong to the project:";
-            } else {
-                headerMessage += "There are no applications that belong to this project yet";
-            }
+        if (attachments.length > 0) {
+            headerMessage += "The below applications belong to the project:";
+        } else {
+            headerMessage += "There are no applications that belong to this project yet";
+        }
 
-            const msg: SlackMessage = {
-                text: headerMessage,
-                attachments,
-            };
-            return ctx.messageClient.respond(msg);
-        }).catch(error => {
-            logErrorAndReturnSuccess(gluonApplicationsLinkedToGluonProjectId.name, error);
-        });
-
+        const msg: SlackMessage = {
+            text: headerMessage,
+            attachments,
+        };
+        return await ctx.messageClient.respond(msg);
     }
 }
