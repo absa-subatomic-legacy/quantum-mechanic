@@ -3,9 +3,11 @@ import {
     HandleCommand,
     HandlerContext,
     HandlerResult,
+    logger,
     MappedParameter,
     MappedParameters,
     Parameter,
+    success,
 } from "@atomist/automation-client";
 import axios from "axios";
 import * as _ from "lodash";
@@ -13,12 +15,14 @@ import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
 import {
-    gluonTenantFromTenantName, gluonTenantList,
+    gluonTenantFromTenantName,
+    gluonTenantList,
     menuForTenants,
 } from "../shared/Tenant";
 import {
     gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
+    gluonTeamsWhoSlackScreenNameBelongsTo,
+    menuForTeams,
 } from "../team/Teams";
 
 @CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
@@ -54,75 +58,75 @@ export class CreateProject implements HandleCommand<HandlerResult> {
     })
     public tenantName: string;
 
-    public handle(ctx: HandlerContext): Promise<HandlerResult> {
+    public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName) || _.isEmpty(this.tenantName)) {
-            return this.requestUnsetParameters(ctx);
+            return await this.requestUnsetParameters(ctx);
         }
-        return gluonTenantFromTenantName(this.tenantName).then(tenant => {
-            return this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
-        });
+        const tenant = await gluonTenantFromTenantName(this.tenantName);
+        return await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
     }
 
-    private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+    private async requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
-            return gluonTeamForSlackTeamChannel(this.teamChannel)
-                .then(
-                    team => {
-                        this.teamName = team.name;
-                        return this.requestUnsetParameters(ctx);
-                    },
-                    () => {
-                        return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
-                            return menuForTeams(
-                                ctx,
-                                teams,
-                                this,
-                                "Please select a team you would like to associate this project with",
-                            );
-                        }).catch(error => {
-                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
-                        });
-                    },
+            try {
+                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                this.teamName = team.name;
+                return this.requestUnsetParameters(ctx);
+            } catch (error) {
+                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return menuForTeams(
+                    ctx,
+                    teams,
+                    this,
+                    "Please select a team you would like to associate this project with",
                 );
+            }
         }
         if (_.isEmpty(this.tenantName)) {
-            return gluonTenantList().then(tenants => {
-                return menuForTenants(ctx,
-                    tenants,
-                    this,
-                    "Please select a tenant you would like to associate this project with. Choose Default if you have no tenant specified for this project.",
-                );
-            });
+            const tenants = await gluonTenantList();
+            return await menuForTenants(ctx,
+                tenants,
+                this,
+                "Please select a tenant you would like to associate this project with. Choose Default if you have no tenant specified for this project.",
+            );
         }
+
+        return await success();
     }
 
-    private requestNewProjectForTeamAndTenant(ctx: HandlerContext, screenName: string,
-                                              teamName: string, tenantId: string): Promise<any> {
-        return gluonMemberFromScreenName(ctx, screenName)
-            .then(member => {
-                axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`)
-                    .then(team => {
-                        if (!_.isEmpty(team.data._embedded)) {
-                            return axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
-                                {
-                                    name: this.name,
-                                    description: this.description,
-                                    createdBy: member.memberId,
-                                    owningTenant: tenantId,
-                                    teams: [{
-                                        teamId: team.data._embedded.teamResources[0].teamId,
-                                    }],
-                                }).catch(error => {
-                                if (error.response.status === 409) {
-                                    return ctx.messageClient.respond(`❗Failed to create project since the project name is already in use. Please retry using a different project name.`);
-                                } else {
-                                    return ctx.messageClient.respond(`❗Failed to create project with error: ${JSON.stringify(error.response.data)}`);
-                                }
-                            });
-                        }
-                    });
-            }).catch(error => {
-                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+    private async requestNewProjectForTeamAndTenant(ctx: HandlerContext, screenName: string,
+                                                    teamName: string, tenantId: string): Promise<any> {
+        let member;
+        try {
+            member = gluonMemberFromScreenName(ctx, screenName);
+        } catch (error) {
+            return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+        }
+        const teamQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
+        if (teamQueryResult.status !== 200) {
+            logger.error(`❗Failed to find team ${teamName}. Error: ${JSON.stringify(teamQueryResult)}`);
+            return ctx.messageClient.respond(`Team ${teamName} does not appear to be a valid Sub Atomic team.`);
+        }
+
+        const team = teamQueryResult.data._embedded.teamResources[0];
+        const projectCreationResult = await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
+            {
+                name: this.name,
+                description: this.description,
+                createdBy: member.memberId,
+                owningTenant: tenantId,
+                teams: [{
+                    teamId: team.teamId,
+                }],
             });
+        if (projectCreationResult.status === 409) {
+            logger.error(`Failed to create project since the project name is already in use.`);
+            return ctx.messageClient.respond(`❗Failed to create project since the project name is already in use. Please retry using a different project name.`);
+        } else if (projectCreationResult.status !== 200) {
+            logger.error(`Failed to create project with error: ${JSON.stringify(projectCreationResult.data)}`);
+            return ctx.messageClient.respond(`❗Failed to create project.`);
+        }
+
+        return ctx.messageClient.respond("🚀Project successfully created.");
     }
 }

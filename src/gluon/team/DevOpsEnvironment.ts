@@ -71,6 +71,11 @@ export class NewDevOpsEnvironment implements HandleCommand {
     private async requestDevOpsEnvironment(ctx: HandlerContext, screenName: string,
                                            teamName: string,
                                            teamChannel: string): Promise<any> {
+
+        await ctx.messageClient.addressChannels({
+            text: `🚀 Your DevOps environment for *${teamName}* team, is being provisioned...`,
+        }, teamChannel);
+
         let member;
         try {
             member = await gluonMemberFromScreenName(ctx, screenName);
@@ -91,14 +96,11 @@ export class NewDevOpsEnvironment implements HandleCommand {
         const teamUpdateResult = await this.requestDevOpsEnvironmentThroughGluon(team.teamId, member.memberId);
 
         if (teamUpdateResult.status !== 201) {
-            logger.error(`Unable to request ${teamName} devops environment.`);
+            logger.error(`Unable to request ${teamName} devops environment. Error: ${JSON.stringify(teamUpdateResult)}`);
             return await ctx.messageClient.respond(`❗Unable to request devops environment for ${teamName}.`);
         }
 
-        return await ctx.messageClient.addressChannels({
-            text: `🚀 Your DevOps environment for *${teamName}* team, is being provisioned...`,
-        }, teamChannel);
-
+        return await success();
     }
 
     private async getGluonTeamFromTeamName(teamName: string) {
