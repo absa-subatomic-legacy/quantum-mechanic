@@ -72,7 +72,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
 
         await this.createDevOpsEnvironment(projectId, devOpsRequestedEvent.team.name);
 
-        await this.addOpenshiftMembershipPermissions(projectId,
+        await addOpenshiftMembershipPermissions(projectId,
             devOpsRequestedEvent.team);
 
         await this.copySubatomicAppTemplatesToDevOpsEnvironment(projectId);
@@ -444,29 +444,29 @@ If your applications will require a Spring Cloud Config Server, you can add a Su
         return await ctx.messageClient.addressChannels(msg, teamChannel);
     }
 
-    private async addOpenshiftMembershipPermissions(projectId: string, team: { owners: Array<{ domainUsername }>, members: Array<{ domainUsername }> }): Promise<any> {
-        return Promise.all(
-            team.owners.map(owner => {
-                const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
-                logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
-                return OCClient.policy.addRoleToUser(ownerUsername,
-                    "admin",
-                    projectId);
-            }))
-            .then(() => {
-                return Promise.all(
-                    team.members.map(member => {
-                        const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
-                        logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
-                        return OCClient.policy.addRoleToUser(memberUsername,
-                            "view",
-                            projectId);
-                    }));
-            });
-    }
-
     private docs(extension): string {
         return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
             "documentation")}`;
     }
+}
+
+export async function addOpenshiftMembershipPermissions(projectId: string, team: { owners: Array<{ domainUsername }>, members: Array<{ domainUsername }> }): Promise<any> {
+    return Promise.all(
+        team.owners.map(owner => {
+            const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
+            logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
+            return OCClient.policy.addRoleToUser(ownerUsername,
+                "admin",
+                projectId);
+        }))
+        .then(() => {
+            return Promise.all(
+                team.members.map(member => {
+                    const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
+                    logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
+                    return OCClient.policy.addRoleToUser(memberUsername,
+                        "view",
+                        projectId);
+                }));
+        });
 }
