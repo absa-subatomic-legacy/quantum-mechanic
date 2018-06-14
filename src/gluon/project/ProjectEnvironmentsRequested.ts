@@ -1,13 +1,10 @@
 import {
     EventFired,
     EventHandler,
-    failure,
     HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
-    success,
-    SuccessPromise,
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
@@ -160,7 +157,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
             },
         );
         logger.info("Template found and built successfully.");
-        return await axios.post(`https://${jenkinsHost.output}/createItem?name=${_.kebabCase(environmentsRequestedEvent.project.name).toLowerCase()}`,
+        return await axios.post(`https://${jenkinsHost}/createItem?name=${_.kebabCase(environmentsRequestedEvent.project.name).toLowerCase()}`,
             builtTemplate,
             {
                 headers: {
