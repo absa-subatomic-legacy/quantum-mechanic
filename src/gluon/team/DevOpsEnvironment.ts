@@ -5,7 +5,7 @@ import {
     HandlerResult, logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -36,12 +36,12 @@ export class NewDevOpsEnvironment implements HandleCommand {
     })
     public teamName: string;
 
-    public handle(ctx: HandlerContext): Promise<HandlerResult> {
+    public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
-            return this.requestUnsetParameters(ctx);
+            return await this.requestUnsetParameters(ctx);
         }
 
-        return this.requestDevOpsEnvironment(
+        return await this.requestDevOpsEnvironment(
             ctx,
             this.screenName,
             this.teamName,
@@ -49,53 +49,69 @@ export class NewDevOpsEnvironment implements HandleCommand {
         );
     }
 
-    private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+    private async requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
-            return gluonTeamForSlackTeamChannel(this.teamChannel)
-                .then(
-                    team => {
-                        this.teamName = team.name;
-                        return this.requestDevOpsEnvironment(ctx, this.screenName, this.teamName, this.teamChannel);
-                    },
-                    () => {
-                        return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
-                            return menuForTeams(
-                                ctx,
-                                teams,
-                                this,
-                                "Please select a team you would like to create a DevOps environment for");
-                        }).catch(error => {
-                            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
-                        });
-                    },
-                );
+            try {
+                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                this.teamName = team.name;
+                return await this.requestDevOpsEnvironment(ctx, this.screenName, this.teamName, this.teamChannel);
+            } catch (slackChannelError) {
+                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await menuForTeams(
+                    ctx,
+                    teams,
+                    this,
+                    "Please select a team you would like to create a DevOps environment for");
+            }
         }
+
+        return await success();
     }
 
-    private requestDevOpsEnvironment(ctx: HandlerContext, screenName: string,
-                                     teamName: string,
-                                     teamChannel: string): Promise<any> {
-        return gluonMemberFromScreenName(ctx, screenName)
-            .then(member => {
-                axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`)
-                    .then(team => {
-                        if (!_.isEmpty(team.data._embedded)) {
-                            logger.info("Requesting DevOps environment for team: " + teamName);
-                            return axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${team.data._embedded.teamResources[0].teamId}`,
-                                {
-                                    devOpsEnvironment: {
-                                        requestedBy: member.memberId,
-                                    },
-                                });
-                        }
-                    })
-                    .then(() => {
-                        return ctx.messageClient.addressChannels({
-                            text: `🚀 Your DevOps environment for *${teamName}* team, is being provisioned...`,
-                        }, teamChannel);
-                    });
-            }).catch(error => {
-                logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+    private async requestDevOpsEnvironment(ctx: HandlerContext, screenName: string,
+                                           teamName: string,
+                                           teamChannel: string): Promise<any> {
+        let member;
+        try {
+            member = await gluonMemberFromScreenName(ctx, screenName);
+        } catch (error) {
+            return logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+        }
+
+        const teamQueryResult = await this.getGluonTeamFromTeamName(teamName);
+
+        if (teamQueryResult.status !== 200) {
+            logger.error(`Could not find gluon team ${teamName}. This should only happen if the gluon server connection dropped.`);
+            return ctx.messageClient.respond(`❗Unable to find team with name ${teamName}.`);
+        }
+
+        const team = teamQueryResult.data._embedded.teamResources[0];
+        logger.info("Requesting DevOps environment for team: " + teamName);
+
+        const teamUpdateResult = await this.requestDevOpsEnvironmentThroughGluon(team.teamId, member.memberId);
+
+        if (teamUpdateResult.status !== 201) {
+            logger.error(`Unable to request ${teamName} devops environment.`);
+            return await ctx.messageClient.respond(`❗Unable to request devops environment for ${teamName}.`);
+        }
+
+        return await ctx.messageClient.addressChannels({
+            text: `🚀 Your DevOps environment for *${teamName}* team, is being provisioned...`,
+        }, teamChannel);
+
+    }
+
+    private async getGluonTeamFromTeamName(teamName: string) {
+        return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
+    }
+
+    private async requestDevOpsEnvironmentThroughGluon(teamId: string, memberId: string) {
+        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
+            {
+                devOpsEnvironment: {
+                    requestedBy: memberId,
+                },
             });
     }
+
 }
