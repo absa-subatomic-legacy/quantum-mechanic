@@ -20,6 +20,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import * as graphql from "../../typings/types";
 import {ListTeamProjects} from "../project/ProjectDetails";
+import {CreateTeam} from "./CreateTeam";
 
 @CommandHandler("Apply to join an existing team", QMConfig.subatomic.commandPrefix + " apply to team")
 @Tags("subatomic", "team")
@@ -33,7 +34,19 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
         const teamsQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
 
         if (teamsQueryResult.status !== 200) {
-            return await ctx.messageClient.respond("❗Unable to get a list of existing teams.");
+            const msg: SlackMessage = {
+                text: `❗Unfortunately no teams have been created.`,
+                attachments: [{
+                    fallback: "❗Unfortunately no teams have been created.",
+                    thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
+                    actions: [
+                        buttonForCommand(
+                            {text: "Create a new team"},
+                            new CreateTeam()),
+                    ],
+                }],
+            };
+            return await ctx.messageClient.addressUsers(msg, this.slackName);
         }
 
         const teams = teamsQueryResult.data._embedded.teamResources;
