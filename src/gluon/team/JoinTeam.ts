@@ -34,19 +34,7 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
         const teamsQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
 
         if (teamsQueryResult.status !== 200) {
-            const msg: SlackMessage = {
-                text: `❗Unfortunately no teams have been created.`,
-                attachments: [{
-                    fallback: "❗Unfortunately no teams have been created.",
-                    thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
-                    actions: [
-                        buttonForCommand(
-                            {text: "Create a new team"},
-                            new CreateTeam()),
-                    ],
-                }],
-            };
-            return await ctx.messageClient.addressUsers(msg, this.slackName);
+            return this.alertUserThatNoTeamsExist(ctx);
         }
 
         const teams = teamsQueryResult.data._embedded.teamResources;
@@ -79,6 +67,22 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
         };
 
         return ctx.messageClient.addressUsers(msg, this.slackName);
+    }
+
+    private async alertUserThatNoTeamsExist(ctx: HandlerContext): Promise<HandlerResult> {
+        const msg: SlackMessage = {
+            text: `❗Unfortunately no teams have been created.`,
+            attachments: [{
+                fallback: "❗Unfortunately no teams have been created.",
+                thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
+                actions: [
+                    buttonForCommand(
+                        {text: "Create a new team"},
+                        new CreateTeam()),
+                ],
+            }],
+        };
+        return await ctx.messageClient.addressUsers(msg, this.slackName);
     }
 }
 
