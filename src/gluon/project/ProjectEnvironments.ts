@@ -1,12 +1,10 @@
 import {
     CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -14,6 +12,7 @@ import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
@@ -25,7 +24,7 @@ import {
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
 @Tags("subatomic", "openshift", "project")
-export class NewProjectEnvironments implements HandleCommand {
+export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
 
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
@@ -33,26 +32,18 @@ export class NewProjectEnvironments implements HandleCommand {
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "project name",
-        displayable: false,
-        required: false,
     })
     public projectName: string = null;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "team name",
-        displayable: false,
-        required: false,
     })
     public teamName: string = null;
 
-    public handle(ctx: HandlerContext): Promise<HandlerResult> {
+    protected runCommand(ctx: HandlerContext) {
         logger.info("Creating new OpenShift environments...");
-
-        if (_.isEmpty(this.projectName)) {
-            return this.requestUnsetParameters(ctx);
-        }
 
         return gluonMemberFromScreenName(ctx, this.screenName)
             .then(member => {
@@ -77,13 +68,13 @@ export class NewProjectEnvironments implements HandleCommand {
             });
     }
 
-    private requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+    protected setNextParameter(ctx: HandlerContext): Promise<HandlerResult> | void {
         if (_.isEmpty(this.teamName)) {
             return gluonTeamForSlackTeamChannel(this.teamChannel)
                 .then(
                     team => {
                         this.teamName = team.name;
-                        return this.requestUnsetParameters(ctx);
+                        return this.setNextParameter(ctx)  || null;
                     },
                     () => {
                         return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
