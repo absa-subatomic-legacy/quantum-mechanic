@@ -18,6 +18,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {OCCommandResult} from "../../openshift/base/OCCommandResult";
 import {SimpleOption} from "../../openshift/base/options/SimpleOption";
+import {StandardOption} from "../../openshift/base/options/StandardOption";
 import {OCClient} from "../../openshift/OCClient";
 import {OCCommon} from "../../openshift/OCCommon";
 import {QMTemplate} from "../../template/QMTemplate";
@@ -50,7 +51,6 @@ import {
     menuForApplications,
 } from "./Applications";
 import {PackageDefinition} from "./PackageDefinition";
-import {StandardOption} from "../../openshift/base/options/StandardOption";
 
 @CommandHandler("Configure an existing application/library using a predefined template", QMConfig.subatomic.commandPrefix + " configure package")
 export class ConfigureBasicPackage extends RecursiveParameterRequestCommand {

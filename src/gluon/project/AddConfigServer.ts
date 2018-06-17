@@ -10,6 +10,7 @@ import {
     SuccessPromise,
 } from "@atomist/automation-client";
 import {SlackMessage, url} from "@atomist/slack-messages";
+import * as fs from "fs";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {NamedSimpleOption} from "../../openshift/base/options/NamedSimpleOption";
@@ -21,7 +22,6 @@ import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
 } from "../team/Teams";
-import * as fs from "fs";
 
 @CommandHandler("Add a new Subatomic Config Server", QMConfig.subatomic.commandPrefix + " add config server")
 export class AddConfigServer implements HandleCommand<HandlerResult> {
