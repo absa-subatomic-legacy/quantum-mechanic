@@ -21,6 +21,7 @@ import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
 } from "../team/Teams";
+import * as fs from "fs";
 
 @CommandHandler("Add a new Subatomic Config Server", QMConfig.subatomic.commandPrefix + " add config server")
 export class AddConfigServer implements HandleCommand<HandlerResult> {
@@ -84,12 +85,13 @@ export class AddConfigServer implements HandleCommand<HandlerResult> {
                             gluonTeamName: string,
                             gitUri: string): Promise<any> {
         const devOpsProjectId = `${_.kebabCase(gluonTeamName).toLowerCase()}-devops`;
+        const privateKey = fs.readFileSync(QMConfig.subatomic.bitbucket.cicdPrivateKeyPath, "utf8");
         return OCCommon.commonCommand("create secret generic",
             "subatomic-config-server",
             [],
             [
                 new NamedSimpleOption("-from-literal=spring.cloud.config.server.git.hostKey", QMConfig.subatomic.bitbucket.cicdKey),
-                new NamedSimpleOption("-from-file=spring.cloud.config.server.git.privateKey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
+                new NamedSimpleOption("-from-literal=spring.cloud.config.server.git.privateKey", privateKey),
                 new SimpleOption("-namespace", devOpsProjectId),
             ])
             .catch(() => {
@@ -121,7 +123,7 @@ spring:
             })
             .then(() => {
                 return OCCommon.commonCommand("tag",
-                    "subatomic/subatomic-config-server:1.0",
+                    "subatomic/subatomic-config-server:1.1",
                     [`${devOpsProjectId}/subatomic-config-server:1.0`],
                 );
             })

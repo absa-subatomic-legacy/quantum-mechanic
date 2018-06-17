@@ -50,6 +50,7 @@ import {
     menuForApplications,
 } from "./Applications";
 import {PackageDefinition} from "./PackageDefinition";
+import {StandardOption} from "../../openshift/base/options/StandardOption";
 
 @CommandHandler("Configure an existing application/library using a predefined template", QMConfig.subatomic.commandPrefix + " configure package")
 export class ConfigureBasicPackage extends RecursiveParameterRequestCommand {
@@ -598,6 +599,7 @@ You can kick off the build pipeline for your library by clicking the button belo
                             this.openshiftTemplate,
                             [],
                             [
+                                new StandardOption("ignore-unknown-parameters", "true"),
                                 new SimpleOption("p", `APP_NAME=${appName}`),
                                 new SimpleOption("p", `IMAGE_STREAM_PROJECT=${projectId}`),
                                 new SimpleOption("p", `DEVOPS_NAMESPACE=${devOpsProjectId}`),
