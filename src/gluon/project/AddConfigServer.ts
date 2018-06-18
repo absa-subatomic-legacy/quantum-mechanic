@@ -10,7 +10,6 @@ import {
     SuccessPromise,
 } from "@atomist/automation-client";
 import {SlackMessage, url} from "@atomist/slack-messages";
-import * as fs from "fs";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {NamedSimpleOption} from "../../openshift/base/options/NamedSimpleOption";
@@ -85,13 +84,12 @@ export class AddConfigServer implements HandleCommand<HandlerResult> {
                             gluonTeamName: string,
                             gitUri: string): Promise<any> {
         const devOpsProjectId = `${_.kebabCase(gluonTeamName).toLowerCase()}-devops`;
-        const privateKey = fs.readFileSync(QMConfig.subatomic.bitbucket.cicdPrivateKeyPath, "utf8");
         return OCCommon.commonCommand("create secret generic",
             "subatomic-config-server",
             [],
             [
                 new NamedSimpleOption("-from-literal=spring.cloud.config.server.git.hostKey", QMConfig.subatomic.bitbucket.cicdKey),
-                new NamedSimpleOption("-from-literal=spring.cloud.config.server.git.privateKey", privateKey),
+                new NamedSimpleOption("-from-file=spring.cloud.config.server.git.privateKey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
                 new SimpleOption("-namespace", devOpsProjectId),
             ])
             .catch(() => {
