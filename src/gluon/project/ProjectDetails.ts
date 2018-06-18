@@ -13,6 +13,7 @@ import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
 import {gluonApplicationsLinkedToGluonProjectId} from "../packages/Applications";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -21,7 +22,7 @@ import {
 import {gluonProjectsWhichBelongToGluonTeam} from "./Projects";
 
 @CommandHandler("List projects belonging to a team", QMConfig.subatomic.commandPrefix + " list projects")
-export class ListTeamProjects implements HandleCommand<HandlerResult> {
+export class ListTeamProjects extends RecursiveParameterRequestCommand {
 
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
@@ -29,23 +30,16 @@ export class ListTeamProjects implements HandleCommand<HandlerResult> {
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "team name",
-        required: false,
-        displayable: false,
     })
     public teamName: string;
 
-    public async handle(ctx: HandlerContext): Promise<HandlerResult> {
-        if (_.isEmpty(this.teamName)) {
-            return await this.requestUnsetParameters(ctx);
-        }
-
+    protected runCommand(ctx: HandlerContext) {
         return await this.listTeamProjects(ctx, this.teamName);
-
     }
 
-    private async requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+    private async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);

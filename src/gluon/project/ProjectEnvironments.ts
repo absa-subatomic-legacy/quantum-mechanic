@@ -1,6 +1,5 @@
 import {
     CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -14,6 +13,7 @@ import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
@@ -25,7 +25,7 @@ import {
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
 @Tags("subatomic", "openshift", "project")
-export class NewProjectEnvironments implements HandleCommand {
+export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
 
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
@@ -33,10 +33,8 @@ export class NewProjectEnvironments implements HandleCommand {
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "project name",
-        displayable: false,
-        required: false,
     })
     public projectName: string = null;
 
@@ -47,12 +45,8 @@ export class NewProjectEnvironments implements HandleCommand {
     })
     public teamName: string = null;
 
-    public async handle(ctx: HandlerContext): Promise<HandlerResult> {
+    protected async runCommand(ctx: HandlerContext) {
         logger.info("Creating new OpenShift environments...");
-
-        if (_.isEmpty(this.projectName)) {
-            return await this.requestUnsetParameters(ctx);
-        }
 
         let member;
         try {
@@ -80,7 +74,7 @@ export class NewProjectEnvironments implements HandleCommand {
         }, this.teamChannel);
     }
 
-    private async requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+    protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);

@@ -1,6 +1,5 @@
 import {
     CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -24,6 +23,7 @@ import {
     menuForProjects,
 } from "../project/Projects";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -56,8 +56,8 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
 
     @Parameter({
         description: "team name",
-        required: false,
         displayable: false,
+        required: false,
     })
     public teamName: string;
 

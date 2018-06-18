@@ -1,6 +1,5 @@
 import {
     CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -14,6 +13,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTenantFromTenantName,
     gluonTenantList,
@@ -26,7 +26,7 @@ import {
 } from "../team/Teams";
 
 @CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
-export class CreateProject implements HandleCommand<HandlerResult> {
+export class CreateProject extends RecursiveParameterRequestCommand {
 
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
@@ -44,29 +44,22 @@ export class CreateProject implements HandleCommand<HandlerResult> {
     })
     public description: string;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "team name",
-        required: false,
-        displayable: false,
     })
     public teamName: string;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "tenant name",
-        required: false,
-        displayable: false,
     })
     public tenantName: string;
 
-    public async handle(ctx: HandlerContext): Promise<HandlerResult> {
-        if (_.isEmpty(this.teamName) || _.isEmpty(this.tenantName)) {
-            return await this.requestUnsetParameters(ctx);
-        }
+    protected async runCommand(ctx: HandlerContext) {
         const tenant = await gluonTenantFromTenantName(this.tenantName);
         return await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
     }
 
-    private async requestUnsetParameters(ctx: HandlerContext): Promise<HandlerResult> {
+    private async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
