@@ -16,12 +16,13 @@ import {url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {SimpleOption} from "../../openshift/base/options/SimpleOption";
+import {StandardOption} from "../../openshift/base/options/StandardOption";
 import {OCClient} from "../../openshift/OCClient";
 import {OCCommon} from "../../openshift/OCCommon";
 import {QMTemplate} from "../../template/QMTemplate";
 import {jenkinsAxios} from "../jenkins/Jenkins";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
-import {getProjectId} from "../project/Project";
+import {getProjectDevOpsId, getProjectId} from "../project/Project";
 import {
     gluonProjectFromProjectName,
     gluonProjectsWhichBelongToGluonTeam,
@@ -558,6 +559,7 @@ You can kick off the build pipeline for your library by clicking the button belo
         for (const environment of environments) {
             const projectId = getProjectId(tenantName, projectName, environment);
             const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
+            const devOpsProjectId = getProjectDevOpsId(this.teamName);
             logger.info(`Processing app [${appName}] Template for: ${projectId}`);
 
             const template = await OCCommon.commonCommand("get", "templates",
@@ -578,8 +580,10 @@ You can kick off the build pipeline for your library by clicking the button belo
                 this.openshiftTemplate,
                 [],
                 [
+                    new StandardOption("ignore-unknown-parameters", "true"),
                     new SimpleOption("p", `APP_NAME=${appName}`),
                     new SimpleOption("p", `IMAGE_STREAM_PROJECT=${projectId}`),
+                    new SimpleOption("p", `DEVOPS_NAMESPACE=${devOpsProjectId}`),
                     new SimpleOption("-namespace", projectId),
                 ],
             );

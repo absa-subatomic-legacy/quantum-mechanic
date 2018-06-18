@@ -156,5 +156,6 @@ export const configuration: any = {
     cluster: {
         // This will run the client in cluster mode; master and workers
         enabled: process.env.NODE_ENV === "production",
+        workers: 10,
     },
 };

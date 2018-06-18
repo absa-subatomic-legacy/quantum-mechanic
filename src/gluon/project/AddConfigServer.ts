@@ -130,7 +130,7 @@ spring:
 
     private async tagConfigServerImageToDevOpsEnvironment(devOpsProjectId: string) {
         return await OCCommon.commonCommand("tag",
-            "subatomic/subatomic-config-server:1.0",
+            "subatomic/subatomic-config-server:1.1",
             [`${devOpsProjectId}/subatomic-config-server:1.0`],
         );
     }

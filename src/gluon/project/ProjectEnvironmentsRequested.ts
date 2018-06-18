@@ -12,6 +12,7 @@ import * as _ from "lodash";
 import * as qs from "query-string";
 import {QMConfig} from "../../config/QMConfig";
 import {SimpleOption} from "../../openshift/base/options/SimpleOption";
+import {StandardOption} from "../../openshift/base/options/StandardOption";
 import {OCClient} from "../../openshift/OCClient";
 import {OCCommon} from "../../openshift/OCCommon";
 import {QMTemplate} from "../../template/QMTemplate";
@@ -107,6 +108,8 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
         }
 
         await this.createJenkinsCredentials(teamDevOpsProjectId, jenkinsHost.output, token.output);
+
+        await this.createPodNetwork(environmentsRequestedEvent.teams[0].name, environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name);
 
         return await this.sendPackageUsageMessage(ctx, environmentsRequestedEvent.project.name, environmentsRequestedEvent.teams);
     }
@@ -283,6 +286,20 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                     "Authorization": `Bearer ${token}`,
                 },
             });
+    }
+
+    private async createPodNetwork(teamName: string, tenantName: string, projectName: string) {
+        const teamDevOpsProjectId = `${_.kebabCase(teamName).toLowerCase()}-devops`;
+        const projectIdDev = getProjectId(tenantName, projectName, "dev");
+        const projectIdSit = getProjectId(tenantName, projectName, "sit");
+        const projectIdUat = getProjectId(tenantName, projectName, "uat");
+        return OCCommon.commonCommand(
+            "adm pod-network",
+            "join-projects",
+            [projectIdDev, projectIdSit, projectIdUat],
+            [
+                new StandardOption("to", `${teamDevOpsProjectId}`),
+            ]);
     }
 
     private async sendPackageUsageMessage(ctx: HandlerContext, projectName: string, teams) {
