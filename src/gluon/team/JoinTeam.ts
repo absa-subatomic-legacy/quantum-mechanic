@@ -74,6 +74,7 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
             text: `❗Unfortunately no teams have been created.`,
             attachments: [{
                 fallback: "❗Unfortunately no teams have been created.",
+                footer: `For more information, please read ${this.docs()}`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(
@@ -83,6 +84,11 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
             }],
         };
         return await ctx.messageClient.addressUsers(msg, this.slackName);
+    }
+
+    private docs(): string {
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-team`,
+            "documentation")}`;
     }
 }
 
@@ -123,6 +129,11 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
         }
 
         const newMember = newMemberQueryResult.data._embedded.teamMemberResources[0];
+
+        if (!_.isEmpty(_.find(newMember.teams,
+            (team: any) => team.slack.teamChannel === this.teamChannel))) {
+            return ctx.messageClient.respond(`${newMember.slack.screenName} is already a member of this team.`);
+        }
 
         logger.info(`Gluon member found: ${JSON.stringify(newMember)}`);
 

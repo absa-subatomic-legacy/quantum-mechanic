@@ -81,8 +81,8 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
         );
 
         if (updateMembershipRequestResult.status !== 200) {
-            logger.error("Failed to update the member ship request.");
-            return await ctx.messageClient.respond("❗The membership request could not be updated.");
+            logger.error("Failed to update the member shiprequest.");
+            return await ctx.messageClient.respond("❗The membership request could not be updated. Please ensure that you are an owner of this team before responding to the membership request.");
         }
 
         return await this.handleMembershipRequestResult(ctx);
