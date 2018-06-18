@@ -43,8 +43,10 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand {
     })
     public projectName: string;
 
-    @RecursiveParameter({
+    @Parameter({
         description: "team name",
+        displayable: false,
+        required: false,
     })
     public teamName: string;
 
@@ -145,8 +147,10 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
     })
     public projectName: string;
 
-    @RecursiveParameter({
+    @Parameter({
         description: "team name",
+        displayable: false,
+        required: false,
     })
     public teamName: string;
 

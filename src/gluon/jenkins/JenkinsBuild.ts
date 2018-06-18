@@ -6,6 +6,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
+    Parameter,
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
@@ -40,8 +41,10 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
-    @RecursiveParameter({
+    @Parameter({
         description: "team name",
+        displayable: false,
+        required: false,
     })
     public teamName: string;
 

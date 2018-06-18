@@ -1,6 +1,5 @@
 import {
     CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -32,8 +31,10 @@ export class AddConfigServer extends RecursiveParameterRequestCommand {
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
-    @RecursiveParameter({
+    @Parameter({
         description: "team name",
+        displayable: false,
+        required: false,
     })
     public gluonTeamName: string;
 

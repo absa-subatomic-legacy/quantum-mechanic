@@ -4,6 +4,7 @@ import {
     HandlerResult, logger,
     MappedParameter,
     MappedParameters,
+    Parameter,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -11,7 +12,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
-import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -28,8 +29,10 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
-    @RecursiveParameter({
+    @Parameter({
         description: "team name",
+        displayable: false,
+        required: false,
     })
     public teamName: string;
 

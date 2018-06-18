@@ -157,8 +157,10 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
     })
     public description: string;
 
-    @RecursiveParameter({
+    @Parameter({
         description: "team name",
+        displayable: false,
+        required: false,
     })
     public teamName: string;
 

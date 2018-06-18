@@ -50,8 +50,10 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
     })
     public description: string;
 
-    @RecursiveParameter({
+    @Parameter({
         description: "team name",
+        displayable: false,
+        required: false,
     })
     public teamName: string;
 

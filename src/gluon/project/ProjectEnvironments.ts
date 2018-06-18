@@ -5,6 +5,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
+    Parameter,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -37,8 +38,10 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
     })
     public projectName: string = null;
 
-    @RecursiveParameter({
+    @Parameter({
         description: "team name",
+        displayable: false,
+        required: false,
     })
     public teamName: string = null;
 

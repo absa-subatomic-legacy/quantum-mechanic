@@ -42,6 +42,8 @@ export class CreateProject extends RecursiveParameterRequestCommand {
 
     @RecursiveParameter({
         description: "team name",
+        displayable: false,
+        required: false,
     })
     public teamName: string;
 
