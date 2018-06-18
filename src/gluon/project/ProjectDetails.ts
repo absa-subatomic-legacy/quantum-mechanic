@@ -30,10 +30,8 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand {
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "team name",
-        displayable: false,
-        required: false,
     })
     public teamName: string;
 

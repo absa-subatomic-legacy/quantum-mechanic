@@ -12,7 +12,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
-import {RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
+import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -29,10 +29,8 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
-    @Parameter({
+    @RecursiveParameter({
         description: "team name",
-        displayable: false,
-        required: false,
     })
     public teamName: string;
 
