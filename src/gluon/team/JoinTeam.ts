@@ -123,7 +123,6 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
                             logger.info(`Member: ${JSON.stringify(newMember.data)}`);
                             if (!_.isEmpty(newMember.data._embedded)) {
                                 const newTeamMember = newMember.data._embedded.teamMemberResources[0];
-                                logger.info(JSON.stringify(newTeamMember));
                                 if (!_.isEmpty(_.find(newTeamMember.teams,
                                         (team: any) => team.slack.teamChannel === this.teamChannel))) {
                                     return ctx.messageClient.respond(`${newTeamMember.slack.screenName} is already a member of this team.`);
