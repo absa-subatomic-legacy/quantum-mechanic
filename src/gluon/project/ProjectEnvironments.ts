@@ -13,7 +13,10 @@ import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
-import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
+import {
+    RecursiveParameter,
+    RecursiveParameterRequestCommand,
+} from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
@@ -79,7 +82,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return await this.requestUnsetParameters(ctx);
+                return await success();
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(

@@ -35,16 +35,16 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand {
     })
     public teamName: string;
 
-    protected runCommand(ctx: HandlerContext) {
+    protected async runCommand(ctx: HandlerContext) {
         return await this.listTeamProjects(ctx, this.teamName);
     }
 
-    private async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
+    protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return await this.requestUnsetParameters(ctx);
+                return await success();
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(

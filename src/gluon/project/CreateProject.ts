@@ -59,15 +59,15 @@ export class CreateProject extends RecursiveParameterRequestCommand {
         return await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
     }
 
-    private async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
+    protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return this.requestUnsetParameters(ctx);
+                return await success();
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return menuForTeams(
+                return await menuForTeams(
                     ctx,
                     teams,
                     this,
@@ -114,12 +114,12 @@ export class CreateProject extends RecursiveParameterRequestCommand {
             });
         if (projectCreationResult.status === 409) {
             logger.error(`Failed to create project since the project name is already in use.`);
-            return ctx.messageClient.respond(`❗Failed to create project since the project name is already in use. Please retry using a different project name.`);
+            return await ctx.messageClient.respond(`❗Failed to create project since the project name is already in use. Please retry using a different project name.`);
         } else if (projectCreationResult.status !== 200) {
             logger.error(`Failed to create project with error: ${JSON.stringify(projectCreationResult.data)}`);
-            return ctx.messageClient.respond(`❗Failed to create project.`);
+            return await ctx.messageClient.respond(`❗Failed to create project.`);
         }
 
-        return ctx.messageClient.respond("🚀Project successfully created.");
+        return await ctx.messageClient.respond("🚀Project successfully created.");
     }
 }
