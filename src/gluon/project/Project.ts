@@ -4,8 +4,8 @@ export function getProjectId(tenant: string, project: string, environment: strin
     return `${_.kebabCase(tenant).toLowerCase()}-${_.kebabCase(project).toLowerCase()}-${environment.toLowerCase()}`;
 }
 
-export function getProjectDevOpsId(tenant: string, project: string): string {
-    return `${_.kebabCase(tenant).toLowerCase()}-${_.kebabCase(project).toLowerCase()}-devops`;
+export function getProjectDevOpsId(team: string): string {
+    return `${_.kebabCase(team).toLowerCase()}-devops`;
 }
 
 export function getProjectDisplayName(tenant: string, project: string, environment: string) {

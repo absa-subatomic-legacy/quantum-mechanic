@@ -575,7 +575,7 @@ You can kick off the build pipeline for your library by clicking the button belo
             .map(environment => {
                 const projectId = getProjectId(tenantName, projectName, environment[0]);
                 const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
-                const devOpsProjectId = getProjectDevOpsId(tenantName, projectName);
+                const devOpsProjectId = getProjectDevOpsId(this.teamName);
                 logger.info(`Processing app [${appName}] Template for: ${projectId}`);
 
                 return OCCommon.commonCommand("get", "templates",
