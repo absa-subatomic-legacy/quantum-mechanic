@@ -7,12 +7,11 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
-import {SlackDestination} from "@atomist/automation-client/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
-import {handleQMError, QMError} from "../shared/Error";
+import {handleQMError, QMError, UserMessageClient} from "../shared/Error";
 import {bitbucketAxios, bitbucketProjectFromKey} from "./Bitbucket";
 import {
     addBitbucketProjectAccessKeys,
@@ -156,9 +155,9 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
     }
 
     private async handleError(ctx: HandlerContext, screenName: string, error) {
-        const destination = new SlackDestination(QMConfig.teamId);
-        destination.addressUser(screenName);
-        return await handleQMError(ctx, destination, error);
+        const messageClient = new UserMessageClient(ctx);
+        messageClient.addDestination(screenName);
+        return await handleQMError(messageClient, error);
     }
 
     private docs(): string {

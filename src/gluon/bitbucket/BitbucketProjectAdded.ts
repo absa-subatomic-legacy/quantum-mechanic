@@ -2,19 +2,16 @@ import {
     EventFired,
     EventHandler,
     HandleEvent,
-    HandlerContext, HandlerError,
+    HandlerContext,
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import {
-    buttonForCommand,
-    SlackDestination,
-} from "@atomist/automation-client/spi/message/MessageClient";
+import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../config/QMConfig";
 import {AssociateTeam} from "../project/AssociateTeam";
 import {NewProjectEnvironments} from "../project/ProjectEnvironments";
-import {handleQMError, QMError} from "../shared/Error";
+import {handleQMError, QMError, UserMessageClient} from "../shared/Error";
 import {addBitbucketProjectAccessKeys} from "./BitbucketConfiguration";
 
 @EventHandler("Receive BitbucketProjectAddedEvent events", `
@@ -74,17 +71,6 @@ export class BitbucketProjectAdded implements HandleEvent<any> {
         }
     }
 
-    private docs(extension): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
-            "documentation")}`;
-    }
-
-    private async handleError(ctx: HandlerContext, screenName: string, error) {
-        const destination = new SlackDestination(QMConfig.teamId);
-        destination.addressUser(screenName);
-        return await handleQMError(ctx, destination, error);
-    }
-
     private async sendBitbucketAddedSuccessfullyMessage(ctx: HandlerContext, addedEvent) {
         return await ctx.messageClient.addressChannels({
             text: `
@@ -125,5 +111,16 @@ If you would like to associate more teams to the *${addedEvent.project.name}* pr
                     ],
                 }],
         }, addedEvent.teams.map(team => team.slackIdentity.teamChannel));
+    }
+
+    private docs(extension): string {
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
+            "documentation")}`;
+    }
+
+    private async handleError(ctx: HandlerContext, screenName: string, error) {
+        const messageClient = new UserMessageClient(ctx);
+        messageClient.addDestination(screenName);
+        return await handleQMError(messageClient, error);
     }
 }
