@@ -5,7 +5,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -19,11 +19,13 @@ import {
 } from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams,
+    gluonTeamsWhoSlackScreenNameBelongsTo,
+    menuForTeams,
 } from "../team/Teams";
 import {
     gluonProjectFromProjectName,
-    gluonProjectsWhichBelongToGluonTeam, menuForProjects,
+    gluonProjectsWhichBelongToGluonTeam,
+    menuForProjects,
 } from "./Projects";
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
@@ -82,7 +84,6 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return await success();
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(
@@ -102,7 +103,6 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
                 "Please select the projects you wish to provision the environments for",
             );
         }
-        return await success();
     }
 
     private async requestProjectEnvironment(projectId: string, memberId: string) {

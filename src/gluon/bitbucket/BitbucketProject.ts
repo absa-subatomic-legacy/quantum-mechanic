@@ -77,7 +77,6 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return await success();
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(
@@ -98,8 +97,6 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand {
                 "Please select the project you wish to create a Bitbucket project for",
             );
         }
-
-        return await success();
     }
 
     private async updateGluonWithBitbucketDetails(projectId: string, projectName: string, projectDescription: string, memberId: string) {
@@ -166,7 +163,6 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return await success();
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(
@@ -188,7 +184,6 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
                 "Please select the project you wish to link a Bitbucket project to",
             );
         }
-        return await success();
     }
 
     private async configBitbucket(ctx: HandlerContext): Promise<HandlerResult> {
