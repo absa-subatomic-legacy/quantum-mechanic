@@ -5,7 +5,6 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    success,
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
@@ -67,7 +66,6 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return await success();
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(
@@ -93,8 +91,6 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
                 this,
                 "Please select the application you would like to build");
         }
-
-        return await success();
     }
 
     private async applicationsForGluonProject(ctx: HandlerContext,

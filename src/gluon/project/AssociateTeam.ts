@@ -11,9 +11,19 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
-import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
-import {gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams} from "../team/Teams";
-import {gluonProjectFromProjectName, gluonProjects, menuForProjects} from "./Projects";
+import {
+    RecursiveParameter,
+    RecursiveParameterRequestCommand,
+} from "../shared/RecursiveParameterRequestCommand";
+import {
+    gluonTeamsWhoSlackScreenNameBelongsTo,
+    menuForTeams,
+} from "../team/Teams";
+import {
+    gluonProjectFromProjectName,
+    gluonProjects,
+    menuForProjects,
+} from "./Projects";
 
 @CommandHandler("Add additional team/s to a project", QMConfig.subatomic.commandPrefix + " associate team")
 export class AssociateTeam extends RecursiveParameterRequestCommand {
@@ -54,11 +64,11 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
     protected runCommand(ctx: HandlerContext) {
         return gluonProjectFromProjectName(ctx, this.projectName)
             .then(() => {
-            return this.linkProjectForTeam(ctx, this.screenName, this.teamName);
-        });
+                return this.linkProjectForTeam(ctx, this.screenName, this.teamName);
+            });
     }
 
-    protected setNextParameter(ctx: HandlerContext): Promise<HandlerResult> | void {
+    protected setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.projectName)) {
             return gluonProjects(ctx).then(projects => {
                 return menuForProjects(
@@ -102,10 +112,10 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
                                                 teamId: team.data._embedded.teamResources[0].teamId,
                                                 name: team.data._embedded.teamResources[0].name,
                                             }],
-                                        }).then( () => {
-                                            if (this.teamChannel !== team.data._embedded.teamResources[0].name) {
-                                                return ctx.messageClient.respond(`Team *${team.data._embedded.teamResources[0].name}* has been successfully associated with ${gluonProject.projectId}`);
-                                            }
+                                        }).then(() => {
+                                        if (this.teamChannel !== team.data._embedded.teamResources[0].name) {
+                                            return ctx.messageClient.respond(`Team *${team.data._embedded.teamResources[0].name}* has been successfully associated with ${gluonProject.projectId}`);
+                                        }
                                     })
                                         .catch(error => {
                                             return ctx.messageClient.respond(`❗Failed to link project with error: ${JSON.stringify(error.response.data)}.`);

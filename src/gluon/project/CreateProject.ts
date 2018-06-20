@@ -6,14 +6,16 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
-    success,
 } from "@atomist/automation-client";
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
-import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
+import {
+    RecursiveParameter,
+    RecursiveParameterRequestCommand,
+} from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTenantFromTenantName,
     gluonTenantList,
@@ -64,7 +66,6 @@ export class CreateProject extends RecursiveParameterRequestCommand {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return await success();
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(
@@ -83,8 +84,6 @@ export class CreateProject extends RecursiveParameterRequestCommand {
                 "Please select a tenant you would like to associate this project with. Choose Default if you have no tenant specified for this project.",
             );
         }
-
-        return await success();
     }
 
     private async requestNewProjectForTeamAndTenant(ctx: HandlerContext, screenName: string,

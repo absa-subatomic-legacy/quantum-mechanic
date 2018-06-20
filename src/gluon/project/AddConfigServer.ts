@@ -6,7 +6,6 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
-    success,
 } from "@atomist/automation-client";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
@@ -57,7 +56,6 @@ export class AddConfigServer extends RecursiveParameterRequestCommand {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.gluonTeamName = team.name;
-                return await this.setNextParameter(ctx);
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(
@@ -69,7 +67,6 @@ export class AddConfigServer extends RecursiveParameterRequestCommand {
                 );
             }
         }
-        return await success();
     }
 
     private async addConfigServer(ctx: HandlerContext,

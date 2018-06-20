@@ -5,7 +5,7 @@ import {
     HandlerResult,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
@@ -13,7 +13,10 @@ import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
 import {gluonApplicationsLinkedToGluonProjectId} from "../packages/Applications";
 import {logErrorAndReturnSuccess} from "../shared/Error";
-import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
+import {
+    RecursiveParameter,
+    RecursiveParameterRequestCommand,
+} from "../shared/RecursiveParameterRequestCommand";
 import {
     gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
@@ -44,7 +47,6 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return await success();
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(
@@ -55,7 +57,6 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand {
                 );
             }
         }
-        return await success();
     }
 
     private async listTeamProjects(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
