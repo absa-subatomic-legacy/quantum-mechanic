@@ -64,7 +64,6 @@ export class CreateProject extends RecursiveParameterRequestCommand {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return await success();
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(
@@ -91,7 +90,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
                                                     teamName: string, tenantId: string): Promise<any> {
         let member;
         try {
-            member = gluonMemberFromScreenName(ctx, screenName);
+            member = await gluonMemberFromScreenName(ctx, screenName);
         } catch (error) {
             return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
         }
@@ -115,7 +114,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
         if (projectCreationResult.status === 409) {
             logger.error(`Failed to create project since the project name is already in use.`);
             return await ctx.messageClient.respond(`❗Failed to create project since the project name is already in use. Please retry using a different project name.`);
-        } else if (projectCreationResult.status !== 200) {
+        } else if (projectCreationResult.status !== 201) {
             logger.error(`Failed to create project with error: ${JSON.stringify(projectCreationResult.data)}`);
             return await ctx.messageClient.respond(`❗Failed to create project.`);
         }

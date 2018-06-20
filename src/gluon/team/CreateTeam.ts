@@ -39,7 +39,7 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
         const memberQueryResult = await this.getGluonMemberFromScreenName(this.screenName);
 
         if (memberQueryResult.status !== 200) {
-            logger.info(`Slackname ${this.screenName} is not associated witha gluon identity`);
+            logger.info(`Slackname ${this.screenName} is not associated with a gluon identity`);
             return await this.requestMemberOnboarding(ctx, this.name);
         }
 
@@ -47,8 +47,8 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
 
         const teamCreationResult = await this.createTeamInGluon(this.name, this.description, member.memberId);
 
-        if (teamCreationResult.status !== 200) {
-            logger.error(`Failed to create the team with name ${this.name}. Error: ${teamCreationResult.data}`);
+        if (teamCreationResult.status !== 201) {
+            logger.error(`Failed to create the team with name ${this.name}. Error: ${teamCreationResult.status}`);
             return ctx.messageClient.respond("❗Unable to create team.");
         }
 
