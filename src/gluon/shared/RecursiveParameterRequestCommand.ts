@@ -1,14 +1,15 @@
 import {
     HandleCommand,
     HandlerContext,
-    HandlerResult, logger,
+    HandlerResult,
+    logger,
 } from "@atomist/automation-client";
 import {
     BaseParameter,
     declareParameter,
 } from "@atomist/automation-client/internal/metadata/decoratorSupport";
 import _ = require("lodash");
-import {QMError} from "./Error";
+import {handleQMError, QMError, ResponderMessageClient} from "./Error";
 
 export abstract class RecursiveParameterRequestCommand implements HandleCommand<HandlerResult> {
 
@@ -17,7 +18,11 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
 
         if (!this.recursiveParametersAreSet()) {
-            return await this.requestNextUnsetParameter(ctx);
+            try {
+                return await this.requestNextUnsetParameter(ctx);
+            } catch (error) {
+                return await this.handleRequestNextParameterError(ctx, error);
+            }
         }
 
         return await this.runCommand(ctx);
@@ -56,6 +61,11 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
             }
         }
         return parametersAreSet;
+    }
+
+    private async handleRequestNextParameterError(ctx: HandlerContext, error) {
+        const messageClient = new ResponderMessageClient(ctx);
+        return await handleQMError(messageClient, error);
     }
 }
 

@@ -10,10 +10,24 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
-import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
-import {RecursiveParameter, RecursiveParameterRequestCommand} from "../shared/RecursiveParameterRequestCommand";
-import {gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams} from "../team/Teams";
-import {gluonProjectFromProjectName, gluonProjects, menuForProjects} from "./Projects";
+import {
+    handleQMError,
+    QMError,
+    ResponderMessageClient,
+} from "../shared/Error";
+import {
+    RecursiveParameter,
+    RecursiveParameterRequestCommand,
+} from "../shared/RecursiveParameterRequestCommand";
+import {
+    gluonTeamsWhoSlackScreenNameBelongsTo,
+    menuForTeams,
+} from "../team/Teams";
+import {
+    gluonProjectFromProjectName,
+    gluonProjects,
+    menuForProjects,
+} from "./Projects";
 
 @CommandHandler("Add additional team/s to a project", QMConfig.subatomic.commandPrefix + " associate team")
 export class AssociateTeam extends RecursiveParameterRequestCommand {
@@ -94,19 +108,15 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
             } catch (error) {
                 return failure(error);
             }
-            let updateGluonWithProjectDetails;
-            try {
-                updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.data._embedded.teamResources[0].teamId, team.data._embedded.teamResources[0].name);
-            } catch (error) {
-                return await this.handleError(ctx, error);
-            }
-            logger.info(`!!${JSON.stringify(updateGluonWithProjectDetails.status)}`);
+            const updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.data._embedded.teamResources[0].teamId, team.data._embedded.teamResources[0].name);
+
             if (updateGluonWithProjectDetails.status === 201) {
                 if (this.teamChannel !== team.data._embedded.teamResources[0].name) {
                     return await ctx.messageClient.respond(`Team *${team.data._embedded.teamResources[0].name}* has been successfully associated with ${gluonProject.projectId}`);
                 }
             } else {
-                return await ctx.messageClient.respond(`❗Failed to link project.`);
+                logger.error(`Failed to link project. Error ${updateGluonWithProjectDetails.data}`);
+                throw new QMError(`❗Failed to link project.`);
             }
         }
     }
