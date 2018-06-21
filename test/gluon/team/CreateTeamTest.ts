@@ -25,7 +25,7 @@ describe("Create Team test", () => {
             },
         });
 
-        mock.onPost(`${QMConfig.subatomic.gluon.baseUrl}/teams`).reply(200, {
+        mock.onPost(`${QMConfig.subatomic.gluon.baseUrl}/teams`).reply(201, {
             name: "A Team",
             description: "Best team alive!",
             createdBy: "3d01d401-abb3-4eee-8884-2ed5a472172d",
@@ -52,7 +52,23 @@ describe("Create Team test", () => {
         const screenName = "Test.User";
 
         mock.onGet(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${screenName}`).reply(200, {
-            _embedded: {},
+            _embedded: {
+                teamMemberResources: [
+                    {
+                        memberId: "3d01d401-abb3-4eee-8884-2ed5a472172d",
+                        slack: {
+                            screenName: `${screenName}`,
+                            userId: "9USDA7D6dH",
+                        },
+                    },
+                ],
+            },
+        });
+
+        mock.onPost(`${QMConfig.subatomic.gluon.baseUrl}/teams`).reply(200, {
+            name: "A Team",
+            description: "Best team alive!",
+            createdBy: "3d01d401-abb3-4eee-8884-2ed5a472172d",
         });
 
         const subject = new CreateTeam();
@@ -66,7 +82,7 @@ describe("Create Team test", () => {
 
         subject.handle(fakeContext)
             .then(() => {
-                assert(fakeContext.messageClient.textMsg.text === "There was an error creating your undefined team");
+                assert(fakeContext.messageClient.textMsg === "❗Unable to create team.");
             })
             .then(done, done);
     });

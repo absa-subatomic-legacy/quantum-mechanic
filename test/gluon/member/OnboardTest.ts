@@ -9,7 +9,7 @@ describe("Onboard new member test", () => {
     it("should welcome new user", done => {
         const mock = new MockAdapter(axios);
 
-        mock.onPost(`${QMConfig.subatomic.gluon.baseUrl}/members`).reply(200, {
+        mock.onPost(`${QMConfig.subatomic.gluon.baseUrl}/members`).reply(201, {
             firstName: "Test",
             lastName: "User",
             email: "test.user@foo.co.za",
