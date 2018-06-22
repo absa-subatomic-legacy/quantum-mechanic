@@ -12,6 +12,7 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {handleQMError, QMError, UserMessageClient} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {bitbucketAxios, bitbucketProjectFromKey} from "./Bitbucket";
 import {
     addBitbucketProjectAccessKeys,
@@ -110,7 +111,7 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
                 projectDescription,
             });
 
-        if (createBitbucketProjectRequest.status === 200) {
+        if (isSuccessCode(createBitbucketProjectRequest.status)) {
             const project = createBitbucketProjectRequest.data;
             logger.info(`Created project: ${JSON.stringify(project)} -> ${project.id} + ${project.links.self[0].href}`);
             this.bitbucketProjectId = project.id;
@@ -147,7 +148,7 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
                     url: this.bitbucketProjectUrl,
                 },
             });
-        if (confirmBitbucketProjectCreatedResult.status !== 201) {
+        if (!isSuccessCode(confirmBitbucketProjectCreatedResult.status)) {
             logger.error(`Could not confirm Bitbucket project: [${confirmBitbucketProjectCreatedResult.status}-${confirmBitbucketProjectCreatedResult.data}]`);
             throw new QMError(`There was an error confirming the ${projectName} Bitbucket project details`);
         }

@@ -12,6 +12,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -95,7 +96,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
             return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
         }
         const teamQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
-        if (teamQueryResult.status !== 200) {
+        if (!isSuccessCode(teamQueryResult.status)) {
             logger.error(`❗Failed to find team ${teamName}. Error: ${JSON.stringify(teamQueryResult)}`);
             return ctx.messageClient.respond(`Team ${teamName} does not appear to be a valid Sub Atomic team.`);
         }
@@ -114,7 +115,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
         if (projectCreationResult.status === 409) {
             logger.error(`Failed to create project since the project name is already in use.`);
             return await ctx.messageClient.respond(`❗Failed to create project since the project name is already in use. Please retry using a different project name.`);
-        } else if (projectCreationResult.status !== 201) {
+        } else if (!isSuccessCode(projectCreationResult.status)) {
             logger.error(`Failed to create project with error: ${JSON.stringify(projectCreationResult.data)}`);
             return await ctx.messageClient.respond(`❗Failed to create project.`);
         }

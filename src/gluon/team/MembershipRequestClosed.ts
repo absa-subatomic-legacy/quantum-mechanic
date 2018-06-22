@@ -14,6 +14,7 @@ import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/handlers/c
 import {SlackMessage} from "@atomist/slack-messages";
 import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
+import {isSuccessCode} from "../shared/Http";
 
 @CommandHandler("Close a membership request")
 @Tags("subatomic", "team", "membership")
@@ -66,7 +67,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
 
         const approverMemberQueryResult = await this.findGluonTeamMember(this.approverUserName);
 
-        if (approverMemberQueryResult.status !== 200) {
+        if (!isSuccessCode(approverMemberQueryResult.status)) {
             logger.error("The approver is not a gluon member. This can only happen if the user was deleted before approving this request.");
             return await ctx.messageClient.respond("❗You are no longer a Subatomic user.");
         }
@@ -80,7 +81,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
             this.approvalStatus,
         );
 
-        if (updateMembershipRequestResult.status !== 200) {
+        if (!isSuccessCode(updateMembershipRequestResult.status)) {
             logger.error("Failed to update the member shiprequest.");
             return await ctx.messageClient.respond("❗The membership request could not be updated. Please ensure that you are an owner of this team before responding to the membership request.");
         }

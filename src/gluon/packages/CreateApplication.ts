@@ -23,6 +23,7 @@ import {
     menuForProjects,
 } from "../project/Projects";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -94,7 +95,7 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
         }
         const createApplicationResult = await this.createApplicationInGluon(project, member);
 
-        if (createApplicationResult.status !== 200) {
+        if (!isSuccessCode(createApplicationResult.status)) {
             return await ctx.messageClient.addressChannels({
                 text: "❗ Your new application could not be created. Please ensure it does not already exist.",
             }, this.teamChannel);
@@ -288,7 +289,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
                 requestConfiguration: true,
             });
 
-        if (createApplicationResult.status !== 200) {
+        if (!isSuccessCode(createApplicationResult.status)) {
             logger.error(`Failed to link package. Error: ${JSON.stringify(createApplicationResult)}`);
             return await ctx.messageClient.respond("❗Failed to link the specified package.");
         }

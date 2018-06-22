@@ -19,6 +19,7 @@ import {QMTemplate} from "../../template/QMTemplate";
 import {jenkinsAxios} from "../jenkins/Jenkins";
 import {LinkExistingApplication} from "../packages/CreateApplication";
 import {LinkExistingLibrary} from "../packages/CreateLibrary";
+import {isSuccessCode} from "../shared/Http";
 import {getProjectDisplayName, getProjectId} from "./Project";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
@@ -97,7 +98,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
 
         const jenkinsCreateItemResult = await this.createJenkinsBuildTemplate(environmentsRequestedEvent, teamDevOpsProjectId, jenkinsHost.output, token.output);
 
-        if (jenkinsCreateItemResult.status !== 200) {
+        if (!isSuccessCode(jenkinsCreateItemResult.status)) {
             if (jenkinsCreateItemResult && jenkinsCreateItemResult.status === 400) {
                 logger.warn(`Folder for [${environmentsRequestedEvent.project.name}] probably already created`);
             } else {

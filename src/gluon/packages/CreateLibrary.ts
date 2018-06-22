@@ -23,6 +23,7 @@ import {
     menuForProjects,
 } from "../project/Projects";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -180,7 +181,7 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
                 requestConfiguration: true,
             });
 
-        if (createApplicationResult.status !== 200) {
+        if (!isSuccessCode(createApplicationResult.status)) {
             logger.error(`Failed to link package. Error: ${JSON.stringify(createApplicationResult)}`);
             return await ctx.messageClient.respond("❗Failed to link the specified package.");
         }

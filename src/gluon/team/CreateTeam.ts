@@ -15,6 +15,7 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
 import {OnboardMember} from "../member/Onboard";
+import {isSuccessCode} from "../shared/Http";
 
 @CommandHandler("Create a new team", QMConfig.subatomic.commandPrefix + " create team")
 @Tags("subatomic", "team")
@@ -38,7 +39,7 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
 
         const memberQueryResult = await this.getGluonMemberFromScreenName(this.screenName);
 
-        if (memberQueryResult.status !== 200) {
+        if (!isSuccessCode(memberQueryResult.status)) {
             logger.info(`Slackname ${this.screenName} is not associated with a gluon identity`);
             return await this.requestMemberOnboarding(ctx, this.name);
         }
@@ -47,7 +48,7 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
 
         const teamCreationResult = await this.createTeamInGluon(this.name, this.description, member.memberId);
 
-        if (teamCreationResult.status !== 201) {
+        if (!isSuccessCode(teamCreationResult.status)) {
             logger.error(`Failed to create the team with name ${this.name}. Error: ${teamCreationResult.status}`);
             return ctx.messageClient.respond("❗Unable to create team.");
         }
