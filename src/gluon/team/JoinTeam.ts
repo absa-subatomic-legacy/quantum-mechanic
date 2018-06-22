@@ -20,6 +20,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import * as graphql from "../../typings/types";
 import {ListTeamProjects} from "../project/ProjectDetails";
+import {isSuccessCode} from "../shared/Http";
 import {CreateTeam} from "./CreateTeam";
 
 @CommandHandler("Apply to join an existing team", QMConfig.subatomic.commandPrefix + " apply to team")
@@ -33,7 +34,7 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
 
         const teamsQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
 
-        if (teamsQueryResult.status !== 200) {
+        if (!isSuccessCode(teamsQueryResult.status)) {
             return this.alertUserThatNoTeamsExist(ctx);
         }
 
@@ -124,7 +125,7 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
 
         const newMemberQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${chatId}`);
 
-        if (newMemberQueryResult.status !== 200) {
+        if (!isSuccessCode(newMemberQueryResult.status)) {
             return await alertGluonMemberForSlackMentionDoesNotExist(ctx, this.slackName, this.docs("onboard-me"));
         }
 
@@ -140,7 +141,7 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
         logger.info(`Getting teams that ${this.screenName} (you) are a part of...`);
 
         const invokingMemberResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${this.screenName}`);
-        if (invokingMemberResult.status !== 200) {
+        if (!isSuccessCode(invokingMemberResult.status)) {
             return await ctx.messageClient.respond(`❗${this.screenName} does not appear to have been onboarded onto the Subatomic system`);
         }
 
@@ -170,7 +171,7 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
                 createdBy: actioningMember.memberId,
             });
 
-        if (updateTeamResult.status !== 201) {
+        if (!isSuccessCode(updateTeamResult.status)) {
             return await ctx.messageClient.respond(`❗Failed to add member to the team. Server side failure.`);
         }
 
@@ -260,13 +261,13 @@ export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResul
 
         const newMemberQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${chatId}`);
 
-        if (newMemberQueryResult.status !== 200) {
+        if (!isSuccessCode(newMemberQueryResult.status)) {
             return await alertGluonMemberForSlackMentionDoesNotExist(ctx, this.slackName, this.docs("onboard-me"));
         }
 
         const updateTeamResult = await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${this.teamId}`);
 
-        if (updateTeamResult.status !== 201) {
+        if (!isSuccessCode(updateTeamResult.status)) {
             return await ctx.messageClient.respond(`❗Failed to add member to the team. Server side failure.`);
         }
 

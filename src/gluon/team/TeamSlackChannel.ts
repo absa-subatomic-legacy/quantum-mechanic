@@ -19,6 +19,7 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -173,7 +174,7 @@ async function linkSlackChannelToGluonTeam(ctx: HandlerContext,
 
     const teamQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${gluonTeamName}`);
 
-    if (teamQueryResult.status === 200) {
+    if (isSuccessCode(teamQueryResult.status)) {
         const team = teamQueryResult.data._embedded.teamResources[0];
 
         logger.info(`Updating team channel [${finalisedSlackChannelName}]: ${team.teamId}`);
@@ -228,7 +229,7 @@ async function tryInviteGluonMemberToChannel(ctx: HandlerContext,
     logger.info("Creating promise to find and add member: " + gluonMemberId);
     const memberQueryResponse = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members/${gluonMemberId}`);
 
-    if (memberQueryResponse.status !== 200) {
+    if (!isSuccessCode(memberQueryResponse.status)) {
         throw new Error("Unable to find member");
     }
 

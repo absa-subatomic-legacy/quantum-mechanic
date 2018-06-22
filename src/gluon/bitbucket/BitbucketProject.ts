@@ -18,6 +18,7 @@ import {
     menuForProjects,
 } from "../project/Projects";
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -108,7 +109,7 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand {
                 },
                 createdBy: memberId,
             });
-        if (updateGluonProjectResult.status !== 201) {
+        if (!isSuccessCode(updateGluonProjectResult.status)) {
             logger.error(`Unable to register Bitbucket project in gluon. Error ${updateGluonProjectResult.data}`);
             throw new QMError("Failed to update the Subatomic project with specified Bitbucket details.");
         }
@@ -209,7 +210,7 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
     private async getBitbucketProject(bitbucketProjectRestUrl: string) {
         const bitbucketProjectRequestResult = await bitbucketAxios().get(bitbucketProjectRestUrl);
 
-        if (bitbucketProjectRequestResult.status !== 200) {
+        if (!isSuccessCode(bitbucketProjectRequestResult.status)) {
             throw new QMError("Unable find the specified project in Bitbucket. Please make sure it exists.");
         }
 
@@ -229,7 +230,7 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
                 createdBy: createdByMemberId,
             });
 
-        if (updateGluonProjectResult.status !== 201) {
+        if (!isSuccessCode(updateGluonProjectResult.status)) {
             throw new QMError(`Failed to update the Subatomic project with specified Bibucket details.`);
         }
     }

@@ -13,6 +13,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -81,7 +82,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
 
         const teamQueryResult = await this.getGluonTeamFromTeamName(teamName);
 
-        if (teamQueryResult.status !== 200) {
+        if (!isSuccessCode(teamQueryResult.status)) {
             logger.error(`Could not find gluon team ${teamName}. This should only happen if the gluon server connection dropped.`);
             return ctx.messageClient.respond(`❗Unable to find team with name ${teamName}.`);
         }
@@ -91,7 +92,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
 
         const teamUpdateResult = await this.requestDevOpsEnvironmentThroughGluon(team.teamId, member.memberId);
 
-        if (teamUpdateResult.status !== 201) {
+        if (!isSuccessCode(teamUpdateResult.status)) {
             logger.error(`Unable to request ${teamName} devops environment. Error: ${JSON.stringify(teamUpdateResult)}`);
             return await ctx.messageClient.respond(`❗Unable to request devops environment for ${teamName}.`);
         }

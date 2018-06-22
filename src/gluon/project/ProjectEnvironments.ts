@@ -13,6 +13,7 @@ import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -69,7 +70,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
 
         const projectEnvironmentRequestResult = await this.requestProjectEnvironment(project.projectId, member.memberId);
 
-        if (projectEnvironmentRequestResult.status !== 200) {
+        if (!isSuccessCode(projectEnvironmentRequestResult.status)) {
             logger.error(`Failed to request project environment for project ${this.projectName}. Error: ${JSON.stringify(projectEnvironmentRequestResult)}`);
             return await ctx.messageClient.respond("❗Failed to request project environment. Network error.");
         }

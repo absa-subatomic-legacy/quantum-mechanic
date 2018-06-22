@@ -1,6 +1,5 @@
 import {
     CommandHandler,
-    failure,
     HandleCommand,
     HandlerContext,
     HandlerResult,
@@ -13,6 +12,7 @@ import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageCl
 import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
+import {isSuccessCode} from "../shared/Http";
 import {CreateTeam} from "../team/CreateTeam";
 import {JoinTeam} from "../team/JoinTeam";
 
@@ -62,7 +62,7 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
                 },
             });
 
-        if (createMemberResult.status !== 201) {
+        if (!isSuccessCode(createMemberResult)) {
             return await ctx.messageClient.respond(`❗Unable to onboard a member with provided details. Details of the user are already in use.`);
         }
 
