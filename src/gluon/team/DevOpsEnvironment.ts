@@ -92,6 +92,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
 
         const teamUpdateResult = await this.requestDevOpsEnvironmentThroughGluon(team.teamId, member.memberId);
 
+
         if (!isSuccessCode(teamUpdateResult.status)) {
             logger.error(`Unable to request ${teamName} devops environment. Error: ${JSON.stringify(teamUpdateResult)}`);
             return await ctx.messageClient.respond(`❗Unable to request devops environment for ${teamName}.`);

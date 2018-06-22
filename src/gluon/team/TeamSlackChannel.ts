@@ -179,6 +179,13 @@ async function linkSlackChannelToGluonTeam(ctx: HandlerContext,
 
         logger.info(`Updating team channel [${finalisedSlackChannelName}]: ${team.teamId}`);
 
+        await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${team.teamId}`,
+        {
+            slack: {
+                teamChannel: finalisedSlackChannelName,
+            },
+        });
+
         return await createTeamSlackChannel(ctx, slackTeamId, slackChannelName, team);
     } else {
         return await requestNonExistentTeamsCreation(ctx, gluonTeamName, documentationLink);
