@@ -448,23 +448,19 @@ If your applications will require a Spring Cloud Config Server, you can add a Su
     }
 }
 
-export async function addOpenshiftMembershipPermissions(projectId: string, team: { owners: Array<{ domainUsername }>, members: Array<{ domainUsername }> }): Promise<any> {
-    return Promise.all(
-        team.owners.map(owner => {
-            const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
-            logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
-            return OCClient.policy.addRoleToUser(ownerUsername,
-                "admin",
-                projectId);
-        }))
-        .then(() => {
-            return Promise.all(
-                team.members.map(member => {
-                    const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
-                    logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
-                    return OCClient.policy.addRoleToUser(memberUsername,
-                        "view",
-                        projectId);
-                }));
-        });
+export async function addOpenshiftMembershipPermissions(projectId: string, team: { owners: Array<{ domainUsername }>, members: Array<{ domainUsername }> }) {
+    await team.owners.map(async owner => {
+        const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
+        logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
+        return await OCClient.policy.addRoleToUser(ownerUsername,
+            "admin",
+            projectId);
+    });
+    await team.members.map(async member => {
+        const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
+        await logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
+        return await OCClient.policy.addRoleToUser(memberUsername,
+            "view",
+            projectId);
+    });
 }

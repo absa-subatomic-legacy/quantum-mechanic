@@ -5,6 +5,8 @@ import {
     success,
 } from "@atomist/automation-client";
 import {SlackMessage} from "@atomist/slack-messages";
+import * as util from "util";
+import {OCCommandResult} from "../../openshift/base/OCCommandResult";
 
 export function logErrorAndReturnSuccess(method, error): HandlerResult {
     logger.info(`Don't display the error - ${method} already handles it.`);
@@ -12,26 +14,55 @@ export function logErrorAndReturnSuccess(method, error): HandlerResult {
     return success();
 }
 
-export async function handleQMError(messageClient: QMMessageClient, error: any) {
+export async function handleQMError(messageClient: QMMessageClient, error) {
     logger.error("Trying to handle QM error.");
-    if (error instanceof Error) {
-        logger.error("Error is not of QMError type. Letting error bubble up.");
+    if ("code" in error && error.code === "ECONNREFUSED") {
+        logger.error(`Error code suggests and external service is down.\nError: ${util.inspect(error)}`);
+        return await messageClient.send(`❗Unexpected failure. An external service dependency appears to be down.`);
+    } else if (error instanceof Error) {
+        logger.error(`Error is not of default Error type. Letting error bubble up.\nError: ${util.inspect(error)}`);
         throw error;
     } else if (error instanceof QMError) {
         logger.error(`Error is of QMError type. Error: ${error.message}`);
+        return await messageClient.send(`${error.getSlackMessage()}`);
+    } else if (error instanceof OCResultError) {
+        logger.error(`Error is of OCResultError type. Error: ${error.message}`);
+        return await messageClient.send(`${error.getSlackMessage()}`);
+    } else if (error instanceof OCCommandResult) {
+        logger.error(`Error is of OCCommandResult type (unhandled OCCommand failure).
+        Command: ${error.command}
+        Error: ${error.error}`);
 
-        return await messageClient.send(`❗${error.message}`);
+        return await messageClient.send(`❗An Openshift command failed to run successfully. Please alert your system admin to check the logs and correct the issue accordingly.`);
     }
     logger.error("Unknown error type. Rethrowing error.");
     throw new Error(error);
 }
 
 export class QMError extends Error {
-    // Nothing special
+    constructor(message: string, protected slackMessage: SlackMessage | string = null) {
+        super(message);
+    }
+
+    public getSlackMessage() {
+        if (this.slackMessage === null) {
+            return `❗${this.message}`;
+        }
+        return this.slackMessage;
+    }
+}
+
+export class OCResultError extends QMError {
+    constructor(private ocCommandResult: OCCommandResult, message: string, slackMessage: SlackMessage | string = message) {
+        super(message, slackMessage);
+        this.message = `${message}
+        Command: ${ocCommandResult.command}
+        Error: ${ocCommandResult.error}`;
+    }
 }
 
 export interface QMMessageClient {
-    send(message: (string|SlackMessage)): Promise<HandlerResult>;
+    send(message: (string | SlackMessage)): Promise<HandlerResult>;
 }
 
 export class ResponderMessageClient implements QMMessageClient {
@@ -41,7 +72,7 @@ export class ResponderMessageClient implements QMMessageClient {
         this.ctx = ctx;
     }
 
-    public async send(message: (string|SlackMessage)): Promise<HandlerResult> {
+    public async send(message: (string | SlackMessage)): Promise<HandlerResult> {
         return await this.ctx.messageClient.respond(message);
     }
 }
@@ -59,7 +90,7 @@ export class UserMessageClient implements QMMessageClient {
         this.users.push(user);
     }
 
-    public async send(message: (string|SlackMessage)): Promise<HandlerResult> {
+    public async send(message: (string | SlackMessage)): Promise<HandlerResult> {
         return await this.ctx.messageClient.addressUsers(message, this.users);
     }
 }
@@ -77,7 +108,7 @@ export class ChannelMessageClient implements QMMessageClient {
         this.channels.push(channel);
     }
 
-    public async send(message: (string|SlackMessage)): Promise<HandlerResult> {
+    public async send(message: (string | SlackMessage)): Promise<HandlerResult> {
         return await this.ctx.messageClient.addressChannels(message, this.channels);
     }
 }
