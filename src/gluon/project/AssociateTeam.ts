@@ -62,7 +62,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            await this.linkProjectForTeam(ctx, this.screenName, this.teamName);
+            await this.linkProjectForTeam(ctx, this.teamName);
         } catch (error) {
             return await this.handleError(ctx, error);
         }
@@ -79,37 +79,27 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
             );
         }
         if (_.isEmpty(this.teamName)) {
-            try {
-                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
-                this.teamName = team.name;
-            } catch (error) {
-                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await menuForTeams(
-                    ctx,
-                    teams,
-                    this,
-                    "Please select a team you would like to associate this project with",
-                );
-            }
+            const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+            return await menuForTeams(
+                ctx,
+                teams,
+                this,
+                `Please select a team you would like to associate to *${this.projectName}*.`,
+            );
         }
     }
 
-    private async linkProjectForTeam(ctx: HandlerContext, screenName: string,
-                                     teamName: string): Promise<any> {
-        const member = await gluonMemberFromScreenName(ctx, screenName);
+    private async linkProjectForTeam(ctx: HandlerContext, teamName: string): Promise<any> {
         const team = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
-logger.info("HERE");
-        let gluonProject;
+        const gluonProject = await gluonProjectFromProjectName(ctx, this.projectName);
+        let updateGluonWithProjectDetails;
         try {
-            logger.info(`${ctx},${this.projectName}`);
-            gluonProject = await gluonProjectFromProjectName(ctx, this.projectName);
-            logger.info(gluonProject);
+            updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.data._embedded.teamResources[0].teamId, team.data._embedded.teamResources[0].name);
         } catch (error) {
-            return failure(error);
+            return await ctx.messageClient.respond(`Unfortunately team *${team.data._embedded.teamResources[0].name}* has already been associated with ${gluonProject.projectId}`);
         }
-        const updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.data._embedded.teamResources[0].teamId, team.data._embedded.teamResources[0].name);
-        logger.info(`!!!!${updateGluonWithProjectDetails}`);
-        if (updateGluonWithProjectDetails.status === 201) {
+
+        if (updateGluonWithProjectDetails.status === 202) {
             if (this.teamChannel !== team.data._embedded.teamResources[0].name) {
                 return await ctx.messageClient.respond(`Team *${team.data._embedded.teamResources[0].name}* has been successfully associated with ${gluonProject.projectId}`);
             }
@@ -121,7 +111,6 @@ logger.info("HERE");
     }
 
     private async updateGluonProject(projectId: string, createdBy: string, teamId: string, name: string) {
-        logger.info(`${projectId},${createdBy},${teamId},${name}`);
         return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
             {
                 productId: `${projectId}`,
