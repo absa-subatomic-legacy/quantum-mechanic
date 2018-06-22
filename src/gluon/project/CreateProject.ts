@@ -91,7 +91,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
                                                     teamName: string, tenantId: string): Promise<any> {
         let member;
         try {
-            member = gluonMemberFromScreenName(ctx, screenName);
+            member = await gluonMemberFromScreenName(ctx, screenName);
         } catch (error) {
             return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
         }
