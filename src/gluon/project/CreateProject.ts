@@ -58,6 +58,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
 
     protected async runCommand(ctx: HandlerContext) {
         const tenant = await gluonTenantFromTenantName(this.tenantName);
+        logger.info("-----");
         return await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
     }
 

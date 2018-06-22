@@ -22,6 +22,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
 import {
+    gluonTeamForSlackTeamChannel,
     gluonTeamsWhoSlackScreenNameBelongsTo,
     menuForTeams,
 } from "../team/Teams";
@@ -59,10 +60,9 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
         this.projectName = projectName;
     }
 
-    protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
+    protected async runCommand(ctx: HandlerContext) {
         try {
             await this.linkProjectForTeam(ctx, this.screenName, this.teamName);
-            return await success();
         } catch (error) {
             return await this.handleError(ctx, error);
         }
@@ -79,31 +79,36 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
             );
         }
         if (_.isEmpty(this.teamName)) {
-            const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-            return await menuForTeams(
-                ctx,
-                teams,
-                this,
-                `Please select a team you would like to associate to *${this.projectName}*.`,
-            );
+            try {
+                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                this.teamName = team.name;
+            } catch (error) {
+                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await menuForTeams(
+                    ctx,
+                    teams,
+                    this,
+                    "Please select a team you would like to associate this project with",
+                );
+            }
         }
-
-        return await success();
     }
 
     private async linkProjectForTeam(ctx: HandlerContext, screenName: string,
                                      teamName: string): Promise<any> {
         const member = await gluonMemberFromScreenName(ctx, screenName);
         const team = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
-
+logger.info("HERE");
         let gluonProject;
         try {
+            logger.info(`${ctx},${this.projectName}`);
             gluonProject = await gluonProjectFromProjectName(ctx, this.projectName);
+            logger.info(gluonProject);
         } catch (error) {
             return failure(error);
         }
         const updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.data._embedded.teamResources[0].teamId, team.data._embedded.teamResources[0].name);
-
+        logger.info(`!!!!${updateGluonWithProjectDetails}`);
         if (updateGluonWithProjectDetails.status === 201) {
             if (this.teamChannel !== team.data._embedded.teamResources[0].name) {
                 return await ctx.messageClient.respond(`Team *${team.data._embedded.teamResources[0].name}* has been successfully associated with ${gluonProject.projectId}`);
@@ -116,6 +121,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
     }
 
     private async updateGluonProject(projectId: string, createdBy: string, teamId: string, name: string) {
+        logger.info(`${projectId},${createdBy},${teamId},${name}`);
         return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
             {
                 productId: `${projectId}`,
