@@ -14,6 +14,7 @@ import {NamedSimpleOption} from "../../openshift/base/options/NamedSimpleOption"
 import {SimpleOption} from "../../openshift/base/options/SimpleOption";
 import {OCClient} from "../../openshift/OCClient";
 import {OCCommon} from "../../openshift/OCCommon";
+import {handleQMError, ResponderMessageClient} from "../shared/Error";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -44,11 +45,15 @@ export class AddConfigServer extends RecursiveParameterRequestCommand {
     public gitUri: string;
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
-        return await this.addConfigServer(
-            ctx,
-            this.gluonTeamName,
-            this.gitUri,
-        );
+        try {
+            return await this.addConfigServer(
+                ctx,
+                this.gluonTeamName,
+                this.gitUri,
+            );
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
