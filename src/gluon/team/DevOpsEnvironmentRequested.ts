@@ -20,7 +20,8 @@ import {
 } from "../jenkins/Jenkins";
 import {AddConfigServer} from "../project/AddConfigServer";
 import {CreateProject} from "../project/CreateProject";
-import {ChannelMessageClient, handleQMError} from "../shared/Error";
+import {ChannelMessageClient, handleQMError, QMError} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {subatomicImageStreamTags} from "../shared/SubatomicOpenshiftQueries";
 import {TaskListMessage, TaskStatus} from "../shared/TaskListMessage";
 
@@ -368,7 +369,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
 
     private async addJenkinsCredentials(projectId: string, jenkinsHost: string, token: string) {
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
-        await createGlobalCredentials(
+        const createBitbucketGlobalCredentialsResult = await createGlobalCredentials(
             jenkinsHost,
             token,
             projectId,
@@ -384,7 +385,11 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                 },
             });
 
-        await createGlobalCredentials(
+        if (!isSuccessCode(createBitbucketGlobalCredentialsResult.status)) {
+            throw new QMError("Failed to created Bitbucket Global Credentials in Jenkins");
+        }
+
+        const createNexusGlobalCredentialsResult = await createGlobalCredentials(
             jenkinsHost,
             token,
             projectId,
@@ -399,7 +404,11 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                 },
             });
 
-        await createGlobalCredentialsWithFile(
+        if (!isSuccessCode(createNexusGlobalCredentialsResult.status)) {
+            throw new QMError("Failed to create Nexus Global Credentials in Jenkins");
+        }
+
+        const createMavenGlobalCredentialsResult = await createGlobalCredentialsWithFile(
             jenkinsHost,
             token,
             projectId,
@@ -416,6 +425,10 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
             },
             QMConfig.subatomic.maven.settingsPath,
             "settings.xml");
+
+        if (!isSuccessCode(createMavenGlobalCredentialsResult.status)) {
+            throw new QMError("Failed to create Maven Global Credentials in Jenkins");
+        }
     }
 
     private async addBitbucketSSHSecret(projectId: string) {

@@ -19,6 +19,7 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
+import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -58,7 +59,11 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
     public applicationName: string;
 
     protected async runCommand(ctx: HandlerContext) {
-        return await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
+        try {
+            return await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -130,7 +135,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
                 });
             } else {
                 logger.error(`Failed to kick off JenkinsBuild. Error: ${JSON.stringify(error)}`);
-                return ctx.messageClient.respond("❗Failed to kick off jenkins build. Network failure connecting to Jenkins instance.");
+                throw new QMError("❗Failed to kick off jenkins build. Network failure connecting to Jenkins instance.");
             }
         }
     }
