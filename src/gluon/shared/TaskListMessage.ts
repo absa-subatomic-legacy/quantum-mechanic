@@ -1,11 +1,11 @@
-import {HandlerContext, HandlerResult} from "@atomist/automation-client";
+import {HandlerResult} from "@atomist/automation-client";
 import {Attachment, SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
 import {QMMessageClient} from "./Error";
 
 export class TaskListMessage {
 
-    private statusImages = new Map<TaskStatus, string>();
+    private statusCosmetics = new Map<TaskStatus, { color: string, symbol: string }>();
     private readonly messageId: string;
     private readonly tasks: { [k: string]: Task };
     private readonly taskOrder: string[];
@@ -14,9 +14,18 @@ export class TaskListMessage {
         this.messageId = uuid();
         this.tasks = {};
         this.taskOrder = [];
-        this.statusImages.set(TaskStatus.Pending, "✴️");
-        this.statusImages.set(TaskStatus.Failed, "❌");
-        this.statusImages.set(TaskStatus.Successful, "✅");
+        this.statusCosmetics.set(TaskStatus.Pending, {
+            color: "#ffcc00",
+            symbol: "●",
+        });
+        this.statusCosmetics.set(TaskStatus.Failed, {
+            color: "#D94649",
+            symbol: "✗",
+        });
+        this.statusCosmetics.set(TaskStatus.Successful, {
+            color: "#45B254",
+            symbol: "✓",
+        });
     }
 
     public addTask(key: string, description: string) {
@@ -47,13 +56,15 @@ export class TaskListMessage {
             text: this.titleMessage,
             attachments: [],
         };
-        let messageText = "";
         for (const key of this.taskOrder) {
             const task = this.tasks[key];
-            const statusImage = this.statusImages.get(task.status);
-            messageText += `${statusImage} ${task.description}\n`;
+            const statusCosmetic = this.statusCosmetics.get(task.status);
+            const messageText = `${task.description}\n`;
+            message.attachments.push({
+                text: `${statusCosmetic.symbol} ${messageText}`,
+                color: statusCosmetic.color,
+            } as Attachment);
         }
-        message.attachments.push({text: `${messageText}`} as Attachment);
         return message;
     }
 }
