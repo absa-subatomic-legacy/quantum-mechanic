@@ -28,8 +28,13 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
-import {logErrorAndReturnSuccess} from "../shared/Error";
+import {
+    handleQMError,
+    logErrorAndReturnSuccess,
+    QMError, ResponderMessageClient,
+} from "../shared/Error";
 import {createMenu} from "../shared/GenericMenu";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -197,10 +202,14 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     private readonly JENKINSFILE_EXISTS = "JENKINS_FILE_EXISTS";
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
-        await ctx.messageClient.addressChannels({
-            text: "🚀 Your package is being configured...",
-        }, this.teamChannel);
-        return await this.configurePackage(ctx).then(success);
+        try {
+            await ctx.messageClient.addressChannels({
+                text: "🚀 Your package is being configured...",
+            }, this.teamChannel);
+            return await this.configurePackage(ctx);
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -306,7 +315,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     private async configurePackage(ctx: HandlerContext): Promise<HandlerResult> {
         let project;
         try {
-            project = gluonProjectFromProjectName(ctx, this.projectName);
+            project = await gluonProjectFromProjectName(ctx, this.projectName);
         } catch (error) {
             return await logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
         }
@@ -645,12 +654,13 @@ You can kick off the build pipeline for your library by clicking the button belo
                     "Authorization": `Bearer ${token.output}`,
                 },
             });
-
-        if (createJenkinsJobResponse.status === 400) {
-            logger.warn(`Multibranch job for [${gluonApplicationName}] probably already created`);
-        } else {
-            logger.error(`Unable to create jenkinsJob`);
-            throw new Error("❗Failed to create jenkins job. Network request failed.");
+        if (!isSuccessCode(createJenkinsJobResponse.status)) {
+            if (createJenkinsJobResponse.status === 400) {
+                logger.warn(`Multibranch job for [${gluonApplicationName}] probably already created`);
+            } else {
+                logger.error(`Unable to create jenkinsJob`);
+                throw new QMError("❗Failed to create jenkins job. Network request failed.");
+            }
         }
         return success();
     }
