@@ -92,7 +92,11 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand {
     private readonly PACKAGE_DEFINITION_FOLDER = "resources/package-definitions/";
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
-        return await this.callPackageConfiguration(ctx);
+        try {
+            return await this.callPackageConfiguration(ctx);
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -473,18 +477,14 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
 
         await this.addJenkinsFile(bitbucketProjectKey, bitbucketRepoName);
 
-        try {
-            await this.createJenkinsJob(
-                teamDevOpsProjectId,
-                projectName,
-                projectId,
-                packageName,
-                bitbucketProjectKey,
-                bitbucketRepoName.toLowerCase(),
-            );
-        } catch (error) {
-            return await ctx.messageClient.respond(error.message);
-        }
+        await this.createJenkinsJob(
+            teamDevOpsProjectId,
+            projectName,
+            projectId,
+            packageName,
+            bitbucketProjectKey,
+            bitbucketRepoName.toLowerCase(),
+        );
 
         if (packageType === ApplicationType.DEPLOYABLE.toString()) {
             const appBuildName = `${_.kebabCase(projectName).toLowerCase()}-${_.kebabCase(packageName).toLowerCase()}`;
@@ -607,7 +607,7 @@ You can kick off the build pipeline for your library by clicking the button belo
                     ]);
             }
         }
-        return success();
+        return await success();
     }
 
     private async createJenkinsJob(teamDevOpsProjectId: string,
@@ -659,10 +659,10 @@ You can kick off the build pipeline for your library by clicking the button belo
                 logger.warn(`Multibranch job for [${gluonApplicationName}] probably already created`);
             } else {
                 logger.error(`Unable to create jenkinsJob`);
-                throw new QMError("❗Failed to create jenkins job. Network request failed.");
+                throw new QMError("Failed to create jenkins job. Network request failed.");
             }
         }
-        return success();
+        return await success();
     }
 
     private docs(): string {

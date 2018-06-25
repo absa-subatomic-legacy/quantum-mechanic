@@ -19,6 +19,8 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
+import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -58,7 +60,11 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
     public applicationName: string;
 
     protected async runCommand(ctx: HandlerContext) {
-        return await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
+        try {
+            return await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -106,18 +112,18 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
 
         logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to kick off build`);
 
-        try {
-            await kickOffBuild(
-                jenkinsHost.output,
-                token.output,
-                gluonProjectName,
-                gluonApplicationName,
-            );
+        const kickOffBuildResult = await kickOffBuild(
+            jenkinsHost.output,
+            token.output,
+            gluonProjectName,
+            gluonApplicationName,
+        );
+        if (isSuccessCode(kickOffBuildResult.status)) {
             return await ctx.messageClient.respond({
                 text: `🚀 *${gluonApplicationName}* is being built...`,
             });
-        } catch (error) {
-            if (error.response && error.response.status === 404) {
+        } else {
+            if (kickOffBuildResult.status === 404) {
                 logger.warn(`This is probably the first build and therefore a master branch job does not exist`);
                 await kickOffFirstBuild(
                     jenkinsHost.output,
@@ -129,8 +135,8 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
                     text: `🚀 *${gluonApplicationName}* is being built for the first time...`,
                 });
             } else {
-                logger.error(`Failed to kick off JenkinsBuild. Error: ${JSON.stringify(error)}`);
-                return ctx.messageClient.respond("❗Failed to kick off jenkins build. Network failure connecting to Jenkins instance.");
+                logger.error(`Failed to kick off JenkinsBuild. Error: ${JSON.stringify(kickOffBuildResult)}`);
+                throw new QMError("Failed to kick off jenkins build. Network failure connecting to Jenkins instance.");
             }
         }
     }
