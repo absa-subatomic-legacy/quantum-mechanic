@@ -47,7 +47,7 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
 
             return await this.presentMenuForTeamSelection(ctx, this.slackName, teams);
         } catch (error) {
-            return await this.handleError(ctx, error);
+            return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }
 
@@ -90,10 +90,6 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
             }],
         };
         return await ctx.messageClient.addressUsers(msg, this.slackName);
-    }
-
-    private async handleError(ctx: HandlerContext, error) {
-        return await handleQMError(new ResponderMessageClient(ctx), error);
     }
 
     private docs(): string {
