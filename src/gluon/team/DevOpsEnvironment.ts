@@ -70,7 +70,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
                                            teamChannel: string): Promise<any> {
 
         await ctx.messageClient.addressChannels({
-            text: `🚀 Your DevOps environment for *${teamName}* team, is being provisioned...`,
+            text: `Requesting DevOps environment for *${teamName}* team.`,
         }, teamChannel);
 
         let member;
@@ -91,7 +91,6 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
         logger.info("Requesting DevOps environment for team: " + teamName);
 
         const teamUpdateResult = await this.requestDevOpsEnvironmentThroughGluon(team.teamId, member.memberId);
-
 
         if (!isSuccessCode(teamUpdateResult.status)) {
             logger.error(`Unable to request ${teamName} devops environment. Error: ${JSON.stringify(teamUpdateResult)}`);
