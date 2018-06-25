@@ -13,7 +13,11 @@ import {Attachment} from "@atomist/slack-messages/SlackMessages";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {OCClient} from "../../openshift/OCClient";
-import {logErrorAndReturnSuccess} from "../shared/Error";
+import {
+    handleQMError,
+    logErrorAndReturnSuccess,
+    ResponderMessageClient,
+} from "../shared/Error";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -57,30 +61,34 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand {
     public pvcName: string;
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
-        const projectId = _.kebabCase(this.gluonProjectName);
+        try {
+            const projectId = _.kebabCase(this.gluonProjectName);
 
-        if (this.openShiftProjectNames === "all") {
-            this.openShiftProjectNames = `${projectId}-dev,${projectId}-sit,${projectId}-uat`;
-        }
+            if (this.openShiftProjectNames === "all") {
+                this.openShiftProjectNames = `${projectId}-dev,${projectId}-sit,${projectId}-uat`;
+            }
 
-        const pvcName = _.kebabCase(this.pvcName).toLowerCase();
-        const pvcAttachments: Attachment[] = [];
+            const pvcName = _.kebabCase(this.pvcName).toLowerCase();
+            const pvcAttachments: Attachment[] = [];
 
-        for (const environment of this.openShiftProjectNames.split(",")) {
-            logger.debug(`Adding PVC to OpenShift project: ${environment}`);
-            await OCClient.createPvc(pvcName, environment);
-            pvcAttachments.push({
-                fallback: `PVC created`,
-                text: `
+            for (const environment of this.openShiftProjectNames.split(",")) {
+                logger.debug(`Adding PVC to OpenShift project: ${environment}`);
+                await OCClient.createPvc(pvcName, environment);
+                pvcAttachments.push({
+                    fallback: `PVC created`,
+                    text: `
 *${pvcName}* PVC successfully created in *${environment}*`,
-                mrkdwn_in: ["text"],
-                title_link: `${QMConfig.subatomic.openshift.masterUrl}/console/project/${environment}/browse/persistentvolumeclaims/${pvcName}`,
-                title: `${environment}`,
-                color: "#45B254",
-            });
-        }
+                    mrkdwn_in: ["text"],
+                    title_link: `${QMConfig.subatomic.openshift.masterUrl}/console/project/${environment}/browse/persistentvolumeclaims/${pvcName}`,
+                    title: `${environment}`,
+                    color: "#45B254",
+                });
+            }
 
-        return await this.sendPvcResultMessage(ctx, pvcAttachments);
+            return await this.sendPvcResultMessage(ctx, pvcAttachments);
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -113,11 +121,12 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
             } as Attachment),
         };
 
-        return ctx.messageClient.addressChannels(msg, this.teamChannel);
+        return await ctx.messageClient.addressChannels(msg, this.teamChannel);
     }
 
-    private presentMenuToSelectProjectAssociatedTeam(ctx: HandlerContext): Promise<HandlerResult> {
-        return gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName).then(teams => {
+    private async presentMenuToSelectProjectAssociatedTeam(ctx: HandlerContext): Promise<HandlerResult> {
+        try {
+            const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
             const msg: SlackMessage = {
                 text: "Please select a team associated with the project you wish to create a PVC for",
                 attachments: [{
@@ -138,14 +147,16 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
                 }],
             };
 
-            return ctx.messageClient.respond(msg);
-        }).catch(error => {
-            logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
-        });
+            return await ctx.messageClient.respond(msg);
+        } catch (error) {
+            return await logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
+        }
     }
 
-    private presentMenuToSelectProjectToCreatePvcFor(ctx: HandlerContext): Promise<HandlerResult> {
-        return gluonProjectsWhichBelongToGluonTeam(ctx, this.gluonTeamName).then(teams => {
+    private async presentMenuToSelectProjectToCreatePvcFor(ctx: HandlerContext): Promise<HandlerResult> {
+        try {
+            const teams = await gluonProjectsWhichBelongToGluonTeam(ctx, this.gluonTeamName);
+
             const msg: SlackMessage = {
                 text: "Please select the project, whose OpenShift environments the PVCs will be created in",
                 attachments: [{
@@ -169,10 +180,10 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
                 }],
             };
 
-            return ctx.messageClient.respond(msg);
-        }).catch(error => {
-            logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
-        });
+            return await ctx.messageClient.respond(msg);
+        } catch (error) {
+            return await logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
+        }
     }
 
     private async presentMenuToSelectOpenshiftProjectToCreatePvcIn(ctx: HandlerContext, projectId: string) {
