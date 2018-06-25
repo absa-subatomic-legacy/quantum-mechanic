@@ -4,6 +4,7 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
+import {MessageOptions} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import * as util from "util";
 import {OCCommandResult} from "../../openshift/base/OCCommandResult";
@@ -62,7 +63,7 @@ export class OCResultError extends QMError {
 }
 
 export interface QMMessageClient {
-    send(message: (string | SlackMessage)): Promise<HandlerResult>;
+    send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult>;
 }
 
 export class ResponderMessageClient implements QMMessageClient {
@@ -72,8 +73,8 @@ export class ResponderMessageClient implements QMMessageClient {
         this.ctx = ctx;
     }
 
-    public async send(message: (string | SlackMessage)): Promise<HandlerResult> {
-        return await this.ctx.messageClient.respond(message);
+    public async send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult> {
+        return await this.ctx.messageClient.respond(message, options);
     }
 }
 
@@ -88,10 +89,11 @@ export class UserMessageClient implements QMMessageClient {
 
     public addDestination(user: string) {
         this.users.push(user);
+        return this;
     }
 
-    public async send(message: (string | SlackMessage)): Promise<HandlerResult> {
-        return await this.ctx.messageClient.addressUsers(message, this.users);
+    public async send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult> {
+        return await this.ctx.messageClient.addressUsers(message, this.users, options);
     }
 }
 
@@ -106,9 +108,10 @@ export class ChannelMessageClient implements QMMessageClient {
 
     public addDestination(channel: string) {
         this.channels.push(channel);
+        return this;
     }
 
-    public async send(message: (string | SlackMessage)): Promise<HandlerResult> {
-        return await this.ctx.messageClient.addressChannels(message, this.channels);
+    public async send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult> {
+        return await this.ctx.messageClient.addressChannels(message, this.channels, options);
     }
 }

@@ -53,7 +53,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
-                return await this.requestDevOpsEnvironment(ctx, this.screenName, this.teamName, this.teamChannel);
+                return await this.runCommand(ctx);
             } catch (slackChannelError) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(

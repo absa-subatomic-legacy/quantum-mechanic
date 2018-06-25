@@ -20,7 +20,9 @@ import {
 } from "../jenkins/Jenkins";
 import {AddConfigServer} from "../project/AddConfigServer";
 import {CreateProject} from "../project/CreateProject";
+import {ChannelMessageClient, handleQMError} from "../shared/Error";
 import {subatomicImageStreamTags} from "../shared/SubatomicOpenshiftQueries";
+import {TaskListMessage, TaskStatus} from "../shared/TaskListMessage";
 
 const promiseRetry = require("promise-retry");
 
@@ -65,45 +67,75 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
 
         const devOpsRequestedEvent = event.data.DevOpsEnvironmentRequestedEvent[0];
 
-        const projectId = `${_.kebabCase(devOpsRequestedEvent.team.name).toLowerCase()}-devops`;
-        logger.info(`Working with OpenShift project Id: ${projectId}`);
+        const teamChannel = devOpsRequestedEvent.team.slackIdentity.teamChannel;
 
-        await OCClient.login(QMConfig.subatomic.openshift.masterUrl, QMConfig.subatomic.openshift.auth.token);
+        const taskList = new TaskListMessage(`🚀 Provisioning DevOps envrionment for team ${devOpsRequestedEvent.team.name}`, new ChannelMessageClient(ctx).addDestination(teamChannel));
+        taskList.addTask("OpenshiftEnv", "Create DevOps Openshift Project");
+        taskList.addTask("OpenshiftPermissions", "Add Openshift Permissions");
+        taskList.addTask("Resources", "Copy Subatomic resources to DevOps Project");
+        taskList.addTask("Jenkins", "Rollout Jenkins instance");
+        taskList.addTask("ConfigJenkins", "Configure Jenkins");
 
-        await this.createDevOpsEnvironment(projectId, devOpsRequestedEvent.team.name);
+        try {
+            const projectId = `${_.kebabCase(devOpsRequestedEvent.team.name).toLowerCase()}-devops`;
+            logger.info(`Working with OpenShift project Id: ${projectId}`);
 
-        await addOpenshiftMembershipPermissions(projectId,
-            devOpsRequestedEvent.team);
+            await taskList.display();
 
-        await this.copySubatomicAppTemplatesToDevOpsEnvironment(projectId);
+            await OCClient.login(QMConfig.subatomic.openshift.masterUrl, QMConfig.subatomic.openshift.auth.token);
 
-        await this.copyJenkinsTemplateToDevOpsEnvironment(projectId);
+            await this.createDevOpsEnvironment(projectId, devOpsRequestedEvent.team.name);
 
-        await this.copyImageStreamsToDevOpsEnvironment(projectId);
+            await taskList.setTaskStatus("OpenshiftEnv", TaskStatus.Successful);
 
-        await this.createJenkinsDeploymentConfig(projectId);
+            await addOpenshiftMembershipPermissions(projectId,
+                devOpsRequestedEvent.team);
 
-        await this.createJenkinsServiceAccount(projectId);
+            await taskList.setTaskStatus("OpenshiftPermissions", TaskStatus.Successful);
 
-        await this.rolloutJenkinsDeployment(projectId);
+            await this.copySubatomicAppTemplatesToDevOpsEnvironment(projectId);
 
-        const jenkinsHost: string = await this.createJenkinsRoute(projectId);
+            await this.copyJenkinsTemplateToDevOpsEnvironment(projectId);
 
-        const token: string = await this.getJenkinsServiceAccountToken(projectId);
+            await this.copyImageStreamsToDevOpsEnvironment(projectId);
 
-        logger.info(`Using Service Account token: ${token}`);
+            await taskList.setTaskStatus("Resources", TaskStatus.Successful);
 
-        await this.addJenkinsCredentials(projectId, jenkinsHost, token);
+            await this.createJenkinsDeploymentConfig(projectId);
 
-        await this.addBitbucketSSHSecret(projectId);
+            await this.createJenkinsServiceAccount(projectId);
 
-        return await this.sendDevOpsSuccessfullyProvisionedMessage(ctx, devOpsRequestedEvent.team.name, devOpsRequestedEvent.team.slackIdentity.teamChannel);
+            await this.rolloutJenkinsDeployment(projectId);
+
+            await taskList.setTaskStatus("Jenkins", TaskStatus.Successful);
+
+            const jenkinsHost: string = await this.createJenkinsRoute(projectId);
+
+            const token: string = await this.getJenkinsServiceAccountToken(projectId);
+
+            logger.info(`Using Service Account token: ${token}`);
+
+            await this.addJenkinsCredentials(projectId, jenkinsHost, token);
+
+            await this.addBitbucketSSHSecret(projectId);
+
+            await taskList.setTaskStatus("ConfigJenkins", TaskStatus.Successful);
+
+            return await this.sendDevOpsSuccessfullyProvisionedMessage(ctx, devOpsRequestedEvent.team.name, devOpsRequestedEvent.team.slackIdentity.teamChannel);
+        } catch (error) {
+            await taskList.failRemainingTasks();
+            return await this.handleError(ctx, error, devOpsRequestedEvent.team.slackIdentity.teamChannel);
+        }
     }
 
     private async createDevOpsEnvironment(projectId: string, teamName: string) {
-        await OCClient.newProject(projectId,
-            `${teamName} DevOps`,
-            `DevOps environment for ${teamName} [managed by Subatomic]`);
+        try {
+            await OCClient.newProject(projectId,
+                `${teamName} DevOps`,
+                `DevOps environment for ${teamName} [managed by Subatomic]`);
+        } catch (error) {
+            logger.warn("DevOps project already seems to exist. Trying to continue.");
+        }
 
         await OCCommon.createFromData({
             apiVersion: "v1",
@@ -445,6 +477,12 @@ If your applications will require a Spring Cloud Config Server, you can add a Su
     private docs(extension): string {
         return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
             "documentation")}`;
+    }
+
+    private async handleError(ctx: HandlerContext, error, teamChannel: string) {
+        const messageClient = new ChannelMessageClient(ctx);
+        messageClient.addDestination(teamChannel);
+        return await handleQMError(messageClient, error);
     }
 }
 
