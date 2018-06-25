@@ -76,7 +76,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
             await this.requestProjectEnvironment(project.projectId, member.memberId);
 
             return await ctx.messageClient.addressChannels({
-                text: "🚀 Your team's project environment is being provisioned...",
+                text: `Requesting project environment's for project *${this.projectName}*`,
             }, this.teamChannel);
         } catch (error) {
             return await this.handleError(ctx, error);

@@ -480,9 +480,7 @@ If your applications will require a Spring Cloud Config Server, you can add a Su
     }
 
     private async handleError(ctx: HandlerContext, error, teamChannel: string) {
-        const messageClient = new ChannelMessageClient(ctx);
-        messageClient.addDestination(teamChannel);
-        return await handleQMError(messageClient, error);
+        return await handleQMError(new ChannelMessageClient(ctx).addDestination(teamChannel), error);
     }
 }
 
