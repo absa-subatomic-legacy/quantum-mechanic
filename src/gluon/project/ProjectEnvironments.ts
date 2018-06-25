@@ -12,7 +12,11 @@ import axios from "axios";
 import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
-import {logErrorAndReturnSuccess} from "../shared/Error";
+import {
+    handleQMError,
+    logErrorAndReturnSuccess, QMError,
+    ResponderMessageClient,
+} from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
@@ -54,30 +58,29 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
     protected async runCommand(ctx: HandlerContext) {
         logger.info("Creating new OpenShift environments...");
 
-        let member;
         try {
-            member = await gluonMemberFromScreenName(ctx, this.screenName);
+            let member;
+            try {
+                member = await gluonMemberFromScreenName(ctx, this.screenName);
+            } catch (error) {
+                return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+            }
+
+            let project;
+            try {
+                project = await gluonProjectFromProjectName(ctx, this.projectName);
+            } catch (error) {
+                return await logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
+            }
+
+            await this.requestProjectEnvironment(project.projectId, member.memberId);
+
+            return await ctx.messageClient.addressChannels({
+                text: "🚀 Your team's project environment is being provisioned...",
+            }, this.teamChannel);
         } catch (error) {
-            return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+            return await this.handleError(ctx, error);
         }
-
-        let project;
-        try {
-            project = await gluonProjectFromProjectName(ctx, this.projectName);
-        } catch (error) {
-            return await logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
-        }
-
-        const projectEnvironmentRequestResult = await this.requestProjectEnvironment(project.projectId, member.memberId);
-
-        if (!isSuccessCode(projectEnvironmentRequestResult.status)) {
-            logger.error(`Failed to request project environment for project ${this.projectName}. Error: ${JSON.stringify(projectEnvironmentRequestResult)}`);
-            return await ctx.messageClient.respond("❗Failed to request project environment. Network error.");
-        }
-
-        return await ctx.messageClient.addressChannels({
-            text: "🚀 Your team's project environment is being provisioned...",
-        }, this.teamChannel);
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -107,11 +110,20 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
     }
 
     private async requestProjectEnvironment(projectId: string, memberId: string) {
-        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+        const projectEnvironmentRequestResult = await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
             {
                 projectEnvironment: {
                     requestedBy: memberId,
                 },
             });
+
+        if (!isSuccessCode(projectEnvironmentRequestResult.status)) {
+            logger.error(`Failed to request project environment for project ${this.projectName}. Error: ${JSON.stringify(projectEnvironmentRequestResult)}`);
+            throw new QMError("Failed to request project environment. Network error.");
+        }
+    }
+
+    private async handleError(ctx: HandlerContext, error) {
+        return await handleQMError(new ResponderMessageClient(ctx), error);
     }
 }

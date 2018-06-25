@@ -20,6 +20,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import * as graphql from "../../typings/types";
 import {ListTeamProjects} from "../project/ProjectDetails";
+import {handleQMError, ResponderMessageClient} from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
 import {CreateTeam} from "./CreateTeam";
 
@@ -31,19 +32,23 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
     public slackName: string;
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
+        try {
 
-        const teamsQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
+            const teamsQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
 
-        if (!isSuccessCode(teamsQueryResult.status)) {
-            return this.alertUserThatNoTeamsExist(ctx);
+            if (!isSuccessCode(teamsQueryResult.status)) {
+                return this.alertUserThatNoTeamsExist(ctx);
+            }
+
+            const teams = teamsQueryResult.data._embedded.teamResources;
+            logger.info(`Found teams data: ${JSON.stringify(teams)}`);
+
+            // remove teams that he is already a member of - TODO in future
+
+            return await this.presentMenuForTeamSelection(ctx, this.slackName, teams);
+        } catch (error) {
+            return await this.handleError(ctx, error);
         }
-
-        const teams = teamsQueryResult.data._embedded.teamResources;
-        logger.info(`Found teams data: ${JSON.stringify(teams)}`);
-
-        // remove teams that he is already a member of - TODO in future
-
-        return await this.presentMenuForTeamSelection(ctx, this.slackName, teams);
     }
 
     private async presentMenuForTeamSelection(ctx: HandlerContext, slackName: string, teams) {
@@ -85,6 +90,10 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
             }],
         };
         return await ctx.messageClient.addressUsers(msg, this.slackName);
+    }
+
+    private async handleError(ctx: HandlerContext, error) {
+        return await handleQMError(new ResponderMessageClient(ctx), error);
     }
 
     private docs(): string {
