@@ -1,30 +1,29 @@
 import {
     CommandHandler,
-    failure,
+    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
     MappedParameter,
     MappedParameters,
-    success,
 } from "@atomist/automation-client";
+import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
-import {gluonMemberFromScreenName} from "../member/Members";
 import {
     handleQMError,
     QMError,
     ResponderMessageClient,
 } from "../shared/Error";
+import {createMenu} from "../shared/GenericMenu";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {
-    gluonTeamsWhoSlackScreenNameBelongsTo,
-    menuForTeams,
-} from "../team/Teams";
+import {CreateTeam} from "../team/CreateTeam";
+import {gluonTeamsWhoSlackScreenNameBelongsTo} from "../team/Teams";
 import {
     gluonProjectFromProjectName,
     gluonProjects,
@@ -59,10 +58,9 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
         this.projectName = projectName;
     }
 
-    protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
+    protected async runCommand(ctx: HandlerContext) {
         try {
-            await this.linkProjectForTeam(ctx, this.screenName, this.teamName);
-            return await success();
+            await this.linkProjectForTeam(ctx, this.teamName);
         } catch (error) {
             return await this.handleError(ctx, error);
         }
@@ -80,31 +78,27 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
         }
         if (_.isEmpty(this.teamName)) {
             const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-            return await menuForTeams(
+            return await this.menuForTeams(
                 ctx,
                 teams,
+                this.projectName,
                 this,
                 `Please select a team you would like to associate to *${this.projectName}*.`,
             );
         }
-
-        return await success();
     }
 
-    private async linkProjectForTeam(ctx: HandlerContext, screenName: string,
-                                     teamName: string): Promise<any> {
-        const member = await gluonMemberFromScreenName(ctx, screenName);
+    private async linkProjectForTeam(ctx: HandlerContext, teamName: string): Promise<any> {
         const team = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
-
-        let gluonProject;
+        const gluonProject = await gluonProjectFromProjectName(ctx, this.projectName);
+        let updateGluonWithProjectDetails;
         try {
-            gluonProject = await gluonProjectFromProjectName(ctx, this.projectName);
+            updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.data._embedded.teamResources[0].teamId, team.data._embedded.teamResources[0].name);
         } catch (error) {
-            return failure(error);
+            return await ctx.messageClient.respond(`Unfortunately team *${team.data._embedded.teamResources[0].name}* has already been associated with ${gluonProject.projectId}`);
         }
-        const updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.data._embedded.teamResources[0].teamId, team.data._embedded.teamResources[0].name);
 
-        if (updateGluonWithProjectDetails.status === 201) {
+        if (updateGluonWithProjectDetails.status === 202) {
             if (this.teamChannel !== team.data._embedded.teamResources[0].name) {
                 return await ctx.messageClient.respond(`Team *${team.data._embedded.teamResources[0].name}* has been successfully associated with ${gluonProject.projectId}`);
             }
@@ -130,5 +124,48 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
     private async handleError(ctx: HandlerContext, error) {
         const messageClient = new ResponderMessageClient(ctx);
         return await handleQMError(messageClient, error);
+    }
+
+    private async menuForTeams(ctx: HandlerContext, teams: any[],
+                               projectName: string,
+                               command: HandleCommand, message: string = "Please select a team",
+                               projectNameVariable: string = "teamName"): Promise<any> {
+        const allTeams = new Array();
+        const associatedTeams = new Array();
+        const unlinked = new Array();
+
+        for (const team of teams) {
+            allTeams.push(team.name);
+        }
+
+        const projectDetails = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?name=${projectName}`);
+        const projectTeams = projectDetails.data._embedded.projectResources[0];
+
+        for (const team of projectTeams.teams) {
+            associatedTeams.push(team.name);
+        }
+        for (const i of allTeams) {
+            if (!associatedTeams.includes(i)) {
+                unlinked.push(i);
+            }
+        }
+
+        return createMenu(ctx,
+            unlinked.map(team => {
+                return {
+                    value: team,
+                    text: team,
+                };
+            }),
+            command,
+            message,
+            "Select Team",
+            projectNameVariable,
+        );
+    }
+
+    private docs(extension): string {
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
+            "documentation")}`;
     }
 }
