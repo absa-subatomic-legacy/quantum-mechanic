@@ -204,7 +204,6 @@ async function linkSlackChannelToGluonTeam(ctx: HandlerContext,
 async function createTeamSlackChannel(ctx: HandlerContext, slackTeamId: string, slackChannelName: string, team): Promise<HandlerResult> {
     try {
         const channel = await createChannel(ctx, slackTeamId, slackChannelName);
-logger.info(JSON.stringify(channel));
         if (channel && channel.createSlackChannel) {
             await addBotToSlackChannel(ctx, slackTeamId, channel.createSlackChannel.id);
 
