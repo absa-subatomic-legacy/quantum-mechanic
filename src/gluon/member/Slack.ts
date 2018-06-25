@@ -10,6 +10,7 @@ import {
 } from "@atomist/automation-client";
 import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
+import {isSuccessCode} from "../shared/Http";
 
 @CommandHandler("Add Slack details to an existing team member", QMConfig.subatomic.commandPrefix + " add slack")
 export class AddSlackDetails implements HandleCommand<HandlerResult> {
@@ -31,7 +32,7 @@ export class AddSlackDetails implements HandleCommand<HandlerResult> {
 
         const memberQueryResult = await this.findGluonMemberByEmail(this.email);
 
-        if (memberQueryResult.status !== 200) {
+        if (!isSuccessCode(memberQueryResult.status)) {
             logger.error(`Unable to find gluon member with email ${this.email}. Http request failed with status ${memberQueryResult.status}`);
             return await ctx.messageClient.respond(`❗No member with email ${this.email} exists.`);
         }
@@ -41,7 +42,7 @@ export class AddSlackDetails implements HandleCommand<HandlerResult> {
 
         const updateMemberResult = await this.updateGluonMemberSlackDetails(this.screenName, this.userId, member.memberId);
 
-        if (updateMemberResult.status !== 200) {
+        if (!isSuccessCode(updateMemberResult.status)) {
             logger.error(`Unable to update slack details for gluon member with email ${this.email}. Http request failed with status ${updateMemberResult.status}`);
             return await ctx.messageClient.respond(`❗Unable to update slack details for the member specified`);
         }

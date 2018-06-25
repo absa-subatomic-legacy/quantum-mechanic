@@ -15,6 +15,8 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
 import {OnboardMember} from "../member/Onboard";
+import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 
 @CommandHandler("Create a new team", QMConfig.subatomic.commandPrefix + " create team")
 @Tags("subatomic", "team")
@@ -36,23 +38,22 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Creating team for member: ${this.screenName}`);
 
-        const memberQueryResult = await this.getGluonMemberFromScreenName(this.screenName);
+        try {
+            const memberQueryResult = await this.getGluonMemberFromScreenName(this.screenName);
 
-        if (memberQueryResult.status !== 200) {
-            logger.info(`Slackname ${this.screenName} is not associated with a gluon identity`);
-            return await this.requestMemberOnboarding(ctx, this.name);
+            if (!isSuccessCode(memberQueryResult.status)) {
+                logger.info(`Slackname ${this.screenName} is not associated with a gluon identity`);
+                return await this.requestMemberOnboarding(ctx, this.name);
+            }
+
+            const member = memberQueryResult.data._embedded.teamMemberResources[0];
+
+            await this.createTeamInGluon(this.name, this.description, member.memberId);
+
+            return await success();
+        } catch (error) {
+            return await this.handleError(ctx, error);
         }
-
-        const member = memberQueryResult.data._embedded.teamMemberResources[0];
-
-        const teamCreationResult = await this.createTeamInGluon(this.name, this.description, member.memberId);
-
-        if (teamCreationResult.status !== 201) {
-            logger.error(`Failed to create the team with name ${this.name}. Error: ${teamCreationResult.status}`);
-            return ctx.messageClient.respond("❗Unable to create team.");
-        }
-
-        return await success();
     }
 
     private async getGluonMemberFromScreenName(screenName: string) {
@@ -60,11 +61,16 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
     }
 
     private async createTeamInGluon(teamName: string, teamDescription: string, createdBy: string) {
-        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/teams`, {
+        const teamCreationResult = await await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/teams`, {
             name: teamName,
             description: teamDescription,
             createdBy,
         });
+
+        if (!isSuccessCode(teamCreationResult.status)) {
+            logger.error(`Failed to create the team with name ${name}. Error: ${teamCreationResult.status}`);
+            throw new QMError("Unable to create team.");
+        }
     }
 
     private async requestMemberOnboarding(ctx: HandlerContext, teamName: string) {
@@ -91,6 +97,10 @@ To create a team you must first onboard yourself. Click the button below to do t
         };
 
         return await ctx.messageClient.respond(msg);
+    }
+
+    private async handleError(ctx: HandlerContext, error) {
+        return await handleQMError(new ResponderMessageClient(ctx), error);
     }
 
     private docs(): string {

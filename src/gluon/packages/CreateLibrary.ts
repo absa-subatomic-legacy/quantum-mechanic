@@ -22,7 +22,12 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
-import {logErrorAndReturnSuccess} from "../shared/Error";
+import {
+    handleQMError,
+    logErrorAndReturnSuccess, QMError,
+    ResponderMessageClient,
+} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -71,18 +76,22 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
     public bitbucketRepositorySlug: string;
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
-        await ctx.messageClient.addressChannels({
-            text: "🚀 Your new library is being created...",
-        }, this.teamChannel);
+        try {
+            await ctx.messageClient.addressChannels({
+                text: "🚀 Your new library is being created...",
+            }, this.teamChannel);
 
-        return await this.linkLibraryForGluonProject(
-            ctx,
-            this.screenName,
-            this.name,
-            this.description,
-            this.bitbucketRepositorySlug,
-            this.projectName,
-        );
+            return await this.linkLibraryForGluonProject(
+                ctx,
+                this.screenName,
+                this.name,
+                this.description,
+                this.bitbucketRepositorySlug,
+                this.projectName,
+            );
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -111,7 +120,7 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
             const project = await gluonProjectFromProjectName(ctx, this.projectName);
             if (_.isEmpty(project.bitbucketProject)) {
-                return await ctx.messageClient.respond(`❗The selected project does not have an associated bitbucket project. Please first associate a bitbucket project using the \`${QMConfig.subatomic.commandPrefix} link bitbucket project\` command.`);
+                throw new QMError(`The selected project does not have an associated bitbucket project. Please first associate a bitbucket project using the \`${QMConfig.subatomic.commandPrefix} link bitbucket project\` command.`);
             }
             const bitbucketRepos = await bitbucketRepositoriesForProjectKey(project.bitbucketProject.key);
             logger.debug(`Bitbucket project [${project.bitbucketProject.name}] has repositories: ${JSON.stringify(bitbucketRepos)}`);
@@ -180,9 +189,9 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
                 requestConfiguration: true,
             });
 
-        if (createApplicationResult.status !== 200) {
+        if (!isSuccessCode(createApplicationResult.status)) {
             logger.error(`Failed to link package. Error: ${JSON.stringify(createApplicationResult)}`);
-            return await ctx.messageClient.respond("❗Failed to link the specified package.");
+            throw new QMError("Failed to link the specified package from bitbucket.");
         }
 
         return await success();

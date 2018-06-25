@@ -14,6 +14,8 @@ import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/handlers/c
 import {SlackMessage} from "@atomist/slack-messages";
 import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
+import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 
 @CommandHandler("Close a membership request")
 @Tags("subatomic", "team", "membership")
@@ -64,36 +66,36 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Attempting approval from user: ${this.approverUserName}`);
 
-        const approverMemberQueryResult = await this.findGluonTeamMember(this.approverUserName);
+        try {
 
-        if (approverMemberQueryResult.status !== 200) {
-            logger.error("The approver is not a gluon member. This can only happen if the user was deleted before approving this request.");
-            return await ctx.messageClient.respond("❗You are no longer a Subatomic user.");
+            const actioningMember = await this.findGluonTeamMember(this.approverUserName);
+
+            await this.updateGluonMembershipRequest(
+                this.teamId,
+                this.membershipRequestId,
+                actioningMember.memberId,
+                this.approvalStatus,
+            );
+
+            return await this.handleMembershipRequestResult(ctx);
+        } catch (error) {
+            return await this.handleError(ctx, error);
         }
-
-        const approverMember = approverMemberQueryResult.data._embedded.teamMemberResources[0];
-
-        const updateMembershipRequestResult = await this.updateGluonMembershipRequest(
-            this.teamId,
-            this.membershipRequestId,
-            approverMember.memberId,
-            this.approvalStatus,
-        );
-
-        if (updateMembershipRequestResult.status !== 200) {
-            logger.error("Failed to update the member shiprequest.");
-            return await ctx.messageClient.respond("❗The membership request could not be updated. Please ensure that you are an owner of this team before responding to the membership request.");
-        }
-
-        return await this.handleMembershipRequestResult(ctx);
     }
 
     private async findGluonTeamMember(slackScreenName: string) {
-        return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${slackScreenName}`);
+        const approverMemberQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${slackScreenName}`);
+
+        if (!isSuccessCode(approverMemberQueryResult.status)) {
+            logger.error("The approver is not a gluon member. This can only happen if the user was deleted before approving this request.");
+            throw new QMError("You are no longer a Subatomic user. Membership request closure failed.");
+        }
+
+        return approverMemberQueryResult.data._embedded.teamMemberResources[0];
     }
 
     private async updateGluonMembershipRequest(teamId: string, membershipRequestId: string, approvedByMemberId: string, approvalStatus: string) {
-        return await axios.put(
+        const updateMembershipRequestResult = await axios.put(
             `${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
             {
                 membershipRequests: [
@@ -105,6 +107,11 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
                         requestStatus: approvalStatus,
                     }],
             });
+
+        if (!isSuccessCode(updateMembershipRequestResult.status)) {
+            logger.error("Failed to update the member shiprequest.");
+            throw new QMError(`The membership request could not be updated. Please ensure that you are an owner of this team before responding to the membership request.`);
+        }
     }
 
     private async handleMembershipRequestResult(ctx: HandlerContext) {
@@ -133,5 +140,10 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
             addressSlackUsers(QMConfig.teamId, rejectedUserScreenName));
 
         return await ctx.messageClient.addressChannels("Membership request rejected", teamChannel);
+    }
+
+    private async handleError(ctx: HandlerContext, error) {
+        const messageClient = new ResponderMessageClient(ctx);
+        return await handleQMError(messageClient, error);
     }
 }

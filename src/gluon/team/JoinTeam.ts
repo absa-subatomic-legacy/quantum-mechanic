@@ -20,6 +20,8 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import * as graphql from "../../typings/types";
 import {ListTeamProjects} from "../project/ProjectDetails";
+import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {CreateTeam} from "./CreateTeam";
 
 @CommandHandler("Apply to join an existing team", QMConfig.subatomic.commandPrefix + " apply to team")
@@ -30,19 +32,22 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
     public slackName: string;
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
+        try {
+            const teamsQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
 
-        const teamsQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
+            if (!isSuccessCode(teamsQueryResult.status)) {
+                return this.alertUserThatNoTeamsExist(ctx);
+            }
 
-        if (teamsQueryResult.status !== 200) {
-            return this.alertUserThatNoTeamsExist(ctx);
+            const teams = teamsQueryResult.data._embedded.teamResources;
+            logger.info(`Found teams data: ${JSON.stringify(teams)}`);
+
+            // remove teams that he is already a member of - TODO in future
+
+            return await this.presentMenuForTeamSelection(ctx, this.slackName, teams);
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-
-        const teams = teamsQueryResult.data._embedded.teamResources;
-        logger.info(`Found teams data: ${JSON.stringify(teams)}`);
-
-        // remove teams that he is already a member of - TODO in future
-
-        return await this.presentMenuForTeamSelection(ctx, this.slackName, teams);
     }
 
     private async presentMenuForTeamSelection(ctx: HandlerContext, slackName: string, teams) {
@@ -114,17 +119,42 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
     public slackName: string;
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
-        logger.info(`Adding member [${this.slackName}] to team: ${this.teamChannel}`);
+        try {
+            logger.info(`Adding member [${this.slackName}] to team: ${this.teamChannel}`);
 
-        const screenName = getScreenName(this.slackName);
+            const screenName = getScreenName(this.slackName);
 
-        const chatId = await loadScreenNameByUserId(ctx, screenName);
+            const chatId = await loadScreenNameByUserId(ctx, screenName);
 
-        logger.info(`Got ChatId: ${chatId}`);
+            logger.info(`Got ChatId: ${chatId}`);
 
+            const newMember = await this.getNewMember(ctx, chatId);
+
+            logger.info(`Gluon member found: ${JSON.stringify(newMember)}`);
+
+            logger.info(`Getting teams that ${this.screenName} (you) are a part of...`);
+
+            const actioningMember = await this.getGluonMemberFromScreenName(this.screenName);
+
+            logger.info(`Got member's teams you belong to: ${JSON.stringify(actioningMember)}`);
+
+            const teamSlackChannel = _.find(actioningMember.teams,
+                (team: any) => team.slack.teamChannel === this.teamChannel);
+
+            if (!_.isEmpty(teamSlackChannel)) {
+                return await this.inviteUserToTeam(ctx, newMember, actioningMember, teamSlackChannel, this.channelId, this.screenName, this.teamId, this.teamChannel, this.slackName);
+            } else {
+                return await this.alertTeamDoesNotExist(ctx);
+            }
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
+    }
+
+    private async getNewMember(ctx: HandlerContext, chatId: string) {
         const newMemberQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${chatId}`);
 
-        if (newMemberQueryResult.status !== 200) {
+        if (!isSuccessCode(newMemberQueryResult.status)) {
             return await alertGluonMemberForSlackMentionDoesNotExist(ctx, this.slackName, this.docs("onboard-me"));
         }
 
@@ -132,30 +162,19 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
 
         if (!_.isEmpty(_.find(newMember.teams,
             (team: any) => team.slack.teamChannel === this.teamChannel))) {
-            return ctx.messageClient.respond(`${newMember.slack.screenName} is already a member of this team.`);
+            throw new QMError(`${newMember.slack.screenName} is already a member of this team.`);
         }
 
-        logger.info(`Gluon member found: ${JSON.stringify(newMember)}`);
+        return newMember;
+    }
 
-        logger.info(`Getting teams that ${this.screenName} (you) are a part of...`);
-
-        const invokingMemberResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${this.screenName}`);
-        if (invokingMemberResult.status !== 200) {
-            return await ctx.messageClient.respond(`❗${this.screenName} does not appear to have been onboarded onto the Subatomic system`);
+    private async getGluonMemberFromScreenName(screenName: string) {
+        const memberResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${screenName}`);
+        if (!isSuccessCode(memberResult.status)) {
+            throw new QMError(`${this.screenName} does not appear to have been onboarded onto the Subatomic system`);
         }
 
-        const actioningMember = invokingMemberResult.data._embedded.teamMemberResources[0];
-
-        logger.info(`Got member's teams you belong to: ${JSON.stringify(actioningMember)}`);
-
-        const teamSlackChannel = _.find(actioningMember.teams,
-            (team: any) => team.slack.teamChannel === this.teamChannel);
-
-        if (!_.isEmpty(teamSlackChannel)) {
-            return await this.inviteUserToTeam(ctx, newMember, actioningMember, teamSlackChannel, this.channelId, this.screenName, this.teamId, this.teamChannel, this.slackName);
-        } else {
-            return await this.alertTeamDoesNotExist(ctx);
-        }
+        return memberResult.data._embedded.teamMemberResources[0];
     }
 
     private async inviteUserToTeam(ctx: HandlerContext, newMember, actioningMember, teamSlackChannel, channelId, screenName, teamId, teamChannel, slackName) {
@@ -170,8 +189,8 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
                 createdBy: actioningMember.memberId,
             });
 
-        if (updateTeamResult.status !== 201) {
-            return await ctx.messageClient.respond(`❗Failed to add member to the team. Server side failure.`);
+        if (!isSuccessCode(updateTeamResult.status)) {
+            throw new QMError(`Failed to add member to the team. Server side failure.`);
         }
 
         try {
@@ -253,24 +272,40 @@ export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResul
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Request to join team: ${this.teamId}`);
+        try {
 
-        const screenName = getScreenName(this.slackName);
+            const screenName = getScreenName(this.slackName);
 
-        const chatId = await loadScreenNameByUserId(ctx, screenName);
+            const chatId = await loadScreenNameByUserId(ctx, screenName);
 
-        const newMemberQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${chatId}`);
+            const newMemberQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${chatId}`);
 
-        if (newMemberQueryResult.status !== 200) {
-            return await alertGluonMemberForSlackMentionDoesNotExist(ctx, this.slackName, this.docs("onboard-me"));
+            if (!isSuccessCode(newMemberQueryResult.status)) {
+                return await alertGluonMemberForSlackMentionDoesNotExist(ctx, this.slackName, this.docs("onboard-me"));
+            }
+
+            await this.createMembershipRequest(newMemberQueryResult.data._embedded.teamMemberResources[0]);
+
+            return await ctx.messageClient.respond("Your request to join then team has been sent.");
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
         }
+    }
 
-        const updateTeamResult = await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${this.teamId}`);
+    private async createMembershipRequest(newMember) {
+        const updateTeamResult = await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${this.teamId}`,
+            {
+                membershipRequests: [
+                    {
+                        requestedBy: {
+                            memberId: newMember.memberId,
+                        },
+                    }],
+            });
 
-        if (updateTeamResult.status !== 201) {
-            return await ctx.messageClient.respond(`❗Failed to add member to the team. Server side failure.`);
+        if (!isSuccessCode(updateTeamResult.status)) {
+            throw new QMError(`❗Failed to add member to the team. Server side failure.`);
         }
-
-        return await ctx.messageClient.respond("Your request to join then team has been sent.");
     }
 
     private docs(extension): string {

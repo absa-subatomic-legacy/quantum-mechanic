@@ -11,6 +11,7 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import * as qs from "query-string";
 import {QMConfig} from "../../config/QMConfig";
+import {OCCommandResult} from "../../openshift/base/OCCommandResult";
 import {SimpleOption} from "../../openshift/base/options/SimpleOption";
 import {StandardOption} from "../../openshift/base/options/StandardOption";
 import {OCClient} from "../../openshift/OCClient";
@@ -19,6 +20,14 @@ import {QMTemplate} from "../../template/QMTemplate";
 import {jenkinsAxios} from "../jenkins/Jenkins";
 import {LinkExistingApplication} from "../packages/CreateApplication";
 import {LinkExistingLibrary} from "../packages/CreateLibrary";
+import {
+    ChannelMessageClient,
+    handleQMError, OCResultError,
+    QMError,
+    QMMessageClient,
+} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
+import {TaskListMessage, TaskStatus} from "../shared/TaskListMessage";
 import {getProjectDisplayName, getProjectId} from "./Project";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
@@ -67,13 +76,67 @@ subscription ProjectEnvironmentsRequestedEvent {
 `)
 export class ProjectEnvironmentsRequested implements HandleEvent<any> {
 
+    private qmMessageClient: ChannelMessageClient;
+    private taskList: TaskListMessage;
+
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested ProjectEnvironmentsRequestedEvent event: ${JSON.stringify(event.data)}`);
 
         const environmentsRequestedEvent = event.data.ProjectEnvironmentsRequestedEvent[0];
 
-        const teamDevOpsProjectId = `${_.kebabCase(environmentsRequestedEvent.teams[0].name).toLowerCase()}-devops`;
+        this.qmMessageClient = this.createMessageClient(ctx, environmentsRequestedEvent.teams);
 
+        this.taskList = this.initialiseTaskList(environmentsRequestedEvent.project.name, this.qmMessageClient);
+        await this.taskList.display();
+
+        try {
+            const teamDevOpsProjectId = `${_.kebabCase(environmentsRequestedEvent.teams[0].name).toLowerCase()}-devops`;
+
+            await this.createOpenshiftEnvironments(environmentsRequestedEvent, teamDevOpsProjectId);
+
+            logger.debug(`Using owning team DevOps project: ${teamDevOpsProjectId}`);
+
+            const token = await this.getJenkinsServiceAccountToken(teamDevOpsProjectId);
+            const jenkinsHost = await this.getJenkinsHost(teamDevOpsProjectId);
+
+            logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to add Bitbucket credentials`);
+
+            await this.createJenkinsBuildTemplate(environmentsRequestedEvent, teamDevOpsProjectId, jenkinsHost.output, token.output);
+
+            await this.createJenkinsCredentials(teamDevOpsProjectId, jenkinsHost.output, token.output);
+
+            await this.taskList.setTaskStatus(`ConfigJenkins`, TaskStatus.Successful);
+
+            await this.createPodNetwork(environmentsRequestedEvent.teams[0].name, environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name);
+
+            await this.taskList.setTaskStatus(`PodNetwork`, TaskStatus.Successful);
+
+            return await this.sendPackageUsageMessage(ctx, environmentsRequestedEvent.project.name, environmentsRequestedEvent.teams);
+        } catch (error) {
+            await this.taskList.failRemainingTasks();
+            return await handleQMError(this.qmMessageClient, error);
+        }
+    }
+
+    private createMessageClient(ctx: HandlerContext, teams) {
+        const messageClient = new ChannelMessageClient(ctx);
+        teams.map(team => {
+            messageClient.addDestination(team.slackIdentity.teamChannel);
+        });
+        return messageClient;
+    }
+
+    private initialiseTaskList(projectName: string, messageClient: QMMessageClient) {
+        const taskList = new TaskListMessage(`🚀 Provisioning of environment's for project *${projectName}* started:`, messageClient);
+        taskList.addTask("devEnvironment", "Create Dev Environment");
+        taskList.addTask("sitEnvironment", "Create SIT Environment");
+        taskList.addTask("uatEnvironment", "Create UAT Environment");
+        taskList.addTask("ConfigJenkins", "Configure Jenkins");
+        taskList.addTask("PodNetwork", "Create project/devops pod network");
+        return taskList;
+    }
+
+    private async createOpenshiftEnvironments(environmentsRequestedEvent, teamDevOpsProjectId: string) {
         const environments = [["dev", "Development"],
             ["sit", "Integration testing"],
             ["uat", "User acceptance"]];
@@ -86,32 +149,8 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
 
             await this.createOpenshiftProject(projectId, environmentsRequestedEvent, environment);
             await this.addEditRoleToJenkinsServiceAccount(teamDevOpsProjectId, projectId);
+            await this.taskList.setTaskStatus(`${environment[0]}Environment`, TaskStatus.Successful);
         }
-
-        logger.debug(`Using owning team DevOps project: ${teamDevOpsProjectId}`);
-
-        const token = await this.getJenkinsServiceAccountToken(teamDevOpsProjectId);
-        const jenkinsHost = await this.getJenkinsHost(teamDevOpsProjectId);
-
-        logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to add Bitbucket credentials`);
-
-        const jenkinsCreateItemResult = await this.createJenkinsBuildTemplate(environmentsRequestedEvent, teamDevOpsProjectId, jenkinsHost.output, token.output);
-
-        if (jenkinsCreateItemResult.status !== 200) {
-            if (jenkinsCreateItemResult && jenkinsCreateItemResult.status === 400) {
-                logger.warn(`Folder for [${environmentsRequestedEvent.project.name}] probably already created`);
-            } else {
-                return ctx.messageClient.addressChannels("❗Failed to create jenkins build template. Network timeout occurred.",
-                    environmentsRequestedEvent.teams.map(team =>
-                        team.slackIdentity.teamChannel));
-            }
-        }
-
-        await this.createJenkinsCredentials(teamDevOpsProjectId, jenkinsHost.output, token.output);
-
-        await this.createPodNetwork(environmentsRequestedEvent.teams[0].name, environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name);
-
-        return await this.sendPackageUsageMessage(ctx, environmentsRequestedEvent.project.name, environmentsRequestedEvent.teams);
     }
 
     private async addEditRoleToJenkinsServiceAccount(teamDevOpsProjectId: string, projectId: string) {
@@ -160,7 +199,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
             },
         );
         logger.info("Template found and built successfully.");
-        return await axios.post(`https://${jenkinsHost}/createItem?name=${_.kebabCase(environmentsRequestedEvent.project.name).toLowerCase()}`,
+        const jenkinsCreateItemResult = await axios.post(`https://${jenkinsHost}/createItem?name=${_.kebabCase(environmentsRequestedEvent.project.name).toLowerCase()}`,
             builtTemplate,
             {
                 headers: {
@@ -168,6 +207,14 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                     "Authorization": `Bearer ${token}`,
                 },
             });
+
+        if (!isSuccessCode(jenkinsCreateItemResult.status)) {
+            if (jenkinsCreateItemResult.status === 400) {
+                logger.warn(`Folder for [${environmentsRequestedEvent.project.name}] probably already created`);
+            } else {
+                throw new QMError("Failed to create jenkins build template. Network timeout occurred.");
+            }
+        }
     }
 
     private async createOpenshiftProject(projectId: string, environmentsRequestedEvent, environment) {
@@ -232,26 +279,22 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
         ]);
     }
 
-    private addMembershipPermissions(projectId: string, teams: any[]): Array<Promise<any[]>> {
-        return teams.map(team => {
-            return Promise.all(
-                team.owners.map(owner => {
-                    const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
-                    logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
-                    return OCClient.policy.addRoleToUser(ownerUsername,
-                        "admin",
-                        projectId);
-                }))
-                .then(() => {
-                    return Promise.all(
-                        team.members.map(member => {
-                            const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
-                            logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
-                            return OCClient.policy.addRoleToUser(memberUsername,
-                                "view",
-                                projectId);
-                        }));
-                });
+    private async addMembershipPermissions(projectId: string, teams: any[]) {
+        await teams.map(async team => {
+            await team.owners.map(async owner => {
+                const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
+                logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
+                await OCClient.policy.addRoleToUser(ownerUsername,
+                    "admin",
+                    projectId);
+            });
+            await team.members.map(async member => {
+                const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
+                logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
+                await OCClient.policy.addRoleToUser(memberUsername,
+                    "view",
+                    projectId);
+            });
         });
     }
 
@@ -276,7 +319,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
             return request;
         });
 
-        return axios.post(`https://${jenkinsHost}/credentials/store/system/domain/_/createCredentials`,
+        const createCredentialsResult = await axios.post(`https://${jenkinsHost}/credentials/store/system/domain/_/createCredentials`,
             {
                 json: `${JSON.stringify(jenkinsCredentials)}`,
             },
@@ -286,6 +329,9 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                     "Authorization": `Bearer ${token}`,
                 },
             });
+        if (!isSuccessCode(createCredentialsResult.status)) {
+            throw new QMError("Failed to create Jenkins credentials for project");
+        }
     }
 
     private async createPodNetwork(teamName: string, tenantName: string, projectName: string) {
@@ -293,13 +339,26 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
         const projectIdDev = getProjectId(tenantName, projectName, "dev");
         const projectIdSit = getProjectId(tenantName, projectName, "sit");
         const projectIdUat = getProjectId(tenantName, projectName, "uat");
-        return OCCommon.commonCommand(
-            "adm pod-network",
-            "join-projects",
-            [projectIdDev, projectIdSit, projectIdUat],
-            [
-                new StandardOption("to", `${teamDevOpsProjectId}`),
-            ]);
+        try {
+            await OCCommon.commonCommand(
+                "adm pod-network",
+                "join-projects",
+                [projectIdDev, projectIdSit, projectIdUat],
+                [
+                    new StandardOption("to", `${teamDevOpsProjectId}`),
+                ]);
+        } catch (error) {
+            if (error instanceof OCCommandResult) {
+                const multitenantNetworkPluginMissingError = "error: Managing pod network is only supported for openshift multitenant network plugin";
+                if (!_.isEmpty(error.error) && error.error.indexOf(multitenantNetworkPluginMissingError) > -1) {
+                    logger.warn("Openshift multitenant network plugin not found. Assuming running on Minishift test environment");
+                } else {
+                    throw new OCResultError(error, "Failed to configure multitenant pod network");
+                }
+            } else {
+                throw error;
+            }
+        }
     }
 
     private async sendPackageUsageMessage(ctx: HandlerContext, projectName: string, teams) {

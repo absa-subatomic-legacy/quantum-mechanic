@@ -22,7 +22,12 @@ import {
     gluonProjectsWhichBelongToGluonTeam,
     menuForProjects,
 } from "../project/Projects";
-import {logErrorAndReturnSuccess} from "../shared/Error";
+import {
+    handleQMError,
+    logErrorAndReturnSuccess, QMError,
+    ResponderMessageClient,
+} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -75,34 +80,32 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         // get memberId for createdBy
-        await ctx.messageClient.addressChannels({
-            text: "🚀 Your new application is being created...",
-        }, this.teamChannel);
-
-        let member;
         try {
-            member = await gluonMemberFromScreenName(ctx, this.screenName);
+            await ctx.messageClient.respond({
+                text: "🚀 Your new application is being created...",
+            });
+
+            let member;
+            try {
+                member = await gluonMemberFromScreenName(ctx, this.screenName);
+            } catch (error) {
+                return await  logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+            }
+
+            let project;
+            try {
+                project = await gluonProjectFromProjectName(ctx, this.projectName);
+            } catch (error) {
+                return await logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
+            }
+            await this.createApplicationInGluon(project, member);
+
+            return await ctx.messageClient.respond({
+                text: "🚀 Application created successfully.",
+            });
         } catch (error) {
-            return await  logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+            return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-
-        let project;
-        try {
-            project = await gluonProjectFromProjectName(ctx, this.projectName);
-        } catch (error) {
-            return await logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
-        }
-        const createApplicationResult = await this.createApplicationInGluon(project, member);
-
-        if (createApplicationResult.status !== 200) {
-            return await ctx.messageClient.addressChannels({
-                text: "❗ Your new application could not be created. Please ensure it does not already exist.",
-            }, this.teamChannel);
-        }
-
-        return await ctx.messageClient.addressChannels({
-            text: "🚀 Application created successfully.",
-        }, this.teamChannel);
 
     }
 
@@ -123,7 +126,7 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
     }
 
     private async createApplicationInGluon(project, member) {
-        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`,
+        const createApplicationResult = await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`,
             {
                 name: this.name,
                 description: this.description,
@@ -136,6 +139,10 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
                 },
                 requestConfiguration: true,
             });
+
+        if (!isSuccessCode(createApplicationResult.status)) {
+            throw new QMError("Your new application could not be created. Please ensure it does not already exist.");
+        }
     }
 }
 
@@ -179,18 +186,22 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
 
         logger.debug(`Linking to Gluon project: ${this.projectName}`);
 
-        await ctx.messageClient.addressChannels({
-            text: "🚀 Your new application is being created...",
-        }, this.teamChannel);
+        try {
+            await ctx.messageClient.respond({
+                text: "🚀 Your new application is being created...",
+            });
 
-        return await this.linkApplicationForGluonProject(
-            ctx,
-            this.screenName,
-            this.name,
-            this.description,
-            this.bitbucketRepositorySlug,
-            this.projectName,
-        );
+            return await this.linkApplicationForGluonProject(
+                ctx,
+                this.screenName,
+                this.name,
+                this.description,
+                this.bitbucketRepositorySlug,
+                this.projectName,
+            );
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -288,9 +299,9 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
                 requestConfiguration: true,
             });
 
-        if (createApplicationResult.status !== 200) {
+        if (!isSuccessCode(createApplicationResult.status)) {
             logger.error(`Failed to link package. Error: ${JSON.stringify(createApplicationResult)}`);
-            return await ctx.messageClient.respond("❗Failed to link the specified package.");
+            throw new QMError("❗Failed to link the specified package.");
         }
 
         return await success();

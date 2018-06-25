@@ -11,7 +11,12 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
-import {logErrorAndReturnSuccess} from "../shared/Error";
+import {
+    handleQMError,
+    logErrorAndReturnSuccess, QMError,
+    ResponderMessageClient,
+} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -57,8 +62,12 @@ export class CreateProject extends RecursiveParameterRequestCommand {
     public tenantName: string;
 
     protected async runCommand(ctx: HandlerContext) {
-        const tenant = await gluonTenantFromTenantName(this.tenantName);
-        return await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
+        try {
+            const tenant = await gluonTenantFromTenantName(this.tenantName);
+            return await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -94,14 +103,10 @@ export class CreateProject extends RecursiveParameterRequestCommand {
         } catch (error) {
             return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
         }
-        const teamQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
-        if (teamQueryResult.status !== 200) {
-            logger.error(`❗Failed to find team ${teamName}. Error: ${JSON.stringify(teamQueryResult)}`);
-            return ctx.messageClient.respond(`Team ${teamName} does not appear to be a valid Sub Atomic team.`);
-        }
 
-        const team = teamQueryResult.data._embedded.teamResources[0];
-        const projectCreationResult = await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
+        const team = await this.getGluonTeamFromName(teamName);
+
+        await this.createGluonProject(
             {
                 name: this.name,
                 description: this.description,
@@ -111,14 +116,28 @@ export class CreateProject extends RecursiveParameterRequestCommand {
                     teamId: team.teamId,
                 }],
             });
-        if (projectCreationResult.status === 409) {
-            logger.error(`Failed to create project since the project name is already in use.`);
-            return await ctx.messageClient.respond(`❗Failed to create project since the project name is already in use. Please retry using a different project name.`);
-        } else if (projectCreationResult.status !== 201) {
-            logger.error(`Failed to create project with error: ${JSON.stringify(projectCreationResult.data)}`);
-            return await ctx.messageClient.respond(`❗Failed to create project.`);
-        }
 
         return await ctx.messageClient.respond("🚀Project successfully created.");
+    }
+
+    private async getGluonTeamFromName(teamName: string) {
+        const teamQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
+        if (!isSuccessCode(teamQueryResult.status)) {
+            logger.error(`Failed to find team ${teamName}. Error: ${JSON.stringify(teamQueryResult)}`);
+            throw new QMError(`Team ${teamName} does not appear to be a valid SubAtomic team.`);
+        }
+        return teamQueryResult.data._embedded.teamResources[0];
+    }
+
+    private async createGluonProject(projectDetails) {
+        const projectCreationResult = await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
+            projectDetails);
+        if (projectCreationResult.status === 409) {
+            logger.error(`Failed to create project since the project name is already in use.`);
+            throw new QMError(`Failed to create project since the project name is already in use. Please retry using a different project name.`);
+        } else if (!isSuccessCode(projectCreationResult.status)) {
+            logger.error(`Failed to create project with error: ${JSON.stringify(projectCreationResult.data)}`);
+            throw new QMError(`❗Failed to create project.`);
+        }
     }
 }

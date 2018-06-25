@@ -18,7 +18,12 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
-import {logErrorAndReturnSuccess} from "../shared/Error";
+import {
+    handleQMError,
+    logErrorAndReturnSuccess, QMError,
+    ResponderMessageClient,
+} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -103,14 +108,19 @@ export class NewTeamSlackChannel implements HandleCommand {
         try {
             this.teamChannel = _.isEmpty(this.teamChannel) ? this.teamName : this.teamChannel;
             return await linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, this.docs(), true);
-        } catch (err) {
-            return await ctx.messageClient.respond(`❗Unable to create the slack channel for you team. Channel creation failed with error: ${err.message}`);
+        } catch (error) {
+            return await this.handleError(ctx, error);
         }
     }
 
     private docs(): string {
         return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-team-channel`,
             "documentation")}`;
+    }
+
+    private async handleError(ctx: HandlerContext, error) {
+        const messageClient = new ResponderMessageClient(ctx);
+        return await handleQMError(messageClient, error);
     }
 }
 
@@ -173,7 +183,7 @@ async function linkSlackChannelToGluonTeam(ctx: HandlerContext,
 
     const teamQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${gluonTeamName}`);
 
-    if (teamQueryResult.status === 200) {
+    if (isSuccessCode(teamQueryResult.status)) {
         const team = teamQueryResult.data._embedded.teamResources[0];
 
         logger.info(`Updating team channel [${finalisedSlackChannelName}]: ${team.teamId}`);
@@ -212,8 +222,7 @@ logger.info(JSON.stringify(channel));
         }
         // allow error to fall through to final return otherwise
     }
-    await ctx.messageClient.respond(`❗Channel with channel name ${slackChannelName} could not be created.`);
-    throw new Error("Channel could not be created");
+    throw new QMError(`Channel with channel name ${slackChannelName} could not be created.`);
 
 }
 
@@ -235,7 +244,7 @@ async function tryInviteGluonMemberToChannel(ctx: HandlerContext,
     logger.info("Creating promise to find and add member: " + gluonMemberId);
     const memberQueryResponse = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members/${gluonMemberId}`);
 
-    if (memberQueryResponse.status !== 200) {
+    if (!isSuccessCode(memberQueryResponse.status)) {
         throw new Error("Unable to find member");
     }
 

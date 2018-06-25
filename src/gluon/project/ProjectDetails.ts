@@ -12,7 +12,11 @@ import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
 import {gluonApplicationsLinkedToGluonProjectId} from "../packages/Applications";
-import {logErrorAndReturnSuccess} from "../shared/Error";
+import {
+    handleQMError,
+    logErrorAndReturnSuccess,
+    ResponderMessageClient,
+} from "../shared/Error";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -39,7 +43,11 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand {
     public teamName: string;
 
     protected async runCommand(ctx: HandlerContext) {
-        return await this.listTeamProjects(ctx, this.teamName);
+        try {
+            return await this.listTeamProjects(ctx, this.teamName);
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -140,44 +148,47 @@ export class ListProjectDetails implements HandleCommand<HandlerResult> {
     public projectBitbucketKey: string;
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
-
-        let applications;
         try {
-            applications = gluonApplicationsLinkedToGluonProjectId(this.projectId);
-        } catch (error) {
-            return await logErrorAndReturnSuccess(gluonApplicationsLinkedToGluonProjectId.name, error);
-        }
-
-        let bitbucketURL = "None";
-        if (this.projectBitbucketKey !== null) {
-            bitbucketURL = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.projectBitbucketKey}`;
-        }
-        const attachments = [];
-        for (const application of applications) {
-            let applicationBitbucketUrl = "None";
-            if (application.bitbucketRepository !== null) {
-                applicationBitbucketUrl = application.bitbucketRepository.repoUrl;
+            let applications;
+            try {
+                applications = gluonApplicationsLinkedToGluonProjectId(this.projectId);
+            } catch (error) {
+                return await logErrorAndReturnSuccess(gluonApplicationsLinkedToGluonProjectId.name, error);
             }
-            attachments.push(
-                {
-                    text: `*Application:* ${application.name}\n*Description:* ${application.description}\n*Bitbucket URL:* ${applicationBitbucketUrl}`,
-                    color: "#45B254",
-                },
-            );
+
+            let bitbucketURL = "None";
+            if (this.projectBitbucketKey !== null) {
+                bitbucketURL = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.projectBitbucketKey}`;
+            }
+            const attachments = [];
+            for (const application of applications) {
+                let applicationBitbucketUrl = "None";
+                if (application.bitbucketRepository !== null) {
+                    applicationBitbucketUrl = application.bitbucketRepository.repoUrl;
+                }
+                attachments.push(
+                    {
+                        text: `*Application:* ${application.name}\n*Description:* ${application.description}\n*Bitbucket URL:* ${applicationBitbucketUrl}`,
+                        color: "#45B254",
+                    },
+                );
+            }
+
+            let headerMessage = `The current details of the project *${this.projectName}* are as follows.\n*Description:* ${this.projectDescription}\n*Bitbucket URL:* ${bitbucketURL}\n`;
+
+            if (attachments.length > 0) {
+                headerMessage += "The below applications belong to the project:";
+            } else {
+                headerMessage += "There are no applications that belong to this project yet";
+            }
+
+            const msg: SlackMessage = {
+                text: headerMessage,
+                attachments,
+            };
+            return await ctx.messageClient.respond(msg);
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-
-        let headerMessage = `The current details of the project *${this.projectName}* are as follows.\n*Description:* ${this.projectDescription}\n*Bitbucket URL:* ${bitbucketURL}\n`;
-
-        if (attachments.length > 0) {
-            headerMessage += "The below applications belong to the project:";
-        } else {
-            headerMessage += "There are no applications that belong to this project yet";
-        }
-
-        const msg: SlackMessage = {
-            text: headerMessage,
-            attachments,
-        };
-        return await ctx.messageClient.respond(msg);
     }
 }
