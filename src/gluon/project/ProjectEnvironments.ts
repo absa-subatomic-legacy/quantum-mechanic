@@ -5,7 +5,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
+    Parameter, success,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -59,6 +59,10 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
         logger.info("Creating new OpenShift environments...");
 
         try {
+            await ctx.messageClient.addressChannels({
+                text: `Requesting project environment's for project *${this.projectName}*`,
+            }, this.teamChannel);
+
             let member;
             try {
                 member = await gluonMemberFromScreenName(ctx, this.screenName);
@@ -75,9 +79,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
 
             await this.requestProjectEnvironment(project.projectId, member.memberId);
 
-            return await ctx.messageClient.addressChannels({
-                text: `Requesting project environment's for project *${this.projectName}*`,
-            }, this.teamChannel);
+            return await success();
         } catch (error) {
             return await this.handleError(ctx, error);
         }

@@ -21,8 +21,8 @@ export async function handleQMError(messageClient: QMMessageClient, error) {
         logger.error(`Error code suggests and external service is down.\nError: ${util.inspect(error)}`);
         return await messageClient.send(`❗Unexpected failure. An external service dependency appears to be down.`);
     } else if (error instanceof Error) {
-        logger.error(`Error is not of default Error type. Letting error bubble up.\nError: ${util.inspect(error)}`);
-        throw error;
+        logger.error(`Error is of default Error type.\nError: ${util.inspect(error)}`);
+        return await messageClient.send(`❗Unhandled exception occurred. Please alert your system admin to check the logs and correct the issue accordingly.`);
     } else if (error instanceof QMError) {
         logger.error(`Error is of QMError type. Error: ${error.message}`);
         return await messageClient.send(`${error.getSlackMessage()}`);
