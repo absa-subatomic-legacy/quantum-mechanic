@@ -89,7 +89,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
         try {
             updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.data._embedded.teamResources[0].teamId, team.data._embedded.teamResources[0].name);
         } catch (error) {
-            return await ctx.messageClient.respond(`Unfortunately team *${team.data._embedded.teamResources[0].name}* has already been associated with ${gluonProject.projectId}`);
+            throw new QMError(`Team *${team.data._embedded.teamResources[0].name}* was already associated with project ${gluonProject.projectId}`);
         }
 
         if (isSuccessCode(updateGluonWithProjectDetails.status)) {
