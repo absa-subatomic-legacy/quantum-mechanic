@@ -7,22 +7,15 @@ import {
     MappedParameter,
     MappedParameters,
 } from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
-import {
-    handleQMError,
-    QMError,
-    ResponderMessageClient,
-} from "../shared/Error";
+import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 import {createMenu} from "../shared/GenericMenu";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {CreateTeam} from "../team/CreateTeam";
 import {gluonTeamsWhoSlackScreenNameBelongsTo} from "../team/Teams";
 import {
     gluonProjectFromProjectName,
