@@ -93,9 +93,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
         }
 
         if (isSuccessCode(updateGluonWithProjectDetails.status)) {
-            if (this.teamChannel !== team.data._embedded.teamResources[0].name) {
-                return await ctx.messageClient.respond(`Team *${team.data._embedded.teamResources[0].name}* has been successfully associated with ${gluonProject.projectId}`);
-            }
+            return await ctx.messageClient.respond(`Team *${team.data._embedded.teamResources[0].name}* has been successfully associated with ${gluonProject.projectId}`);
         } else {
             logger.error(`Failed to link project. Error ${updateGluonWithProjectDetails.data}`);
             throw new QMError(`Failed to link project.`);
