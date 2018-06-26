@@ -12,6 +12,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 import {createMenu} from "../shared/GenericMenu";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -53,7 +54,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            await this.linkProjectForTeam(ctx, this.teamName);
+            return await this.linkProjectForTeam(ctx, this.teamName);
         } catch (error) {
             return await this.handleError(ctx, error);
         }
@@ -81,7 +82,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
         }
     }
 
-    private async linkProjectForTeam(ctx: HandlerContext, teamName: string): Promise<any> {
+    private async linkProjectForTeam(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
         const team = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
         const gluonProject = await gluonProjectFromProjectName(ctx, this.projectName);
         let updateGluonWithProjectDetails;
@@ -91,7 +92,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
             return await ctx.messageClient.respond(`Unfortunately team *${team.data._embedded.teamResources[0].name}* has already been associated with ${gluonProject.projectId}`);
         }
 
-        if (updateGluonWithProjectDetails.status === 202) {
+        if (isSuccessCode(updateGluonWithProjectDetails.status)) {
             if (this.teamChannel !== team.data._embedded.teamResources[0].name) {
                 return await ctx.messageClient.respond(`Team *${team.data._embedded.teamResources[0].name}* has been successfully associated with ${gluonProject.projectId}`);
             }
