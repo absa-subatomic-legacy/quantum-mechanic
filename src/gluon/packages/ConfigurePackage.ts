@@ -199,7 +199,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     })
     public baseS2IImage: string;
 
-    public buildEnvironmentVariables: { [key: string]: string };
+    public buildEnvironmentVariables: { [key: string]: string } = {};
 
     private readonly JENKINSFILE_EXTENSION = ".groovy";
     private readonly JENKINSFILE_FOLDER = "resources/templates/jenkins/jenkinsfile-repo/";
