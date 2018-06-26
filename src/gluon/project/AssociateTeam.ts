@@ -131,6 +131,9 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
         }
 
         const projectDetails = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?name=${projectName}`);
+        if (!isSuccessCode(projectDetails.status)) {
+            throw new QMError("Failed to get project details for the project specified.");
+        }
         const projectTeams = projectDetails.data._embedded.projectResources[0];
 
         for (const team of projectTeams.teams) {
