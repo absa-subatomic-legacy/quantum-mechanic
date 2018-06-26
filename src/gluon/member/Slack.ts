@@ -48,7 +48,7 @@ export class AddSlackDetails implements HandleCommand<HandlerResult> {
         }
 
         return ctx.messageClient.respond({
-            text: `Thanks *${member.data.firstName}*, your Slack details have been added to your Subatomic profile. 👍`,
+            text: `Thanks *${member.firstName}*, your Slack details have been added to your Subatomic profile. 👍`,
         });
     }
 

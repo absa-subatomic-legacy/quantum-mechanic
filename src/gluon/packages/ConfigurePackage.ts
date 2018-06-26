@@ -30,10 +30,11 @@ import {
 } from "../project/Projects";
 import {
     handleQMError,
-    logErrorAndReturnSuccess, QMError,
-    ResponderMessageClient,
+    logErrorAndReturnSuccess,
+    QMError, ResponderMessageClient,
 } from "../shared/Error";
 import {createMenu} from "../shared/GenericMenu";
+import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -220,6 +221,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
             try {
                 const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
+                return await this.handle(ctx);
             } catch (error) {
                 const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
                 return await menuForTeams(
@@ -318,7 +320,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     private async configurePackage(ctx: HandlerContext): Promise<HandlerResult> {
         let project;
         try {
-            project = gluonProjectFromProjectName(ctx, this.projectName);
+            project = await gluonProjectFromProjectName(ctx, this.projectName);
         } catch (error) {
             return await logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
         }
@@ -653,12 +655,13 @@ You can kick off the build pipeline for your library by clicking the button belo
                     "Authorization": `Bearer ${token.output}`,
                 },
             });
-
-        if (createJenkinsJobResponse.status === 400) {
-            logger.warn(`Multibranch job for [${gluonApplicationName}] probably already created`);
-        } else {
-            logger.error(`Unable to create jenkinsJob`);
-            throw new QMError("❗Failed to create jenkins job. Network request failed.");
+        if (!isSuccessCode(createJenkinsJobResponse.status)) {
+            if (createJenkinsJobResponse.status === 400) {
+                logger.warn(`Multibranch job for [${gluonApplicationName}] probably already created`);
+            } else {
+                logger.error(`Unable to create jenkinsJob`);
+                throw new QMError("Failed to create jenkins job. Network request failed.");
+            }
         }
         return await success();
     }

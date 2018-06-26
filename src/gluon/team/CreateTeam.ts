@@ -39,7 +39,6 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
         logger.info(`Creating team for member: ${this.screenName}`);
 
         try {
-
             const memberQueryResult = await this.getGluonMemberFromScreenName(this.screenName);
 
             if (!isSuccessCode(memberQueryResult.status)) {

@@ -18,7 +18,10 @@ describe("Add slack details to existing team member", () => {
         mock.onGet(`${QMConfig.subatomic.gluon.baseUrl}/members?email=${email}`).reply(200, {
             _embedded: {
                 teamMemberResources: [
-                    {memberId: `${memberId}`},
+                    {
+                     memberId: `${memberId}`,
+                     firstName: `${firstName}`,
+                    },
                 ],
             },
         });
