@@ -104,7 +104,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
             }
         } else {
             logger.error(`Failed to link project. Error ${updateGluonWithProjectDetails.data}`);
-            throw new QMError(`❗Failed to link project.`);
+            throw new QMError(`Failed to link project.`);
         }
 
     }
@@ -130,9 +130,9 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
                                projectName: string,
                                command: HandleCommand, message: string = "Please select a team",
                                projectNameVariable: string = "teamName"): Promise<any> {
-        const allTeams = new Array();
-        const associatedTeams = new Array();
-        const unlinked = new Array();
+        const allTeams = [];
+        const associatedTeams = [];
+        const unlinked = [];
 
         for (const team of teams) {
             allTeams.push(team.name);
@@ -162,10 +162,5 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
             "Select Team",
             projectNameVariable,
         );
-    }
-
-    private docs(extension): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
-            "documentation")}`;
     }
 }
