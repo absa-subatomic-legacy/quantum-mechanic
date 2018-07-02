@@ -3,7 +3,8 @@ import {
     EventHandler,
     HandleEvent,
     HandlerContext,
-    HandlerResult, logger,
+    HandlerResult,
+    logger,
     MappedParameter,
     MappedParameters,
     success,
@@ -11,7 +12,10 @@ import {
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
+import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
+import {QMError} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {NewDevOpsEnvironment} from "./DevOpsEnvironment";
 import {AddMemberToTeam} from "./JoinTeam";
 
@@ -62,6 +66,12 @@ export class BotJoinedChannel implements HandleEvent<any> {
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         const botJoinedChannel = event.data.UserJoinedChannel[0];
         logger.info(`BotJoinedChannelEvent: ${JSON.stringify(botJoinedChannel)}`);
+
+        const teams = await this.getTeams(botJoinedChannel.channel.name);
+        if (!JSON.stringify(teams.data).includes("_embedded")) {
+            return await success();
+        }
+
         if (botJoinedChannel.user.isAtomistBot === "true") {
             let channelNameString = "your";
             if (botJoinedChannel.channel.name !== null) {
@@ -98,6 +108,14 @@ If you haven't already, you might want to:
             }],
         };
         return ctx.messageClient.addressChannels(msg, channelId);
+    }
+
+    private async getTeams(channelName: string) {
+        const teamResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackTeamChannel=${channelName}`);
+        if (!isSuccessCode(teamResult.status)) {
+            throw new QMError(`${channelName} is not a Subatomic team channel.`);
+        }
+        return teamResult;
     }
 
     private docs(): string {
