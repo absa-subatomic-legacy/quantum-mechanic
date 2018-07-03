@@ -14,7 +14,8 @@ import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageCl
 import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
 import {QMConfig} from "../../config/QMConfig";
-import {ChannelMessageClient, handleQMError} from "../shared/Error";
+import {ChannelMessageClient, handleQMError, QMError} from "../shared/Error";
+import {isSuccessCode} from "../shared/Http";
 import {NewDevOpsEnvironment} from "./DevOpsEnvironment";
 import {AddMemberToTeam} from "./JoinTeam";
 
@@ -114,7 +115,13 @@ If you haven't already, you might want to:
     }
 
     private async getTeams(channelName: string) {
-        return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackTeamChannel=${channelName}`);
+        const teams = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackTeamChannel=${channelName}`);
+
+        if (!isSuccessCode(teams.status)) {
+            throw new QMError("Unable to connect to Subatomic. Please check your connection");
+        }
+
+        return teams;
     }
 
     private docs(): string {
