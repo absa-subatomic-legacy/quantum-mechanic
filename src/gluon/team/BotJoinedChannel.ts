@@ -82,7 +82,7 @@ export class BotJoinedChannel implements HandleEvent<any> {
             }
             return await success();
         } catch (error) {
-            return await handleQMError(new ChannelMessageClient(ctx), error);
+            return await handleQMError(new ChannelMessageClient(ctx).addDestination(botJoinedChannel.channel.channelId), error);
         }
     }
 
