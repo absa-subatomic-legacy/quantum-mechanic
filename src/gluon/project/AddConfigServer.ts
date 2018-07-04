@@ -40,7 +40,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand {
     public gluonTeamName: string;
 
     @Parameter({
-        description: "Remote Git repository URI",
+        description: "Remote Git repository SSH URI",
     })
     public gitUri: string;
 
