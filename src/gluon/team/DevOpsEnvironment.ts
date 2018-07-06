@@ -11,7 +11,7 @@ import {
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
-import {gluonMemberFromScreenName} from "../member/Members";
+import {MemberService} from "../member/Members";
 import {logErrorAndReturnSuccess} from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
 import {
@@ -35,7 +35,8 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
     })
     public teamName: string;
 
-    constructor(private teamService = new TeamService()) {
+    constructor(private teamService = new TeamService(),
+                private memberService = new MemberService()) {
         super();
     }
 
@@ -75,9 +76,9 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
 
         let member;
         try {
-            member = await gluonMemberFromScreenName(ctx, screenName);
+            member = await this.memberService.gluonMemberFromScreenName(ctx, screenName);
         } catch (error) {
-            return logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+            return logErrorAndReturnSuccess(this.memberService.gluonMemberFromScreenName.name, error);
         }
 
         const teamQueryResult = await this.getGluonTeamFromTeamName(teamName);

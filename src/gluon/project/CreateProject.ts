@@ -10,7 +10,7 @@ import {
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
-import {gluonMemberFromScreenName} from "../member/Members";
+import {MemberService} from "../member/Members";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
@@ -54,7 +54,9 @@ export class CreateProject extends RecursiveParameterRequestCommand {
     })
     public tenantName: string;
 
-    constructor(private teamService = new TeamService(), private tenantService = new TenantService()) {
+    constructor(private teamService = new TeamService(),
+                private tenantService = new TenantService(),
+                private memberService = new MemberService()) {
         super();
     }
 
@@ -97,9 +99,9 @@ export class CreateProject extends RecursiveParameterRequestCommand {
                                                     teamName: string, tenantId: string): Promise<any> {
         let member;
         try {
-            member = await gluonMemberFromScreenName(ctx, screenName);
+            member = await this.memberService.gluonMemberFromScreenName(ctx, screenName);
         } catch (error) {
-            return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+            return await logErrorAndReturnSuccess(this.memberService.gluonMemberFromScreenName.name, error);
         }
 
         const team = await this.getGluonTeamFromName(teamName);
@@ -135,7 +137,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
             throw new QMError(`Failed to create project since the project name is already in use. Please retry using a different project name.`);
         } else if (!isSuccessCode(projectCreationResult.status)) {
             logger.error(`Failed to create project with error: ${JSON.stringify(projectCreationResult.data)}`);
-            throw new QMError(`❗Failed to create project.`);
+            throw new QMError(`Failed to create project.`);
         }
     }
 }

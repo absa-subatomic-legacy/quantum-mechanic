@@ -11,7 +11,7 @@ import {
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
-import {gluonMemberFromScreenName} from "../member/Members";
+import {MemberService} from "../member/Members";
 import {ProjectService} from "../project/ProjectService";
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
@@ -49,7 +49,8 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand {
     public teamName: string;
 
     constructor(private teamService = new TeamService(),
-                private projectService = new ProjectService()) {
+                private projectService = new ProjectService(),
+                private memberService = new MemberService()) {
         super();
     }
 
@@ -57,7 +58,7 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand {
         logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
 
         try {
-            const member = await gluonMemberFromScreenName(ctx, this.screenName);
+            const member = await this.memberService.gluonMemberFromScreenName(ctx, this.screenName);
 
             const project = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
 
@@ -149,7 +150,8 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
     public teamName: string;
 
     constructor(private teamService = new TeamService(),
-                private projectService = new ProjectService()) {
+                private projectService = new ProjectService(),
+                private memberService = new MemberService()) {
         super();
     }
 
@@ -194,7 +196,7 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
     private async configBitbucket(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
 
-        const member = await gluonMemberFromScreenName(ctx, this.screenName);
+        const member = await this.memberService.gluonMemberFromScreenName(ctx, this.screenName);
         const gluonProject = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
 
         const projectRestUrl = `${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${this.bitbucketProjectKey}`;

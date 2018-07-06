@@ -16,7 +16,7 @@ import {
     bitbucketRepositoryForSlug,
     menuForBitbucketRepositories,
 } from "../bitbucket/Bitbucket";
-import {gluonMemberFromScreenName} from "../member/Members";
+import {MemberService} from "../member/Members";
 import {ProjectService} from "../project/ProjectService";
 import {
     handleQMError,
@@ -69,7 +69,8 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
     public bitbucketRepositorySlug: string;
 
     constructor(private teamService = new TeamService(),
-                private projectService = new ProjectService()) {
+                private projectService = new ProjectService(),
+                private memberService = new MemberService()) {
         super();
     }
 
@@ -163,9 +164,9 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
         const repo = await bitbucketRepositoryForSlug(bitbucketProjectKey, bitbucketRepositorySlug);
         let member;
         try {
-            member = await gluonMemberFromScreenName(ctx, slackScreeName);
+            member = await this.memberService.gluonMemberFromScreenName(ctx, slackScreeName);
         } catch (error) {
-            return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+            return await logErrorAndReturnSuccess(this.memberService.gluonMemberFromScreenName.name, error);
         }
         const remoteUrl = _.find(repo.links.clone, clone => {
             return (clone as any).name === "ssh";

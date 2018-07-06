@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
-import {gluonMemberFromScreenName} from "../member/Members";
+import {MemberService} from "../member/Members";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
@@ -50,7 +50,8 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
     public teamName: string = null;
 
     constructor(private teamService = new TeamService(),
-                private projectService = new ProjectService()) {
+                private projectService = new ProjectService(),
+                private memberService = new MemberService()) {
         super();
     }
 
@@ -64,9 +65,9 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
 
             let member;
             try {
-                member = await gluonMemberFromScreenName(ctx, this.screenName);
+                member = await this.memberService.gluonMemberFromScreenName(ctx, this.screenName);
             } catch (error) {
-                return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+                return await logErrorAndReturnSuccess(this.memberService.gluonMemberFromScreenName.name, error);
             }
 
             let project;
