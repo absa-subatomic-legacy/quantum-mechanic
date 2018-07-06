@@ -1,21 +1,41 @@
 import {QMConfig} from "./config/QMConfig";
 import {
-    BitbucketProjectAddedEvent,
-    BitbucketProjectRequestedEvent,
-} from "./gluon/bitbucket/bitbucketIngester";
-import {
     ListExistingBitbucketProject,
     NewBitbucketProject,
 } from "./gluon/bitbucket/BitbucketProject";
 import {BitbucketProjectAdded} from "./gluon/bitbucket/BitbucketProjectAdded";
 import {BitbucketProjectRequested} from "./gluon/bitbucket/BitbucketProjectRequested";
+import {ApplicationCreatedEvent} from "./gluon/ingesters/applicationsIngester";
+import {
+    BitbucketProjectAddedEvent,
+    BitbucketProjectRequestedEvent,
+} from "./gluon/ingesters/bitbucketIngester";
+import {
+    ProjectCreatedEvent,
+    ProjectEnvironmentsRequestedEvent,
+    TeamsLinkedToProjectEvent,
+} from "./gluon/ingesters/projectIngester";
+import {
+    ActionedBy,
+    BitbucketProject,
+    GluonTeam,
+    GluonTenant,
+    GluonTenantId,
+    Project,
+    SlackIdentity,
+} from "./gluon/ingesters/sharedIngester";
+import {
+    DevOpsEnvironmentRequestedEvent,
+    MembersAddedToTeamEvent,
+    MembershipRequestCreatedEvent,
+    TeamCreatedEvent,
+} from "./gluon/ingesters/teamIngester";
+import {TeamMemberCreatedEvent} from "./gluon/ingesters/teamMemberIngester";
 import {KickOffJenkinsBuild} from "./gluon/jenkins/JenkinsBuild";
 import {OnboardMember} from "./gluon/member/Onboard";
 import {AddSlackDetails} from "./gluon/member/Slack";
 import {TeamMemberCreated} from "./gluon/member/TeamMemberCreated";
-import {TeamMemberCreatedEvent} from "./gluon/member/teamMemberIngester";
 import {ApplicationCreated} from "./gluon/packages/ApplicationCreated";
-import {ApplicationCreatedEvent} from "./gluon/packages/applicationsIngester";
 import {
     ConfigureBasicPackage,
     ConfigurePackage,
@@ -36,21 +56,7 @@ import {
 } from "./gluon/project/ProjectDetails";
 import {NewProjectEnvironments} from "./gluon/project/ProjectEnvironments";
 import {ProjectEnvironmentsRequested} from "./gluon/project/ProjectEnvironmentsRequested";
-import {
-    ProjectCreatedEvent,
-    ProjectEnvironmentsRequestedEvent,
-    TeamsLinkedToProjectEvent,
-} from "./gluon/project/projectIngester";
 import {TeamsLinkedToProject} from "./gluon/project/TeamAssociated";
-import {
-    ActionedBy,
-    BitbucketProject,
-    GluonTeam,
-    GluonTenant,
-    GluonTenantId,
-    Project,
-    SlackIdentity,
-} from "./gluon/shared/sharedIngester";
 import {BotJoinedChannel} from "./gluon/team/BotJoinedChannel";
 import {CreateTeam} from "./gluon/team/CreateTeam";
 import {NewDevOpsEnvironment} from "./gluon/team/DevOpsEnvironment";
@@ -64,12 +70,6 @@ import {MembersAddedToTeam} from "./gluon/team/MembersAddedToTeam";
 import {MembershipRequestClosed} from "./gluon/team/MembershipRequestClosed";
 import {MembershipRequestCreated} from "./gluon/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/team/TeamCreated";
-import {
-    DevOpsEnvironmentRequestedEvent,
-    MembersAddedToTeamEvent,
-    MembershipRequestCreatedEvent,
-    TeamCreatedEvent,
-} from "./gluon/team/teamIngester";
 import {
     LinkExistingTeamSlackChannel,
     NewOrUseTeamSlackChannel,
