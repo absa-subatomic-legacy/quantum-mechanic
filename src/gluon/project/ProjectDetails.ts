@@ -11,7 +11,7 @@ import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageCl
 import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {QMConfig} from "../../config/QMConfig";
-import {gluonApplicationsLinkedToGluonProjectId} from "../packages/Applications";
+import {ApplicationService} from "../packages/Applications";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
@@ -149,13 +149,16 @@ export class ListProjectDetails implements HandleCommand<HandlerResult> {
     })
     public projectBitbucketKey: string;
 
+    constructor(private applicationService = new ApplicationService()) {
+    }
+
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             let applications;
             try {
-                applications = await gluonApplicationsLinkedToGluonProjectId(this.projectId);
+                applications = await this.applicationService.gluonApplicationsLinkedToGluonProjectId(this.projectId);
             } catch (error) {
-                return await logErrorAndReturnSuccess(gluonApplicationsLinkedToGluonProjectId.name, error);
+                return await logErrorAndReturnSuccess(this.applicationService.gluonApplicationsLinkedToGluonProjectId.name, error);
             }
 
             let bitbucketURL = "None";

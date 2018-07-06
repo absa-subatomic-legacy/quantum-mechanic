@@ -40,9 +40,8 @@ import {SubatomicOpenshiftService} from "../shared/SubatomicOpenshiftService";
 import {TenantService} from "../shared/TenantService";
 import {TeamService} from "../team/TeamService";
 import {
+    ApplicationService,
     ApplicationType,
-    gluonApplicationForNameAndProjectName,
-    gluonApplicationsLinkedToGluonProject,
     menuForApplications,
 } from "./Applications";
 import {PackageDefinition} from "./PackageDefinition";
@@ -201,7 +200,8 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     constructor(private teamService = new TeamService(),
                 private tenantService = new TenantService(),
                 private subatomicOpenshiftService = new SubatomicOpenshiftService(),
-                private projectService = new ProjectService()) {
+                private projectService = new ProjectService(),
+                private applicationService = new ApplicationService()) {
         super();
     }
 
@@ -237,7 +237,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
             return await this.projectService.menuForProjects(ctx, projects, this, "Please select the owning project of the package you wish to configure");
         }
         if (_.isEmpty(this.applicationName)) {
-            const applications = await gluonApplicationsLinkedToGluonProject(ctx, this.projectName);
+            const applications = await this.applicationService.gluonApplicationsLinkedToGluonProject(ctx, this.projectName);
             return await menuForApplications(ctx, applications, this, "Please select the package you wish to configure");
         }
         if (_.isEmpty(this.openshiftTemplate)) {
@@ -262,7 +262,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     private async requestJenkinsFileParameter(ctx: HandlerContext): Promise<HandlerResult> {
 
         const project = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
-        const application = await gluonApplicationForNameAndProjectName(ctx, this.applicationName, this.projectName);
+        const application = await this.applicationService.gluonApplicationForNameAndProjectName(ctx, this.applicationName, this.projectName);
         const username = QMConfig.subatomic.bitbucket.auth.username;
         const password = QMConfig.subatomic.bitbucket.auth.password;
         const gitProject: GitProject = await GitCommandGitProject.cloned({
@@ -327,9 +327,9 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
 
         let application;
         try {
-            application = await gluonApplicationForNameAndProjectName(ctx, this.applicationName, this.projectName);
+            application = await this.applicationService.gluonApplicationForNameAndProjectName(ctx, this.applicationName, this.projectName);
         } catch (error) {
-            return await logErrorAndReturnSuccess(gluonApplicationForNameAndProjectName.name, error);
+            return await logErrorAndReturnSuccess(this.applicationService.gluonApplicationForNameAndProjectName.name, error);
         }
         return await this.doConfiguration(
             ctx,
