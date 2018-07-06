@@ -20,7 +20,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
 import {TeamService} from "../team/TeamService";
-import {bitbucketAxios} from "./Bitbucket";
+import {BitbucketService} from "./Bitbucket";
 
 @CommandHandler("Create a new Bitbucket project", QMConfig.subatomic.commandPrefix + " create bitbucket project")
 export class NewBitbucketProject extends RecursiveParameterRequestCommand {
@@ -151,7 +151,8 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
 
     constructor(private teamService = new TeamService(),
                 private projectService = new ProjectService(),
-                private memberService = new MemberService()) {
+                private memberService = new MemberService(),
+                private bitbucketService = new BitbucketService()) {
         super();
     }
 
@@ -199,22 +200,23 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
         const member = await this.memberService.gluonMemberFromScreenName(ctx, this.screenName);
         const gluonProject = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
 
-        const projectRestUrl = `${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects/${this.bitbucketProjectKey}`;
         const projectUiUrl = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.bitbucketProjectKey}`;
 
         await ctx.messageClient.addressChannels({
             text: `🚀 The Bitbucket project with key ${this.bitbucketProjectKey} is being configured...`,
         }, this.teamChannel);
 
-        const bitbucketProject = await this.getBitbucketProject(projectRestUrl);
+        const bitbucketProject = await this.getBitbucketProject(this.bitbucketProjectKey);
 
         await this.updateGluonProjectWithBitbucketDetails(projectUiUrl, member.memberId, gluonProject, bitbucketProject);
 
         return await success();
     }
 
-    private async getBitbucketProject(bitbucketProjectRestUrl: string) {
-        const bitbucketProjectRequestResult = await bitbucketAxios().get(bitbucketProjectRestUrl);
+    private async getBitbucketProject(bitbucketProjectKey: string) {
+        const bitbucketProjectRequestResult = await this.bitbucketService.bitbucketProjectFromKey(
+            bitbucketProjectKey,
+        );
 
         if (!isSuccessCode(bitbucketProjectRequestResult.status)) {
             throw new QMError("Unable to find the specified project in Bitbucket. Please make sure it exists.");

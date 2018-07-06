@@ -8,6 +8,7 @@ import {
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {OCCommandResult} from "../../openshift/base/OCCommandResult";
+import {BitbucketService} from "../bitbucket/Bitbucket";
 import {BitbucketConfiguration} from "../bitbucket/BitbucketConfiguration";
 import {getProjectDisplayName} from "../project/Project";
 import {ProjectService} from "../project/ProjectService";
@@ -49,7 +50,7 @@ subscription MembersAddedToTeamEvent {
 `)
 export class MembersAddedToTeam implements HandleEvent<any> {
 
-    constructor(private projectService = new ProjectService()) {
+    constructor(private projectService = new ProjectService(), private bitbucketService = new BitbucketService()) {
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -84,7 +85,7 @@ export class MembersAddedToTeam implements HandleEvent<any> {
 
         teamOwnersUsernames = _.union(teamOwnersUsernames, membersAddedToTeamEvent.owners.map(owner => owner.domainUsername));
         teamMembersUsernames = _.union(teamMembersUsernames, membersAddedToTeamEvent.members.map(member => member.domainUsername));
-        return new BitbucketConfiguration(teamOwnersUsernames, teamMembersUsernames);
+        return new BitbucketConfiguration(teamOwnersUsernames, teamMembersUsernames, this.bitbucketService);
     }
 
     private async addPermissionsForUserToTeams(bitbucketConfiguration: BitbucketConfiguration, teamName: string, projects, membersAddedToTeamEvent) {

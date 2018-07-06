@@ -12,8 +12,7 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../config/QMConfig";
 import {
-    bitbucketRepositoriesForProjectKey,
-    bitbucketRepositoryForSlug,
+    BitbucketService,
     menuForBitbucketRepositories,
 } from "../bitbucket/Bitbucket";
 import {MemberService} from "../member/Members";
@@ -70,7 +69,8 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
 
     constructor(private teamService = new TeamService(),
                 private projectService = new ProjectService(),
-                private memberService = new MemberService()) {
+                private memberService = new MemberService(),
+                private bitbucketService = new BitbucketService()) {
         super();
     }
 
@@ -122,7 +122,14 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
             if (_.isEmpty(project.bitbucketProject)) {
                 throw new QMError(`The selected project does not have an associated bitbucket project. Please first associate a bitbucket project using the \`${QMConfig.subatomic.commandPrefix} link bitbucket project\` command.`);
             }
-            const bitbucketRepos = await bitbucketRepositoriesForProjectKey(project.bitbucketProject.key);
+
+            const bitbucketReposResult = await this.bitbucketService.bitbucketRepositoriesForProjectKey(project.bitbucketProject.key);
+
+            if (!isSuccessCode(bitbucketReposResult.status)) {
+                throw new QMError("Unable to find Bitbucket repositories. Please ensure the Bitbucket project exists and that it has associated projects.");
+            }
+
+            const bitbucketRepos = bitbucketReposResult.data;
             logger.debug(`Bitbucket project [${project.bitbucketProject.name}] has repositories: ${JSON.stringify(bitbucketRepos)}`);
 
             return await menuForBitbucketRepositories(
@@ -161,7 +168,14 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
                                           bitbucketRepositorySlug: string,
                                           bitbucketProjectKey: string,
                                           gluonProjectId: string): Promise<HandlerResult> {
-        const repo = await bitbucketRepositoryForSlug(bitbucketProjectKey, bitbucketRepositorySlug);
+        const repoResult = await this.bitbucketService.bitbucketRepositoryForSlug(bitbucketProjectKey, bitbucketRepositorySlug);
+
+        if (!isSuccessCode(repoResult.status)) {
+            throw new QMError("Unable to find the specified repository in Bitbucket. Please make sure it exists.");
+        }
+
+        const repo = repoResult.data;
+
         let member;
         try {
             member = await this.memberService.gluonMemberFromScreenName(ctx, slackScreeName);
