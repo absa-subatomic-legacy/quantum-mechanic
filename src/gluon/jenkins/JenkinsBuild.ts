@@ -23,7 +23,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
 import {TeamService} from "../team/TeamService";
-import {kickOffBuild, kickOffFirstBuild} from "./Jenkins";
+import {JenkinsService} from "./Jenkins";
 
 @CommandHandler("Kick off a Jenkins build", QMConfig.subatomic.commandPrefix + " jenkins build")
 export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
@@ -54,7 +54,8 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
 
     constructor(private teamService = new TeamService(),
                 private projectService = new ProjectService(),
-                private applicationService = new ApplicationService()) {
+                private applicationService = new ApplicationService(),
+                private jenkinsService = new JenkinsService()) {
         super();
     }
 
@@ -112,7 +113,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
 
         logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to kick off build`);
 
-        const kickOffBuildResult = await kickOffBuild(
+        const kickOffBuildResult = await this.jenkinsService.kickOffBuild(
             jenkinsHost.output,
             token.output,
             gluonProjectName,
@@ -125,7 +126,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
         } else {
             if (kickOffBuildResult.status === 404) {
                 logger.warn(`This is probably the first build and therefore a master branch job does not exist`);
-                await kickOffFirstBuild(
+                await this.jenkinsService.kickOffFirstBuild(
                     jenkinsHost.output,
                     token.output,
                     gluonProjectName,

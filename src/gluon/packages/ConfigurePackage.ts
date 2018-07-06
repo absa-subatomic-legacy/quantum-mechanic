@@ -20,7 +20,7 @@ import {StandardOption} from "../../openshift/base/options/StandardOption";
 import {OCClient} from "../../openshift/OCClient";
 import {OCCommon} from "../../openshift/OCCommon";
 import {QMTemplate} from "../../template/QMTemplate";
-import {jenkinsAxios} from "../jenkins/Jenkins";
+import {JenkinsService} from "../jenkins/Jenkins";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 import {getProjectDevOpsId, getProjectId} from "../project/Project";
 import {ProjectService} from "../project/ProjectService";
@@ -201,7 +201,8 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
                 private tenantService = new TenantService(),
                 private subatomicOpenshiftService = new SubatomicOpenshiftService(),
                 private projectService = new ProjectService(),
-                private applicationService = new ApplicationService()) {
+                private applicationService = new ApplicationService(),
+                private jenkinsService = new JenkinsService()) {
         super();
     }
 
@@ -646,15 +647,14 @@ You can kick off the build pipeline for your library by clicking the button belo
                 bitbucketRepositoryName,
             },
         );
-        const axios = jenkinsAxios();
-        const createJenkinsJobResponse = await axios.post(`https://${jenkinsHost.output}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/createItem?name=${_.kebabCase(gluonApplicationName).toLowerCase()}`,
-            builtTemplate,
-            {
-                headers: {
-                    "Content-Type": "application/xml",
-                    "Authorization": `Bearer ${token.output}`,
-                },
-            });
+
+        const createJenkinsJobResponse = await this.jenkinsService.createJenkinsJob(
+            jenkinsHost.output,
+            token.output,
+            gluonProjectName,
+            gluonApplicationName,
+            builtTemplate);
+
         if (!isSuccessCode(createJenkinsJobResponse.status)) {
             if (createJenkinsJobResponse.status === 400) {
                 logger.warn(`Multibranch job for [${gluonApplicationName}] probably already created`);
