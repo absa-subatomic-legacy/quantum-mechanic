@@ -16,7 +16,7 @@ import {
     menuForBitbucketRepositories,
 } from "../bitbucket/Bitbucket";
 import {MemberService} from "../member/Members";
-import {ProjectService} from "../project/ProjectService";
+import {menuForProjects, ProjectService} from "../project/ProjectService";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
@@ -28,7 +28,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {TeamService} from "../team/TeamService";
+import {menuForTeams, TeamService} from "../team/TeamService";
 import {ApplicationType} from "./Applications";
 
 @CommandHandler("Create a new Bitbucket project", QMConfig.subatomic.commandPrefix + " create bitbucket project")
@@ -115,12 +115,12 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
                 return await this.handle(ctx);
             } catch (error) {
                 const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await this.teamService.menuForTeams(ctx, teams, this);
+                return await menuForTeams(ctx, teams, this);
             }
         }
         if (_.isEmpty(this.projectName)) {
             const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
-            return await this.projectService.menuForProjects(ctx, projects, this);
+            return await menuForProjects(ctx, projects, this);
         }
     }
 
@@ -218,7 +218,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
                 return await this.handle(ctx);
             } catch (error) {
                 const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return this.teamService.menuForTeams(
+                return menuForTeams(
                     ctx,
                     teams,
                     this,
@@ -228,7 +228,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
         }
         if (_.isEmpty(this.projectName)) {
             const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
-            return this.projectService.menuForProjects(
+            return menuForProjects(
                 ctx,
                 projects,
                 this,

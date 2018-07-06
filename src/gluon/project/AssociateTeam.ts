@@ -15,8 +15,8 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {TeamService} from "../team/TeamService";
-import {ProjectService} from "./ProjectService";
+import {menuForTeams, TeamService} from "../team/TeamService";
+import {menuForProjects, ProjectService} from "./ProjectService";
 
 @CommandHandler("Add additional team/s to a project", QMConfig.subatomic.commandPrefix + " associate team")
 export class AssociateTeam extends RecursiveParameterRequestCommand {
@@ -57,7 +57,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.projectName)) {
             const projects = await this.projectService.gluonProjectList(ctx);
-            return await this.projectService.menuForProjects(
+            return await menuForProjects(
                 ctx,
                 projects,
                 this,
@@ -72,7 +72,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
                 return await ctx.messageClient.respond("Unfortunately there are no available teams to associate to.");
             }
 
-            return await this.teamService.menuForTeams(
+            return await menuForTeams(
                 ctx,
                 availTeams,
                 this,

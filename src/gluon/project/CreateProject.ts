@@ -22,8 +22,8 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {TenantService} from "../shared/TenantService";
-import {TeamService} from "../team/TeamService";
+import {menuForTenants, TenantService} from "../shared/TenantService";
+import {menuForTeams, TeamService} from "../team/TeamService";
 
 @CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
 export class CreateProject extends RecursiveParameterRequestCommand {
@@ -77,7 +77,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
                 return await this.handle(ctx);
             } catch (error) {
                 const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await this.teamService.menuForTeams(
+                return await menuForTeams(
                     ctx,
                     teams,
                     this,
@@ -87,7 +87,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
         }
         if (_.isEmpty(this.tenantName)) {
             const tenants = await this.tenantService.gluonTenantList();
-            return await this.tenantService.menuForTenants(ctx,
+            return await menuForTenants(ctx,
                 tenants,
                 this,
                 "Please select a tenant you would like to associate this project with. Choose Default if you have no tenant specified for this project.",

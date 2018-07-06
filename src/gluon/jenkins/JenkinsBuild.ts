@@ -15,14 +15,14 @@ import {
     ApplicationService,
     menuForApplications,
 } from "../packages/Applications";
-import {ProjectService} from "../project/ProjectService";
+import {menuForProjects, ProjectService} from "../project/ProjectService";
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {TeamService} from "../team/TeamService";
+import {menuForTeams, TeamService} from "../team/TeamService";
 import {JenkinsService} from "./Jenkins";
 
 @CommandHandler("Kick off a Jenkins build", QMConfig.subatomic.commandPrefix + " jenkins build")
@@ -75,7 +75,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
                 return await this.handle(ctx);
             } catch (error) {
                 const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await this.teamService.menuForTeams(
+                return await menuForTeams(
                     ctx,
                     teams,
                     this,
@@ -84,7 +84,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
         }
         if (_.isEmpty(this.projectName)) {
             const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
-            return this.projectService.menuForProjects(
+            return menuForProjects(
                 ctx,
                 projects,
                 this,

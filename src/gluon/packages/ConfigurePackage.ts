@@ -23,7 +23,7 @@ import {QMTemplate} from "../../template/QMTemplate";
 import {JenkinsService} from "../jenkins/Jenkins";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 import {getProjectDevOpsId, getProjectId} from "../project/Project";
-import {ProjectService} from "../project/ProjectService";
+import {menuForProjects, ProjectService} from "../project/ProjectService";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
@@ -38,7 +38,7 @@ import {
 } from "../shared/RecursiveParameterRequestCommand";
 import {SubatomicOpenshiftService} from "../shared/SubatomicOpenshiftService";
 import {TenantService} from "../shared/TenantService";
-import {TeamService} from "../team/TeamService";
+import {menuForTeams, TeamService} from "../team/TeamService";
 import {
     ApplicationService,
     ApplicationType,
@@ -225,7 +225,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
                 return await this.handle(ctx);
             } catch (error) {
                 const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await this.teamService.menuForTeams(
+                return await menuForTeams(
                     ctx,
                     teams,
                     this,
@@ -235,7 +235,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
         }
         if (_.isEmpty(this.projectName)) {
             const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
-            return await this.projectService.menuForProjects(ctx, projects, this, "Please select the owning project of the package you wish to configure");
+            return await menuForProjects(ctx, projects, this, "Please select the owning project of the package you wish to configure");
         }
         if (_.isEmpty(this.applicationName)) {
             const applications = await this.applicationService.gluonApplicationsLinkedToGluonProject(ctx, this.projectName);

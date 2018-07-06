@@ -19,7 +19,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {TeamService} from "../team/TeamService";
+import {menuForTeams, TeamService} from "../team/TeamService";
 
 @CommandHandler("Add a new Subatomic Config Server", QMConfig.subatomic.commandPrefix + " add config server")
 export class AddConfigServer extends RecursiveParameterRequestCommand {
@@ -63,7 +63,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand {
                 this.gluonTeamName = team.name;
             } catch (error) {
                 const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await this.teamService.menuForTeams(
+                return await menuForTeams(
                     ctx,
                     teams,
                     this,

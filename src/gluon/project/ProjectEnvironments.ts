@@ -24,8 +24,8 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {TeamService} from "../team/TeamService";
-import {ProjectService} from "./ProjectService";
+import {menuForTeams, TeamService} from "../team/TeamService";
+import {menuForProjects, ProjectService} from "./ProjectService";
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
 @Tags("subatomic", "openshift", "project")
@@ -93,7 +93,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
                 return await this.handle(ctx);
             } catch (error) {
                 const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await this.teamService.menuForTeams(
+                return await menuForTeams(
                     ctx,
                     teams,
                     this,
@@ -103,7 +103,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
         }
         if (_.isEmpty(this.projectName)) {
             const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
-            return await this.projectService.menuForProjects(
+            return await menuForProjects(
                 ctx,
                 projects,
                 this,

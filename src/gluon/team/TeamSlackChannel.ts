@@ -30,7 +30,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
 import {CreateTeam} from "./CreateTeam";
-import {TeamService} from "./TeamService";
+import {menuForTeams, TeamService} from "./TeamService";
 
 @CommandHandler("Check whether to create a new team channel or use an existing channel")
 @Tags("subatomic", "slack", "channel", "team")
@@ -158,7 +158,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
         if (_.isEmpty(this.teamName)) {
             try {
                 const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.slackScreenName);
-                return await this.teamService.menuForTeams(
+                return await menuForTeams(
                     ctx,
                     teams,
                     this,
