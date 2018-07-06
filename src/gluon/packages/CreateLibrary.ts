@@ -17,11 +17,7 @@ import {
     menuForBitbucketRepositories,
 } from "../bitbucket/Bitbucket";
 import {gluonMemberFromScreenName} from "../member/Members";
-import {
-    gluonProjectFromProjectName,
-    gluonProjectsWhichBelongToGluonTeam,
-    menuForProjects,
-} from "../project/Projects";
+import {ProjectService} from "../project/ProjectService";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
@@ -72,7 +68,8 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
     })
     public bitbucketRepositorySlug: string;
 
-    constructor(private teamService = new TeamService()) {
+    constructor(private teamService = new TeamService(),
+                private projectService = new ProjectService()) {
         super();
     }
 
@@ -112,15 +109,15 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
             }
         }
         if (_.isEmpty(this.projectName)) {
-            const projects = await gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
-            return menuForProjects(
+            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
+            return this.projectService.menuForProjects(
                 ctx,
                 projects,
                 this,
                 "Please select a project to which you would like to link a library to");
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
-            const project = await gluonProjectFromProjectName(ctx, this.projectName);
+            const project = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
             if (_.isEmpty(project.bitbucketProject)) {
                 throw new QMError(`The selected project does not have an associated bitbucket project. Please first associate a bitbucket project using the \`${QMConfig.subatomic.commandPrefix} link bitbucket project\` command.`);
             }
@@ -144,7 +141,7 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
                                              libraryDescription: string,
                                              bitbucketRepositorySlug: string,
                                              gluonProjectName: string): Promise<HandlerResult> {
-        const project = await gluonProjectFromProjectName(ctx, gluonProjectName);
+        const project = await this.projectService.gluonProjectFromProjectName(ctx, gluonProjectName);
         logger.debug(`Linking Bitbucket repository: ${bitbucketRepositorySlug}`);
 
         return await this.linkBitbucketRepository(ctx,

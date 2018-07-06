@@ -25,11 +25,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
 import {TeamService} from "../team/TeamService";
-import {
-    gluonProjectFromProjectName,
-    gluonProjectsWhichBelongToGluonTeam,
-    menuForProjects,
-} from "./Projects";
+import {ProjectService} from "./ProjectService";
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
 @Tags("subatomic", "openshift", "project")
@@ -53,7 +49,8 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
     })
     public teamName: string = null;
 
-    constructor(private teamService = new TeamService()) {
+    constructor(private teamService = new TeamService(),
+                private projectService = new ProjectService()) {
         super();
     }
 
@@ -74,9 +71,9 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
 
             let project;
             try {
-                project = await gluonProjectFromProjectName(ctx, this.projectName);
+                project = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
             } catch (error) {
-                return await logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
+                return await logErrorAndReturnSuccess(this.projectService.gluonProjectFromProjectName.name, error);
             }
 
             await this.requestProjectEnvironment(project.projectId, member.memberId);
@@ -104,8 +101,8 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
             }
         }
         if (_.isEmpty(this.projectName)) {
-            const projects = await gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
-            return await menuForProjects(
+            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
+            return await this.projectService.menuForProjects(
                 ctx,
                 projects,
                 this,

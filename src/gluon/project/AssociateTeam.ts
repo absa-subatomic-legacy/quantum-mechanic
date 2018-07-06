@@ -16,11 +16,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
 import {TeamService} from "../team/TeamService";
-import {
-    gluonProjectFromProjectName,
-    gluonProjects,
-    menuForProjects,
-} from "./Projects";
+import {ProjectService} from "./ProjectService";
 
 @CommandHandler("Add additional team/s to a project", QMConfig.subatomic.commandPrefix + " associate team")
 export class AssociateTeam extends RecursiveParameterRequestCommand {
@@ -45,7 +41,8 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
     })
     public projectName: string;
 
-    public constructor(private teamService = new TeamService()) {
+    public constructor(private teamService = new TeamService(),
+                       private projectService = new ProjectService()) {
         super();
     }
 
@@ -59,8 +56,8 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.projectName)) {
-            const projects = await gluonProjects(ctx);
-            return await menuForProjects(
+            const projects = await this.projectService.gluonProjectList(ctx);
+            return await this.projectService.menuForProjects(
                 ctx,
                 projects,
                 this,
@@ -86,7 +83,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     private async linkProjectForTeam(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
         const team = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
-        const gluonProject = await gluonProjectFromProjectName(ctx, this.projectName);
+        const gluonProject = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
         let updateGluonWithProjectDetails;
         try {
             updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.data._embedded.teamResources[0].teamId, team.data._embedded.teamResources[0].name);

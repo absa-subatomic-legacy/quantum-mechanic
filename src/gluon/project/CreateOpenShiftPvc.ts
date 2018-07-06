@@ -23,7 +23,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
 import {TeamService} from "../team/TeamService";
-import {gluonProjectsWhichBelongToGluonTeam} from "./Projects";
+import {ProjectService} from "./ProjectService";
 
 @CommandHandler("Create a new OpenShift Persistent Volume Claim", QMConfig.subatomic.commandPrefix + " create openshift pvc")
 export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand {
@@ -57,7 +57,8 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand {
     })
     public pvcName: string;
 
-    constructor(private teamService = new TeamService()) {
+    constructor(private teamService = new TeamService(),
+                private projectService = new ProjectService()) {
         super();
     }
 
@@ -156,7 +157,7 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
 
     private async presentMenuToSelectProjectToCreatePvcFor(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const teams = await gluonProjectsWhichBelongToGluonTeam(ctx, this.gluonTeamName);
+            const teams = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.gluonTeamName);
 
             const msg: SlackMessage = {
                 text: "Please select the project, whose OpenShift environments the PVCs will be created in",
@@ -183,7 +184,7 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
 
             return await ctx.messageClient.respond(msg);
         } catch (error) {
-            return await logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
+            return await logErrorAndReturnSuccess(this.projectService.gluonProjectsWhichBelongToGluonTeam.name, error);
         }
     }
 

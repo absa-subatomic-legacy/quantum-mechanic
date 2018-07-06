@@ -22,7 +22,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
 import {TeamService} from "../team/TeamService";
-import {gluonProjectsWhichBelongToGluonTeam} from "./Projects";
+import {ProjectService} from "./ProjectService";
 
 @CommandHandler("List projects belonging to a team", QMConfig.subatomic.commandPrefix + " list projects")
 export class ListTeamProjects extends RecursiveParameterRequestCommand {
@@ -38,7 +38,8 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand {
     })
     public teamName: string;
 
-    constructor(private teamService = new TeamService()) {
+    constructor(private teamService = new TeamService(),
+                private projectService = new ProjectService()) {
         super();
     }
 
@@ -71,9 +72,9 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand {
     private async listTeamProjects(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
         let projects;
         try {
-            projects = await gluonProjectsWhichBelongToGluonTeam(ctx, teamName);
+            projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, teamName);
         } catch (error) {
-            return await logErrorAndReturnSuccess(gluonProjectsWhichBelongToGluonTeam.name, error);
+            return await logErrorAndReturnSuccess(this.projectService.gluonProjectsWhichBelongToGluonTeam.name, error);
         }
         const attachments = [];
 

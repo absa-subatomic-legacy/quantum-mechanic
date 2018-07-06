@@ -17,11 +17,7 @@ import {
     menuForBitbucketRepositories,
 } from "../bitbucket/Bitbucket";
 import {gluonMemberFromScreenName} from "../member/Members";
-import {
-    gluonProjectFromProjectName,
-    gluonProjectsWhichBelongToGluonTeam,
-    menuForProjects,
-} from "../project/Projects";
+import {ProjectService} from "../project/ProjectService";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
@@ -75,7 +71,8 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
     })
     public teamName: string;
 
-    constructor(private teamService = new TeamService()) {
+    constructor(private teamService = new TeamService(),
+                private projectService = new ProjectService()) {
         super();
     }
 
@@ -90,14 +87,14 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
             try {
                 member = await gluonMemberFromScreenName(ctx, this.screenName);
             } catch (error) {
-                return await  logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
+                return await logErrorAndReturnSuccess(gluonMemberFromScreenName.name, error);
             }
 
             let project;
             try {
-                project = await gluonProjectFromProjectName(ctx, this.projectName);
+                project = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
             } catch (error) {
-                return await logErrorAndReturnSuccess(gluonProjectFromProjectName.name, error);
+                return await logErrorAndReturnSuccess(this.projectService.gluonProjectFromProjectName.name, error);
             }
             await this.createApplicationInGluon(project, member);
 
@@ -122,8 +119,8 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
             }
         }
         if (_.isEmpty(this.projectName)) {
-            const projects = await gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
-            return await menuForProjects(ctx, projects, this);
+            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
+            return await this.projectService.menuForProjects(ctx, projects, this);
         }
     }
 
@@ -184,7 +181,8 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
     })
     public bitbucketRepositorySlug: string;
 
-    constructor(private teamService = new TeamService()) {
+    constructor(private teamService = new TeamService(),
+                private projectService = new ProjectService()) {
         super();
     }
 
@@ -227,15 +225,15 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
             }
         }
         if (_.isEmpty(this.projectName)) {
-            const projects = await gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
-            return menuForProjects(
+            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
+            return this.projectService.menuForProjects(
                 ctx,
                 projects,
                 this,
                 "Please select a project to which you would like to link a library to");
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
-            const project = await gluonProjectFromProjectName(ctx, this.projectName);
+            const project = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
             if (_.isEmpty(project.bitbucketProject)) {
                 return await ctx.messageClient.respond(`❗The selected project does not have an associated bitbucket project. Please first associate a bitbucket project using the \`${QMConfig.subatomic.commandPrefix} link bitbucket project\` command.`);
             }
@@ -259,7 +257,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
                                                  applicationDescription: string,
                                                  bitbucketRepositorySlug: string,
                                                  gluonProjectName: string): Promise<HandlerResult> {
-        const project = await gluonProjectFromProjectName(ctx, gluonProjectName);
+        const project = await this.projectService.gluonProjectFromProjectName(ctx, gluonProjectName);
         logger.debug(`Linking Bitbucket repository: ${bitbucketRepositorySlug}`);
 
         return await this.linkBitbucketRepository(ctx,

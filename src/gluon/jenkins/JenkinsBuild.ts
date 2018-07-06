@@ -15,10 +15,7 @@ import {
     gluonApplicationsLinkedToGluonProject,
     menuForApplications,
 } from "../packages/Applications";
-import {
-    gluonProjectsWhichBelongToGluonTeam,
-    menuForProjects,
-} from "../project/Projects";
+import {ProjectService} from "../project/ProjectService";
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
 import {
@@ -55,7 +52,8 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
     })
     public applicationName: string;
 
-    constructor(private teamService = new TeamService()) {
+    constructor(private teamService = new TeamService(),
+                private projectService = new ProjectService()) {
         super();
     }
 
@@ -83,8 +81,8 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
             }
         }
         if (_.isEmpty(this.projectName)) {
-            const projects = await gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
-            return menuForProjects(
+            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
+            return this.projectService.menuForProjects(
                 ctx,
                 projects,
                 this,
