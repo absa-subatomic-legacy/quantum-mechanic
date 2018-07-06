@@ -40,7 +40,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {subatomicApplicationTemplates} from "../shared/SubatomicOpenshiftQueries";
+import {SubatomicOpenshiftService} from "../shared/SubatomicOpenshiftService";
 import {TenantService} from "../shared/TenantService";
 import {TeamService} from "../team/TeamService";
 import {
@@ -202,7 +202,9 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     private readonly JENKINSFILE_FOLDER = "resources/templates/jenkins/jenkinsfile-repo/";
     private readonly JENKINSFILE_EXISTS = "JENKINS_FILE_EXISTS";
 
-    constructor(private teamService = new TeamService(), private tenantService = new TenantService()) {
+    constructor(private teamService = new TeamService(),
+                private tenantService = new TenantService(),
+                private subatomicOpenshiftService = new SubatomicOpenshiftService()) {
         super();
     }
 
@@ -243,7 +245,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
         }
         if (_.isEmpty(this.openshiftTemplate)) {
             const namespace = `${_.kebabCase(this.teamName).toLowerCase()}-devops`;
-            const templates = await subatomicApplicationTemplates(namespace);
+            const templates = await this.subatomicOpenshiftService.subatomicApplicationTemplates(namespace);
             return await createMenu(ctx, templates.map(template => {
                     return {
                         value: template.metadata.name,

@@ -22,7 +22,7 @@ import {AddConfigServer} from "../project/AddConfigServer";
 import {CreateProject} from "../project/CreateProject";
 import {ChannelMessageClient, handleQMError, QMError} from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
-import {subatomicImageStreamTags} from "../shared/SubatomicOpenshiftQueries";
+import {SubatomicOpenshiftService} from "../shared/SubatomicOpenshiftService";
 import {TaskListMessage, TaskStatus} from "../shared/TaskListMessage";
 
 const promiseRetry = require("promise-retry");
@@ -62,6 +62,9 @@ subscription DevOpsEnvironmentRequestedEvent {
 }
 `)
 export class DevOpsEnvironmentRequested implements HandleEvent<any> {
+
+    constructor(private subatomicOpenshiftService = new SubatomicOpenshiftService()) {
+    }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested DevOpsEnvironmentRequestedEvent event: ${JSON.stringify(event.data)}`);
@@ -225,7 +228,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
     }
 
     private async copyImageStreamsToDevOpsEnvironment(projectId) {
-        const imageStreamTags = await subatomicImageStreamTags("subatomic");
+        const imageStreamTags = await this.subatomicOpenshiftService.subatomicImageStreamTags("subatomic");
 
         for (const imageStreamTag of imageStreamTags) {
             const imageStreamTagName = imageStreamTag.metadata.name;
