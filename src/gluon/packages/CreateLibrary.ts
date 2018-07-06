@@ -123,13 +123,8 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
                 throw new QMError(`The selected project does not have an associated bitbucket project. Please first associate a bitbucket project using the \`${QMConfig.subatomic.commandPrefix} link bitbucket project\` command.`);
             }
 
-            const bitbucketReposResult = await this.bitbucketService.bitbucketRepositoriesForProjectKey(project.bitbucketProject.key);
+            const bitbucketRepos = await this.bitbucketService.bitbucketRepositoriesForProjectKey(project.bitbucketProject.key);
 
-            if (!isSuccessCode(bitbucketReposResult.status)) {
-                throw new QMError("Unable to find Bitbucket repositories. Please ensure the Bitbucket project exists and that it has associated projects.");
-            }
-
-            const bitbucketRepos = bitbucketReposResult.data;
             logger.debug(`Bitbucket project [${project.bitbucketProject.name}] has repositories: ${JSON.stringify(bitbucketRepos)}`);
 
             return await menuForBitbucketRepositories(

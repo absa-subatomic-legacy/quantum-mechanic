@@ -271,7 +271,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
                 password,
             },
             new BitBucketServerRepoRef(
-                QMConfig.subatomic.bitbucket.baseUrl.replace(/^(https?:|)\/\//, ""),
+                QMConfig.subatomic.bitbucket.baseUrl,
                 project.bitbucketProject.key,
                 application.bitbucketRepository.name));
         try {
@@ -356,7 +356,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
                     password,
                 },
                 new BitBucketServerRepoRef(
-                    QMConfig.subatomic.bitbucket.baseUrl.replace(/^(https?:|)\/\//, ""),
+                    QMConfig.subatomic.bitbucket.baseUrl,
                     bitbucketProjectKey,
                     bitbucketRepoName));
             try {

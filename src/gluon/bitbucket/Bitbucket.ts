@@ -35,20 +35,21 @@ export class BitbucketService {
         return this.getBitbucketResources(`${QMConfig.subatomic.bitbucket.restUrl}/api/1.0/projects`);
     }
 
-    public getBitbucketResources(resourceUri: string, axiosInstance: AxiosInstance = null, currentResources = []) {
+    public async getBitbucketResources(resourceUri: string, axiosInstance: AxiosInstance = null, currentResources = []) {
         if (axiosInstance === null) {
             axiosInstance = bitbucketAxios();
         }
-        return axiosInstance.get(`${resourceUri}?start=${currentResources.length}`).then(
-            resources => {
-                currentResources = currentResources.concat(resources.data.values);
-                if (resources.data.isLastPage === true) {
-                    return Promise.resolve(currentResources);
-                }
+        const bitbucketResult = await axiosInstance.get(`${resourceUri}?start=${currentResources.length}`);
+        if (!isSuccessCode(bitbucketResult.status)) {
+            throw new QMError("Unable to find Bitbucket resources.");
+        }
+        const resources = bitbucketResult.data;
+        currentResources = currentResources.concat(resources.values);
+        if (resources.isLastPage === true) {
+            return currentResources;
+        }
 
-                return this.getBitbucketResources(resourceUri, axiosInstance, currentResources);
-            },
-        );
+        return await this.getBitbucketResources(resourceUri, axiosInstance, currentResources);
     }
 
     public async addProjectPermission(projectKey: string, user: string, permission: string = "PROJECT_READ"): Promise<any> {
