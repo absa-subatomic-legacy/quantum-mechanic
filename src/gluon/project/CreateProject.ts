@@ -22,11 +22,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {
-    gluonTenantFromTenantName,
-    gluonTenantList,
-    menuForTenants,
-} from "../shared/Tenant";
+import {TenantService} from "../shared/TenantService";
 import {TeamService} from "../team/TeamService";
 
 @CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
@@ -58,13 +54,13 @@ export class CreateProject extends RecursiveParameterRequestCommand {
     })
     public tenantName: string;
 
-    constructor(private teamService = new TeamService()) {
+    constructor(private teamService = new TeamService(), private tenantService = new TenantService()) {
         super();
     }
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            const tenant = await gluonTenantFromTenantName(this.tenantName);
+            const tenant = await this.tenantService.gluonTenantFromTenantName(this.tenantName);
             return await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
         } catch (error) {
             return await handleQMError(new ResponderMessageClient(ctx), error);
@@ -88,8 +84,8 @@ export class CreateProject extends RecursiveParameterRequestCommand {
             }
         }
         if (_.isEmpty(this.tenantName)) {
-            const tenants = await gluonTenantList();
-            return await menuForTenants(ctx,
+            const tenants = await this.tenantService.gluonTenantList();
+            return await this.tenantService.menuForTenants(ctx,
                 tenants,
                 this,
                 "Please select a tenant you would like to associate this project with. Choose Default if you have no tenant specified for this project.",

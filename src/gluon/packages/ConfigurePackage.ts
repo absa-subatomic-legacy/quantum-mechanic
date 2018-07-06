@@ -41,7 +41,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
 import {subatomicApplicationTemplates} from "../shared/SubatomicOpenshiftQueries";
-import {gluonTenantFromTenantId} from "../shared/Tenant";
+import {TenantService} from "../shared/TenantService";
 import {TeamService} from "../team/TeamService";
 import {
     ApplicationType,
@@ -202,7 +202,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     private readonly JENKINSFILE_FOLDER = "resources/templates/jenkins/jenkinsfile-repo/";
     private readonly JENKINSFILE_EXISTS = "JENKINS_FILE_EXISTS";
 
-    constructor(private teamService = new TeamService()) {
+    constructor(private teamService = new TeamService(), private tenantService = new TenantService()) {
         super();
     }
 
@@ -496,7 +496,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
 
             const project = await gluonProjectFromProjectName(ctx, projectName);
             logger.info(`Trying to find tenant: ${project.owningTenant}`);
-            const tenant = await gluonTenantFromTenantId(project.owningTenant);
+            const tenant = await this.tenantService.gluonTenantFromTenantId(project.owningTenant);
             logger.info(`Found tenant: ${tenant}`);
             await this.createApplicationOpenshiftResources(tenant.name, project.name, packageName);
 
