@@ -5,7 +5,8 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter, success,
+    Parameter,
+    success,
     Tags,
 } from "@atomist/automation-client";
 import axios from "axios";
@@ -14,7 +15,8 @@ import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {
     handleQMError,
-    logErrorAndReturnSuccess, QMError,
+    logErrorAndReturnSuccess,
+    QMError,
     ResponderMessageClient,
 } from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
@@ -22,11 +24,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {
-    gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo,
-    menuForTeams,
-} from "../team/Teams";
+import {TeamService} from "../team/TeamService";
 import {
     gluonProjectFromProjectName,
     gluonProjectsWhichBelongToGluonTeam,
@@ -54,6 +52,10 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
         required: false,
     })
     public teamName: string = null;
+
+    constructor(private teamService = new TeamService()) {
+        super();
+    }
 
     protected async runCommand(ctx: HandlerContext) {
         logger.info("Creating new OpenShift environments...");
@@ -88,12 +90,12 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
-                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                const team = await this.teamService.gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
                 return await this.handle(ctx);
             } catch (error) {
-                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await menuForTeams(
+                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await this.teamService.menuForTeams(
                     ctx,
                     teams,
                     this,

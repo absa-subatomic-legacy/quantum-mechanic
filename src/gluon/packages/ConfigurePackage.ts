@@ -31,7 +31,8 @@ import {
 import {
     handleQMError,
     logErrorAndReturnSuccess,
-    QMError, ResponderMessageClient,
+    QMError,
+    ResponderMessageClient,
 } from "../shared/Error";
 import {createMenu} from "../shared/GenericMenu";
 import {isSuccessCode} from "../shared/Http";
@@ -41,11 +42,7 @@ import {
 } from "../shared/RecursiveParameterRequestCommand";
 import {subatomicApplicationTemplates} from "../shared/SubatomicOpenshiftQueries";
 import {gluonTenantFromTenantId} from "../shared/Tenant";
-import {
-    gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo,
-    menuForTeams,
-} from "../team/Teams";
+import {TeamService} from "../team/TeamService";
 import {
     ApplicationType,
     gluonApplicationForNameAndProjectName,
@@ -205,6 +202,10 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     private readonly JENKINSFILE_FOLDER = "resources/templates/jenkins/jenkinsfile-repo/";
     private readonly JENKINSFILE_EXISTS = "JENKINS_FILE_EXISTS";
 
+    constructor(private teamService = new TeamService()) {
+        super();
+    }
+
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             await ctx.messageClient.addressChannels({
@@ -219,12 +220,12 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
-                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                const team = await this.teamService.gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
                 return await this.handle(ctx);
             } catch (error) {
-                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await menuForTeams(
+                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await this.teamService.menuForTeams(
                     ctx,
                     teams,
                     this,
@@ -274,7 +275,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
                 project.bitbucketProject.key,
                 application.bitbucketRepository.name));
         try {
-            gitProject.findFile("Jenkinsfile");
+            await gitProject.findFile("Jenkinsfile");
             this.jenkinsfileName = this.JENKINSFILE_EXISTS;
             return success();
         } catch (error) {

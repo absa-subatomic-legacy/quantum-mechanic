@@ -24,7 +24,8 @@ import {
 } from "../project/Projects";
 import {
     handleQMError,
-    logErrorAndReturnSuccess, QMError,
+    logErrorAndReturnSuccess,
+    QMError,
     ResponderMessageClient,
 } from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
@@ -32,11 +33,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {
-    gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo,
-    menuForTeams,
-} from "../team/Teams";
+import {TeamService} from "../team/TeamService";
 import {ApplicationType} from "./Applications";
 
 @CommandHandler("Create a new Bitbucket project", QMConfig.subatomic.commandPrefix + " create bitbucket project")
@@ -78,6 +75,10 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
     })
     public teamName: string;
 
+    constructor(private teamService = new TeamService()) {
+        super();
+    }
+
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         // get memberId for createdBy
         try {
@@ -112,12 +113,12 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
     protected async setNextParameter(ctx: HandlerContext) {
         if (_.isEmpty(this.teamName)) {
             try {
-                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                const team = await this.teamService.gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
                 return await this.handle(ctx);
             } catch (error) {
-                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await menuForTeams(ctx, teams, this);
+                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await this.teamService.menuForTeams(ctx, teams, this);
             }
         }
         if (_.isEmpty(this.projectName)) {
@@ -183,6 +184,10 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
     })
     public bitbucketRepositorySlug: string;
 
+    constructor(private teamService = new TeamService()) {
+        super();
+    }
+
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
 
         logger.debug(`Linking to Gluon project: ${this.projectName}`);
@@ -208,12 +213,12 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
-                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                const team = await this.teamService.gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
                 return await this.handle(ctx);
             } catch (error) {
-                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return menuForTeams(
+                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return this.teamService.menuForTeams(
                     ctx,
                     teams,
                     this,

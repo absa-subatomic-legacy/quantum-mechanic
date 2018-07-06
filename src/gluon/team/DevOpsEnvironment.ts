@@ -18,11 +18,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {
-    gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo,
-    menuForTeams,
-} from "./Teams";
+import {TeamService} from "./TeamService";
 
 @CommandHandler("Check whether to create a new OpenShift DevOps environment or use an existing one", QMConfig.subatomic.commandPrefix + " request devops environment")
 @Tags("subatomic", "slack", "team", "openshift", "devops")
@@ -39,6 +35,10 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
     })
     public teamName: string;
 
+    constructor(private teamService = new TeamService()) {
+        super();
+    }
+
     protected runCommand(ctx: HandlerContext) {
         return this.requestDevOpsEnvironment(
             ctx,
@@ -51,12 +51,12 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
-                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                const team = await this.teamService.gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
                 return await this.handle(ctx);
             } catch (slackChannelError) {
-                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await menuForTeams(
+                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await this.teamService.menuForTeams(
                     ctx,
                     teams,
                     this,

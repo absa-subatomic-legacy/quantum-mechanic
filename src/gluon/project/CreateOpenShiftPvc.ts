@@ -22,10 +22,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {
-    gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo,
-} from "../team/Teams";
+import {TeamService} from "../team/TeamService";
 import {gluonProjectsWhichBelongToGluonTeam} from "./Projects";
 
 @CommandHandler("Create a new OpenShift Persistent Volume Claim", QMConfig.subatomic.commandPrefix + " create openshift pvc")
@@ -60,6 +57,10 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand {
     })
     public pvcName: string;
 
+    constructor(private teamService = new TeamService()) {
+        super();
+    }
+
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             const projectId = _.kebabCase(this.gluonProjectName);
@@ -93,7 +94,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand {
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.gluonProjectName)) {
-            const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+            const team = await this.teamService.gluonTeamForSlackTeamChannel(this.teamChannel);
 
             if (!_.isEmpty(team)) {
                 return await this.presentMenuToSelectProjectToCreatePvcFor(ctx);
@@ -126,7 +127,7 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
 
     private async presentMenuToSelectProjectAssociatedTeam(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+            const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
             const msg: SlackMessage = {
                 text: "Please select a team associated with the project you wish to create a PVC for",
                 attachments: [{
@@ -149,7 +150,7 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
 
             return await ctx.messageClient.respond(msg);
         } catch (error) {
-            return await logErrorAndReturnSuccess(gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
+            return await logErrorAndReturnSuccess(this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
         }
     }
 

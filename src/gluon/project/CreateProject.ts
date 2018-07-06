@@ -13,7 +13,8 @@ import {QMConfig} from "../../config/QMConfig";
 import {gluonMemberFromScreenName} from "../member/Members";
 import {
     handleQMError,
-    logErrorAndReturnSuccess, QMError,
+    logErrorAndReturnSuccess,
+    QMError,
     ResponderMessageClient,
 } from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
@@ -26,11 +27,7 @@ import {
     gluonTenantList,
     menuForTenants,
 } from "../shared/Tenant";
-import {
-    gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo,
-    menuForTeams,
-} from "../team/Teams";
+import {TeamService} from "../team/TeamService";
 
 @CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
 export class CreateProject extends RecursiveParameterRequestCommand {
@@ -61,6 +58,10 @@ export class CreateProject extends RecursiveParameterRequestCommand {
     })
     public tenantName: string;
 
+    constructor(private teamService = new TeamService()) {
+        super();
+    }
+
     protected async runCommand(ctx: HandlerContext) {
         try {
             const tenant = await gluonTenantFromTenantName(this.tenantName);
@@ -73,12 +74,12 @@ export class CreateProject extends RecursiveParameterRequestCommand {
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
-                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                const team = await this.teamService.gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
                 return await this.handle(ctx);
             } catch (error) {
-                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await menuForTeams(
+                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await this.teamService.menuForTeams(
                     ctx,
                     teams,
                     this,

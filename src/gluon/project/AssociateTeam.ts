@@ -15,7 +15,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {gluonTeamsWhoSlackScreenNameBelongsTo, menuForTeams} from "../team/Teams";
+import {TeamService} from "../team/TeamService";
 import {
     gluonProjectFromProjectName,
     gluonProjects,
@@ -45,9 +45,8 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
     })
     public projectName: string;
 
-    public constructor(projectName: string) {
+    public constructor(private teamService = new TeamService()) {
         super();
-        this.projectName = projectName;
     }
 
     protected async runCommand(ctx: HandlerContext) {
@@ -69,14 +68,14 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
             );
         }
         if (_.isEmpty(this.teamName)) {
-            const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+            const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
             const availTeams = await this.availableTeamsToAssociate(teams, this.projectName);
 
             if (_.isEmpty(availTeams)) {
                 return await ctx.messageClient.respond("Unfortunately there are no available teams to associate to.");
             }
 
-            return await menuForTeams(
+            return await this.teamService.menuForTeams(
                 ctx,
                 availTeams,
                 this,

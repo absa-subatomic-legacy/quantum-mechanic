@@ -23,11 +23,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {
-    gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo,
-    menuForTeams,
-} from "../team/Teams";
+import {TeamService} from "../team/TeamService";
 import {bitbucketAxios} from "./Bitbucket";
 
 @CommandHandler("Create a new Bitbucket project", QMConfig.subatomic.commandPrefix + " create bitbucket project")
@@ -56,6 +52,10 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand {
     })
     public teamName: string;
 
+    constructor(private teamService = new TeamService()) {
+        super();
+    }
+
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
 
@@ -76,12 +76,12 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand {
         if (_.isEmpty(this.teamName)) {
             logger.info("Team name is empty");
             try {
-                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                const team = await this.teamService.gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
                 return await this.handle(ctx);
             } catch (error) {
-                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await menuForTeams(
+                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await this.teamService.menuForTeams(
                     ctx,
                     teams,
                     this,
@@ -151,6 +151,10 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
     })
     public teamName: string;
 
+    constructor(private teamService = new TeamService()) {
+        super();
+    }
+
     protected async runCommand(ctx: HandlerContext) {
         try {
             return await this.configBitbucket(ctx);
@@ -163,12 +167,12 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
         if (_.isEmpty(this.teamName)) {
             logger.info("Team name is empty");
             try {
-                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                const team = await this.teamService.gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
                 return await this.handle(ctx);
             } catch (error) {
-                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return await menuForTeams(
+                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return await this.teamService.menuForTeams(
                     ctx,
                     teams,
                     this,

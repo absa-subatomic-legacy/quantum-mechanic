@@ -72,6 +72,10 @@ export class BitbucketProjectAdded implements HandleEvent<any> {
     }
 
     private async sendBitbucketAddedSuccessfullyMessage(ctx: HandlerContext, addedEvent) {
+
+        const associateTeamCommand: AssociateTeam = new AssociateTeam();
+        associateTeamCommand.projectName = addedEvent.project.name;
+
         return await ctx.messageClient.addressChannels({
             text: `
 The *${addedEvent.bitbucketProject.name}* Bitbucket project has been configured successfully and linked to the *${addedEvent.project.name}* Subatomic project.
@@ -107,7 +111,7 @@ If you would like to associate more teams to the *${addedEvent.project.name}* pr
                             {
                                 text: "Associate team",
                             },
-                            new AssociateTeam(addedEvent.project.name)),
+                            associateTeamCommand),
                     ],
                 }],
         }, addedEvent.teams.map(team => team.slackIdentity.teamChannel));

@@ -24,7 +24,8 @@ import {
 } from "../project/Projects";
 import {
     handleQMError,
-    logErrorAndReturnSuccess, QMError,
+    logErrorAndReturnSuccess,
+    QMError,
     ResponderMessageClient,
 } from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
@@ -32,11 +33,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../shared/RecursiveParameterRequestCommand";
-import {
-    gluonTeamForSlackTeamChannel,
-    gluonTeamsWhoSlackScreenNameBelongsTo,
-    menuForTeams,
-} from "../team/Teams";
+import {TeamService} from "../team/TeamService";
 import {ApplicationType} from "./Applications";
 
 @CommandHandler("Link an existing library", QMConfig.subatomic.commandPrefix + " link library")
@@ -75,6 +72,10 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
     })
     public bitbucketRepositorySlug: string;
 
+    constructor(private teamService = new TeamService()) {
+        super();
+    }
+
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             await ctx.messageClient.addressChannels({
@@ -97,12 +98,12 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
             try {
-                const team = await gluonTeamForSlackTeamChannel(this.teamChannel);
+                const team = await this.teamService.gluonTeamForSlackTeamChannel(this.teamChannel);
                 this.teamName = team.name;
                 return await this.handle(ctx);
             } catch (error) {
-                const teams = await gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-                return menuForTeams(
+                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                return this.teamService.menuForTeams(
                     ctx,
                     teams,
                     this,
