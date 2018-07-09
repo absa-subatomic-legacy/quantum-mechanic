@@ -2,6 +2,7 @@ import {logger} from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {AbstractOption} from "../../../openshift/base/options/AbstractOption";
+import {NamedSimpleOption} from "../../../openshift/base/options/NamedSimpleOption";
 import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
 import {StandardOption} from "../../../openshift/base/options/StandardOption";
 import {OCClient} from "../../../openshift/OCClient";
@@ -163,10 +164,10 @@ export class OCService {
             , applyNotReplace);
     }
 
-    public async tagSubatomicImageToNamespace(imageStreamTagName: string, destinationProjectNamespace: string): Promise<OCCommandResult> {
+    public async tagSubatomicImageToNamespace(imageStreamTagName: string, destinationProjectNamespace: string, destinationImageStreamTagName: string = imageStreamTagName): Promise<OCCommandResult> {
         return await OCCommon.commonCommand("tag",
             `subatomic/${imageStreamTagName}`,
-            [`${destinationProjectNamespace}/${imageStreamTagName}`]);
+            [`${destinationProjectNamespace}/${destinationImageStreamTagName}`]);
     }
 
     public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string): Promise<OCCommandResult> {
@@ -270,6 +271,17 @@ export class OCService {
             [
                 new SimpleOption("-ssh-privatekey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
                 new SimpleOption("-ca-cert", QMConfig.subatomic.bitbucket.caPath),
+                new SimpleOption("-namespace", namespace),
+            ]);
+    }
+
+    public async createConfigServerSecret(namespace: string): Promise<OCCommandResult> {
+        return await OCCommon.commonCommand("create secret generic",
+            "subatomic-config-server",
+            [],
+            [
+                new NamedSimpleOption("-from-literal=spring.cloud.config.server.git.hostKey", QMConfig.subatomic.bitbucket.cicdKey),
+                new NamedSimpleOption("-from-file=spring.cloud.config.server.git.privateKey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
                 new SimpleOption("-namespace", namespace),
             ]);
     }
