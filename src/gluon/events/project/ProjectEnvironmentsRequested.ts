@@ -195,7 +195,9 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
         } catch (err) {
             logger.warn(err);
         } finally {
-            await this.ocService.addTeamMembershipPermissionsToProject(projectId, environmentsRequestedEvent.teams);
+            await environmentsRequestedEvent.teams.map(async team => {
+                await this.ocService.addTeamMembershipPermissionsToProject(projectId, team);
+            });
         }
 
         await this.createProjectQuotasAndLimits(projectId);
