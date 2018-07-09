@@ -135,12 +135,12 @@ export class OCService {
         );
     }
 
-    public async getSubatomicAppTemplates(): Promise<OCCommandResult> {
+    public async getSubatomicAppTemplates(namespace = "subatomic"): Promise<OCCommandResult> {
         return await OCCommon.commonCommand("get", "templates",
             [],
             [
                 new SimpleOption("l", "usage=subatomic-app"),
-                new SimpleOption("-namespace", "subatomic"),
+                new SimpleOption("-namespace", namespace),
                 new SimpleOption("-output", "json"),
             ],
         );
@@ -151,6 +151,17 @@ export class OCService {
             ["jenkins-persistent-subatomic"],
             [
                 new SimpleOption("-namespace", "subatomic"),
+                new SimpleOption("-output", "json"),
+            ],
+        );
+    }
+
+    public async getSubatomicImageStreamTags(namespace = "subatomic") {
+        return OCCommon.commonCommand("get", "istag",
+            [],
+            [
+                new SimpleOption("l", "usage=subatomic-is"),
+                new SimpleOption("-namespace", namespace),
                 new SimpleOption("-output", "json"),
             ],
         );

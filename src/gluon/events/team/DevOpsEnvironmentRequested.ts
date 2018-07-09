@@ -21,7 +21,6 @@ import {
     QMError,
 } from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
-import {SubatomicOpenshiftService} from "../../util/shared/SubatomicOpenshiftService";
 import {TaskListMessage, TaskStatus} from "../../util/shared/TaskListMessage";
 
 const promiseRetry = require("promise-retry");
@@ -62,8 +61,7 @@ subscription DevOpsEnvironmentRequestedEvent {
 `)
 export class DevOpsEnvironmentRequested implements HandleEvent<any> {
 
-    constructor(private subatomicOpenshiftService = new SubatomicOpenshiftService(),
-                private jenkinsService = new JenkinsService(),
+    constructor(private jenkinsService = new JenkinsService(),
                 private ocService = new OCService()) {
     }
 
@@ -166,7 +164,8 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
     }
 
     private async copyImageStreamsToDevOpsEnvironment(projectId) {
-        const imageStreamTags = await this.subatomicOpenshiftService.subatomicImageStreamTags("subatomic");
+        const imageStreamTagsResult = await this.ocService.getSubatomicImageStreamTags();
+        const imageStreamTags = JSON.parse(imageStreamTagsResult.output).items;
 
         for (const imageStreamTag of imageStreamTags) {
             const imageStreamTagName = imageStreamTag.metadata.name;

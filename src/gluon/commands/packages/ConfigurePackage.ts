@@ -41,7 +41,6 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/shared/RecursiveParameterRequestCommand";
-import {SubatomicOpenshiftService} from "../../util/shared/SubatomicOpenshiftService";
 import {TenantService} from "../../util/shared/TenantService";
 import {menuForTeams, TeamService} from "../../util/team/TeamService";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
@@ -199,7 +198,6 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
 
     constructor(private teamService = new TeamService(),
                 private tenantService = new TenantService(),
-                private subatomicOpenshiftService = new SubatomicOpenshiftService(),
                 private projectService = new ProjectService(),
                 private applicationService = new ApplicationService(),
                 private jenkinsService = new JenkinsService(),
@@ -244,7 +242,8 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
         }
         if (_.isEmpty(this.openshiftTemplate)) {
             const namespace = `${_.kebabCase(this.teamName).toLowerCase()}-devops`;
-            const templates = await this.subatomicOpenshiftService.subatomicApplicationTemplates(namespace);
+            const templatesResult = await this.ocService.getSubatomicAppTemplates(namespace);
+            const templates = JSON.parse(templatesResult.output).items;
             return await createMenu(ctx, templates.map(template => {
                     return {
                         value: template.metadata.name,
