@@ -301,9 +301,13 @@ export class OCService {
             ]);
     }
 
-    public async addRoleToUserInNamespace(user: string, role: string, namespace: string) {
+    public async addRoleToUserInNamespace(user: string, role: string, namespace: string): Promise<OCCommandResult> {
         return await OCClient.policy.addRoleToUser(user,
             role,
             namespace);
+    }
+
+    public async createPVC(pvcName: string, namespace: string): Promise<OCCommandResult> {
+        return await OCClient.createPvc(pvcName, namespace);
     }
 }
