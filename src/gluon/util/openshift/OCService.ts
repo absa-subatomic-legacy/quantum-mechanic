@@ -2,10 +2,16 @@ import {logger} from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
+import {StandardOption} from "../../../openshift/base/options/StandardOption";
 import {OCClient} from "../../../openshift/OCClient";
 import {OCCommon} from "../../../openshift/OCCommon";
+import {getProjectDisplayName} from "../project/Project";
 
 export class OCService {
+
+    public async login() {
+        return await OCClient.login(QMConfig.subatomic.openshift.masterUrl, QMConfig.subatomic.openshift.auth.token);
+    }
 
     public async newDevOpsProject(openshiftProjectId: string, teamName: string): Promise<OCCommandResult> {
         return await OCClient.newProject(openshiftProjectId,
@@ -13,7 +19,13 @@ export class OCService {
             `DevOps environment for ${teamName} [managed by Subatomic]`);
     }
 
-    public async createDefaultResourceQuota(openshiftProjectId: string): Promise<OCCommandResult> {
+    public async newSubatomicProject(openshiftProjectId: string, projectName: string, owningTenant: string, environment: string[]): Promise<OCCommandResult> {
+        return await OCClient.newProject(openshiftProjectId,
+            getProjectDisplayName(owningTenant, projectName, environment[0]),
+            `${environment[1]} environment for ${projectName} [managed by Subatomic]`);
+    }
+
+    public async createDevOpsDefaultResourceQuota(openshiftProjectId: string): Promise<OCCommandResult> {
         return await OCCommon.createFromData({
             apiVersion: "v1",
             kind: "ResourceQuota",
@@ -32,7 +44,7 @@ export class OCService {
         ]);
     }
 
-    public async createDefaultLimits(openshiftProjectId: string): Promise<OCCommandResult> {
+    public async createDevOpsDefaultLimits(openshiftProjectId: string): Promise<OCCommandResult> {
         return await OCCommon.createFromData({
             apiVersion: "v1",
             kind: "LimitRange",
@@ -45,6 +57,56 @@ export class OCService {
                     max: {
                         cpu: "4",
                         memory: "1024Mi",
+                    },
+                    default: {
+                        cpu: "4",
+                        memory: "1024Mi",
+                    },
+                    defaultRequest: {
+                        cpu: "0",
+                        memory: "0Mi",
+                    },
+                }],
+            },
+        }, [
+            new SimpleOption("-namespace", openshiftProjectId),
+        ]);
+    }
+
+    public async createProjectDefaultResourceQuota(openshiftProjectId: string): Promise<OCCommandResult> {
+        return await OCCommon.createFromData({
+            apiVersion: "v1",
+            kind: "ResourceQuota",
+            metadata: {
+                name: "default-quota",
+            },
+            spec: {
+                hard: {
+                    "limits.cpu": "80", // 20 * 4m
+                    "limits.memory": "20480Mi", // 20 * 1024Mi
+                    "pods": "20",
+                    "replicationcontrollers": "20",
+                    "services": "20",
+                },
+            },
+        }, [
+            new SimpleOption("-namespace", openshiftProjectId),
+        ]);
+    }
+
+    public async createProjectDefaultLimits(openshiftProjectId: string): Promise<OCCommandResult> {
+        return await OCCommon.createFromData({
+            apiVersion: "v1",
+            kind: "LimitRange",
+            metadata: {
+                name: "default-limits",
+            },
+            spec: {
+                limits: [{
+                    type: "Container",
+                    max: {
+                        cpu: "8",
+                        memory: "4096Mi",
                     },
                     default: {
                         cpu: "4",
@@ -135,7 +197,7 @@ export class OCService {
             ], true);
     }
 
-    public async getServiceAccountToken(serviceAccountName: string, namespace: string) {
+    public async getServiceAccountToken(serviceAccountName: string, namespace: string): Promise<OCCommandResult> {
         return await OCCommon.commonCommand("serviceaccounts",
             "get-token",
             [
@@ -145,7 +207,7 @@ export class OCService {
             ]);
     }
 
-    public async annotateJenkinsRoute(namespace: string) {
+    public async annotateJenkinsRoute(namespace: string): Promise<OCCommandResult> {
         return await OCCommon.commonCommand("annotate route",
             "jenkins",
             [],
@@ -155,7 +217,7 @@ export class OCService {
             ]);
     }
 
-    public async getJenkinsRoute(namespace: string) {
+    public async getJenkinsRoute(namespace: string): Promise<OCCommandResult> {
         return await OCCommon.commonCommand(
             "get",
             "route/jenkins",
@@ -166,7 +228,7 @@ export class OCService {
             ]);
     }
 
-    public async getSecretFromNamespace(secretName: string, namespace: string) {
+    public async getSecretFromNamespace(secretName: string, namespace: string): Promise<OCCommandResult> {
         return await OCCommon.commonCommand("get secrets",
             secretName,
             [],
@@ -175,7 +237,7 @@ export class OCService {
             ]);
     }
 
-    public async createBitbucketSSHAuthSecret(secretName: string, namespace: string) {
+    public async createBitbucketSSHAuthSecret(secretName: string, namespace: string): Promise<OCCommandResult> {
         return await OCCommon.commonCommand("secrets new-sshauth",
             secretName,
             [],
@@ -201,5 +263,21 @@ export class OCService {
                 "view",
                 projectId);
         });
+    }
+
+    public async createPodNetwork(projectsToJoin: string[], projectToJoinTo: string): Promise<OCCommandResult> {
+        return await OCCommon.commonCommand(
+            "adm pod-network",
+            "join-projects",
+            projectsToJoin,
+            [
+                new StandardOption("to", `${projectToJoinTo}`),
+            ]);
+    }
+
+    public async addRoleToUserInNamespace(user: string, role: string, namespace: string) {
+        return await OCClient.policy.addRoleToUser(user,
+            role,
+            namespace);
     }
 }

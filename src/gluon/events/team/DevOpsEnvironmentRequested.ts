@@ -11,7 +11,6 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {timeout, TimeoutError} from "promise-timeout";
 import {QMConfig} from "../../../config/QMConfig";
-import {OCClient} from "../../../openshift/OCClient";
 import {AddConfigServer} from "../../commands/project/AddConfigServer";
 import {CreateProject} from "../../commands/project/CreateProject";
 import {JenkinsService} from "../../util/jenkins/Jenkins";
@@ -88,7 +87,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
 
             await taskList.display();
 
-            await OCClient.login(QMConfig.subatomic.openshift.masterUrl, QMConfig.subatomic.openshift.auth.token);
+            await this.ocService.login();
 
             await this.createDevOpsEnvironment(projectId, devOpsRequestedEvent.team.name);
 
@@ -141,9 +140,9 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
             logger.warn("DevOps project already seems to exist. Trying to continue.");
         }
 
-        await this.ocService.createDefaultResourceQuota(projectId);
+        await this.ocService.createDevOpsDefaultResourceQuota(projectId);
 
-        await this.ocService.createDefaultLimits(projectId);
+        await this.ocService.createDevOpsDefaultLimits(projectId);
     }
 
     private async copySubatomicAppTemplatesToDevOpsEnvironment(projectId: string) {
