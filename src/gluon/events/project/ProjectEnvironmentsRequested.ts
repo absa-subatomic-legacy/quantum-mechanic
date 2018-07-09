@@ -98,7 +98,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
             logger.debug(`Using owning team DevOps project: ${teamDevOpsProjectId}`);
 
             const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
-            const jenkinsHost = await this.ocService.getJenkinsRoute(teamDevOpsProjectId);
+            const jenkinsHost = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
 
             logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to add Bitbucket credentials`);
 

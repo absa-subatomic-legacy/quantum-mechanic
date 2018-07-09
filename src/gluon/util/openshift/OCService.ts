@@ -1,6 +1,7 @@
 import {logger} from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
+import {AbstractOption} from "../../../openshift/base/options/AbstractOption";
 import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
 import {StandardOption} from "../../../openshift/base/options/StandardOption";
 import {OCClient} from "../../../openshift/OCClient";
@@ -123,6 +124,16 @@ export class OCService {
         ]);
     }
 
+    public async getSubatomicTemplate(templateName: string): Promise<OCCommandResult> {
+        return await OCCommon.commonCommand("get", "templates",
+            [templateName],
+            [
+                new SimpleOption("-namespace", "subatomic"),
+                new SimpleOption("-output", "json"),
+            ],
+        );
+    }
+
     public async getSubatomicAppTemplates(): Promise<OCCommandResult> {
         return await OCCommon.commonCommand("get", "templates",
             [],
@@ -159,23 +170,38 @@ export class OCService {
     }
 
     public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string): Promise<OCCommandResult> {
+        const parameters = [
+            `NAMESPACE=${devopsNamespace}`,
+            "JENKINS_IMAGE_STREAM_TAG=jenkins-subatomic:2.0",
+            "BITBUCKET_NAME=Subatomic Bitbucket",
+            `BITBUCKET_URL=${QMConfig.subatomic.bitbucket.baseUrl}`,
+            `BITBUCKET_CREDENTIALS_ID=${devopsNamespace}-bitbucket`,
+            // TODO this should be a property on Team. I.e. teamEmail
+            "JENKINS_ADMIN_EMAIL=subatomic@local",
+            // TODO the registry Cluster IP we will have to get by introspecting the registry Service
+            // If no team email then the address of the createdBy member
+            `MAVEN_SLAVE_IMAGE=${QMConfig.subatomic.openshift.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-maven-subatomic:2.0`,
+            `NODEJS_SLAVE_IMAGE=${QMConfig.subatomic.openshift.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-nodejs-subatomic:2.0`,
+        ];
+        return await this.processOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
+    }
+
+    public async processOpenshiftTemplate(templateName: string, namespace: string, parameters: string[], ignoreUnknownParameters: boolean = false) {
+        const commandOptions: AbstractOption[] = [];
+        if (ignoreUnknownParameters) {
+            commandOptions.push(new StandardOption("ignore-unknown-parameters", "true"));
+        }
+
+        for (const parameter of parameters) {
+            commandOptions.push(new SimpleOption("p", parameter));
+        }
+
+        commandOptions.push(new SimpleOption("-namespace", namespace));
+
         return await OCCommon.commonCommand("process",
-            "jenkins-persistent-subatomic",
+            templateName,
             [],
-            [
-                new SimpleOption("p", `NAMESPACE=${devopsNamespace}`),
-                new SimpleOption("p", "JENKINS_IMAGE_STREAM_TAG=jenkins-subatomic:2.0"),
-                new SimpleOption("p", "BITBUCKET_NAME=Subatomic Bitbucket"),
-                new SimpleOption("p", `BITBUCKET_URL=${QMConfig.subatomic.bitbucket.baseUrl}`),
-                new SimpleOption("p", `BITBUCKET_CREDENTIALS_ID=${devopsNamespace}-bitbucket`),
-                // TODO this should be a property on Team. I.e. teamEmail
-                // If no team email then the address of the createdBy member
-                new SimpleOption("p", "JENKINS_ADMIN_EMAIL=subatomic@local"),
-                // TODO the registry Cluster IP we will have to get by introspecting the registry Service
-                new SimpleOption("p", `MAVEN_SLAVE_IMAGE=${QMConfig.subatomic.openshift.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-maven-subatomic:2.0`),
-                new SimpleOption("p", `NODEJS_SLAVE_IMAGE=${QMConfig.subatomic.openshift.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-nodejs-subatomic:2.0`),
-                new SimpleOption("-namespace", devopsNamespace),
-            ],
+            commandOptions,
         );
     }
 
@@ -217,7 +243,7 @@ export class OCService {
             ]);
     }
 
-    public async getJenkinsRoute(namespace: string): Promise<OCCommandResult> {
+    public async getJenkinsHost(namespace: string): Promise<OCCommandResult> {
         return await OCCommon.commonCommand(
             "get",
             "route/jenkins",

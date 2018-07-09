@@ -252,7 +252,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
     private async createJenkinsRoute(projectId: string): Promise<string> {
 
         await this.ocService.annotateJenkinsRoute(projectId);
-        const jenkinsHost = await this.ocService.getJenkinsRoute(projectId);
+        const jenkinsHost = await this.ocService.getJenkinsHost(projectId);
 
         return jenkinsHost.output;
     }
