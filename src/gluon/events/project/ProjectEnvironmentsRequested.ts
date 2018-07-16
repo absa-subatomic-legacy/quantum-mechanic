@@ -25,6 +25,7 @@ import {
     QMMessageClient,
 } from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
+import {retryFunction} from "../../util/shared/RetryFunction";
 import {TaskListMessage, TaskStatus} from "../../util/shared/TaskListMessage";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
@@ -209,6 +210,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
     }
 
     private async createJenkinsCredentials(teamDevOpsProjectId: string, jenkinsHost: string, token: string) {
+
         const jenkinsCredentials = {
             "": "0",
             "credentials": {
@@ -220,10 +222,25 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                 $class: "com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl",
             },
         };
-        const createCredentialsResult = await this.jenkinsService.createGlobalCredentials(jenkinsHost, token, teamDevOpsProjectId, jenkinsCredentials);
+        const maxRetries = 3;
+        const waitTime = 5000;
+        const result = await retryFunction(maxRetries, waitTime, async (attemptNumber: number) => {
+            logger.warn(`Trying to create jenkins credentials. Attempt number ${attemptNumber}.`);
+            const createCredentialsResult = await this.jenkinsService.createGlobalCredentials(jenkinsHost, token, teamDevOpsProjectId, jenkinsCredentials);
 
-        if (!isSuccessCode(createCredentialsResult.status)) {
-            throw new QMError("Failed to create Jenkins credentials for project");
+            if (!isSuccessCode(createCredentialsResult.status)) {
+                logger.warn("Failed to create jenkins credentials.");
+                if (attemptNumber < maxRetries) {
+                    logger.warn(`Waiting to retry again in ${waitTime}ms...`);
+                }
+                return false;
+            }
+
+            return true;
+        });
+
+        if (!result) {
+            throw new QMError("Failed to create jenkins credentials. Instance was non responsive.");
         }
     }
 
