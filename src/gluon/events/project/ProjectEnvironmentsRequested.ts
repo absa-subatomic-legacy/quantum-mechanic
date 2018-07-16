@@ -9,6 +9,7 @@ import {
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
+import * as util from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {QMTemplate} from "../../../template/QMTemplate";
@@ -239,6 +240,10 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
 
                 return true;
             } catch (error) {
+                logger.warn(`Failed to create jenkins credentials. Error: ${util.inspect(error)}`);
+                if (attemptNumber < maxRetries) {
+                    logger.warn(`Waiting to retry again in ${waitTime}ms...`);
+                }
                 return false;
             }
         });
