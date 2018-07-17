@@ -1,4 +1,8 @@
-import {HandleCommand, HandlerContext} from "@atomist/automation-client";
+import {
+    HandleCommand,
+    HandlerContext,
+    logger,
+} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
@@ -15,6 +19,7 @@ export enum ApplicationType {
 
 export class ApplicationService {
     public gluonApplicationsLinkedToGluonProject(ctx: HandlerContext, gluonProjectName: string): Promise<any> {
+        logger.debug(`Trying to get gluon applications associated to projectName. gluonProjectName: ${gluonProjectName} `);
         return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/applications?projectName=${gluonProjectName}`)
             .then(applications => {
                 if (!_.isEmpty(applications.data._embedded)) {
@@ -42,6 +47,7 @@ export class ApplicationService {
                                                  applicationName: string,
                                                  projectName: string,
                                                  message: string = "This command requires an existing application"): Promise<any> {
+        logger.debug(`Trying to get gluon applications associated to name and project. applicationName: ${applicationName}; projectName: ${projectName}`);
         return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/applications?name=${applicationName}&projectName=${projectName}`)
             .then(applications => {
                 if (!_.isEmpty(applications.data._embedded)) {
@@ -79,6 +85,7 @@ Consider creating a new application called ${applicationName}. Click the button 
     }
 
     public gluonApplicationsLinkedToGluonProjectId(gluonProjectId: string): Promise<any[]> {
+        logger.debug(`Trying to get gluon applications associated to project Id. gluonProjectId: ${gluonProjectId} `);
         return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/applications?projectId=${gluonProjectId}`)
             .then(applications => {
                 if (!_.isEmpty(applications.data._embedded)) {

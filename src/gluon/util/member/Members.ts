@@ -1,4 +1,4 @@
-import {HandlerContext} from "@atomist/automation-client";
+import {HandlerContext, logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
@@ -10,6 +10,8 @@ export class MemberService {
     public gluonMemberFromScreenName(ctx: HandlerContext,
                                      screenName: string,
                                      message: string = "This command requires an onboarded member"): Promise<any> {
+        logger.debug(`Trying to get gluon member from screen name. screenName: ${screenName} `);
+
         return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${screenName}`)
             .then(members => {
                 if (!_.isEmpty(members.data._embedded)) {

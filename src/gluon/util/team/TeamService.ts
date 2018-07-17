@@ -1,4 +1,8 @@
-import {HandleCommand, HandlerContext} from "@atomist/automation-client";
+import {
+    HandleCommand,
+    HandlerContext,
+    logger,
+} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import axios from "axios";
 import * as _ from "lodash";
@@ -9,6 +13,7 @@ import {createMenu} from "../shared/GenericMenu";
 
 export class TeamService {
     public gluonTeamsWhoSlackScreenNameBelongsTo(ctx: HandlerContext, screenName: string): Promise<any[]> {
+        logger.debug(`Trying to get gluon teams associated to a screenName. screenName: ${screenName} `);
         return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackScreenName=${screenName}`)
             .then(teams => {
                 if (!_.isEmpty(teams.data._embedded)) {
@@ -39,6 +44,7 @@ export class TeamService {
     }
 
     public gluonTeamForSlackTeamChannel(teamChannel: string): Promise<any> {
+        logger.debug(`Trying to get gluon team associated to a teamChannel. teamChannel: ${teamChannel} `);
         return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackTeamChannel=${teamChannel}`)
             .then(teams => {
                 if (!_.isEmpty(teams.data._embedded)) {
