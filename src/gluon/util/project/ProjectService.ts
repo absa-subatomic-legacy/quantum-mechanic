@@ -1,4 +1,8 @@
-import {HandleCommand, HandlerContext} from "@atomist/automation-client";
+import {
+    HandleCommand,
+    HandlerContext,
+    logger,
+} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
@@ -11,6 +15,7 @@ export class ProjectService {
     public gluonProjectFromProjectName(ctx: HandlerContext,
                                        projectName: string,
                                        message: string = "This command requires an existing project"): Promise<any> {
+        logger.debug(`Trying to get gluon project by projectName. projectName: ${projectName} `);
         return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?name=${projectName}`)
             .then(projects => {
                 if (!_.isEmpty(projects.data._embedded)) {
@@ -48,6 +53,7 @@ Consider creating a new project called ${projectName}. Click the button below to
     }
 
     public gluonProjectsWhichBelongToGluonTeam(ctx: HandlerContext, teamName: string, promptToCreateIfNoProjects = true): Promise<any[]> {
+        logger.debug(`Trying to get gluon projects associated to team. teamName: ${teamName} `);
         return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?teamName=${teamName}`)
             .then(projects => {
                 if (!_.isEmpty(projects.data._embedded)) {
@@ -74,6 +80,7 @@ Consider creating a new project called ${projectName}. Click the button below to
     }
 
     public gluonProjectList(ctx: HandlerContext): Promise<any[]> {
+        logger.debug(`Trying to get all gluon projects.`);
         return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects`)
             .then(projects => {
                 if (!_.isEmpty(projects.data._embedded)) {
