@@ -94,6 +94,10 @@ Consider creating a new application called ${applicationName}. Click the button 
                 return [];
             });
     }
+
+    public async createGluonApplication(applicationDetails: any): Promise<any> {
+        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`, applicationDetails);
+    }
 }
 
 export function menuForApplications(ctx: HandlerContext, applications: any[],

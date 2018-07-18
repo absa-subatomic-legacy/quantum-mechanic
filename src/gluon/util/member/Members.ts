@@ -47,6 +47,11 @@ To create a team you must first onboard yourself. Click the button below to do t
                 }
             });
     }
+
+    public async createGluonMember(teamMemberDetails: any): Promise<any> {
+        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/members`,
+            teamMemberDetails);
+    }
 }
 
 export function usernameFromDomainUsername(domainUsername: string): string {

@@ -103,6 +103,11 @@ Consider creating a new project called ${projectName}. Click the button below to
                     .then(() => Promise.reject(`Currently no existing projects.`));
             });
     }
+
+    public async createGluonProject(projectDetails: any): Promise<any> {
+        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
+            projectDetails);
+    }
 }
 
 export function menuForProjects(ctx: HandlerContext, projects: any[],

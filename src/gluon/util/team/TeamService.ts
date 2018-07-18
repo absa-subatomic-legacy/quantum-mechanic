@@ -58,6 +58,14 @@ export class TeamService {
                 }
             });
     }
+
+    public async createGluonTeam(teamName: string, teamDescription: string, createdBy: string): Promise<any> {
+        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/teams`, {
+            name: teamName,
+            description: teamDescription,
+            createdBy,
+        });
+    }
 }
 
 export function menuForTeams(ctx: HandlerContext, teams: any[],
