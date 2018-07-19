@@ -48,6 +48,14 @@ To create a team you must first onboard yourself. Click the button below to do t
         return result.data._embedded.teamMemberResources[0];
     }
 
+    public async gluonMemberFromEmailAddress(emailAddress: string): Promise<any> {
+        return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?email=${emailAddress}`);
+    }
+
+    public async gluonMemberFromMemberId(memberId: string): Promise<any> {
+        return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members/${memberId}`);
+    }
+
     public async createGluonMember(teamMemberDetails: any): Promise<any> {
         return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/members`,
             teamMemberDetails);

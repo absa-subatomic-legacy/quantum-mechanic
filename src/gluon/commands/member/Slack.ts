@@ -8,7 +8,6 @@ import {
     MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
-import axios from "axios";
 import {QMConfig} from "../../../config/QMConfig";
 import {MemberService} from "../../util/member/Members";
 import {isSuccessCode} from "../../util/shared/Http";
@@ -57,7 +56,7 @@ export class AddSlackDetails implements HandleCommand<HandlerResult> {
     }
 
     private async findGluonMemberByEmail(emailAddress: string) {
-        return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?email=${emailAddress}`);
+        return await this.memberService.gluonMemberFromEmailAddress(emailAddress);
     }
 
     private async updateGluonMemberSlackDetails(slackScreenName: string, slackUserId: string, gluonMemberId: string) {

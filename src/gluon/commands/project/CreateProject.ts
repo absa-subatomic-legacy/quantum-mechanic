@@ -7,7 +7,6 @@ import {
     MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
-import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {MemberService} from "../../util/member/Members";
@@ -118,7 +117,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
     }
 
     private async getGluonTeamFromName(teamName: string) {
-        const teamQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
+        const teamQueryResult = await this.teamService.gluonTeamByName(teamName);
         if (!isSuccessCode(teamQueryResult.status)) {
             logger.error(`Failed to find team ${teamName}. Error: ${JSON.stringify(teamQueryResult)}`);
             throw new QMError(`Team ${teamName} does not appear to be a valid SubAtomic team.`);

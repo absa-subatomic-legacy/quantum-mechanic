@@ -12,7 +12,6 @@ import {
 import {addressSlackUsers} from "@atomist/automation-client/spi/message/MessageClient";
 import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/handlers/command/slack/AssociateRepo";
 import {SlackMessage} from "@atomist/slack-messages";
-import axios from "axios";
 import {QMConfig} from "../../../config/QMConfig";
 import {MemberService} from "../../util/member/Members";
 import {
@@ -92,7 +91,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     }
 
     private async findGluonTeamMember(slackScreenName: string) {
-        const approverMemberQueryResult = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${slackScreenName}`);
+        const approverMemberQueryResult = await this.memberService.gluonMemberFromScreenName(slackScreenName, false);
 
         if (!isSuccessCode(approverMemberQueryResult.status)) {
             logger.error("The approver is not a gluon member. This can only happen if the user was deleted before approving this request.");

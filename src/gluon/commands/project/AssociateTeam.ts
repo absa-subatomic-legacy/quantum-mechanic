@@ -6,7 +6,6 @@ import {
     MappedParameter,
     MappedParameters,
 } from "@atomist/automation-client";
-import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {
@@ -89,7 +88,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
     }
 
     private async linkProjectForTeam(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
-        const team = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
+        const team = await this.teamService.gluonTeamByName(teamName);
         const gluonProject = await this.projectService.gluonProjectFromProjectName(this.projectName);
         let updateGluonWithProjectDetails;
         try {
@@ -134,11 +133,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
             allTeams.push(team.name);
         }
 
-        const projectDetails = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?name=${projectName}`);
-        if (!isSuccessCode(projectDetails.status)) {
-            throw new QMError("Failed to get project details for the project specified.");
-        }
-        const projectTeams = projectDetails.data._embedded.projectResources[0];
+        const projectTeams = await this.projectService.gluonProjectFromProjectName(projectName);
 
         for (const team of projectTeams.teams) {
             associatedTeams.push(team.name);

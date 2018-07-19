@@ -8,7 +8,6 @@ import {
     success,
     Tags,
 } from "@atomist/automation-client";
-import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {MemberService} from "../../util/member/Members";
@@ -96,7 +95,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
     }
 
     private async getGluonTeamFromTeamName(teamName: string) {
-        return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
+        return await this.teamService.gluonTeamByName(teamName);
     }
 
     private async requestDevOpsEnvironmentThroughGluon(teamId: string, memberId: string) {

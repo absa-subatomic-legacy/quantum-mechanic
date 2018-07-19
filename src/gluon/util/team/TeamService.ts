@@ -63,6 +63,16 @@ export class TeamService {
 
     }
 
+    public async getAllTeams(): Promise<any> {
+        return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
+    }
+
+    public async gluonTeamByName(teamName: string): Promise<any> {
+        logger.debug(`Trying to get gluon team with by name. teamName: ${teamName} `);
+
+        return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
+    }
+
     public async createGluonTeam(teamName: string, teamDescription: string, createdBy: string): Promise<any> {
         return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/teams`, {
             name: teamName,
