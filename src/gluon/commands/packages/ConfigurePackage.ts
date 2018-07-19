@@ -31,7 +31,6 @@ import {
 } from "../../util/project/ProjectService";
 import {
     handleQMError,
-    logErrorAndReturnSuccess,
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
@@ -263,7 +262,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     private async requestJenkinsFileParameter(ctx: HandlerContext): Promise<HandlerResult> {
 
         const project = await this.projectService.gluonProjectFromProjectName(this.projectName);
-        const application = await this.applicationService.gluonApplicationForNameAndProjectName(ctx, this.applicationName, this.projectName);
+        const application = await this.applicationService.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
         const username = QMConfig.subatomic.bitbucket.auth.username;
         const password = QMConfig.subatomic.bitbucket.auth.password;
         const gitProject: GitProject = await GitCommandGitProject.cloned({
@@ -321,12 +320,8 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     private async configurePackage(ctx: HandlerContext): Promise<HandlerResult> {
         const project = await this.projectService.gluonProjectFromProjectName(this.projectName);
 
-        let application;
-        try {
-            application = await this.applicationService.gluonApplicationForNameAndProjectName(ctx, this.applicationName, this.projectName);
-        } catch (error) {
-            return await logErrorAndReturnSuccess(this.applicationService.gluonApplicationForNameAndProjectName.name, error);
-        }
+        const application = await this.applicationService.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
+
         return await this.doConfiguration(
             ctx,
             project.name,

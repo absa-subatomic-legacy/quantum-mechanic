@@ -52,45 +52,47 @@ export class ApplicationService {
 
     }
 
-    public gluonApplicationForNameAndProjectName(ctx: HandlerContext,
-                                                 applicationName: string,
-                                                 projectName: string,
-                                                 message: string = "This command requires an existing application"): Promise<any> {
+    public async gluonApplicationForNameAndProjectName(applicationName: string,
+                                                       projectName: string,
+                                                       requestActionOnFailure: boolean = true): Promise<any> {
         logger.debug(`Trying to get gluon applications associated to name and project. applicationName: ${applicationName}; projectName: ${projectName}`);
-        return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/applications?name=${applicationName}&projectName=${projectName}`)
-            .then(applications => {
-                if (!_.isEmpty(applications.data._embedded)) {
-                    return Promise.resolve(applications.data._embedded.applicationResources[0]);
-                } else {
-                    const msg: SlackMessage = {
-                        text: message,
-                        attachments: [{
-                            text: `
-Unfortunately Subatomic does not manage this project.
+
+        const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/applications?name=${applicationName}&projectName=${projectName}`);
+
+        if (!isSuccessCode(result.status)) {
+            const errorMessage = `Application with name ${applicationName} in project ${projectName} does not exist`;
+            if (requestActionOnFailure) {
+                const slackMessage: SlackMessage = {
+                    text: "This command requires an existing application",
+                    attachments: [{
+                        text: `
+Unfortunately Subatomic does not manage this application.
 Consider creating a new application called ${applicationName}. Click the button below to do that now.
                             `,
-                            fallback: "Application not managed by Subatomic",
-                            footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-bitbucket-project`,
-                                "documentation")}`,
-                            color: "#ffcc00",
-                            mrkdwn_in: ["text"],
-                            actions: [
-                                buttonForCommand(
-                                    {
-                                        text: "Create application",
-                                    },
-                                    new CreateApplication(), {
-                                        name: applicationName,
-                                    }),
-                            ],
-                        }],
-                    };
+                        fallback: "Application not managed by Subatomic",
+                        footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-bitbucket-project`,
+                            "documentation")}`,
+                        color: "#ffcc00",
+                        mrkdwn_in: ["text"],
+                        actions: [
+                            buttonForCommand(
+                                {
+                                    text: "Create application",
+                                },
+                                new CreateApplication(), {
+                                    name: applicationName,
+                                }),
+                        ],
+                    }],
+                };
 
-                    return ctx.messageClient.respond(msg)
-                        .then(() => Promise.reject(
-                            `Application with name ${applicationName} does not exist`));
-                }
-            });
+                throw new QMError(errorMessage, slackMessage);
+            } else {
+                throw new QMError(errorMessage);
+            }
+        }
+
+        return result.data._embedded.applicationResources[0];
     }
 
     public gluonApplicationsLinkedToGluonProjectId(gluonProjectId: string): Promise<any[]> {
