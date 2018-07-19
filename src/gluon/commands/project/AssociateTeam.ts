@@ -9,8 +9,15 @@ import {
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
-import {menuForProjects, ProjectService} from "../../util/project/ProjectService";
-import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
+import {
+    menuForProjects,
+    ProjectService,
+} from "../../util/project/ProjectService";
+import {
+    handleQMError,
+    QMError,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
 import {
     RecursiveParameter,
@@ -101,7 +108,8 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
     }
 
     private async updateGluonProject(projectId: string, createdBy: string, teamId: string, name: string) {
-        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+
+        return await this.projectService.associateTeamToProject(projectId,
             {
                 productId: `${projectId}`,
                 createdBy: `${createdBy}`,

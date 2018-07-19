@@ -105,10 +105,12 @@ export class NewTeamSlackChannel implements HandleCommand {
     })
     public teamChannel: string;
 
+    constructor(private teamService = new TeamService()) {}
+
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             this.teamChannel = _.isEmpty(this.teamChannel) ? this.teamName : this.teamChannel;
-            return await linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, this.docs(), true);
+            return await linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, this.docs(), true, this.teamService);
         } catch (error) {
             return await this.handleError(ctx, error);
         }
@@ -151,7 +153,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
     }
 
     protected async runCommand(ctx: HandlerContext) {
-        return await linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, this.docs(), false);
+        return await linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, this.docs(), false, this.teamService);
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -180,7 +182,8 @@ async function linkSlackChannelToGluonTeam(ctx: HandlerContext,
                                            slackTeamId: string,
                                            slackChannelName: string,
                                            documentationLink: string,
-                                           isNewChannel: boolean): Promise<HandlerResult> {
+                                           isNewChannel: boolean,
+                                           teamService: TeamService): Promise<HandlerResult> {
     let finalisedSlackChannelName: string = slackChannelName;
     if (isNewChannel) {
         finalisedSlackChannelName = _.kebabCase(slackChannelName);
@@ -193,14 +196,13 @@ async function linkSlackChannelToGluonTeam(ctx: HandlerContext,
 
         logger.info(`Updating team channel [${finalisedSlackChannelName}]: ${team.teamId}`);
 
-        await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${team.teamId}`,
-            {
-                slack: {
-                    teamChannel: finalisedSlackChannelName,
-                },
-            });
+        await teamService.addSlackDetailsToTeam(team.teamId, {
+            slack: {
+                teamChannel: finalisedSlackChannelName,
+            },
+        });
 
-        return await createTeamSlackChannel(ctx, slackTeamId, slackChannelName, team);
+        await createTeamSlackChannel(ctx, slackTeamId, slackChannelName, team);
     } else {
         return await requestNonExistentTeamsCreation(ctx, gluonTeamName, documentationLink);
     }

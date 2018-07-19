@@ -106,12 +106,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
     }
 
     private async requestDevOpsEnvironmentThroughGluon(teamId: string, memberId: string) {
-        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
-            {
-                devOpsEnvironment: {
-                    requestedBy: memberId,
-                },
-            });
+        return await this.teamService.requestDevOpsEnvironment(teamId, memberId);
     }
 
 }

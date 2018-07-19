@@ -8,7 +8,6 @@ import {
     Parameter,
     success,
 } from "@atomist/automation-client";
-import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {
@@ -16,8 +15,14 @@ import {
     menuForBitbucketRepositories,
 } from "../../util/bitbucket/Bitbucket";
 import {MemberService} from "../../util/member/Members";
-import {ApplicationType} from "../../util/packages/Applications";
-import {menuForProjects, ProjectService} from "../../util/project/ProjectService";
+import {
+    ApplicationService,
+    ApplicationType,
+} from "../../util/packages/Applications";
+import {
+    menuForProjects,
+    ProjectService,
+} from "../../util/project/ProjectService";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
@@ -70,7 +75,8 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
     constructor(private teamService = new TeamService(),
                 private projectService = new ProjectService(),
                 private memberService = new MemberService(),
-                private bitbucketService = new BitbucketService()) {
+                private bitbucketService = new BitbucketService(),
+                private applicationService = new ApplicationService()) {
         super();
     }
 
@@ -181,7 +187,7 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
             return (clone as any).name === "ssh";
         }) as any;
 
-        const createApplicationResult = await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`,
+        const createApplicationResult = await this.applicationService.createGluonApplication(
             {
                 name: libraryName,
                 description: libraryDescription,

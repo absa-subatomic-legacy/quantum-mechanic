@@ -108,6 +108,29 @@ Consider creating a new project called ${projectName}. Click the button below to
         return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
             projectDetails);
     }
+
+    public async confirmBitbucketProjectCreated(projectId: string, bitbucketConfirmationDetails: any): Promise<any> {
+        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+            bitbucketConfirmationDetails);
+    }
+
+    public async requestProjectEnvironment(projectId: string, memberId: string): Promise<any> {
+        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+            {
+                projectEnvironment: {
+                    requestedBy: memberId,
+                },
+            });
+    }
+
+    public async associateTeamToProject(projectId: string, associationDetails: any): Promise<any> {
+        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`, associationDetails);
+    }
+
+    public async updateProjectWithBitbucketDetails(projectId: string, bitbucketDetails: any): Promise<any> {
+        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+            bitbucketDetails);
+    }
 }
 
 export function menuForProjects(ctx: HandlerContext, projects: any[],

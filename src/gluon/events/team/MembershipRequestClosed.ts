@@ -14,7 +14,12 @@ import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/handlers/c
 import {SlackMessage} from "@atomist/slack-messages";
 import axios from "axios";
 import {QMConfig} from "../../../config/QMConfig";
-import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
+import {MemberService} from "../../util/member/Members";
+import {
+    handleQMError,
+    QMError,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
 
 @CommandHandler("Close a membership request")
@@ -63,6 +68,9 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     })
     public approvalStatus: string;
 
+    constructor(private memberService = new MemberService()) {
+    }
+
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Attempting approval from user: ${this.approverUserName}`);
 
@@ -95,8 +103,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     }
 
     private async updateGluonMembershipRequest(teamId: string, membershipRequestId: string, approvedByMemberId: string, approvalStatus: string) {
-        const updateMembershipRequestResult = await axios.put(
-            `${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
+        const updateMembershipRequestResult = await this.memberService.updateGluonMembershipRequest(teamId,
             {
                 membershipRequests: [
                     {

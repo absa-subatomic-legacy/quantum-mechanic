@@ -52,6 +52,17 @@ To create a team you must first onboard yourself. Click the button below to do t
         return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/members`,
             teamMemberDetails);
     }
+
+    public async updateGluonMembershipRequest(teamId: string, membershipRequestDetails: any): Promise<any> {
+        return await axios.put(
+            `${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
+            membershipRequestDetails);
+    }
+
+    public async updateMemberSlackDetails(memberId: string, slackDetails: any): Promise<any> {
+        return await axios.put(
+            `${QMConfig.subatomic.gluon.baseUrl}/members/${memberId}`, slackDetails);
+    }
 }
 
 export function usernameFromDomainUsername(domainUsername: string): string {

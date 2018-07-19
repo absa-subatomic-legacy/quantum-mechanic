@@ -9,11 +9,13 @@ import {
     success,
     Tags,
 } from "@atomist/automation-client";
-import axios from "axios";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {MemberService} from "../../util/member/Members";
-import {menuForProjects, ProjectService} from "../../util/project/ProjectService";
+import {
+    menuForProjects,
+    ProjectService,
+} from "../../util/project/ProjectService";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
@@ -113,12 +115,9 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
     }
 
     private async requestProjectEnvironment(projectId: string, memberId: string) {
-        const projectEnvironmentRequestResult = await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
-            {
-                projectEnvironment: {
-                    requestedBy: memberId,
-                },
-            });
+        const projectEnvironmentRequestResult = await this.projectService.requestProjectEnvironment(projectId,
+            memberId,
+        );
 
         if (!isSuccessCode(projectEnvironmentRequestResult.status)) {
             logger.error(`Failed to request project environment for project ${this.projectName}. Error: ${JSON.stringify(projectEnvironmentRequestResult)}`);

@@ -19,8 +19,13 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import * as graphql from "../../../typings/types";
-import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
+import {
+    handleQMError,
+    QMError,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
+import {TeamService} from "../../util/team/TeamService";
 import {ListTeamProjects} from "../project/ProjectDetails";
 import {CreateTeam} from "./CreateTeam";
 
@@ -118,6 +123,9 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
     })
     public slackName: string;
 
+    constructor(private teamService = new TeamService()) {
+    }
+
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             logger.info(`Adding member [${this.slackName}] to team: ${this.teamChannel}`);
@@ -181,7 +189,7 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
         const newMemberId = newMember.memberId;
         logger.info(`Adding member [${newMemberId}] to team with ${JSON.stringify(teamSlackChannel._links.self.href)}`);
 
-        const updateTeamResult = await axios.put(teamSlackChannel._links.self.href,
+        const updateTeamResult = await this.teamService.addMemberToTeam(teamSlackChannel.teamId,
             {
                 members: [{
                     memberId: newMemberId,
@@ -271,6 +279,9 @@ export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResul
     })
     public slackName: string;
 
+    constructor(private teamService = new TeamService()) {
+    }
+
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Request to join team: ${this.teamId}`);
         try {
@@ -294,7 +305,7 @@ export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResul
     }
 
     private async createMembershipRequest(newMember) {
-        const updateTeamResult = await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${this.teamId}`,
+        const updateTeamResult = await this.teamService.createMembershipRequest(this.teamId,
             {
                 membershipRequests: [
                     {

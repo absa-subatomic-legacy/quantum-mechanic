@@ -66,6 +66,29 @@ export class TeamService {
             createdBy,
         });
     }
+
+    public async addSlackDetailsToTeam(teamId: string, slackDetails: any): Promise<any> {
+        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`, slackDetails);
+    }
+
+    public async addMemberToTeam(teamId: string, memberDetails: any): Promise<any> {
+        return await axios.put(teamId,
+            memberDetails);
+    }
+
+    public async createMembershipRequest(teamId: string, membershipRequestDetails: any): Promise<any> {
+        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
+            membershipRequestDetails);
+    }
+
+    public async requestDevOpsEnvironment(teamId: string, memberId: string): Promise<any> {
+        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
+            {
+                devOpsEnvironment: {
+                    requestedBy: memberId,
+                },
+            });
+    }
 }
 
 export function menuForTeams(ctx: HandlerContext, teams: any[],

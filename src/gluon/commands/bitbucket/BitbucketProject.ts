@@ -8,13 +8,19 @@ import {
     Parameter,
     success,
 } from "@atomist/automation-client";
-import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {BitbucketService} from "../../util/bitbucket/Bitbucket";
 import {MemberService} from "../../util/member/Members";
-import {menuForProjects, ProjectService} from "../../util/project/ProjectService";
-import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
+import {
+    menuForProjects,
+    ProjectService,
+} from "../../util/project/ProjectService";
+import {
+    handleQMError,
+    QMError,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
 import {
     RecursiveParameter,
@@ -100,7 +106,7 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand {
     }
 
     private async updateGluonWithBitbucketDetails(projectId: string, projectName: string, projectDescription: string, memberId: string) {
-        const updateGluonProjectResult = await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+        const updateGluonProjectResult = await this.projectService.updateProjectWithBitbucketDetails(projectId,
             {
                 bitbucketProject: {
                     name: projectName,
@@ -226,7 +232,7 @@ export class ListExistingBitbucketProject extends RecursiveParameterRequestComma
     }
 
     private async updateGluonProjectWithBitbucketDetails(bitbucketProjectUiUrl: string, createdByMemberId: string, gluonProject, bitbucketProject) {
-        const updateGluonProjectResult = await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${gluonProject.projectId}`,
+        const updateGluonProjectResult = await this.projectService.updateProjectWithBitbucketDetails(gluonProject,
             {
                 bitbucketProject: {
                     bitbucketProjectId: bitbucketProject.id,
