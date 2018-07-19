@@ -18,7 +18,6 @@ import {
 } from "../../util/project/ProjectService";
 import {
     handleQMError,
-    logErrorAndReturnSuccess,
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
@@ -67,12 +66,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
 
             const member = await this.memberService.gluonMemberFromScreenName(this.screenName);
 
-            let project;
-            try {
-                project = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
-            } catch (error) {
-                return await logErrorAndReturnSuccess(this.projectService.gluonProjectFromProjectName.name, error);
-            }
+            const project = await this.projectService.gluonProjectFromProjectName(this.projectName);
 
             await this.requestProjectEnvironment(project.projectId, member.memberId);
 

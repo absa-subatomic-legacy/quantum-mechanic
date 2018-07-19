@@ -6,7 +6,6 @@ import {
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import axios from "axios";
-import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateTeam} from "../../commands/team/CreateTeam";
 import {JoinTeam} from "../../commands/team/JoinTeam";
@@ -51,20 +50,17 @@ export class TeamService {
         return result.data._embedded.teamResources;
     }
 
-    public gluonTeamForSlackTeamChannel(teamChannel: string): Promise<any> {
+    public async gluonTeamForSlackTeamChannel(teamChannel: string): Promise<any> {
         logger.debug(`Trying to get gluon team associated to a teamChannel. teamChannel: ${teamChannel} `);
-        return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackTeamChannel=${teamChannel}`)
-            .then(teams => {
-                if (!_.isEmpty(teams.data._embedded)) {
-                    if (teams.data._embedded.teamResources.length === 1) {
-                        return Promise.resolve(teams.data._embedded.teamResources[0]);
-                    } else {
-                        throw new RangeError("Multiple teams associated with the same Slack team channel is not expected");
-                    }
-                } else {
-                    return Promise.reject(`No team associated with Slack team channel: ${teamChannel}`);
-                }
-            });
+
+        const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackTeamChannel=${teamChannel}`);
+
+        if (!isSuccessCode(result.status)) {
+            throw new QMError(`No team associated with Slack team channel: ${teamChannel}`);
+        }
+
+        return result.data._embedded.teamResources[0];
+
     }
 
     public async createGluonTeam(teamName: string, teamDescription: string, createdBy: string): Promise<any> {

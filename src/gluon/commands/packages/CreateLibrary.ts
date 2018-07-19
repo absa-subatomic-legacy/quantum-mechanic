@@ -86,7 +86,6 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
             }, this.teamChannel);
 
             return await this.linkLibraryForGluonProject(
-                ctx,
                 this.screenName,
                 this.name,
                 this.description,
@@ -123,7 +122,7 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
                 "Please select a project to which you would like to link a library to");
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
-            const project = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
+            const project = await this.projectService.gluonProjectFromProjectName(this.projectName);
             if (_.isEmpty(project.bitbucketProject)) {
                 throw new QMError(`The selected project does not have an associated bitbucket project. Please first associate a bitbucket project using the \`${QMConfig.subatomic.commandPrefix} link bitbucket project\` command.`);
             }
@@ -143,13 +142,12 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
         }
     }
 
-    private async linkLibraryForGluonProject(ctx: HandlerContext,
-                                             slackScreeName: string,
+    private async linkLibraryForGluonProject(slackScreeName: string,
                                              libraryName: string,
                                              libraryDescription: string,
                                              bitbucketRepositorySlug: string,
                                              gluonProjectName: string): Promise<HandlerResult> {
-        const project = await this.projectService.gluonProjectFromProjectName(ctx, gluonProjectName);
+        const project = await this.projectService.gluonProjectFromProjectName(gluonProjectName);
         logger.debug(`Linking Bitbucket repository: ${bitbucketRepositorySlug}`);
 
         return await this.linkBitbucketRepository(

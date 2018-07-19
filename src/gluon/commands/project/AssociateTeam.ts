@@ -90,7 +90,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     private async linkProjectForTeam(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
         const team = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
-        const gluonProject = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
+        const gluonProject = await this.projectService.gluonProjectFromProjectName(this.projectName);
         let updateGluonWithProjectDetails;
         try {
             updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.data._embedded.teamResources[0].teamId, team.data._embedded.teamResources[0].name);

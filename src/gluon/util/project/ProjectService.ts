@@ -9,47 +9,51 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateProject} from "../../commands/project/CreateProject";
+import {QMError} from "../shared/Error";
 import {createMenu} from "../shared/GenericMenu";
+import {isSuccessCode} from "../shared/Http";
 
 export class ProjectService {
-    public gluonProjectFromProjectName(ctx: HandlerContext,
-                                       projectName: string,
-                                       message: string = "This command requires an existing project"): Promise<any> {
+    public async gluonProjectFromProjectName(projectName: string,
+                                             requestActionOnFailure: boolean = true): Promise<any> {
         logger.debug(`Trying to get gluon project by projectName. projectName: ${projectName} `);
-        return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?name=${projectName}`)
-            .then(projects => {
-                if (!_.isEmpty(projects.data._embedded)) {
-                    return Promise.resolve(projects.data._embedded.projectResources[0]);
-                } else {
-                    const msg: SlackMessage = {
-                        text: message,
-                        attachments: [{
-                            text: `
+
+        const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?name=${projectName}`);
+
+        if (!isSuccessCode(result.status)) {
+            const errorMessage = `Project with name ${projectName} does not exist`;
+            if (requestActionOnFailure) {
+                const slackMessage: SlackMessage = {
+                    text: "This command requires an existing project",
+                    attachments: [{
+                        text: `
 Unfortunately Subatomic does not manage this project.
 Consider creating a new project called ${projectName}. Click the button below to do that now.
                             `,
-                            fallback: "Project not managed by Subatomic",
-                            footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-project`,
-                                "documentation")}`,
-                            color: "#ffcc00",
-                            mrkdwn_in: ["text"],
-                            actions: [
-                                buttonForCommand(
-                                    {
-                                        text: "Create project",
-                                    },
-                                    new CreateProject(), {
-                                        name: projectName,
-                                    }),
-                            ],
-                        }],
-                    };
+                        fallback: "Project not managed by Subatomic",
+                        footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-project`,
+                            "documentation")}`,
+                        color: "#ffcc00",
+                        mrkdwn_in: ["text"],
+                        actions: [
+                            buttonForCommand(
+                                {
+                                    text: "Create project",
+                                },
+                                new CreateProject(), {
+                                    name: projectName,
+                                }),
+                        ],
+                    }],
+                };
 
-                    return ctx.messageClient.respond(msg)
-                        .then(() => Promise.reject(
-                            `Project with name ${projectName} does not exist`));
-                }
-            });
+                throw new QMError(errorMessage, slackMessage);
+            } else {
+                throw new QMError(errorMessage);
+            }
+        }
+
+        return result.data._embedded.projectResources[0];
     }
 
     public gluonProjectsWhichBelongToGluonTeam(ctx: HandlerContext, teamName: string, promptToCreateIfNoProjects = true): Promise<any[]> {

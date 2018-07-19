@@ -25,7 +25,6 @@ import {
 } from "../../util/project/ProjectService";
 import {
     handleQMError,
-    logErrorAndReturnSuccess,
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
@@ -91,12 +90,8 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
 
             const member = await this.memberService.gluonMemberFromScreenName(this.screenName);
 
-            let project;
-            try {
-                project = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
-            } catch (error) {
-                return await logErrorAndReturnSuccess(this.projectService.gluonProjectFromProjectName.name, error);
-            }
+            const project = await this.projectService.gluonProjectFromProjectName(this.projectName);
+
             await this.createApplicationInGluon(project, member);
 
             return await ctx.messageClient.respond({
@@ -200,7 +195,6 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
             });
 
             return await this.linkApplicationForGluonProject(
-                ctx,
                 this.screenName,
                 this.name,
                 this.description,
@@ -237,7 +231,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
                 "Please select a project to which you would like to link a library to");
         }
         if (_.isEmpty(this.bitbucketRepositorySlug)) {
-            const project = await this.projectService.gluonProjectFromProjectName(ctx, this.projectName);
+            const project = await this.projectService.gluonProjectFromProjectName(this.projectName);
             if (_.isEmpty(project.bitbucketProject)) {
                 return await ctx.messageClient.respond(`❗The selected project does not have an associated bitbucket project. Please first associate a bitbucket project using the \`${QMConfig.subatomic.commandPrefix} link bitbucket project\` command.`);
             }
@@ -257,13 +251,12 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
         }
     }
 
-    private async linkApplicationForGluonProject(ctx: HandlerContext,
-                                                 slackScreeName: string,
+    private async linkApplicationForGluonProject(slackScreeName: string,
                                                  applicationName: string,
                                                  applicationDescription: string,
                                                  bitbucketRepositorySlug: string,
                                                  gluonProjectName: string): Promise<HandlerResult> {
-        const project = await this.projectService.gluonProjectFromProjectName(ctx, gluonProjectName);
+        const project = await this.projectService.gluonProjectFromProjectName(gluonProjectName);
         logger.debug(`Linking Bitbucket repository: ${bitbucketRepositorySlug}`);
 
         return await this.linkBitbucketRepository(
