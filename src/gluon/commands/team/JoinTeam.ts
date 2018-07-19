@@ -175,9 +175,12 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
 
     private async inviteUserToTeam(ctx: HandlerContext, newMember, actioningMember, teamSlackChannel, channelId, screenName, teamId, teamChannel, slackName) {
         const newMemberId = newMember.memberId;
-        logger.info(`Adding member [${newMemberId}] to team with ${JSON.stringify(teamSlackChannel._links.self.href)}`);
+        logger.info(`Adding member [${newMemberId}] to team ${JSON.stringify(teamSlackChannel._links.self.href)}`);
 
-        const updateTeamResult = await this.teamService.addMemberToTeam(teamSlackChannel.teamId,
+        const splitLink = teamSlackChannel._links.self.href.split("/");
+        const gluonTeamId = splitLink[splitLink.length - 1];
+
+        const updateTeamResult = await this.teamService.addMemberToTeam(gluonTeamId,
             {
                 members: [{
                     memberId: newMemberId,

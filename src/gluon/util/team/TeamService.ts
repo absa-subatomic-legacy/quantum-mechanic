@@ -96,7 +96,7 @@ export class TeamService {
 
     public async addMemberToTeam(teamId: string, memberDetails: any): Promise<any> {
         logger.debug(`Trying to add member member to team. teamId: ${teamId}`);
-        return await axios.put(teamId,
+        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
             memberDetails);
     }
 

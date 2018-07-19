@@ -91,14 +91,12 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     }
 
     private async findGluonTeamMember(slackScreenName: string) {
-        const approverMemberQueryResult = await this.memberService.gluonMemberFromScreenName(slackScreenName, false);
-
-        if (!isSuccessCode(approverMemberQueryResult.status)) {
+        try {
+            return await this.memberService.gluonMemberFromScreenName(slackScreenName, false);
+        } catch (error) {
             logger.error("The approver is not a gluon member. This can only happen if the user was deleted before approving this request.");
             throw new QMError("You are no longer a Subatomic user. Membership request closure failed.");
         }
-
-        return approverMemberQueryResult.data._embedded.teamMemberResources[0];
     }
 
     private async updateGluonMembershipRequest(teamId: string, membershipRequestId: string, approvedByMemberId: string, approvalStatus: string) {
