@@ -14,7 +14,6 @@ import {MemberService} from "../../util/member/Members";
 import {ProjectService} from "../../util/project/ProjectService";
 import {
     handleQMError,
-    logErrorAndReturnSuccess,
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
@@ -99,12 +98,8 @@ export class CreateProject extends RecursiveParameterRequestCommand {
 
     private async requestNewProjectForTeamAndTenant(ctx: HandlerContext, screenName: string,
                                                     teamName: string, tenantId: string): Promise<any> {
-        let member;
-        try {
-            member = await this.memberService.gluonMemberFromScreenName(ctx, screenName);
-        } catch (error) {
-            return await logErrorAndReturnSuccess(this.memberService.gluonMemberFromScreenName.name, error);
-        }
+
+        const member = await this.memberService.gluonMemberFromScreenName(screenName);
 
         const team = await this.getGluonTeamFromName(teamName);
 

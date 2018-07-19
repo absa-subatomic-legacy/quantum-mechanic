@@ -12,7 +12,6 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {MemberService} from "../../util/member/Members";
-import {logErrorAndReturnSuccess} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
 import {
     RecursiveParameter,
@@ -74,12 +73,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
             text: `Requesting DevOps environment for *${teamName}* team.`,
         }, teamChannel);
 
-        let member;
-        try {
-            member = await this.memberService.gluonMemberFromScreenName(ctx, screenName);
-        } catch (error) {
-            return logErrorAndReturnSuccess(this.memberService.gluonMemberFromScreenName.name, error);
-        }
+        const member = await this.memberService.gluonMemberFromScreenName(screenName);
 
         const teamQueryResult = await this.getGluonTeamFromTeamName(teamName);
 

@@ -89,12 +89,7 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
                 text: "🚀 Your new application is being created...",
             });
 
-            let member;
-            try {
-                member = await this.memberService.gluonMemberFromScreenName(ctx, this.screenName);
-            } catch (error) {
-                return await logErrorAndReturnSuccess(this.memberService.gluonMemberFromScreenName.name, error);
-            }
+            const member = await this.memberService.gluonMemberFromScreenName(this.screenName);
 
             let project;
             try {
@@ -271,7 +266,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
         const project = await this.projectService.gluonProjectFromProjectName(ctx, gluonProjectName);
         logger.debug(`Linking Bitbucket repository: ${bitbucketRepositorySlug}`);
 
-        return await this.linkBitbucketRepository(ctx,
+        return await this.linkBitbucketRepository(
             slackScreeName,
             applicationName,
             applicationDescription,
@@ -280,8 +275,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
             project.projectId);
     }
 
-    private async linkBitbucketRepository(ctx: HandlerContext,
-                                          slackScreeName: string,
+    private async linkBitbucketRepository(slackScreeName: string,
                                           libraryName: string,
                                           libraryDescription: string,
                                           bitbucketRepositorySlug: string,
@@ -295,12 +289,8 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
 
         const repo = repoResult.data;
 
-        let member;
-        try {
-            member = await this.memberService.gluonMemberFromScreenName(ctx, slackScreeName);
-        } catch (error) {
-            return await logErrorAndReturnSuccess(this.memberService.gluonMemberFromScreenName.name, error);
-        }
+        const member = await this.memberService.gluonMemberFromScreenName(slackScreeName);
+
         const remoteUrl = _.find(repo.links.clone, clone => {
             return (clone as any).name === "ssh";
         }) as any;
