@@ -115,7 +115,7 @@ export class CreateApplication extends RecursiveParameterRequestCommand {
             }
         }
         if (_.isEmpty(this.projectName)) {
-            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
+            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(this.teamName);
             return await menuForProjects(ctx, projects, this);
         }
     }
@@ -223,7 +223,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand {
             }
         }
         if (_.isEmpty(this.projectName)) {
-            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
+            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(this.teamName);
             return menuForProjects(
                 ctx,
                 projects,

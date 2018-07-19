@@ -56,20 +56,19 @@ Consider creating a new project called ${projectName}. Click the button below to
         return result.data._embedded.projectResources[0];
     }
 
-    public gluonProjectsWhichBelongToGluonTeam(ctx: HandlerContext, teamName: string, promptToCreateIfNoProjects = true): Promise<any[]> {
+    public async gluonProjectsWhichBelongToGluonTeam(teamName: string, promptToCreateIfNoProjects = true): Promise<any[]> {
         logger.debug(`Trying to get gluon projects associated to team. teamName: ${teamName} `);
-        return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?teamName=${teamName}`)
-            .then(projects => {
-                if (!_.isEmpty(projects.data._embedded)) {
-                    return Promise.resolve(projects.data._embedded.projectResources);
-                } else if (!promptToCreateIfNoProjects) {
-                    return Promise.resolve([]);
-                }
 
-                return ctx.messageClient.respond({
+        const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?teamName=${teamName}`);
+
+        if (!isSuccessCode(result.status)) {
+            const errorMessage = `No projects associated to team ${teamName}`;
+            if (promptToCreateIfNoProjects) {
+                const slackMessage: SlackMessage = {
                     text: "Unfortunately there are no projects linked to any of your teams with that name.",
                     attachments: [{
                         text: "Would you like to create a new project?",
+                        fallback: "Would you like to create a new project?",
                         actions: [
                             buttonForCommand(
                                 {
@@ -78,9 +77,14 @@ Consider creating a new project called ${projectName}. Click the button below to
                                 new CreateProject()),
                         ],
                     }],
-                })
-                    .then(() => Promise.reject(`${teamName} team does not have any projects linked to it`));
-            });
+                };
+                throw new QMError(errorMessage, slackMessage);
+            } else {
+                throw new QMError(errorMessage);
+            }
+        }
+
+        return result.data._embedded.projectResources;
     }
 
     public gluonProjectList(ctx: HandlerContext): Promise<any[]> {

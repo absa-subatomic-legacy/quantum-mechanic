@@ -90,7 +90,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
             }
         }
         if (_.isEmpty(this.projectName)) {
-            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, this.teamName);
+            const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(this.teamName);
             return menuForProjects(
                 ctx,
                 projects,

@@ -70,12 +70,8 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand {
     }
 
     private async listTeamProjects(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
-        let projects;
-        try {
-            projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(ctx, teamName);
-        } catch (error) {
-            return await logErrorAndReturnSuccess(this.projectService.gluonProjectsWhichBelongToGluonTeam.name, error);
-        }
+        const projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(teamName);
+
         const attachments = [];
 
         for (const project of projects) {
