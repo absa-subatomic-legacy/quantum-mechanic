@@ -6,6 +6,7 @@ import {
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
+import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateProject} from "../../commands/project/CreateProject";
 import {QMError} from "../shared/Error";
@@ -19,7 +20,7 @@ export class ProjectService {
 
         const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?name=${projectName}`);
 
-        if (!isSuccessCode(result.status)) {
+        if (!isSuccessCode(result.status) || _.isEmpty(result.data._embedded)) {
             const errorMessage = `Project with name ${projectName} does not exist`;
             if (requestActionOnFailure) {
                 const slackMessage: SlackMessage = {
@@ -64,7 +65,11 @@ Consider creating a new project called ${projectName}. Click the button below to
             throw new QMError(`Failed to get project associated to ${teamName}`);
         }
 
-        if (promptToCreateIfNoProjects && result.data._embedded.projectResources.isEmpty()) {
+        let returnValue = [];
+
+        if (!_.isEmpty(result.data._embedded)) {
+            returnValue = result.data._embedded.projectResources;
+        } else if (promptToCreateIfNoProjects) {
             const slackMessage: SlackMessage = {
                 text: "Unfortunately there are no projects linked to any of your teams with that name.",
                 attachments: [{
@@ -82,7 +87,7 @@ Consider creating a new project called ${projectName}. Click the button below to
             throw new QMError(`No projects associated to ${teamName}`, slackMessage);
         }
 
-        return result.data._embedded.projectResources;
+        return returnValue;
     }
 
     public async gluonProjectList(promptToCreateIfNoProjects: boolean = true): Promise<any[]> {
@@ -95,7 +100,11 @@ Consider creating a new project called ${projectName}. Click the button below to
             throw new QMError(`Failed to get projects.`);
         }
 
-        if (promptToCreateIfNoProjects && result.data._embedded.projectResources.isEmpty()) {
+        let returnValue = [];
+
+        if (!_.isEmpty(result.data._embedded)) {
+            returnValue = result.data._embedded.projectResources;
+        } else if (promptToCreateIfNoProjects) {
             const slackMessage: SlackMessage = {
                 text: "Unfortunately there are no projects created yet.",
                 attachments: [{
@@ -113,7 +122,7 @@ Consider creating a new project called ${projectName}. Click the button below to
             throw new QMError(`No projects exist yet`, slackMessage);
         }
 
-        return result.data._embedded.projectResources;
+        return returnValue;
     }
 
     public async createGluonProject(projectDetails: any): Promise<any> {

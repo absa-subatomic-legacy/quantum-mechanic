@@ -2,6 +2,7 @@ import {logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
+import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {OnboardMember} from "../../commands/member/Onboard";
 import {QMError} from "../shared/Error";
@@ -14,7 +15,7 @@ export class MemberService {
 
         const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${screenName}`);
 
-        if (!isSuccessCode(result.status)) {
+        if (!isSuccessCode(result.status) || _.isEmpty(result.data._embedded)) {
             const errorMessage = `Failed to get member details. Member ${screenName} appears to not be onboarded.`;
             if (requestOnboardingIfFailure) {
                 const msg: SlackMessage = {

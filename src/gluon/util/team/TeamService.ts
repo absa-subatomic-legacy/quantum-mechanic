@@ -6,6 +6,7 @@ import {
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import axios from "axios";
+import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateTeam} from "../../commands/team/CreateTeam";
 import {JoinTeam} from "../../commands/team/JoinTeam";
@@ -19,35 +20,40 @@ export class TeamService {
 
         const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackScreenName=${screenName}`);
 
-        if (!isSuccessCode(result.status)) {
-            const errorMessage = `Failed to find teams associated to member. Member ${screenName} is either not onboarded, or is not a member of any team..`;
-            if (requestActionOnFailure) {
-                const slackMessage: SlackMessage = {
-                    text: "Unfortunately, you are not a member of any team. To associate this project you need to be a member of at least one team.",
-                    attachments: [{
-                        text: "You can either create a new team or apply to join an existing team",
-                        fallback: "You can either create a new team or apply to join an existing team",
-                        actions: [
-                            buttonForCommand(
-                                {
-                                    text: "Apply to join a team",
-                                    style: "primary",
-                                },
-                                new JoinTeam()),
-                            buttonForCommand(
-                                {text: "Create a new team"},
-                                new CreateTeam()),
-                        ],
-                    }],
-                };
+        const errorMessage = `Failed to find teams associated to member. Member ${screenName} is either not onboarded, or is not a member of any team..`;
 
-                throw new QMError(errorMessage, slackMessage);
-            } else {
-                throw new QMError(errorMessage);
-            }
+        if (!isSuccessCode(result.status)) {
+            throw new QMError(errorMessage);
         }
 
-        return result.data._embedded.teamResources;
+        let returnValue = [];
+
+        if (!_.isEmpty(result.data._embedded)) {
+            returnValue = result.data._embedded.teamResources;
+        } else if (requestActionOnFailure) {
+            const slackMessage: SlackMessage = {
+                text: "Unfortunately, you are not a member of any team. To associate this project you need to be a member of at least one team.",
+                attachments: [{
+                    text: "You can either create a new team or apply to join an existing team",
+                    fallback: "You can either create a new team or apply to join an existing team",
+                    actions: [
+                        buttonForCommand(
+                            {
+                                text: "Apply to join a team",
+                                style: "primary",
+                            },
+                            new JoinTeam()),
+                        buttonForCommand(
+                            {text: "Create a new team"},
+                            new CreateTeam()),
+                    ],
+                }],
+            };
+
+            throw new QMError(errorMessage, slackMessage);
+        }
+
+        return returnValue;
     }
 
     public async gluonTeamForSlackTeamChannel(teamChannel: string): Promise<any> {
@@ -55,7 +61,7 @@ export class TeamService {
 
         const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackTeamChannel=${teamChannel}`);
 
-        if (!isSuccessCode(result.status)) {
+        if (!isSuccessCode(result.status) || _.isEmpty(result.data._embedded)) {
             throw new QMError(`No team associated with Slack team channel: ${teamChannel}`);
         }
 

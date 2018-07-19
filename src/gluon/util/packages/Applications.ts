@@ -29,7 +29,11 @@ export class ApplicationService {
             throw new QMError(`Failed to get applications linked to project ${gluonProjectName}`);
         }
 
-        if (requestActionOnFailure && result.data._embedded.applicationResources.isEmpty()) {
+        let returnValue = [];
+
+        if (!_.isEmpty(result.data._embedded)) {
+            returnValue = result.data._embedded.applicationResources;
+        } else if (requestActionOnFailure) {
             const slackMessage: SlackMessage = {
                 text: "Unfortunately there are no applications linked to this project.",
                 attachments: [{
@@ -48,7 +52,7 @@ export class ApplicationService {
             throw new QMError(`No applications linked to project ${gluonProjectName}.`, slackMessage);
         }
 
-        return result.data._embedded.applicationResources;
+        return returnValue;
 
     }
 
@@ -59,7 +63,7 @@ export class ApplicationService {
 
         const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/applications?name=${applicationName}&projectName=${projectName}`);
 
-        if (!isSuccessCode(result.status)) {
+        if (!isSuccessCode(result.status) || _.isEmpty(result.data._embedded)) {
             const errorMessage = `Application with name ${applicationName} in project ${projectName} does not exist`;
             if (requestActionOnFailure) {
                 const slackMessage: SlackMessage = {
