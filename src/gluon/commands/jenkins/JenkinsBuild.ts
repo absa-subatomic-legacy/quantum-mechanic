@@ -98,7 +98,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
                 "Please select a project which contains the application you would like to build");
         }
         if (_.isEmpty(this.applicationName)) {
-            const applications = await this.applicationService.gluonApplicationsLinkedToGluonProject(ctx, this.projectName);
+            const applications = await this.applicationService.gluonApplicationsLinkedToGluonProject(this.projectName);
             return await menuForApplications(
                 ctx,
                 applications,

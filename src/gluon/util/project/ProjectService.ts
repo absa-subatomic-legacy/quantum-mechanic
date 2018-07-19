@@ -61,26 +61,25 @@ Consider creating a new project called ${projectName}. Click the button below to
         const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?teamName=${teamName}`);
 
         if (!isSuccessCode(result.status)) {
-            const errorMessage = `No projects associated to team ${teamName}`;
-            if (promptToCreateIfNoProjects) {
-                const slackMessage: SlackMessage = {
-                    text: "Unfortunately there are no projects linked to any of your teams with that name.",
-                    attachments: [{
-                        text: "Would you like to create a new project?",
-                        fallback: "Would you like to create a new project?",
-                        actions: [
-                            buttonForCommand(
-                                {
-                                    text: "Create project",
-                                },
-                                new CreateProject()),
-                        ],
-                    }],
-                };
-                throw new QMError(errorMessage, slackMessage);
-            } else {
-                throw new QMError(errorMessage);
-            }
+            throw new QMError(`Failed to get project associated to ${teamName}`);
+        }
+
+        if (promptToCreateIfNoProjects && result.data._embedded.projectResources.isEmpty()) {
+            const slackMessage: SlackMessage = {
+                text: "Unfortunately there are no projects linked to any of your teams with that name.",
+                attachments: [{
+                    text: "Would you like to create a new project?",
+                    fallback: "Would you like to create a new project?",
+                    actions: [
+                        buttonForCommand(
+                            {
+                                text: "Create project",
+                            },
+                            new CreateProject()),
+                    ],
+                }],
+            };
+            throw new QMError(`No projects associated to ${teamName}`, slackMessage);
         }
 
         return result.data._embedded.projectResources;
@@ -93,26 +92,25 @@ Consider creating a new project called ${projectName}. Click the button below to
         const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects`);
 
         if (!isSuccessCode(result.status)) {
-            const errorMessage = `No projects exist.`;
-            if (promptToCreateIfNoProjects) {
-                const slackMessage: SlackMessage = {
-                    text: "Unfortunately there are no projects created yet.",
-                    attachments: [{
-                        text: "Would you like to create a new project?",
-                        fallback: "Would you like to create a new project?",
-                        actions: [
-                            buttonForCommand(
-                                {
-                                    text: "Create project",
-                                },
-                                new CreateProject()),
-                        ],
-                    }],
-                };
-                throw new QMError(errorMessage, slackMessage);
-            } else {
-                throw new QMError(errorMessage);
-            }
+            throw new QMError(`Failed to get projects.`);
+        }
+
+        if (promptToCreateIfNoProjects && result.data._embedded.projectResources.isEmpty()) {
+            const slackMessage: SlackMessage = {
+                text: "Unfortunately there are no projects created yet.",
+                attachments: [{
+                    text: "Would you like to create a new project?",
+                    fallback: "Would you like to create a new project?",
+                    actions: [
+                        buttonForCommand(
+                            {
+                                text: "Create project",
+                            },
+                            new CreateProject()),
+                    ],
+                }],
+            };
+            throw new QMError(`No projects exist yet`, slackMessage);
         }
 
         return result.data._embedded.projectResources;

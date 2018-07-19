@@ -9,7 +9,9 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateApplication} from "../../commands/packages/CreateApplication";
+import {QMError} from "../shared/Error";
 import {createMenu} from "../shared/GenericMenu";
+import {isSuccessCode} from "../shared/Http";
 
 export enum ApplicationType {
 
@@ -18,29 +20,36 @@ export enum ApplicationType {
 }
 
 export class ApplicationService {
-    public gluonApplicationsLinkedToGluonProject(ctx: HandlerContext, gluonProjectName: string): Promise<any> {
+    public async gluonApplicationsLinkedToGluonProject(gluonProjectName: string, requestActionOnFailure: boolean = true): Promise<any> {
         logger.debug(`Trying to get gluon applications associated to projectName. gluonProjectName: ${gluonProjectName} `);
-        return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/applications?projectName=${gluonProjectName}`)
-            .then(applications => {
-                if (!_.isEmpty(applications.data._embedded)) {
-                    return Promise.resolve(applications.data._embedded.applicationResources);
-                }
 
-                return ctx.messageClient.respond({
-                    text: "Unfortunately there are no applications linked to this project.",
-                    attachments: [{
-                        text: "Would you like to create a new application?",
-                        actions: [
-                            buttonForCommand(
-                                {
-                                    text: "Create application",
-                                },
-                                new CreateApplication()),
-                        ],
-                    }],
-                })
-                    .then(() => Promise.reject(`${gluonProjectName} project does not have any applications linked to it`));
-            });
+        const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/applications?projectName=${gluonProjectName}`);
+
+        if (!isSuccessCode(result.status)) {
+            throw new QMError(`Failed to get applications linked to project ${gluonProjectName}`);
+        }
+
+        if (requestActionOnFailure && result.data._embedded.applicationResources.isEmpty()) {
+            const slackMessage: SlackMessage = {
+                text: "Unfortunately there are no applications linked to this project.",
+                attachments: [{
+                    text: "Would you like to create a new application?",
+                    fallback: "Would you like to create a new application?",
+                    actions: [
+                        buttonForCommand(
+                            {
+                                text: "Create application",
+                            },
+                            new CreateApplication()),
+                    ],
+                }],
+            };
+
+            throw new QMError(`No applications linked to project ${gluonProjectName}.`, slackMessage);
+        }
+
+        return result.data._embedded.applicationResources;
+
     }
 
     public gluonApplicationForNameAndProjectName(ctx: HandlerContext,

@@ -237,7 +237,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
             return await menuForProjects(ctx, projects, this, "Please select the owning project of the package you wish to configure");
         }
         if (_.isEmpty(this.applicationName)) {
-            const applications = await this.applicationService.gluonApplicationsLinkedToGluonProject(ctx, this.projectName);
+            const applications = await this.applicationService.gluonApplicationsLinkedToGluonProject(this.projectName);
             return await menuForApplications(ctx, applications, this, "Please select the package you wish to configure");
         }
         if (_.isEmpty(this.openshiftTemplate)) {
