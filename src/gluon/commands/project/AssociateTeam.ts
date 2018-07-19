@@ -72,7 +72,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
             );
         }
         if (_.isEmpty(this.teamName)) {
-            const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+            const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(this.screenName);
             const availTeams = await this.availableTeamsToAssociate(teams, this.projectName);
 
             if (_.isEmpty(availTeams)) {

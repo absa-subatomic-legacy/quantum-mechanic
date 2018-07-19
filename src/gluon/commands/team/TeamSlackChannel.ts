@@ -20,7 +20,6 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {
     handleQMError,
-    logErrorAndReturnSuccess,
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
@@ -105,7 +104,8 @@ export class NewTeamSlackChannel implements HandleCommand {
     })
     public teamChannel: string;
 
-    constructor(private teamService = new TeamService()) {}
+    constructor(private teamService = new TeamService()) {
+    }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
@@ -158,16 +158,12 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
-            try {
-                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.slackScreenName);
-                return await menuForTeams(
-                    ctx,
-                    teams,
-                    this,
-                    "Please select the team you would like to link the slack channel to");
-            } catch (error) {
-                return await logErrorAndReturnSuccess(this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
-            }
+            const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(this.slackScreenName);
+            return await menuForTeams(
+                ctx,
+                teams,
+                this,
+                "Please select the team you would like to link the slack channel to");
         }
     }
 

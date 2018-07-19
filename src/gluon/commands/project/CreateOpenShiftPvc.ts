@@ -131,32 +131,29 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
     }
 
     private async presentMenuToSelectProjectAssociatedTeam(ctx: HandlerContext): Promise<HandlerResult> {
-        try {
-            const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
-            const msg: SlackMessage = {
-                text: "Please select a team associated with the project you wish to create a PVC for",
-                attachments: [{
-                    fallback: "Please select a team",
-                    actions: [
-                        menuForCommand({
-                                text: "Select Team", options:
-                                    teams.map(team => {
-                                        return {
-                                            value: team.name,
-                                            text: team.name,
-                                        };
-                                    }),
-                            },
-                            this, "gluonTeamName",
-                            {pvcName: this.pvcName}),
-                    ],
-                }],
-            };
 
-            return await ctx.messageClient.respond(msg);
-        } catch (error) {
-            return await logErrorAndReturnSuccess(this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo.name, error);
-        }
+        const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(this.screenName);
+        const msg: SlackMessage = {
+            text: "Please select a team associated with the project you wish to create a PVC for",
+            attachments: [{
+                fallback: "Please select a team",
+                actions: [
+                    menuForCommand({
+                            text: "Select Team", options:
+                                teams.map(team => {
+                                    return {
+                                        value: team.name,
+                                        text: team.name,
+                                    };
+                                }),
+                        },
+                        this, "gluonTeamName",
+                        {pvcName: this.pvcName}),
+                ],
+            }],
+        };
+
+        return await ctx.messageClient.respond(msg);
     }
 
     private async presentMenuToSelectProjectToCreatePvcFor(ctx: HandlerContext): Promise<HandlerResult> {

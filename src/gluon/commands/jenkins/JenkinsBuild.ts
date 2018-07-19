@@ -81,7 +81,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand {
                 this.teamName = team.name;
                 return await this.handle(ctx);
             } catch (error) {
-                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(ctx, this.screenName);
+                const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(this.screenName);
                 return await menuForTeams(
                     ctx,
                     teams,

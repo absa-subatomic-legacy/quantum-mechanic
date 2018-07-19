@@ -4,29 +4,31 @@ import {
     logger,
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {SlackMessage} from "@atomist/slack-messages";
 import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateTeam} from "../../commands/team/CreateTeam";
 import {JoinTeam} from "../../commands/team/JoinTeam";
+import {QMError} from "../shared/Error";
 import {createMenu} from "../shared/GenericMenu";
+import {isSuccessCode} from "../shared/Http";
 
 export class TeamService {
-    public gluonTeamsWhoSlackScreenNameBelongsTo(ctx: HandlerContext, screenName: string): Promise<any[]> {
+    public async gluonTeamsWhoSlackScreenNameBelongsTo(screenName: string, requestActionOnFailure: boolean = true): Promise<any[]> {
         logger.debug(`Trying to get gluon teams associated to a screenName. screenName: ${screenName} `);
-        return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackScreenName=${screenName}`)
-            .then(teams => {
-                if (!_.isEmpty(teams.data._embedded)) {
-                    return Promise.resolve(teams.data._embedded.teamResources);
-                }
 
-                return ctx.messageClient.respond({
-                    // TODO this message should be customisable, as this function is used elsewhere
+        const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackScreenName=${screenName}`);
+
+        if (!isSuccessCode(result.status)) {
+            const errorMessage = `Failed to find teams associated to member. Member ${screenName} is either not onboarded, or is not a member of any team..`;
+            if (requestActionOnFailure) {
+                const slackMessage: SlackMessage = {
                     text: "Unfortunately, you are not a member of any team. To associate this project you need to be a member of at least one team.",
                     attachments: [{
                         text: "You can either create a new team or apply to join an existing team",
+                        fallback: "You can either create a new team or apply to join an existing team",
                         actions: [
-                            // TODO add support for this later
                             buttonForCommand(
                                 {
                                     text: "Apply to join a team",
@@ -38,9 +40,15 @@ export class TeamService {
                                 new CreateTeam()),
                         ],
                     }],
-                })
-                    .then(() => Promise.reject(`${screenName} does not belong to any team`));
-            });
+                };
+
+                throw new QMError(errorMessage, slackMessage);
+            } else {
+                throw new QMError(errorMessage);
+            }
+        }
+
+        return result.data._embedded.teamResources;
     }
 
     public gluonTeamForSlackTeamChannel(teamChannel: string): Promise<any> {
