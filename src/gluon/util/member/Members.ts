@@ -49,25 +49,30 @@ To create a team you must first onboard yourself. Click the button below to do t
     }
 
     public async gluonMemberFromEmailAddress(emailAddress: string): Promise<any> {
+        logger.debug(`Trying to get member from email address. emailAddress: ${emailAddress}`);
         return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members?email=${emailAddress}`);
     }
 
     public async gluonMemberFromMemberId(memberId: string): Promise<any> {
+        logger.debug(`Trying to get member from memberId. memberId: ${memberId}`);
         return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/members/${memberId}`);
     }
 
     public async createGluonMember(teamMemberDetails: any): Promise<any> {
+        logger.debug(`Trying to create gluon member.`);
         return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/members`,
             teamMemberDetails);
     }
 
     public async updateGluonMembershipRequest(teamId: string, membershipRequestDetails: any): Promise<any> {
+        logger.debug(`Trying to update membership request. teamId: ${teamId}`);
         return await axios.put(
             `${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
             membershipRequestDetails);
     }
 
     public async updateMemberSlackDetails(memberId: string, slackDetails: any): Promise<any> {
+        logger.debug(`Trying to update member slack details. memberId: ${memberId}`);
         return await axios.put(
             `${QMConfig.subatomic.gluon.baseUrl}/members/${memberId}`, slackDetails);
     }

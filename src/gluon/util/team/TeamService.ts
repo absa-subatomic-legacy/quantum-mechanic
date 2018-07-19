@@ -64,6 +64,7 @@ export class TeamService {
     }
 
     public async getAllTeams(): Promise<any> {
+        logger.debug(`Trying to get all teams.`);
         return await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
     }
 
@@ -74,6 +75,7 @@ export class TeamService {
     }
 
     public async createGluonTeam(teamName: string, teamDescription: string, createdBy: string): Promise<any> {
+        logger.debug(`Trying to create team. teamName: ${teamName}; teamDescription: ${teamDescription}; createdBy: ${createdBy}`);
         return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/teams`, {
             name: teamName,
             description: teamDescription,
@@ -82,20 +84,24 @@ export class TeamService {
     }
 
     public async addSlackDetailsToTeam(teamId: string, slackDetails: any): Promise<any> {
+        logger.debug(`Trying to update team slack details. teamId: ${teamId}`);
         return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`, slackDetails);
     }
 
     public async addMemberToTeam(teamId: string, memberDetails: any): Promise<any> {
+        logger.debug(`Trying to add member member to team. teamId: ${teamId}`);
         return await axios.put(teamId,
             memberDetails);
     }
 
     public async createMembershipRequest(teamId: string, membershipRequestDetails: any): Promise<any> {
+        logger.debug(`Trying to create membership request. teamId: ${teamId}`);
         return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
             membershipRequestDetails);
     }
 
     public async requestDevOpsEnvironment(teamId: string, memberId: string): Promise<any> {
+        logger.debug(`Trying to request team devops environment. teamId: ${teamId}, memberId: ${memberId}`);
         return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`,
             {
                 devOpsEnvironment: {

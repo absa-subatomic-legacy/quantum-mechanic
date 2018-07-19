@@ -107,6 +107,7 @@ Consider creating a new application called ${applicationName}. Click the button 
     }
 
     public async createGluonApplication(applicationDetails: any): Promise<any> {
+        logger.debug(`Trying to create application.`);
         return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`, applicationDetails);
     }
 }
