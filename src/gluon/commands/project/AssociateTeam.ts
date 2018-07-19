@@ -63,7 +63,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.projectName)) {
-            const projects = await this.projectService.gluonProjectList(ctx);
+            const projects = await this.projectService.gluonProjectList();
             return await menuForProjects(
                 ctx,
                 projects,

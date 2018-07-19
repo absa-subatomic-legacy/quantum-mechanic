@@ -6,7 +6,6 @@ import {
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import axios from "axios";
-import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateProject} from "../../commands/project/CreateProject";
 import {QMError} from "../shared/Error";
@@ -87,18 +86,20 @@ Consider creating a new project called ${projectName}. Click the button below to
         return result.data._embedded.projectResources;
     }
 
-    public gluonProjectList(ctx: HandlerContext): Promise<any[]> {
-        logger.debug(`Trying to get all gluon projects.`);
-        return axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects`)
-            .then(projects => {
-                if (!_.isEmpty(projects.data._embedded)) {
-                    return Promise.resolve(projects.data._embedded.projectResources);
-                }
+    public async gluonProjectList(promptToCreateIfNoProjects: boolean = true): Promise<any[]> {
 
-                return ctx.messageClient.respond({
-                    text: "Unfortunately there are no existing projects",
+        logger.debug(`Trying to get all gluon projects.`);
+
+        const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects`);
+
+        if (!isSuccessCode(result.status)) {
+            const errorMessage = `No projects exist.`;
+            if (promptToCreateIfNoProjects) {
+                const slackMessage: SlackMessage = {
+                    text: "Unfortunately there are no projects created yet.",
                     attachments: [{
                         text: "Would you like to create a new project?",
+                        fallback: "Would you like to create a new project?",
                         actions: [
                             buttonForCommand(
                                 {
@@ -107,9 +108,14 @@ Consider creating a new project called ${projectName}. Click the button below to
                                 new CreateProject()),
                         ],
                     }],
-                })
-                    .then(() => Promise.reject(`Currently no existing projects.`));
-            });
+                };
+                throw new QMError(errorMessage, slackMessage);
+            } else {
+                throw new QMError(errorMessage);
+            }
+        }
+
+        return result.data._embedded.projectResources;
     }
 
     public async createGluonProject(projectDetails: any): Promise<any> {
