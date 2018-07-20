@@ -17,7 +17,7 @@ import {createChannel} from "@atomist/lifecycle-automation/handlers/command/slac
 import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
-import {MemberService} from "../../util/member/Members";
+import {GluonService} from "../../services/gluon/GluonService";
 import {
     handleQMError,
     QMError,
@@ -28,7 +28,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/shared/RecursiveParameterRequestCommand";
-import {menuForTeams, TeamService} from "../../util/team/TeamService";
+import {menuForTeams} from "../../util/team/TeamService";
 import {CreateTeam} from "./CreateTeam";
 
 @CommandHandler("Check whether to create a new team channel or use an existing channel")
@@ -104,7 +104,7 @@ export class NewTeamSlackChannel implements HandleCommand {
     })
     public teamChannel: string;
 
-    constructor(private teamService = new TeamService(), private teamSlackChannelService = new TeamSlackChannelService()) {
+    constructor(private teamSlackChannelService = new TeamSlackChannelService()) {
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
@@ -148,7 +148,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
     })
     public teamChannel: string;
 
-    constructor(private teamService = new TeamService(),
+    constructor(private gluonService = new GluonService(),
                 private teamSlackChannelService = new TeamSlackChannelService()) {
         super();
     }
@@ -159,7 +159,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.teamName)) {
-            const teams = await this.teamService.gluonTeamsWhoSlackScreenNameBelongsTo(this.slackScreenName);
+            const teams = await this.gluonService.teams.gluonTeamsWhoSlackScreenNameBelongsTo(this.slackScreenName);
             return await menuForTeams(
                 ctx,
                 teams,
@@ -176,7 +176,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
 
 export class TeamSlackChannelService {
 
-    constructor(private teamService = new TeamService(), private memberService = new MemberService()) {
+    constructor(private gluonService = new GluonService()) {
     }
 
     public async linkSlackChannelToGluonTeam(ctx: HandlerContext,
@@ -190,14 +190,14 @@ export class TeamSlackChannelService {
             finalisedSlackChannelName = _.kebabCase(slackChannelName);
         }
 
-        const teamQueryResult = await this.teamService.gluonTeamByName(gluonTeamName);
+        const teamQueryResult = await this.gluonService.teams.gluonTeamByName(gluonTeamName);
 
         if (isSuccessCode(teamQueryResult.status)) {
             const team = teamQueryResult.data._embedded.teamResources[0];
 
             logger.info(`Updating team channel [${finalisedSlackChannelName}]: ${team.teamId}`);
 
-            await this.teamService.addSlackDetailsToTeam(team.teamId, {
+            await this.gluonService.teams.addSlackDetailsToTeam(team.teamId, {
                 slack: {
                     teamChannel: finalisedSlackChannelName,
                 },
@@ -249,7 +249,7 @@ export class TeamSlackChannelService {
                                                 slackTeamId: string,
                                                 slackChannelId: string): Promise<any> {
         logger.info("Creating promise to find and add member: " + gluonMemberId);
-        const memberQueryResponse = await this.memberService.gluonMemberFromMemberId(gluonMemberId);
+        const memberQueryResponse = await this.gluonService.members.gluonMemberFromMemberId(gluonMemberId);
 
         if (!isSuccessCode(memberQueryResponse.status)) {
             throw new Error("Unable to find member");

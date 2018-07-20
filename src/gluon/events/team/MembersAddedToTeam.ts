@@ -8,11 +8,11 @@ import {
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
+import {GluonService} from "../../services/gluon/GluonService";
 import {BitbucketService} from "../../util/bitbucket/Bitbucket";
 import {BitbucketConfiguration} from "../../util/bitbucket/BitbucketConfiguration";
 import {OCService} from "../../util/openshift/OCService";
 import {getProjectDisplayName} from "../../util/project/Project";
-import {ProjectService} from "../../util/project/ProjectService";
 import {
     ChannelMessageClient,
     handleQMError,
@@ -50,7 +50,7 @@ subscription MembersAddedToTeamEvent {
 `)
 export class MembersAddedToTeam implements HandleEvent<any> {
 
-    constructor(private projectService = new ProjectService(),
+    constructor(private gluonService = new GluonService(),
                 private bitbucketService = new BitbucketService(),
                 private ocService = new OCService()) {
     }
@@ -78,7 +78,7 @@ export class MembersAddedToTeam implements HandleEvent<any> {
     private async getListOfTeamProjects(teamName: string) {
         let projects;
         try {
-            projects = await this.projectService.gluonProjectsWhichBelongToGluonTeam(teamName, false);
+            projects = await this.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(teamName, false);
         } catch (error) {
             throw new QMError(error, "Failed to get list of projects associated with this team.");
         }
