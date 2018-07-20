@@ -17,8 +17,8 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {QMTemplate} from "../../../template/QMTemplate";
 import {GluonService} from "../../services/gluon/GluonService";
-import {JenkinsService} from "../../util/jenkins/Jenkins";
-import {OCService} from "../../util/openshift/OCService";
+import {JenkinsService} from "../../services/jenkins/JenkinsService";
+import {OCService} from "../../services/openshift/OCService";
 import {
     ApplicationType,
     menuForApplications,

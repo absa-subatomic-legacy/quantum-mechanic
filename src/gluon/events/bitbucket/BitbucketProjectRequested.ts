@@ -10,9 +10,9 @@ import {
 import {url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
+import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
+import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {BitbucketService} from "../../util/bitbucket/Bitbucket";
-import {BitbucketConfiguration} from "../../util/bitbucket/BitbucketConfiguration";
 import {
     handleQMError,
     QMError,
@@ -89,7 +89,7 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
                 teamMembers = _.union(teamMembers, team.members.map(member => member.domainUsername));
             });
 
-            const bitbucketConfiguration = new BitbucketConfiguration(
+            const bitbucketConfiguration = new BitbucketConfigurationService(
                 teamOwners,
                 teamMembers,
                 this.bitbucketService,

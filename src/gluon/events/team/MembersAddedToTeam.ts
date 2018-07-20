@@ -8,10 +8,10 @@ import {
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
+import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
+import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {BitbucketService} from "../../util/bitbucket/Bitbucket";
-import {BitbucketConfiguration} from "../../util/bitbucket/BitbucketConfiguration";
-import {OCService} from "../../util/openshift/OCService";
+import {OCService} from "../../services/openshift/OCService";
 import {getProjectDisplayName} from "../../util/project/Project";
 import {
     ChannelMessageClient,
@@ -85,16 +85,16 @@ export class MembersAddedToTeam implements HandleEvent<any> {
         return projects;
     }
 
-    private getBitbucketConfiguration(membersAddedToTeamEvent): BitbucketConfiguration {
+    private getBitbucketConfiguration(membersAddedToTeamEvent): BitbucketConfigurationService {
         let teamOwnersUsernames: string[] = [];
         let teamMembersUsernames: string[] = [];
 
         teamOwnersUsernames = _.union(teamOwnersUsernames, membersAddedToTeamEvent.owners.map(owner => owner.domainUsername));
         teamMembersUsernames = _.union(teamMembersUsernames, membersAddedToTeamEvent.members.map(member => member.domainUsername));
-        return new BitbucketConfiguration(teamOwnersUsernames, teamMembersUsernames, this.bitbucketService);
+        return new BitbucketConfigurationService(teamOwnersUsernames, teamMembersUsernames, this.bitbucketService);
     }
 
-    private async addPermissionsForUserToTeams(bitbucketConfiguration: BitbucketConfiguration, teamName: string, projects, membersAddedToTeamEvent) {
+    private async addPermissionsForUserToTeams(bitbucketConfiguration: BitbucketConfigurationService, teamName: string, projects, membersAddedToTeamEvent) {
         try {
             await this.ocService.login();
             const devopsProject = `${_.kebabCase(teamName).toLowerCase()}-devops`;

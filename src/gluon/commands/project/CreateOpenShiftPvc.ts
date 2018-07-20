@@ -13,7 +13,7 @@ import {Attachment} from "@atomist/slack-messages/SlackMessages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
-import {OCService} from "../../util/openshift/OCService";
+import {OCService} from "../../services/openshift/OCService";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {
     RecursiveParameter,

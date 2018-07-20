@@ -9,11 +9,9 @@ import {
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
+import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {
-    BitbucketService,
-    menuForBitbucketRepositories,
-} from "../../util/bitbucket/Bitbucket";
+import {menuForBitbucketRepositories} from "../../util/bitbucket/Bitbucket";
 import {ApplicationType} from "../../util/packages/Applications";
 import {PackageCommandService} from "../../util/packages/PackageCommandService";
 import {menuForProjects} from "../../util/project/Project";

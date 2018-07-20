@@ -1,7 +1,7 @@
 import {HandlerResult, logger, success} from "@atomist/automation-client";
 import * as _ from "lodash";
+import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {BitbucketService} from "../bitbucket/Bitbucket";
 import {QMError} from "../shared/Error";
 import {isSuccessCode} from "../shared/Http";
 import {ApplicationType} from "./Applications";

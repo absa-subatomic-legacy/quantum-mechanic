@@ -10,8 +10,8 @@ import {
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
+import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {BitbucketService} from "../../util/bitbucket/Bitbucket";
 import {menuForProjects} from "../../util/project/Project";
 import {
     handleQMError,
