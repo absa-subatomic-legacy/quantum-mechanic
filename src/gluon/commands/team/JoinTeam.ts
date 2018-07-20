@@ -19,14 +19,12 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import * as graphql from "../../../typings/types";
 import {GluonService} from "../../services/gluon/GluonService";
-import {MemberService} from "../../util/member/Members";
 import {
     handleQMError,
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
-import {TeamService} from "../../util/team/TeamService";
 import {ListTeamProjects} from "../project/ProjectDetails";
 import {CreateTeam} from "./CreateTeam";
 
@@ -271,8 +269,7 @@ export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResul
     })
     public slackName: string;
 
-    constructor(private teamService = new TeamService(),
-                private memberService = new MemberService()) {
+    constructor(private gluonService = new GluonService()) {
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
@@ -283,7 +280,7 @@ export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResul
 
             const chatId = await loadScreenNameByUserId(ctx, screenName);
 
-            const newMemberQueryResult = await this.memberService.gluonMemberFromScreenName(chatId);
+            const newMemberQueryResult = await this.gluonService.members.gluonMemberFromScreenName(chatId);
 
             if (!isSuccessCode(newMemberQueryResult.status)) {
                 return await alertGluonMemberForSlackMentionDoesNotExist(ctx, this.slackName, this.docs("onboard-me"));
@@ -298,7 +295,7 @@ export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResul
     }
 
     private async createMembershipRequest(newMember) {
-        const updateTeamResult = await this.teamService.createMembershipRequest(this.teamId,
+        const updateTeamResult = await this.gluonService.teams.createMembershipRequest(this.teamId,
             {
                 membershipRequests: [
                     {

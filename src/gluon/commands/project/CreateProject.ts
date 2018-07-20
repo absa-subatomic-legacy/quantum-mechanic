@@ -20,8 +20,8 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/shared/RecursiveParameterRequestCommand";
-import {menuForTenants} from "../../util/shared/TenantService";
-import {menuForTeams} from "../../util/team/TeamService";
+import {menuForTenants} from "../../util/shared/Tenants";
+import {menuForTeams} from "../../util/team/Teams";
 
 @CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
 export class CreateProject extends RecursiveParameterRequestCommand {

@@ -28,7 +28,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/shared/RecursiveParameterRequestCommand";
-import {menuForTeams} from "../../util/team/TeamService";
+import {menuForTeams} from "../../util/team/Teams";
 import {CreateTeam} from "./CreateTeam";
 
 @CommandHandler("Check whether to create a new team channel or use an existing channel")

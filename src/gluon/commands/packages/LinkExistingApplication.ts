@@ -16,13 +16,13 @@ import {
 } from "../../util/bitbucket/Bitbucket";
 import {ApplicationType} from "../../util/packages/Applications";
 import {PackageCommandService} from "../../util/packages/PackageCommandService";
-import {menuForProjects} from "../../util/project/ProjectService";
+import {menuForProjects} from "../../util/project/Project";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/shared/RecursiveParameterRequestCommand";
-import {menuForTeams} from "../../util/team/TeamService";
+import {menuForTeams} from "../../util/team/Teams";
 
 @CommandHandler("Link an existing application", QMConfig.subatomic.commandPrefix + " link application")
 export class LinkExistingApplication extends RecursiveParameterRequestCommand {

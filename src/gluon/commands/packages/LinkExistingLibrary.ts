@@ -16,7 +16,7 @@ import {
 } from "../../util/bitbucket/Bitbucket";
 import {ApplicationType} from "../../util/packages/Applications";
 import {PackageCommandService} from "../../util/packages/PackageCommandService";
-import {menuForProjects} from "../../util/project/ProjectService";
+import {menuForProjects} from "../../util/project/Project";
 import {
     handleQMError,
     QMError,
@@ -26,7 +26,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/shared/RecursiveParameterRequestCommand";
-import {menuForTeams} from "../../util/team/TeamService";
+import {menuForTeams} from "../../util/team/Teams";
 
 @CommandHandler("Link an existing library", QMConfig.subatomic.commandPrefix + " link library")
 export class LinkExistingLibrary extends RecursiveParameterRequestCommand {
