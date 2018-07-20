@@ -11,9 +11,9 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
+import {PackageCommandService} from "../../services/packages/PackageCommandService";
 import {menuForBitbucketRepositories} from "../../util/bitbucket/Bitbucket";
 import {ApplicationType} from "../../util/packages/Applications";
-import {PackageCommandService} from "../../util/packages/PackageCommandService";
 import {menuForProjects} from "../../util/project/Project";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {

@@ -1,10 +1,10 @@
 import {HandlerResult, logger, success} from "@atomist/automation-client";
 import * as _ from "lodash";
-import {BitbucketService} from "../../services/bitbucket/BitbucketService";
-import {GluonService} from "../../services/gluon/GluonService";
-import {QMError} from "../shared/Error";
-import {isSuccessCode} from "../shared/Http";
-import {ApplicationType} from "./Applications";
+import {ApplicationType} from "../../util/packages/Applications";
+import {QMError} from "../../util/shared/Error";
+import {isSuccessCode} from "../../util/shared/Http";
+import {BitbucketService} from "../bitbucket/BitbucketService";
+import {GluonService} from "../gluon/GluonService";
 
 export class PackageCommandService {
 
