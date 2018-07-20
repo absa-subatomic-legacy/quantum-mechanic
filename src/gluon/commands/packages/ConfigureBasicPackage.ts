@@ -119,7 +119,7 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand {
         const configurePackage = new ConfigurePackage();
         configurePackage.screenName = this.screenName;
         configurePackage.teamChannel = this.teamChannel;
-        configurePackage.openshiftTemplate = definition.openshiftTemplate || "";
+        configurePackage.openshiftTemplate = definition.openshiftTemplate || "Default";
         configurePackage.jenkinsfileName = definition.jenkinsfile;
         configurePackage.baseS2IImage = definition.buildConfig.imageStream;
         if (definition.buildConfig.envVariables != null) {
