@@ -302,7 +302,6 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
                         ref: "master",
                     },
                     sourceSecret: {
-                        // TODO should this be configurable?
                         name: "bitbucket-ssh",
                     },
                 },
@@ -339,7 +338,6 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
             );
         }
 
-        // TODO this should be extracted to a configurable QMTemplate
         await this.ocService.createResourceFromDataInNamespace(
             buildConfig,
             teamDevOpsProjectId,
