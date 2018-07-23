@@ -6,9 +6,7 @@ export class CreateMembershipRequestToTeamMessages {
         return {
             text: `The Slack name you typed (${slackName}) does not appear to be a valid Slack user`,
             attachments: [{
-                text: `
-Adding a team member from Slack requires typing their \`@mention\` name or using their actual Slack screen name.
-                                  `,
+                text: `Adding a team member from Slack requires typing their \`@mention\` name or using their actual Slack screen name.`,
                 fallback: `${slackName} is not onboarded onto Subatomic`,
                 footer: `For more information, please read the ${this.docs("onboard-me")}`,
                 color: "#D94649",
