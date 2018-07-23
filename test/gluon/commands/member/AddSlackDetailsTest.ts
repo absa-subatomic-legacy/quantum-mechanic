@@ -1,10 +1,11 @@
 import "mocha";
 import * as assert from "power-assert";
+
 const MockAdapter = require("axios-mock-adapter");
 import axios from "axios";
-import {QMConfig} from "../../../src/config/QMConfig";
-import {AddSlackDetails} from "../../../src/gluon/commands/member/Slack";
-import {TestMessageClient} from "../TestMessageClient";
+import {QMConfig} from "../../../../src/config/QMConfig";
+import {AddSlackDetails} from "../../../../src/gluon/commands/member/AddSlackDetails";
+import {TestMessageClient} from "../../TestMessageClient";
 
 describe("Add slack details to existing team member", () => {
     it("should add slack details to existing memnber", done => {
@@ -19,8 +20,8 @@ describe("Add slack details to existing team member", () => {
             _embedded: {
                 teamMemberResources: [
                     {
-                     memberId: `${memberId}`,
-                     firstName: `${firstName}`,
+                        memberId: `${memberId}`,
+                        firstName: `${firstName}`,
                     },
                 ],
             },
@@ -53,4 +54,8 @@ describe("Add slack details to existing team member", () => {
             })
             .then(done, done);
     });
+});
+
+describe("", () => {
+    const a = 1;
 });
