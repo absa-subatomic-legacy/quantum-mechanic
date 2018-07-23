@@ -1,8 +1,12 @@
 import * as assert from "power-assert";
+
 const MockAdapter = require("axios-mock-adapter");
 import axios from "axios";
 import {QMConfig} from "../../../src/config/QMConfig";
-import {OnboardMember} from "../../../src/gluon/commands/member/Onboard";
+import {
+    OnboardMember,
+    OnboardMemberMessages,
+} from "../../../src/gluon/commands/member/Onboard";
 import {TestMessageClient} from "../TestMessageClient";
 
 describe("Onboard new member test", () => {
@@ -35,5 +39,19 @@ describe("Onboard new member test", () => {
 
         await subject.handle(fakeContext);
         assert(fakeContext.messageClient.textMsg.text.trim() === "Welcome to the Subatomic environment *Test*!\nNext steps are to either join an existing team or create a new one.");
+    });
+});
+
+describe("OnboardMemberMessages presentTeamCreationAndApplicationOptions", () => {
+    it("should present message with two buttons", async () => {
+        const onboardMemberMessages = new OnboardMemberMessages();
+
+        const result = onboardMemberMessages.presentTeamCreationAndApplicationOptions("Tom");
+        assert(result.text.indexOf(`Welcome to the Subatomic environment *Tom*!`) > -1);
+        assert(result.attachments.length === 1);
+        assert.equal(result.attachments[0].actions[0].type, "button");
+        assert.equal(result.attachments[0].actions[0].text, "Apply to join a team");
+        assert.equal(result.attachments[0].actions[1].type, "button");
+        assert.equal(result.attachments[0].actions[1].text, "Create a new team");
     });
 });

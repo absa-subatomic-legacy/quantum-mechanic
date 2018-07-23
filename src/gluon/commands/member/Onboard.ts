@@ -55,6 +55,8 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
     })
     public domainUsername: string;
 
+    public onboardMessages: OnboardMemberMessages = new OnboardMemberMessages();
+
     constructor(private gluonService = new GluonService()) {
     }
 
@@ -72,8 +74,8 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
                         userId: this.userId,
                     },
                 });
-
-            return await this.presentTeamCreationAndApplicationOptions(ctx, this.firstName, this.userId);
+            const message = this.onboardMessages.presentTeamCreationAndApplicationOptions(this.firstName);
+            return await ctx.messageClient.addressUsers(message, this.userId);
         } catch (error) {
             return await this.handleError(ctx, error);
         }
@@ -88,13 +90,20 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
         }
     }
 
-    private async presentTeamCreationAndApplicationOptions(ctx: HandlerContext, firstName: string, userId: string): Promise<HandlerResult> {
+    private async handleError(ctx: HandlerContext, error) {
+        const messageClient = new ResponderMessageClient(ctx);
+        return await handleQMError(messageClient, error);
+    }
+}
+
+export class OnboardMemberMessages {
+    public presentTeamCreationAndApplicationOptions(firstName: string): SlackMessage {
         const text: string = `
 Welcome to the Subatomic environment *${firstName}*!
 Next steps are to either join an existing team or create a new one.
                 `;
 
-        const msg: SlackMessage = {
+        return {
             text,
             attachments: [{
                 fallback: "Welcome to the Subatomic environment",
@@ -113,16 +122,11 @@ Next steps are to either join an existing team or create a new one.
                 ],
             }],
         };
-        return await ctx.messageClient.addressUsers(msg, userId);
     }
 
-    private docs(): string {
+    public docs(): string {
         return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#joinTeam`,
             "documentation")}`;
     }
 
-    private async handleError(ctx: HandlerContext, error) {
-        const messageClient = new ResponderMessageClient(ctx);
-        return await handleQMError(messageClient, error);
-    }
 }
