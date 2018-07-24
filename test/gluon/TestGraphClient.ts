@@ -10,6 +10,11 @@ export class TestGraphClient implements GraphClient {
     public queryString: string;
     public var: any;
 
+    public executeQueryFromFileResults: boolean[] = [];
+    public executeMutationFromFileResults: boolean[] = [];
+    public executeQueryResults: boolean[] = [];
+    public executeMutationResults: boolean [] = [];
+
     public executeQueryFromFile<T, Q>(path: string, variables?: Q, options?: any, current?: string): Promise<any> {
         this.path = path;
         const json = {
@@ -20,11 +25,23 @@ export class TestGraphClient implements GraphClient {
                 },
             ],
         };
+        if (this.executeQueryFromFileResults.length > 0) {
+            const result = this.executeQueryFromFileResults.shift();
+            if (!result) {
+                return Promise.reject(json);
+            }
+        }
         return Promise.resolve(json);
     }
 
     public executeMutationFromFile<T, Q>(path: string, variables?: Q, options?: any, current?: string): Promise<any> {
         this.path = path;
+        if (this.executeMutationFromFileResults.length > 0) {
+            const result = this.executeMutationFromFileResults.shift();
+            if (!result) {
+                return Promise.reject("Error");
+            }
+        }
         return Promise.resolve();
     }
 
@@ -48,11 +65,23 @@ export class TestGraphClient implements GraphClient {
 
     public executeQuery<T, Q>(query: string, variables?: Q, options?: any): Promise<any> {
         this.queryString = query;
+        if (this.executeQueryResults.length > 0) {
+            const result = this.executeQueryResults.shift();
+            if (!result) {
+                return Promise.reject("Error");
+            }
+        }
         return Promise.resolve();
     }
 
     public executeMutation<T, Q>(mutation: string, variables?: Q, options?: any): Promise<any> {
         this.mutation = mutation;
+        if (this.executeMutationResults.length > 0) {
+            const result = this.executeMutationResults.shift();
+            if (!result) {
+                return Promise.reject("Error");
+            }
+        }
         return Promise.resolve();
     }
 }
