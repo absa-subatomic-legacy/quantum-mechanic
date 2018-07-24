@@ -100,15 +100,10 @@ export class NewTeamSlackChannel implements HandleCommand {
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             this.teamChannel = _.isEmpty(this.teamChannel) ? this.teamName : this.teamChannel;
-            return await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, this.docs(), true);
+            return await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, "create-team-channel", true);
         } catch (error) {
             return await this.handleError(ctx, error);
         }
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-team-channel`,
-            "documentation")}`;
     }
 
     private async handleError(ctx: HandlerContext, error) {
@@ -144,7 +139,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
     }
 
     protected async runCommand(ctx: HandlerContext) {
-        return await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, this.docs(), false);
+        return await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, "link-team-channel", false);
     }
 
     protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -156,10 +151,5 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
                 this,
                 "Please select the team you would like to link the slack channel to");
         }
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#link-team-channel`,
-            "documentation")}`;
     }
 }
