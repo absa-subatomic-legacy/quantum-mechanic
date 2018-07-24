@@ -25,11 +25,9 @@ import {CreateMembershipRequestToTeam} from "./gluon/commands/team/CreateMembers
 import {CreateTeam} from "./gluon/commands/team/CreateTeam";
 import {NewDevOpsEnvironment} from "./gluon/commands/team/DevOpsEnvironment";
 import {JoinTeam} from "./gluon/commands/team/JoinTeam";
-import {
-    LinkExistingTeamSlackChannel,
-    NewOrUseTeamSlackChannel,
-    NewTeamSlackChannel,
-} from "./gluon/commands/team/TeamSlackChannel";
+import {LinkExistingTeamSlackChannel} from "./gluon/commands/team/LinkExistingTeamSlackChannel";
+import {NewOrUseTeamSlackChannel} from "./gluon/commands/team/NewOrExistingTeamSlackChannel";
+import {NewTeamSlackChannel} from "./gluon/commands/team/NewSlackChannel";
 import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAdded";
 import {BitbucketProjectRequested} from "./gluon/events/bitbucket/BitbucketProjectRequested";
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
