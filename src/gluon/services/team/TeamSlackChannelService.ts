@@ -35,6 +35,17 @@ export class TeamSlackChannelService {
 
     }
 
+    public async getGluonTeam(gluonTeamName, commandReferenceDocsExtension): Promise<any> {
+        const teamQueryResult = await this.gluonService.teams.gluonTeamByName(gluonTeamName);
+
+        if (!isSuccessCode(teamQueryResult.status)) {
+            throw new QMError(`Failed to find to gluon team ${gluonTeamName}`,
+                this.teamSlackChannelMessages.requestNonExistentTeamsCreation(gluonTeamName, commandReferenceDocsExtension));
+        }
+
+        return teamQueryResult.data._embedded.teamResources[0];
+    }
+
     public async addSlackDetailsToGluonTeam(gluonTeamId: string,
                                             slackChannelName: string,
                                             isNewChannel: boolean) {
@@ -45,11 +56,15 @@ export class TeamSlackChannelService {
 
         logger.info(`Updating team channel [${finalisedSlackChannelName}]: ${gluonTeamId}`);
 
-        await this.gluonService.teams.addSlackDetailsToTeam(gluonTeamId, {
+        const result = await this.gluonService.teams.addSlackDetailsToTeam(gluonTeamId, {
             slack: {
                 teamChannel: finalisedSlackChannelName,
             },
         });
+
+        if (!isSuccessCode(result.status)) {
+            throw new QMError(`Failed to add slack details to team with id ${gluonTeamId}`);
+        }
     }
 
     public async createTeamSlackChannel(ctx: HandlerContext, slackTeamId: string, slackChannelName: string): Promise<CreateSlackChannel.Mutation> {
@@ -72,7 +87,7 @@ export class TeamSlackChannelService {
 
     }
 
-    public async inviteListOfGluonMembersToChannel(ctx: HandlerContext, slackTeamId: string, channelId: string, slackChannelName: string, memberList): Promise<void> {
+    public async inviteListOfGluonMembersToChannel(ctx: HandlerContext, slackTeamId: string, channelId: string, slackChannelName: string, memberList: any[]): Promise<void> {
         for (const member of memberList) {
             try {
                 await this.tryInviteGluonMemberToChannel(ctx, member.memberId, slackTeamId, channelId);
@@ -91,27 +106,16 @@ export class TeamSlackChannelService {
         const memberQueryResponse = await this.gluonService.members.gluonMemberFromMemberId(gluonMemberId);
 
         if (!isSuccessCode(memberQueryResponse.status)) {
-            throw new Error("Unable to find member");
+            throw new QMError("Unable to find member");
         }
 
         const member = memberQueryResponse.data;
-        if (member.slack !== null) {
+        if (!_.isEmpty(member.slack)) {
             logger.info(`Inviting member: ${member.firstName}`);
             return await inviteUserToSlackChannel(ctx, slackTeamId, slackChannelId, member.slack.userId);
         } else {
-            throw new Error("User has no associated slack id to invite");
+            throw new QMError("User has no associated slack id to invite");
         }
-    }
-
-    private async getGluonTeam(gluonTeamName, commandReferenceDocsExtension): Promise<any> {
-        const teamQueryResult = await this.gluonService.teams.gluonTeamByName(gluonTeamName);
-
-        if (isSuccessCode(teamQueryResult.status)) {
-            throw new QMError(`Failed to find to gluon team ${gluonTeamName}`,
-                this.teamSlackChannelMessages.requestNonExistentTeamsCreation(gluonTeamName, commandReferenceDocsExtension));
-        }
-
-        return teamQueryResult.data._embedded.teamResources[0];
     }
 
 }

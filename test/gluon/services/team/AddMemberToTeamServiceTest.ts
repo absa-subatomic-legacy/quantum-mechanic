@@ -129,7 +129,7 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
         };
 
         // Force invite to fail
-        fakeContext.graphClient.executeMutationFromFileResults.push(false);
+        fakeContext.graphClient.executeMutationFromFileResults.push({result: false});
 
         await service.inviteUserToSlackChannel(fakeContext,
             "Jude",
@@ -142,7 +142,7 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
             "jude",
         );
 
-        assert.equal(fakeContext.messageClient.textMsg, "User jude successfully added to your gluon team." +
+        assert.equal(fakeContext.messageClient.textMsg[0], "User jude successfully added to your gluon team." +
             " Private channels do not currently support automatic user invitation." +
             " Please invite the user to this slack channel manually.");
 
@@ -170,7 +170,7 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
             "jude",
         );
 
-        assert.equal(fakeContext.messageClient.textMsg.text, "Welcome to the team *Jude*!");
+        assert.equal(fakeContext.messageClient.textMsg[0].text, "Welcome to the team *Jude*!");
 
     });
 });

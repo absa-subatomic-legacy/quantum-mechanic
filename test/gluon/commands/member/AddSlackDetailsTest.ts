@@ -49,7 +49,7 @@ describe("Add slack details to existing team member", () => {
 
         subject.handle(fakeContext)
             .then(() => {
-                assert(fakeContext.messageClient.textMsg.text === `Thanks *${firstName}*, your Slack details have been added to your Subatomic profile. 👍`);
+                assert(fakeContext.messageClient.textMsg[0].text === `Thanks *${firstName}*, your Slack details have been added to your Subatomic profile. 👍`);
                 return Promise.resolve();
             })
             .then(done, done);

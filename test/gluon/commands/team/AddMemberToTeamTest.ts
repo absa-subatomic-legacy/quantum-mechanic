@@ -68,10 +68,10 @@ describe("AddMemberToTeam tests", () => {
         });
         const subject = new AddMemberToTeam();
         subject.screenName = `${screenName}`;
-        subject.teamId = `${teamId}`,
-            subject.channelId = `${channelId}`,
-            subject.teamChannel = `${teamChannel}`,
-            subject.slackName = `${slackName}`;
+        subject.teamId = `${teamId}`;
+        subject.channelId = `${channelId}`;
+        subject.teamChannel = `${teamChannel}`;
+        subject.slackName = `${slackName}`;
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
@@ -80,6 +80,6 @@ describe("AddMemberToTeam tests", () => {
         };
 
         await subject.handle(fakeContext);
-        assert(fakeContext.messageClient.textMsg.text === "Welcome to the team *Test*!");
+        assert(fakeContext.messageClient.textMsg[0].text === "Welcome to the team *Test*!");
     });
 });

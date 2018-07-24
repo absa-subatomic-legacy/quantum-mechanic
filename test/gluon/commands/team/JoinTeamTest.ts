@@ -35,6 +35,6 @@ describe("Join team tests", () => {
         };
 
         await subject.handle(fakeContext);
-        assert(fakeContext.messageClient.textMsg.text === `Please select the team you would like to join`);
+        assert(fakeContext.messageClient.textMsg[0].text === `Please select the team you would like to join`);
     });
 });

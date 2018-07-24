@@ -35,6 +35,6 @@ describe("Onboard new member test", () => {
         };
 
         await subject.handle(fakeContext);
-        assert(fakeContext.messageClient.textMsg.text.trim() === "Welcome to the Subatomic environment *Test*!\nNext steps are to either join an existing team or create a new one.");
+        assert(fakeContext.messageClient.textMsg[0].text.trim() === "Welcome to the Subatomic environment *Test*!\nNext steps are to either join an existing team or create a new one.");
     });
 });

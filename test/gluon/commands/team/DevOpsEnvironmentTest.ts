@@ -80,6 +80,6 @@ describe("Create a new or use an existing Openshift DevOps environment", () => {
         };
 
         await subject.handle(fakeContext);
-        assert(fakeContext.messageClient.textMsg.text === `Requesting DevOps environment for *${teamName}* team.`);
+        assert(fakeContext.messageClient.textMsg[0].text === `Requesting DevOps environment for *${teamName}* team.`);
     });
 });
