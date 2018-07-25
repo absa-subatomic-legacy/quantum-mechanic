@@ -16,9 +16,7 @@ import {LinkExistingApplication} from "../../commands/packages/LinkExistingAppli
 import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
-import {
-    getProjectId,
-} from "../../util/project/Project";
+import {getProjectId} from "../../util/project/Project";
 import {
     ChannelMessageClient,
     handleQMError,
@@ -189,11 +187,12 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
 
     private async createOpenshiftProject(projectId: string, environmentsRequestedEvent, environment) {
         try {
-            return await this.ocService.newSubatomicProject(
+            await this.ocService.newSubatomicProject(
                 projectId,
                 environmentsRequestedEvent.project.name,
                 environmentsRequestedEvent.owningTenant.name,
                 environment);
+            await this.ocService.initilizeProjectWithDefaultProjectTemplate(projectId);
         } catch (err) {
             logger.warn(err);
         } finally {
