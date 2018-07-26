@@ -192,10 +192,10 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                 environmentsRequestedEvent.project.name,
                 environmentsRequestedEvent.owningTenant.name,
                 environment);
-            await this.ocService.initilizeProjectWithDefaultProjectTemplate(projectId);
         } catch (err) {
             logger.warn(err);
         } finally {
+            await this.ocService.initilizeProjectWithDefaultProjectTemplate(projectId);
             await environmentsRequestedEvent.teams.map(async team => {
                 await this.ocService.addTeamMembershipPermissionsToProject(projectId, team);
             });

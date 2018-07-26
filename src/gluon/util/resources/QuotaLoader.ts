@@ -2,7 +2,7 @@ import {JsonLoader} from "./JsonLoader";
 
 export class QuotaLoader extends JsonLoader {
 
-    private readonly QUOTA_DIRECTORY = "/resources/quotas/";
+    private readonly QUOTA_DIRECTORY = "resources/quotas/";
 
     public getDevOpsDefaultResourceQuota() {
         return this.readFileContents(`${this.QUOTA_DIRECTORY}devops-default-resource-quota.json`);
