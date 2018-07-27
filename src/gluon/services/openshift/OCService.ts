@@ -305,4 +305,15 @@ export class OCService {
             logger.debug(`Base template is empty. Not applying to project ${projectId}`);
         }
     }
+
+    public async findProject(projectId: string) {
+        const listOfProjectsResult = await OCCommon.commonCommand("get", "projects",
+            [], [new SimpleOption("-output", "json")]);
+        for (const project of JSON.parse(listOfProjectsResult.output).items) {
+            if (project.metadata.name === projectId) {
+                return project;
+            }
+        }
+        return null;
+    }
 }
