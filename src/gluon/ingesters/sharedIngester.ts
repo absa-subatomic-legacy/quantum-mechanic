@@ -332,3 +332,43 @@ export const GluonTenantId: Ingester = {
         },
     ],
 };
+
+export const BitbucketRepository: Ingester = {
+    root_type: "BitbucketRepository",
+    types: [
+        {
+            kind: "OBJECT",
+            name: "BitbucketRepository",
+            fields: [
+                {
+                    name: "bitbucketId",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+                {
+                    name: "name",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+                {
+                    name: "repoUrl",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+                {
+                    name: "remoteUrl",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+            ],
+        },
+    ],
+};

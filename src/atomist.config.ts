@@ -34,6 +34,7 @@ import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAd
 import {BitbucketProjectRequested} from "./gluon/events/bitbucket/BitbucketProjectRequested";
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
+import {PackageConfigured} from "./gluon/events/packages/PackageConfigured";
 import {ProjectCreated} from "./gluon/events/project/ProjectCreated";
 import {ProjectEnvironmentsRequested} from "./gluon/events/project/ProjectEnvironmentsRequested";
 import {TeamsLinkedToProject} from "./gluon/events/project/TeamAssociated";
@@ -44,7 +45,10 @@ import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
 import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClosed";
 import {MembershipRequestCreated} from "./gluon/events/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/events/team/TeamCreated";
-import {ApplicationCreatedEvent} from "./gluon/ingesters/applicationsIngester";
+import {
+    ApplicationCreatedEvent,
+    PackageConfiguredEvent,
+} from "./gluon/ingesters/applicationsIngester";
 import {
     BitbucketProjectAddedEvent,
     BitbucketProjectRequestedEvent,
@@ -57,6 +61,7 @@ import {
 import {
     ActionedBy,
     BitbucketProject,
+    BitbucketRepository,
     GluonTeam,
     GluonTenant,
     GluonTenantId,
@@ -125,6 +130,7 @@ export const configuration: any = {
         MembershipRequestCreated,
         BotJoinedChannel,
         MembersAddedToTeam,
+        PackageConfigured,
     ],
     ingesters: [
         SlackIdentity,
@@ -140,6 +146,7 @@ export const configuration: any = {
         MembershipRequestCreatedEvent,
         Project,
         BitbucketProject,
+        BitbucketRepository,
         ActionedBy,
         MembersAddedToTeamEvent,
         GluonTenant,
@@ -147,6 +154,7 @@ export const configuration: any = {
         TeamsLinkedToProjectEvent,
         DevOpsEnvironmentProvisionedEvent,
         DevOpsEnvironmentDetails,
+        PackageConfiguredEvent,
     ],
     token,
     http,
