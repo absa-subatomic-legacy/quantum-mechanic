@@ -6,13 +6,10 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {timeout, TimeoutError} from "promise-timeout";
 import {QMConfig} from "../../../config/QMConfig";
-import {AddConfigServer} from "../../commands/project/AddConfigServer";
-import {CreateProject} from "../../commands/project/CreateProject";
+import {DevOpsMessages} from "../../messages/team/DevOpsMessages";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -44,6 +41,8 @@ subscription DevOpsEnvironmentProvisionedEvent {
 }
 `)
 export class DevOpsEnvironmentProvisioned implements HandleEvent<any> {
+
+    private devopsMessages = new DevOpsMessages();
 
     constructor(private jenkinsService = new JenkinsService(),
                 private ocService = new OCService()) {
@@ -91,7 +90,10 @@ export class DevOpsEnvironmentProvisioned implements HandleEvent<any> {
 
             await taskList.setTaskStatus("ConfigJenkins", TaskStatus.Successful);
 
-            return await this.sendDevOpsSuccessfullyProvisionedMessage(ctx, jenkinsHost, devOpsRequestedEvent.team.name, devOpsRequestedEvent.team.slackIdentity.teamChannel);
+            return await ctx.messageClient.addressChannels(
+                this.devopsMessages.jenkinsSuccessfullyProvisioned(jenkinsHost, devOpsRequestedEvent.team.name),
+                devOpsRequestedEvent.team.slackIdentity.teamChannel,
+            );
         } catch (error) {
             await taskList.failRemainingTasks();
             return await this.handleError(ctx, error, devOpsRequestedEvent.team.slackIdentity.teamChannel);
@@ -242,46 +244,6 @@ export class DevOpsEnvironmentProvisioned implements HandleEvent<any> {
         } catch (error) {
             throw new QMError(`Failed to create ${forName} Global Credentials in Jenkins`);
         }
-    }
-
-    private async sendDevOpsSuccessfullyProvisionedMessage(ctx: HandlerContext, jenkinsHost: string, teamName: string, teamChannel: string): Promise<HandlerResult> {
-        const msg: SlackMessage = {
-            text: `Your Jenkins instance has been successfully provisioned in the DevOps environment: ${url(`https://${jenkinsHost}`)}`,
-            attachments: [{
-                fallback: `Create a project`,
-                footer: `For more information, please read the ${this.docs("create-project")}`,
-                text: `
-If you haven't already, you might want to create a Project for your team to work on.`,
-                mrkdwn_in: ["text"],
-                thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
-                actions: [
-                    buttonForCommand(
-                        {text: "Create project"},
-                        new CreateProject(),
-                        {teamName}),
-                ],
-            }, {
-                fallback: `Add a Subatomic Config Server`,
-                footer: `For more information, please read the ${this.docs("add-config-server")}`,
-                text: `
-If your applications will require a Spring Cloud Config Server, you can add a Subatomic Config Server to your DevOps project now`,
-                mrkdwn_in: ["text"],
-                thumb_url: "https://docs.spring.io/spring-cloud-dataflow/docs/current-SNAPSHOT/reference/html/images/logo.png",
-                actions: [
-                    buttonForCommand(
-                        {text: "Add Config Server"},
-                        new AddConfigServer(),
-                        {gluonTeamName: teamName}),
-                ],
-            }],
-        };
-
-        return await ctx.messageClient.addressChannels(msg, teamChannel);
-    }
-
-    private docs(extension): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
-            "documentation")}`;
     }
 
     private async handleError(ctx: HandlerContext, error, teamChannel: string) {
