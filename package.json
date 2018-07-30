@@ -23,7 +23,8 @@
     "promise-timeout": "^1.1.1",
     "query-string": "^6.1.0",
     "superagent": "^3.8.2",
-    "murmurhash-js": "^1.0.0"
+    "murmurhash-js": "^1.0.0",
+    "strip-json-comments": "^2.0.1"
   },
   "devDependencies": {
     "@types/app-root-path": "^1.2.4",

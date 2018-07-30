@@ -1,5 +1,7 @@
+import {logger} from "@atomist/automation-client";
 import fs = require("fs");
 import _ = require("lodash");
+import stripJsonComments = require("strip-json-comments");
 import {HttpAuth} from "./HttpAuth";
 import {SubatomicConfig} from "./SubatomicConfig";
 
@@ -18,11 +20,31 @@ export class QMConfig {
     }
 
     public static initialize() {
-        const config = JSON.parse(fs.readFileSync("config/local.json").toString());
+        const configRaw = stripJsonComments(fs.readFileSync(this.getConfigFile()).toString());
+        const config = JSON.parse(configRaw);
         QMConfig.subatomic = config.subatomic;
         QMConfig.teamId = config.teamId;
         QMConfig.token = config.token;
         QMConfig.http = config.http;
+    }
+
+    private static getConfigFile() {
+        let configFile = "";
+        logger.info(`Searching folder: config/`);
+        fs.readdirSync(`config/`).forEach(file => {
+            logger.info(`Found file: ${file}`);
+            if (file.endsWith("local.json")) {
+                configFile = file;
+            } else if (file.endsWith("config.json") && configFile === "") {
+                configFile = file;
+            }
+        });
+        if (configFile === "") {
+            logger.error("Failed to read config file in config/ directory. Exiting.");
+            process.exit(1);
+        }
+        logger.info(`Using config file: ${configFile}`);
+        return `config/${configFile}`;
     }
 
 }
