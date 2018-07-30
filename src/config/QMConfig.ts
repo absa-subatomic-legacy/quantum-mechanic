@@ -35,7 +35,9 @@ export class QMConfig {
             logger.info(`Found file: ${file}`);
             if (file.endsWith("local.json")) {
                 configFile = file;
-            } else if (file.endsWith("config.json") && configFile === "") {
+            } else if (file.endsWith("config.json") && configFile !== "local.json") {
+                configFile = file;
+            } else if (file.endsWith(".json") && configFile === "") {
                 configFile = file;
             }
         });
