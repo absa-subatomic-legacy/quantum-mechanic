@@ -65,45 +65,23 @@ export const DevOpsEnvironmentProvisionedEvent: Ingester = {
                         kind: "OBJECT",
                         name: "GluonTeam",
                     },
+                    args: [{
+                        defaultValue: null,
+                        name: "name",
+                        type: {
+                            kind: "LIST",
+                            ofType: {
+                                kind: "SCALAR",
+                                name: "String",
+                            },
+                        },
+                    }],
                 },
                 {
                     name: "devOpsEnvironment",
                     type: {
                         kind: "OBJECT",
                         name: "DevOpsEnvironmentDetails",
-                    },
-                },
-            ],
-        },
-    ],
-};
-
-export const DevOpsEnvironmentDetails = {
-    root_type: "DevOpsEnvironmentDetails",
-    types: [
-        {
-            kind: "OBJECT",
-            name: "DevOpsEnvironmentDetails",
-            fields: [
-                {
-                    name: "projectId",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "name",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
-                    },
-                },
-                {
-                    name: "description",
-                    type: {
-                        kind: "SCALAR",
-                        name: "String",
                     },
                 },
             ],

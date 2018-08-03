@@ -62,14 +62,15 @@ import {
     ActionedBy,
     BitbucketProject,
     BitbucketRepository,
+    DevOpsEnvironmentDetails,
     GluonTeam,
     GluonTenant,
     GluonTenantId,
     Project,
     SlackIdentity,
 } from "./gluon/ingesters/sharedIngester";
+import {TeamDevOpsDetails} from "./gluon/ingesters/teamDevOpsDetails";
 import {
-    DevOpsEnvironmentDetails,
     DevOpsEnvironmentProvisionedEvent,
     DevOpsEnvironmentRequestedEvent,
     MembersAddedToTeamEvent,
@@ -155,6 +156,7 @@ export const configuration: any = {
         DevOpsEnvironmentProvisionedEvent,
         DevOpsEnvironmentDetails,
         PackageConfiguredEvent,
+        TeamDevOpsDetails,
     ],
     token,
     http,

@@ -90,7 +90,7 @@ export class PackageConfigured implements HandleEvent<any> {
         const devopsDetails = getDevOpsEnvironmentDetails(packageConfiguredEvent.owningTeam.name);
 
         await this.createJenkinsJob(
-            devopsDetails.projectId,
+            devopsDetails.openshiftProjectId,
             packageConfiguredEvent.project.name,
             packageConfiguredEvent.project.projectId,
             packageConfiguredEvent.application.name,

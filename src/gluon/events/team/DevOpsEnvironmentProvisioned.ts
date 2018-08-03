@@ -33,7 +33,7 @@ subscription DevOpsEnvironmentProvisionedEvent {
       }
     }
     devOpsEnvironment{
-        projectId
+        openshiftProjectId
         name
         description
     }

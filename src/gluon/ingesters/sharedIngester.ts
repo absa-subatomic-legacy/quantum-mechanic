@@ -372,3 +372,36 @@ export const BitbucketRepository: Ingester = {
         },
     ],
 };
+
+export const DevOpsEnvironmentDetails = {
+    root_type: "DevOpsEnvironmentDetails",
+    types: [
+        {
+            kind: "OBJECT",
+            name: "DevOpsEnvironmentDetails",
+            fields: [
+                {
+                    name: "openshiftProjectId",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+                {
+                    name: "name",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+                {
+                    name: "description",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+            ],
+        },
+    ],
+};

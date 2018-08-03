@@ -21,7 +21,7 @@ export function menuForTeams(ctx: HandlerContext, teams: any[],
 
 export function getDevOpsEnvironmentDetails(teamName) {
     return {
-     projectId : `${_.kebabCase(teamName).toLowerCase()}-devops`,
+     openshiftProjectId : `${_.kebabCase(teamName).toLowerCase()}-devops`,
      name : `${teamName} DevOps`,
      description: `DevOps environment for ${teamName} [managed by Subatomic]`,
     };
