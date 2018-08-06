@@ -7,8 +7,13 @@ import {QMConfig} from "../../../config/QMConfig";
 import {CreateProject} from "../../commands/project/CreateProject";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
+import {inspect} from "util";
+import {AwaitAxios} from "../../util/shared/AwaitAxios";
 
 export class ProjectService {
+
+    private axiosInstance = new AwaitAxios();
+
     public async gluonProjectFromProjectName(projectName: string,
                                              requestActionOnFailure: boolean = true): Promise<any> {
         logger.debug(`Trying to get gluon project by projectName. projectName: ${projectName} `);
@@ -122,12 +127,10 @@ Consider creating a new project called ${projectName}. Click the button below to
 
     public async createGluonProject(projectDetails: any): Promise<any> {
         logger.debug(`Trying to create gluon projects`);
-        try {
-            return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
-                projectDetails);
-        } catch (error) {
-            return error;
-        }
+
+        return await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
+            projectDetails);
+
     }
 
     public async confirmBitbucketProjectCreated(projectId: string, bitbucketConfirmationDetails: any): Promise<any> {
