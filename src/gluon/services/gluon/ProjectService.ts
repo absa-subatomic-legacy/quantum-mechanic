@@ -122,8 +122,12 @@ Consider creating a new project called ${projectName}. Click the button below to
 
     public async createGluonProject(projectDetails: any): Promise<any> {
         logger.debug(`Trying to create gluon projects`);
-        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
-            projectDetails);
+        try {
+            return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
+                projectDetails);
+        } catch (error) {
+            return error;
+        }
     }
 
     public async confirmBitbucketProjectCreated(projectId: string, bitbucketConfirmationDetails: any): Promise<any> {

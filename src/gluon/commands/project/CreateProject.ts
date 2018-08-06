@@ -124,7 +124,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
     private async createGluonProject(projectDetails) {
         const projectCreationResult = await this.gluonService.projects.createGluonProject(
             projectDetails);
-        if (projectCreationResult.status === 409) {
+        if (projectCreationResult.toString().indexOf("409") !== -1) {
             logger.error(`Failed to create project since the project name is already in use.`);
             throw new QMError(`Failed to create project since the project name is already in use. Please retry using a different project name.`);
         } else if (!isSuccessCode(projectCreationResult.status)) {
