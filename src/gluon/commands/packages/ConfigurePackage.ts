@@ -18,6 +18,7 @@ import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
 import {ConfigurePackageInOpenshift} from "../../tasks/packages/ConfigurePackageInOpenshift";
+import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {menuForApplications} from "../../util/packages/Applications";
 import {menuForProjects} from "../../util/project/Project";
@@ -27,7 +28,6 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/shared/RecursiveParameterRequestCommand";
-import {TaskListMessage} from "../../util/shared/TaskListMessage";
 import {menuForTeams} from "../../util/team/Teams";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
 

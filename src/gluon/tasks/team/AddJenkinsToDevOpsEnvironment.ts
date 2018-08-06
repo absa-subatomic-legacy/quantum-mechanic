@@ -1,103 +1,70 @@
-import {
-    EventFired,
-    EventHandler,
-    HandleEvent,
-    HandlerContext,
-    HandlerResult,
-    logger,
-} from "@atomist/automation-client";
+import {HandlerContext, logger} from "@atomist/automation-client";
 import * as _ from "lodash";
-import {timeout, TimeoutError} from "promise-timeout";
 import {QMConfig} from "../../../config/QMConfig";
 import {DevOpsMessages} from "../../messages/team/DevOpsMessages";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
-import {
-    ChannelMessageClient,
-    handleQMError,
-    QMError,
-} from "../../util/shared/Error";
-import {TaskListMessage, TaskStatus} from "../../util/shared/TaskListMessage";
+import {QMError} from "../../util/shared/Error";
+import {Task} from "../Task";
+import {TaskListMessage} from "../TaskListMessage";
 
 const promiseRetry = require("promise-retry");
 
-@EventHandler("Receive DevOpsEnvironmentProvisionedEvent events", `
-subscription DevOpsEnvironmentProvisionedEvent {
-  DevOpsEnvironmentProvisionedEvent {
-    id
-    team {
-      teamId
-      name
-      slackIdentity {
-        teamChannel
-      }
-    }
-    devOpsEnvironment{
-        openshiftProjectId
-        name
-        description
-    }
-  }
-}
-`)
-export class DevOpsEnvironmentProvisioned implements HandleEvent<any> {
+export class AddJenkinsToDevOpsEnvironment extends Task {
 
     private devopsMessages = new DevOpsMessages();
 
-    constructor(private jenkinsService = new JenkinsService(),
+    private readonly TASK_TAG_TEMPLATE = "TagTemplate";
+    private readonly TASK_ROLLOUT_JENKINS = "RolloutJenkins";
+    private readonly TASK_CONFIG_JENKINS = "ConfigJenkins";
+
+    constructor(private devOpsRequestedEvent,
+                private jenkinsService = new JenkinsService(),
                 private ocService = new OCService()) {
+        super();
     }
 
-    public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
-        logger.info(`Ingested DevOpsEnvironmentProvisioned event: ${JSON.stringify(event.data)}`);
+    protected configureTaskListMessage(taskListMessage: TaskListMessage) {
+        taskListMessage.addTask(this.TASK_TAG_TEMPLATE, "Tag jenkins template to environment");
+        taskListMessage.addTask(this.TASK_ROLLOUT_JENKINS, "Rollout Jenkins instance");
+        taskListMessage.addTask(this.TASK_CONFIG_JENKINS, "Configure Jenkins");
+    }
 
-        const devOpsRequestedEvent = event.data.DevOpsEnvironmentProvisionedEvent[0];
+    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
 
-        const teamChannel = devOpsRequestedEvent.team.slackIdentity.teamChannel;
+        const projectId = `${_.kebabCase(this.devOpsRequestedEvent.team.name).toLowerCase()}-devops`;
+        logger.info(`Working with OpenShift project Id: ${projectId}`);
 
-        const taskList = new TaskListMessage(`🚀 Provisioning of DevOps jenkins for team *${devOpsRequestedEvent.team.name}* started:`, new ChannelMessageClient(ctx).addDestination(teamChannel));
-        taskList.addTask("Template", "Tag jenkins template to environment");
-        taskList.addTask("Jenkins", "Rollout Jenkins instance");
-        taskList.addTask("ConfigJenkins", "Configure Jenkins");
+        await this.ocService.login();
 
-        try {
-            const projectId = `${_.kebabCase(devOpsRequestedEvent.team.name).toLowerCase()}-devops`;
-            logger.info(`Working with OpenShift project Id: ${projectId}`);
+        await this.copyJenkinsTemplateToDevOpsEnvironment(projectId);
 
-            await taskList.display();
+        await this.taskListMessage.succeedTask(this.TASK_TAG_TEMPLATE);
 
-            await this.ocService.login();
+        await this.createJenkinsDeploymentConfig(projectId);
 
-            await this.copyJenkinsTemplateToDevOpsEnvironment(projectId);
+        await this.createJenkinsServiceAccount(projectId);
 
-            await taskList.setTaskStatus("Template", TaskStatus.Successful);
+        await this.rolloutJenkinsDeployment(projectId);
 
-            await this.createJenkinsDeploymentConfig(projectId);
+        await this.taskListMessage.succeedTask(this.TASK_ROLLOUT_JENKINS);
 
-            await this.createJenkinsServiceAccount(projectId);
+        const jenkinsHost: string = await this.createJenkinsRoute(projectId);
 
-            await this.rolloutJenkinsDeployment(projectId);
+        const token: string = await this.getJenkinsServiceAccountToken(projectId);
 
-            await taskList.setTaskStatus("Jenkins", TaskStatus.Successful);
+        logger.info(`Using Service Account token: ${token}`);
 
-            const jenkinsHost: string = await this.createJenkinsRoute(projectId);
+        await this.addJenkinsCredentials(projectId, jenkinsHost, token);
 
-            const token: string = await this.getJenkinsServiceAccountToken(projectId);
+        await this.taskListMessage.succeedTask(this.TASK_CONFIG_JENKINS);
 
-            logger.info(`Using Service Account token: ${token}`);
+        await ctx.messageClient.addressChannels(
+            this.devopsMessages.jenkinsSuccessfullyProvisioned(jenkinsHost, this.devOpsRequestedEvent.team.name),
+            this.devOpsRequestedEvent.team.slackIdentity.teamChannel,
+        );
 
-            await this.addJenkinsCredentials(projectId, jenkinsHost, token);
-
-            await taskList.setTaskStatus("ConfigJenkins", TaskStatus.Successful);
-
-            return await ctx.messageClient.addressChannels(
-                this.devopsMessages.jenkinsSuccessfullyProvisioned(jenkinsHost, devOpsRequestedEvent.team.name),
-                devOpsRequestedEvent.team.slackIdentity.teamChannel,
-            );
-        } catch (error) {
-            await taskList.failRemainingTasks();
-            return await this.handleError(ctx, error, devOpsRequestedEvent.team.slackIdentity.teamChannel);
-        }
+        return true;
     }
 
     private async copyJenkinsTemplateToDevOpsEnvironment(projectId: string) {
@@ -246,7 +213,4 @@ export class DevOpsEnvironmentProvisioned implements HandleEvent<any> {
         }
     }
 
-    private async handleError(ctx: HandlerContext, error, teamChannel: string) {
-        return await handleQMError(new ChannelMessageClient(ctx).addDestination(teamChannel), error);
-    }
 }

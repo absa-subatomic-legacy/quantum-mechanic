@@ -17,9 +17,9 @@ import {OCService} from "../../services/openshift/OCService";
 import {ApplicationType} from "../../util/packages/Applications";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
-import {TaskListMessage} from "../../util/shared/TaskListMessage";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {Task} from "../Task";
+import {TaskListMessage} from "../TaskListMessage";
 
 export class ConfigurePackageInJenkins extends Task {
 

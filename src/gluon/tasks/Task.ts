@@ -1,6 +1,6 @@
 import {HandlerContext} from "@atomist/automation-client";
 import {QMError} from "../util/shared/Error";
-import {TaskListMessage} from "../util/shared/TaskListMessage";
+import {TaskListMessage} from "./TaskListMessage";
 
 export abstract class Task {
 

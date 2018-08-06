@@ -1,7 +1,7 @@
 import {HandlerResult} from "@atomist/automation-client";
 import {Attachment, SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
-import {QMMessageClient} from "./Error";
+import {QMMessageClient} from "../util/shared/Error";
 
 export class TaskListMessage {
 

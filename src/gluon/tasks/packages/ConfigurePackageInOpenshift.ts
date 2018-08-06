@@ -10,8 +10,8 @@ import {OCService} from "../../services/openshift/OCService";
 import {ApplicationType} from "../../util/packages/Applications";
 import {getProjectDevOpsId, getProjectId} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
-import {TaskListMessage} from "../../util/shared/TaskListMessage";
 import {Task} from "../Task";
+import {TaskListMessage} from "../TaskListMessage";
 
 export class ConfigurePackageInOpenshift extends Task {
 

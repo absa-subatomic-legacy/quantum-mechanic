@@ -16,6 +16,7 @@ import {LinkExistingApplication} from "../../commands/packages/LinkExistingAppli
 import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
+import {TaskListMessage, TaskStatus} from "../../tasks/TaskListMessage";
 import {getProjectId} from "../../util/project/Project";
 import {
     ChannelMessageClient,
@@ -25,7 +26,6 @@ import {
     QMMessageClient,
 } from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
-import {TaskListMessage, TaskStatus} from "../../util/shared/TaskListMessage";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
 subscription ProjectEnvironmentsRequestedEvent {

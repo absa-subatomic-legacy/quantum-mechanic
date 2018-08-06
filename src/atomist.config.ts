@@ -38,7 +38,6 @@ import {ProjectCreated} from "./gluon/events/project/ProjectCreated";
 import {ProjectEnvironmentsRequested} from "./gluon/events/project/ProjectEnvironmentsRequested";
 import {TeamsLinkedToProject} from "./gluon/events/project/TeamAssociated";
 import {BotJoinedChannel} from "./gluon/events/team/BotJoinedChannel";
-import {DevOpsEnvironmentProvisioned} from "./gluon/events/team/DevOpsEnvironmentProvisioned";
 import {DevOpsEnvironmentRequested} from "./gluon/events/team/DevOpsEnvironmentRequested";
 import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
 import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClosed";
@@ -124,7 +123,6 @@ export const configuration: any = {
         BitbucketProjectRequested,
         BitbucketProjectAdded,
         DevOpsEnvironmentRequested,
-        DevOpsEnvironmentProvisioned,
         ProjectEnvironmentsRequested,
         ApplicationCreated,
         MembershipRequestCreated,
