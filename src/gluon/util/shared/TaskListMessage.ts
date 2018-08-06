@@ -33,6 +33,10 @@ export class TaskListMessage {
         this.taskOrder.push(key);
     }
 
+    public async succeedTask(key: string) {
+        return await this.setTaskStatus(key, TaskStatus.Successful);
+    }
+
     public async setTaskStatus(key: string, status: TaskStatus): Promise<HandlerResult> {
         this.tasks[key].status = status;
         return await this.display();

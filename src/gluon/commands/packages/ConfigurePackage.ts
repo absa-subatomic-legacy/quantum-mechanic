@@ -11,27 +11,23 @@ import {
 import {BitBucketServerRepoRef} from "@atomist/automation-client/operations/common/BitBucketServerRepoRef";
 import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
 import {GitProject} from "@atomist/automation-client/project/git/GitProject";
-import {addressEvent} from "@atomist/automation-client/spi/message/MessageClient";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
-import {
-    ApplicationType,
-    menuForApplications,
-} from "../../util/packages/Applications";
-import {
-    getProjectDevOpsId,
-    getProjectId,
-    menuForProjects,
-} from "../../util/project/Project";
+import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
+import {ConfigurePackageInOpenshift} from "../../tasks/packages/ConfigurePackageInOpenshift";
+import {TaskRunner} from "../../tasks/TaskRunner";
+import {menuForApplications} from "../../util/packages/Applications";
+import {menuForProjects} from "../../util/project/Project";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {createMenu} from "../../util/shared/GenericMenu";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/shared/RecursiveParameterRequestCommand";
+import {TaskListMessage} from "../../util/shared/TaskListMessage";
 import {menuForTeams} from "../../util/team/Teams";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
 
@@ -89,7 +85,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             await ctx.messageClient.addressChannels({
-                text: "🚀 Your package is being configured...",
+                text: "Preparing to configure your package...",
             }, this.teamChannel);
             return await this.configurePackage(ctx);
         } catch (error) {
@@ -200,176 +196,38 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
 
         const application = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
 
-        await this.doConfiguration(
-            project.name,
-            application.name,
-            application.applicationType,
-            application.bitbucketRepository.remoteUrl,
-            project.owningTeam.name,
+        const taskListMessage = new TaskListMessage(":rocket: Configuring package...", new ResponderMessageClient(ctx));
+        const taskRunner = new TaskRunner(taskListMessage);
+        taskRunner.addTask(
+            new ConfigurePackageInOpenshift(
+                {
+                    buildEnvironmentVariables: this.buildEnvironmentVariables,
+                    openshiftTemplate: this.openshiftTemplate,
+                    baseS2IImage: this.baseS2IImage,
+                },
+                {
+                    teamName: this.teamName,
+                    projectName: this.projectName,
+                    packageName: application.name,
+                    packageType: application.applicationType,
+                    bitbucketRepoRemoteUrl: application.bitbucketRepository.remoteUrl,
+                    owningTeamName: project.owningTeam.name,
+                }),
+        );
+        taskRunner.addTask(
+            new ConfigurePackageInJenkins(
+                application,
+                project,
+                GluonToEvent.bitbucketRepository(application),
+                GluonToEvent.bitbucketProject(project),
+                GluonToEvent.team(project.owningTeam),
+                this.jenkinsfileName),
         );
 
-        return await ctx.messageClient.send(this.createPackageConfiguredEvent(project, application, project.owningTeam), addressEvent("PackageConfiguredEvent"));
-    }
-
-    private createPackageConfiguredEvent(gluonProject, gluonApplication, gluonOwningTeam) {
-        return {
-            application: GluonToEvent.application(gluonApplication),
-            project: GluonToEvent.project(gluonProject),
-            bitbucketRepository: GluonToEvent.bitbucketRepository(gluonApplication),
-            bitbucketProject: GluonToEvent.bitbucketProject(gluonProject),
-            owningTeam: GluonToEvent.team(gluonOwningTeam),
-            buildDetails: {
-                buildType: "JENKINS",
-                jenkinsDetails: {
-                    jenkinsFile: this.jenkinsfileName,
-                },
-            },
-        };
-    }
-
-    private async createApplicationImageStream(appBuildName: string, teamDevOpsProjectId: string) {
-        await this.ocService.createResourceFromDataInNamespace({
-            apiVersion: "v1",
-            kind: "ImageStream",
-            metadata: {
-                name: appBuildName,
-            },
-        }, teamDevOpsProjectId);
-    }
-
-    private getBuildConfigData(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string): { [key: string]: any } {
-        return {
-            apiVersion: "v1",
-            kind: "BuildConfig",
-            metadata: {
-                name: appBuildName,
-            },
-            spec: {
-                resources: {
-                    limits: {
-                        cpu: "0",
-                        memory: "0",
-                    },
-                },
-                source: {
-                    type: "Git",
-                    git: {
-                        // temporary hack because of the NodePort
-                        // TODO remove this!
-                        uri: `${bitbucketRepoRemoteUrl.replace("7999", "30999")}`,
-                        ref: "master",
-                    },
-                    sourceSecret: {
-                        name: "bitbucket-ssh",
-                    },
-                },
-                strategy: {
-                    sourceStrategy: {
-                        from: {
-                            kind: "ImageStreamTag",
-                            name: baseS2IImage,
-                        },
-                        env: [],
-                    },
-                },
-                output: {
-                    to: {
-                        kind: "ImageStreamTag",
-                        name: `${appBuildName}:latest`,
-                    },
-                },
-            },
-        };
-    }
-
-    private async createApplicationBuildConfig(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string, teamDevOpsProjectId: string) {
-
-        logger.info(`Using Git URI: ${bitbucketRepoRemoteUrl}`);
-        const buildConfig: { [key: string]: any } = this.getBuildConfigData(bitbucketRepoRemoteUrl, appBuildName, baseS2IImage);
-
-        for (const envVariableName of Object.keys(this.buildEnvironmentVariables)) {
-            buildConfig.spec.strategy.sourceStrategy.env.push(
-                {
-                    name: envVariableName,
-                    value: this.buildEnvironmentVariables[envVariableName],
-                },
-            );
-        }
-
-        await this.ocService.createResourceFromDataInNamespace(
-            buildConfig,
-            teamDevOpsProjectId,
-            true);  // TODO clean up this hack - cannot be a boolean (magic)
-    }
-
-    private async doConfiguration(projectName: string,
-                                  packageName: string,
-                                  packageType: string,
-                                  bitbucketRepoRemoteUrl: string,
-                                  owningTeamName: string,
-    ): Promise<HandlerResult> {
-
-        const teamDevOpsProjectId = `${_.kebabCase(owningTeamName).toLowerCase()}-devops`;
-        logger.debug(`Using owning team DevOps project: ${teamDevOpsProjectId}`);
-
-        await this.ocService.login();
-
-        if (packageType === ApplicationType.DEPLOYABLE.toString()) {
-            const appBuildName = `${_.kebabCase(projectName).toLowerCase()}-${_.kebabCase(packageName).toLowerCase()}`;
-            await this.createApplicationImageStream(appBuildName, teamDevOpsProjectId);
-
-            await this.createApplicationBuildConfig(bitbucketRepoRemoteUrl, appBuildName, this.baseS2IImage, teamDevOpsProjectId);
-
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
-            logger.info(`Trying to find tenant: ${project.owningTenant}`);
-            const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
-            logger.info(`Found tenant: ${tenant}`);
-            await this.createApplicationOpenshiftResources(tenant.name, project.name, packageName);
-
-        }
+        await taskRunner.execute(ctx);
 
         return success();
+
     }
 
-    private async createApplicationOpenshiftResources(tenantName: string, projectName: string, applicationName: string): Promise<HandlerResult> {
-
-        const environments: string [] = ["dev", "sit", "uat"];
-
-        for (const environment of environments) {
-            const projectId = getProjectId(tenantName, projectName, environment);
-            const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
-            const devOpsProjectId = getProjectDevOpsId(this.teamName);
-            logger.info(`Processing app [${appName}] Template for: ${projectId}`);
-
-            const template = await this.ocService.getSubatomicTemplate(this.openshiftTemplate);
-            const appBaseTemplate: any = JSON.parse(template.output);
-            appBaseTemplate.metadata.namespace = projectId;
-            await this.ocService.createResourceFromDataInNamespace(appBaseTemplate, projectId);
-
-            const templateParameters = [
-                `APP_NAME=${appName}`,
-                `IMAGE_STREAM_PROJECT=${projectId}`,
-                `DEVOPS_NAMESPACE=${devOpsProjectId}`,
-            ];
-
-            const appProcessedTemplate = await this.ocService.processOpenshiftTemplate(
-                this.openshiftTemplate,
-                projectId,
-                templateParameters,
-                true);
-
-            logger.debug(`Processed app [${appName}] Template: ${appProcessedTemplate.output}`);
-
-            try {
-                await this.ocService.getDeploymentConfigInNamespace(appName, projectId);
-                logger.warn(`App [${appName}] Template has already been processed, deployment exists`);
-            } catch (error) {
-                await this.ocService.createResourceFromDataInNamespace(
-                    JSON.parse(appProcessedTemplate.output),
-                    projectId,
-                );
-            }
-        }
-        return await success();
-    }
 }

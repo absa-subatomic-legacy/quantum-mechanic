@@ -34,7 +34,6 @@ import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAd
 import {BitbucketProjectRequested} from "./gluon/events/bitbucket/BitbucketProjectRequested";
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
-import {PackageConfigured} from "./gluon/events/packages/PackageConfigured";
 import {ProjectCreated} from "./gluon/events/project/ProjectCreated";
 import {ProjectEnvironmentsRequested} from "./gluon/events/project/ProjectEnvironmentsRequested";
 import {TeamsLinkedToProject} from "./gluon/events/project/TeamAssociated";
@@ -131,7 +130,6 @@ export const configuration: any = {
         MembershipRequestCreated,
         BotJoinedChannel,
         MembersAddedToTeam,
-        PackageConfigured,
     ],
     ingesters: [
         SlackIdentity,

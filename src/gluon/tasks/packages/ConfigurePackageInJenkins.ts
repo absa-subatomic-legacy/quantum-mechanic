@@ -1,7 +1,4 @@
 import {
-    EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
@@ -20,96 +17,71 @@ import {OCService} from "../../services/openshift/OCService";
 import {ApplicationType} from "../../util/packages/Applications";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
+import {TaskListMessage} from "../../util/shared/TaskListMessage";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {Task} from "../Task";
 
-@EventHandler("Receive PackageConfiguredEvent events", `
-subscription PackageConfiguredEvent {
-  PackageConfiguredEvent {
-    id
-    application {
-      applicationId
-      name
-      description
-      applicationType
-    }
-    project {
-      projectId
-      name
-      description
-    }
-    bitbucketRepository {
-      bitbucketId
-      name
-      repoUrl
-      remoteUrl
-    }
-    bitbucketProject {
-      id
-      key
-      name
-      description
-      url
-    }
-    owningTeam {
-      teamId
-      name
-      slackIdentity {
-        teamChannel
-      }
-    }
-    buildDetails{
-        buildType
-        jenkinsDetails{
-            jenkinsFile
-        }
-    }
-  }
-}
-`)
-export class PackageConfigured implements HandleEvent<any> {
+export class ConfigurePackageInJenkins extends Task {
 
     private readonly JENKINSFILE_EXTENSION = ".groovy";
     private readonly JENKINSFILE_FOLDER = "resources/templates/jenkins/jenkinsfile-repo/";
     private readonly JENKINSFILE_EXISTS = "JENKINS_FILE_EXISTS";
 
-    constructor(private ocService = new OCService(), private jenkinsService = new JenkinsService()) {
+    private readonly TASK_ADD_JENKINS_FILE = "AddJenkinsfile";
+    private readonly TASK_CREATE_JENKINS_JOB = "CreateJenkinsJob";
 
+    constructor(private application,
+                private project,
+                private bitbucketRepository,
+                private bitbucketProject,
+                private owningTeam,
+                private jenkinsFile,
+                private ocService = new OCService(),
+                private jenkinsService = new JenkinsService()) {
+        super();
     }
 
-    public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
-        logger.info(`Ingested PackageConfigured event: ${JSON.stringify(event.data)}`);
+    protected configureTaskListMessage(taskListMessage: TaskListMessage) {
+        this.taskListMessage.addTask(this.TASK_ADD_JENKINS_FILE, "Add Jenkinsfile");
+        this.taskListMessage.addTask(this.TASK_CREATE_JENKINS_JOB, "Create Jenkins Job");
+    }
 
-        const packageConfiguredEvent = event.data.PackageConfiguredEvent[0];
-
+    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
         await this.addJenkinsFile(
-            packageConfiguredEvent.buildDetails.jenkinsDetails.jenkinsFile,
-            packageConfiguredEvent.bitbucketProject.key,
-            packageConfiguredEvent.bitbucketRepository.name,
+            this.jenkinsFile,
+            this.bitbucketProject.key,
+            this.bitbucketRepository.name,
         );
 
-        const devopsDetails = getDevOpsEnvironmentDetails(packageConfiguredEvent.owningTeam.name);
+        await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_FILE);
+
+        const devopsDetails = getDevOpsEnvironmentDetails(this.owningTeam.name);
 
         await this.createJenkinsJob(
             devopsDetails.openshiftProjectId,
-            packageConfiguredEvent.project.name,
-            packageConfiguredEvent.project.projectId,
-            packageConfiguredEvent.application.name,
-            packageConfiguredEvent.bitbucketProject.key,
-            packageConfiguredEvent.bitbucketRepository.name);
+            this.project.name,
+            this.project.projectId,
+            this.application.name,
+            this.bitbucketProject.key,
+            this.bitbucketRepository.name);
+
+        await this.taskListMessage.succeedTask(this.TASK_CREATE_JENKINS_JOB);
 
         logger.info(`PackageConfigured successfully`);
 
         let applicationType = ApplicationType.LIBRARY;
-        if (packageConfiguredEvent.application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
+        if (this.application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
             applicationType = ApplicationType.DEPLOYABLE;
         }
 
-        return await this.sendPackageProvisionedMessage(
+        await this.sendPackageProvisionedMessage(
             ctx,
-            packageConfiguredEvent.application.name,
-            packageConfiguredEvent.project.name,
-            [packageConfiguredEvent.owningTeam],
+            this.application.name,
+            this.project.name,
+            [this.owningTeam],
             applicationType);
+
+        return true;
     }
 
     private async addJenkinsFile(jenkinsfileName, bitbucketProjectKey, bitbucketRepoName): Promise<HandlerResult> {
@@ -233,4 +205,5 @@ You can kick off the build pipeline for your ${packageTypeString} by clicking th
         return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference`,
             "documentation")}`;
     }
+
 }
