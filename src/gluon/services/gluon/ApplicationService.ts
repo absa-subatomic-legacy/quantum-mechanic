@@ -5,10 +5,14 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateApplication} from "../../commands/packages/CreateApplication";
+import {AwaitAxios} from "../../util/shared/AwaitAxios";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
 
 export class ApplicationService {
+
+    private axiosInstance = new AwaitAxios();
+
     public async gluonApplicationsLinkedToGluonProject(gluonProjectName: string, requestActionOnFailure: boolean = true): Promise<any> {
         logger.debug(`Trying to get gluon applications associated to projectName. gluonProjectName: ${gluonProjectName} `);
 
@@ -101,6 +105,6 @@ Consider creating a new application called ${applicationName}. Click the button 
 
     public async createGluonApplication(applicationDetails: any): Promise<any> {
         logger.debug(`Trying to create application.`);
-        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`, applicationDetails);
+        return await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`, applicationDetails);
     }
 }

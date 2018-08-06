@@ -8,8 +8,12 @@ import {CreateTeam} from "../../commands/team/CreateTeam";
 import {JoinTeam} from "../../commands/team/JoinTeam";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
+import {AwaitAxios} from "../../util/shared/AwaitAxios";
 
 export class TeamService {
+
+    private axiosInstance = new AwaitAxios();
+
     public async gluonTeamsWhoSlackScreenNameBelongsTo(screenName: string, requestActionOnFailure: boolean = true): Promise<any[]> {
         logger.debug(`Trying to get gluon teams associated to a screenName. screenName: ${screenName} `);
 
@@ -77,7 +81,7 @@ export class TeamService {
 
     public async createGluonTeam(teamName: string, teamDescription: string, createdBy: string): Promise<any> {
         logger.debug(`Trying to create team. teamName: ${teamName}; teamDescription: ${teamDescription}; createdBy: ${createdBy}`);
-        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/teams`, {
+        return await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/teams`, {
             name: teamName,
             description: teamDescription,
             createdBy,

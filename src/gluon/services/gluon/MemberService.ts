@@ -5,10 +5,14 @@ import axios from "axios";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {OnboardMember} from "../../commands/member/OnboardMember";
+import {AwaitAxios} from "../../util/shared/AwaitAxios";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
 
 export class MemberService {
+
+    private axiosInstance = new AwaitAxios();
+
     public async gluonMemberFromScreenName(screenName: string,
                                            requestOnboardingIfFailure: boolean = true): Promise<any> {
         logger.debug(`Trying to get gluon member from screen name. screenName: ${screenName} `);
@@ -61,7 +65,7 @@ To create a team you must first onboard yourself. Click the button below to do t
 
     public async createGluonMember(teamMemberDetails: any): Promise<any> {
         logger.debug(`Trying to create gluon member.`);
-        return await axios.post(`${QMConfig.subatomic.gluon.baseUrl}/members`,
+        return await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/members`,
             teamMemberDetails);
     }
 
