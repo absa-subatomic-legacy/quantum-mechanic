@@ -63,8 +63,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
 
             taskRunner.addTask(
                 new CreateTeamDevOpsEnvironment(devOpsRequestedEvent),
-            );
-            taskRunner.addTask(
+            ).addTask(
                 new AddJenkinsToDevOpsEnvironment(devOpsRequestedEvent),
             );
 

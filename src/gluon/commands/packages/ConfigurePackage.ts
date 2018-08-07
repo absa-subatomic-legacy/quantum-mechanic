@@ -213,8 +213,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand {
                     bitbucketRepoRemoteUrl: application.bitbucketRepository.remoteUrl,
                     owningTeamName: project.owningTeam.name,
                 }),
-        );
-        taskRunner.addTask(
+        ).addTask(
             new ConfigurePackageInJenkins(
                 application,
                 project,

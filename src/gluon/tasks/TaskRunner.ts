@@ -8,9 +8,10 @@ export class TaskRunner {
     constructor(private taskListMessage: TaskListMessage) {
     }
 
-    public addTask(task: Task) {
+    public addTask(task: Task): TaskRunner {
         task.setTaskListMessage(this.taskListMessage);
         this.tasks.push(task);
+        return this;
     }
 
     public async execute(ctx: HandlerContext) {
