@@ -6,13 +6,14 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateTeam} from "../../commands/team/CreateTeam";
 import {JoinTeam} from "../../commands/team/JoinTeam";
+import {AwaitAxios} from "../../util/shared/AwaitAxios";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
-import {AwaitAxios} from "../../util/shared/AwaitAxios";
 
 export class TeamService {
 
-    private axiosInstance = new AwaitAxios();
+    constructor(public axiosInstance = new AwaitAxios()) {
+    }
 
     public async gluonTeamsWhoSlackScreenNameBelongsTo(screenName: string, requestActionOnFailure: boolean = true): Promise<any[]> {
         logger.debug(`Trying to get gluon teams associated to a screenName. screenName: ${screenName} `);

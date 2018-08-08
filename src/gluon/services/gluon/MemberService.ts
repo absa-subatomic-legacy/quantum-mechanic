@@ -11,7 +11,8 @@ import {isSuccessCode} from "../../util/shared/Http";
 
 export class MemberService {
 
-    private axiosInstance = new AwaitAxios();
+    constructor(public axiosInstance = new AwaitAxios()) {
+    }
 
     public async gluonMemberFromScreenName(screenName: string,
                                            requestOnboardingIfFailure: boolean = true): Promise<any> {

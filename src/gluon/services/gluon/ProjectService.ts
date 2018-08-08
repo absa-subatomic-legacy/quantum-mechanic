@@ -5,10 +5,9 @@ import axios from "axios";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateProject} from "../../commands/project/CreateProject";
+import {AwaitAxios} from "../../util/shared/AwaitAxios";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
-import {inspect} from "util";
-import {AwaitAxios} from "../../util/shared/AwaitAxios";
 
 export class ProjectService {
 
