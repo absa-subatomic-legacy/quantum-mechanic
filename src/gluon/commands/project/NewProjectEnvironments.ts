@@ -11,9 +11,11 @@ import {
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
+    GluonProjectNameSetter,
+    GluonTeamNameSetter,
     setGluonProjectName,
     setGluonTeamName,
-} from "../../util/recursiveparam/ParameterSetters";
+} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -27,7 +29,8 @@ import {isSuccessCode} from "../../util/shared/Http";
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
 @Tags("subatomic", "openshift", "project")
-export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
+export class NewProjectEnvironments extends RecursiveParameterRequestCommand
+    implements GluonTeamNameSetter, GluonProjectNameSetter {
 
     public static RecursiveKeys = {
         teamName: "TEAM_NAME",
@@ -53,7 +56,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
     })
     public teamName: string = null;
 
-    constructor(private gluonService = new GluonService()) {
+    constructor(public gluonService = new GluonService()) {
         super();
     }
 

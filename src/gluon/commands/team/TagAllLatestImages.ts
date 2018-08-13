@@ -12,7 +12,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {getProjectDevOpsId} from "../../util/project/Project";
-import {setGluonTeamName} from "../../util/recursiveparam/ParameterSetters";
+import {
+    GluonTeamNameSetter,
+    setGluonTeamName,
+} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -25,7 +28,8 @@ import {
 
 @CommandHandler("Tag all latest subatomic images to a devops environment ", QMConfig.subatomic.commandPrefix + " tag all images")
 @Tags("subatomic", "devops", "team", "openshift", "images")
-export class TagAllLatestImages extends RecursiveParameterRequestCommand {
+export class TagAllLatestImages extends RecursiveParameterRequestCommand
+    implements GluonTeamNameSetter {
 
     public static RecursiveKeys = {
         teamName: "TEAM_NAME",
@@ -43,7 +47,7 @@ export class TagAllLatestImages extends RecursiveParameterRequestCommand {
     })
     public teamName: string;
 
-    constructor(private gluonService = new GluonService(), private ocService = new OCService()) {
+    constructor(public gluonService = new GluonService(), private ocService = new OCService()) {
         super();
     }
 

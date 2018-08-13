@@ -9,7 +9,10 @@ import {
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TeamSlackChannelService} from "../../services/team/TeamSlackChannelService";
-import {setGluonTeamName} from "../../util/recursiveparam/ParameterSetters";
+import {
+    GluonTeamNameSetter,
+    setGluonTeamName,
+} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -17,14 +20,15 @@ import {
 
 @CommandHandler("Link existing team channel", QMConfig.subatomic.commandPrefix + " link team channel")
 @Tags("subatomic", "slack", "channel", "team")
-export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestCommand {
+export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestCommand
+    implements GluonTeamNameSetter {
 
     public static RecursiveKeys = {
         teamName: "TEAM_NAME",
     };
 
     @MappedParameter(MappedParameters.SlackUserName)
-    public slackScreenName: string;
+    public screenName: string;
 
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
@@ -41,7 +45,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
     })
     public teamChannel: string;
 
-    constructor(private gluonService = new GluonService(),
+    constructor(public gluonService = new GluonService(),
                 private teamSlackChannelService = new TeamSlackChannelService()) {
         super();
     }

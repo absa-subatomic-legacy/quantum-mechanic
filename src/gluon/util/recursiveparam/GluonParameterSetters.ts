@@ -4,16 +4,15 @@ import {
     logger,
 } from "@atomist/automation-client";
 import {GluonService} from "../../services/gluon/GluonService";
-import {OCService} from "../../services/openshift/OCService";
+import {menuForApplications} from "../packages/Applications";
 import {menuForProjects} from "../project/Project";
 import {QMError} from "../shared/Error";
-import {createMenu} from "../shared/GenericMenu";
 import {menuForTenants} from "../shared/Tenants";
 import {menuForTeams} from "../team/Teams";
 
 export async function setGluonTeamName(
     ctx: HandlerContext,
-    commandHandler: { gluonService: GluonService, teamChannel?: string, screenName: string, teamName: string, handle: (ctx: HandlerContext) => Promise<HandlerResult> },
+    commandHandler: GluonTeamNameSetter,
     selectionMessage: string = "Please select a team") {
     if (commandHandler.gluonService === undefined) {
         throw new QMError(`setGluonTeamName commandHandler requires gluonService parameter to be defined`);
@@ -43,41 +42,25 @@ export async function setGluonTeamName(
         selectionMessage);
 }
 
-export async function setImageName(
-    ctx: HandlerContext,
-    commandHandler: { ocService: OCService, handle: (ctx: HandlerContext) => Promise<HandlerResult> },
-    selectionMessage: string = "Please select an image") {
-    if (commandHandler.ocService === undefined) {
-        throw new QMError(`setImageName commandHandler requires ocService parameter to be defined`);
-    }
-
-    const imagesResult = await commandHandler.ocService.getSubatomicImageStreamTags();
-    const images = JSON.parse(imagesResult.output).items;
-    return await createMenu(
-        ctx,
-        images.map(image => {
-            return {
-                value: image.metadata.name,
-                text: image.metadata.name,
-            };
-        }),
-        commandHandler,
-        selectionMessage,
-        "Select Image",
-        "imageName");
+export interface GluonTeamNameSetter {
+    gluonService: GluonService;
+    teamChannel?: string;
+    screenName: string;
+    teamName: string;
+    handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
 
 export async function setGluonProjectName(
     ctx: HandlerContext,
-    commandHandler: { gluonService: GluonService, teamName: string, handle: (ctx: HandlerContext) => Promise<HandlerResult> },
+    commandHandler: GluonProjectNameSetter,
     selectionMessage: string = "Please select a project") {
 
     if (commandHandler.gluonService === undefined) {
-        throw new QMError(`setGluonProject commandHandler requires gluonService parameter to be defined`);
+        throw new QMError(`setGluonProjectName commandHandler requires gluonService parameter to be defined`);
     }
 
     if (commandHandler.teamName === undefined) {
-        throw new QMError(`setGluonProject commandHandler requires the teamName parameter to be defined`);
+        throw new QMError(`setGluonProjectName commandHandler requires the teamName parameter to be defined`);
     }
 
     const projects = await commandHandler.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(commandHandler.teamName);
@@ -89,9 +72,16 @@ export async function setGluonProjectName(
     );
 }
 
+export interface GluonProjectNameSetter {
+    gluonService: GluonService;
+    teamName: string;
+    projectName: string;
+    handle: (ctx: HandlerContext) => Promise<HandlerResult>;
+}
+
 export async function setGluonTenantName(
     ctx: HandlerContext,
-    commandHandler: { gluonService: GluonService, handle: (ctx: HandlerContext) => Promise<HandlerResult> },
+    commandHandler: GluonTenantNameSetter,
     selectionMessage: string = "Please select a tenant") {
 
     if (commandHandler.gluonService === undefined) {
@@ -104,4 +94,37 @@ export async function setGluonTenantName(
         commandHandler,
         selectionMessage,
     );
+}
+
+export interface GluonTenantNameSetter {
+    gluonService: GluonService;
+    tenantName: string;
+    handle: (ctx: HandlerContext) => Promise<HandlerResult>;
+}
+
+export async function setGluonApplicationName(
+    ctx: HandlerContext,
+    commandHandler: GluonApplicationNameSetter,
+    selectionMessage: string = "Please select an application") {
+    if (commandHandler.gluonService === undefined) {
+        throw new QMError(`setGluonApplicationName commandHandler requires gluonService parameter to be defined`);
+    }
+
+    if (commandHandler.projectName === undefined) {
+        throw new QMError(`setGluonApplicationName commandHandler requires the projectName parameter to be defined`);
+    }
+
+    const applications = await commandHandler.gluonService.applications.gluonApplicationsLinkedToGluonProject(commandHandler.projectName);
+    return await menuForApplications(
+        ctx,
+        applications,
+        commandHandler,
+        selectionMessage);
+}
+
+export interface GluonApplicationNameSetter {
+    gluonService: GluonService;
+    projectName: string;
+    applicationName: string;
+    handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }

@@ -11,7 +11,10 @@ import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageCl
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
-import {setGluonTeamName} from "../../util/recursiveparam/ParameterSetters";
+import {
+    GluonTeamNameSetter,
+    setGluonTeamName,
+} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -23,7 +26,8 @@ import {
 } from "../../util/shared/Error";
 
 @CommandHandler("List projects belonging to a team", QMConfig.subatomic.commandPrefix + " list projects")
-export class ListTeamProjects extends RecursiveParameterRequestCommand {
+export class ListTeamProjects extends RecursiveParameterRequestCommand
+    implements GluonTeamNameSetter {
 
     public static RecursiveKeys = {
         teamName: "TEAM_NAME",
@@ -41,7 +45,7 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand {
     })
     public teamName: string;
 
-    constructor(private gluonService = new GluonService()) {
+    constructor(public gluonService = new GluonService()) {
         super();
     }
 

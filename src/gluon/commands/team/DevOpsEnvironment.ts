@@ -9,7 +9,10 @@ import {
 } from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
-import {setGluonTeamName} from "../../util/recursiveparam/ParameterSetters";
+import {
+    GluonTeamNameSetter,
+    setGluonTeamName,
+} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -18,7 +21,8 @@ import {isSuccessCode} from "../../util/shared/Http";
 
 @CommandHandler("Check whether to create a new OpenShift DevOps environment or use an existing one", QMConfig.subatomic.commandPrefix + " request devops environment")
 @Tags("subatomic", "slack", "team", "openshift", "devops")
-export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
+export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
+    implements GluonTeamNameSetter {
 
     public static RecursiveKeys = {
         teamName: "TEAM_NAME",
@@ -36,7 +40,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand {
     })
     public teamName: string;
 
-    constructor(private gluonService = new GluonService()) {
+    constructor(public gluonService = new GluonService()) {
         super();
     }
 

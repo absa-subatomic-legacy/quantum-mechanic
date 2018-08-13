@@ -9,9 +9,11 @@ import {
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
+    GluonTeamNameSetter,
+    GluonTenantNameSetter,
     setGluonTeamName,
     setGluonTenantName,
-} from "../../util/recursiveparam/ParameterSetters";
+} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -24,7 +26,8 @@ import {
 import {isSuccessCode} from "../../util/shared/Http";
 
 @CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
-export class CreateProject extends RecursiveParameterRequestCommand {
+export class CreateProject extends RecursiveParameterRequestCommand
+    implements GluonTeamNameSetter, GluonTenantNameSetter {
 
     public static RecursiveKeys = {
         teamName: "TEAM_NAME",
@@ -59,7 +62,7 @@ export class CreateProject extends RecursiveParameterRequestCommand {
     })
     public tenantName: string;
 
-    constructor(private gluonService = new GluonService()) {
+    constructor(public gluonService = new GluonService()) {
         super();
     }
 
