@@ -5,29 +5,34 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
-    Parameter,
     success,
     Tags,
 } from "@atomist/automation-client";
-import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
-import {menuForProjects} from "../../util/project/Project";
+import {
+    setGluonProjectName,
+    setGluonTeamName,
+} from "../../util/recursiveparam/ParameterSetters";
+import {
+    RecursiveParameter,
+    RecursiveParameterRequestCommand,
+} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/shared/RecursiveParameterRequestCommand";
-import {menuForTeams} from "../../util/team/Teams";
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
 @Tags("subatomic", "openshift", "project")
 export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
+
+    public static RecursiveKeys = {
+        teamName: "TEAM_NAME",
+        projectName: "PROJECT_NAME",
+    };
 
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
@@ -36,14 +41,15 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
     public teamChannel: string;
 
     @RecursiveParameter({
-        description: "project name",
+        recursiveKey: NewProjectEnvironments.RecursiveKeys.projectName,
+        selectionMessage: "Please select the projects you wish to provision the environments for",
     })
     public projectName: string = null;
 
-    @Parameter({
-        description: "team name",
-        displayable: false,
-        required: false,
+    @RecursiveParameter({
+        recursiveKey: NewProjectEnvironments.RecursiveKeys.teamName,
+        selectionMessage: "Please select a team associated with the project you wish to provision the environments for",
+        forceSet: false,
     })
     public teamName: string = null;
 
@@ -51,7 +57,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
         super();
     }
 
-    protected async runCommand(ctx: HandlerContext) {
+    protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info("Creating new OpenShift environments...");
 
         try {
@@ -71,31 +77,9 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand {
         }
     }
 
-    protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
-        if (_.isEmpty(this.teamName)) {
-            try {
-                const team = await this.gluonService.teams.gluonTeamForSlackTeamChannel(this.teamChannel);
-                this.teamName = team.name;
-                return await this.handle(ctx);
-            } catch (error) {
-                const teams = await this.gluonService.teams.gluonTeamsWhoSlackScreenNameBelongsTo(this.screenName);
-                return await menuForTeams(
-                    ctx,
-                    teams,
-                    this,
-                    "Please select a team associated with the project you wish to provision the environments for",
-                );
-            }
-        }
-        if (_.isEmpty(this.projectName)) {
-            const projects = await this.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(this.teamName);
-            return await menuForProjects(
-                ctx,
-                projects,
-                this,
-                "Please select the projects you wish to provision the environments for",
-            );
-        }
+    protected configureParameterSetters() {
+        this.addRecursiveSetter(NewProjectEnvironments.RecursiveKeys.teamName, setGluonTeamName);
+        this.addRecursiveSetter(NewProjectEnvironments.RecursiveKeys.projectName, setGluonProjectName);
     }
 
     private async requestProjectEnvironment(projectId: string, memberId: string) {

@@ -1,30 +1,35 @@
 import {
     CommandHandler,
     HandlerContext,
-    HandlerResult,
     logger,
     MappedParameter,
     MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
-import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
+import {
+    setGluonTeamName,
+    setGluonTenantName,
+} from "../../util/recursiveparam/ParameterSetters";
+import {
+    RecursiveParameter,
+    RecursiveParameterRequestCommand,
+} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/shared/RecursiveParameterRequestCommand";
-import {menuForTenants} from "../../util/shared/Tenants";
-import {menuForTeams} from "../../util/team/Teams";
 
 @CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
 export class CreateProject extends RecursiveParameterRequestCommand {
+
+    public static RecursiveKeys = {
+        teamName: "TEAM_NAME",
+        tenantName: "TENANT_NAME",
+    };
 
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
@@ -43,12 +48,14 @@ export class CreateProject extends RecursiveParameterRequestCommand {
     public description: string;
 
     @RecursiveParameter({
-        description: "team name",
+        recursiveKey: CreateProject.RecursiveKeys.teamName,
+        selectionMessage: "Please select a team you would like to associate this project with",
     })
     public teamName: string;
 
     @RecursiveParameter({
-        description: "tenant name",
+        recursiveKey: CreateProject.RecursiveKeys.tenantName,
+        selectionMessage: "Please select a tenant you would like to associate this project with. Choose Default if you have no tenant specified for this project.",
     })
     public tenantName: string;
 
@@ -65,30 +72,9 @@ export class CreateProject extends RecursiveParameterRequestCommand {
         }
     }
 
-    protected async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
-        if (_.isEmpty(this.teamName)) {
-            try {
-                const team = await this.gluonService.teams.gluonTeamForSlackTeamChannel(this.teamChannel);
-                this.teamName = team.name;
-                return await this.handle(ctx);
-            } catch (error) {
-                const teams = await this.gluonService.teams.gluonTeamsWhoSlackScreenNameBelongsTo(this.screenName);
-                return await menuForTeams(
-                    ctx,
-                    teams,
-                    this,
-                    "Please select a team you would like to associate this project with",
-                );
-            }
-        }
-        if (_.isEmpty(this.tenantName)) {
-            const tenants = await this.gluonService.tenants.gluonTenantList();
-            return await menuForTenants(ctx,
-                tenants,
-                this,
-                "Please select a tenant you would like to associate this project with. Choose Default if you have no tenant specified for this project.",
-            );
-        }
+    protected configureParameterSetters() {
+        this.addRecursiveSetter(CreateProject.RecursiveKeys.teamName, setGluonTeamName);
+        this.addRecursiveSetter(CreateProject.RecursiveKeys.tenantName, setGluonTenantName);
     }
 
     private async requestNewProjectForTeamAndTenant(ctx: HandlerContext, screenName: string,
