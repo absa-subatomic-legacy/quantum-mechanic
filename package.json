@@ -29,7 +29,7 @@
   "devDependencies": {
     "@types/app-root-path": "^1.2.4",
     "@types/mocha": "^2.2.48",
-    "@types/node": "^9.4.1",
+    "@types/node": "^10.5.8",
     "@types/power-assert": "^1.4.29",
     "@types/handlebars": "^4.0.37",
     "axios-mock-adapter": "^1.14.1",
