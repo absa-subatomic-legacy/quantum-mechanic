@@ -11,6 +11,9 @@ import {QMTemplate} from "../../../template/QMTemplate";
 import {GluonService} from "../../services/gluon/GluonService";
 import {PackageDefinition} from "../../util/packages/PackageDefinition";
 import {
+    GluonApplicationNameSetter,
+    GluonProjectNameSetter,
+    GluonTeamNameSetter,
     setGluonApplicationName,
     setGluonProjectName,
     setGluonTeamName,
@@ -27,7 +30,8 @@ const PACKAGE_DEFINITION_EXTENSION = ".json";
 const PACKAGE_DEFINITION_FOLDER = "resources/package-definitions/";
 
 @CommandHandler("Configure an existing application/library using a predefined template", QMConfig.subatomic.commandPrefix + " configure package")
-export class ConfigureBasicPackage extends RecursiveParameterRequestCommand {
+export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
+    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
 
     private static RecursiveKeys = {
         teamName: "TEAM_NAME",
