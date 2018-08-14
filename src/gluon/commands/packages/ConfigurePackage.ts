@@ -41,7 +41,7 @@ import {GluonToEvent} from "../../util/transform/GluonToEvent";
 export class ConfigurePackage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, JenkinsfileNameSetter, OpenshiftTemplateSetter {
 
-    public static RecursiveKeys = {
+    private static RecursiveKeys = {
         teamName: "TEAM_NAME",
         projectName: "PROJECT_NAME",
         applicationName: "APPLICATION_NAME",

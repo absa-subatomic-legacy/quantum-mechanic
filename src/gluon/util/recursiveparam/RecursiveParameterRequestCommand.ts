@@ -22,7 +22,6 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
 
         this.configureParameterSetters();
-
         if (!this.recursiveParametersAreSet()) {
             try {
                 return await this.requestNextUnsetParameter(ctx);
@@ -44,6 +43,7 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
                 selectionMessage: parameterDetails.selectionMessage,
                 forceSet: parameterDetails.forceSet,
             };
+            logger.info(JSON.stringify(this.recursiveParameterMap[parameterDetails.recursiveKey]));
             this.recursiveParameterList.push(parameterDetails.recursiveKey);
         } else {
             throw new QMError(`Duplicate recursive key ${parameterDetails.recursiveKey} defined. Recursive keys must be unique.`);
@@ -61,7 +61,7 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
         throw new QMError("Recursive parameters could not be set correctly. This is an implementation fault. Please raise an issue.");
     }
 
-    protected addRecursiveSetter(recursiveKey: string, setter: (ctx: HandlerContext, commandHandler: any) => Promise<any>) {
+    protected addRecursiveSetter(recursiveKey: string, setter: (ctx: HandlerContext, commandHandler: any, selectionMessage: string) => Promise<any>) {
         this.recursiveParameterMap[recursiveKey].parameterSetter = setter;
         this.recursiveParameterOrder.push(recursiveKey);
     }
@@ -93,6 +93,8 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
                 throw new Error(`Setter for recursive parameter ${propertyKey} is not set.`);
             }
 
+            logger.debug(`Recursive Param with recursive key ${recursiveKey} details:\nProperty: ${propertyKey}\nForceSet: ${this.recursiveParameterMap[recursiveKey].forceSet}\nValue: ${dynamicClassInstance[propertyKey]}`);
+
             if (this.recursiveParameterMap[recursiveKey].forceSet &&
                 _.isEmpty(dynamicClassInstance[propertyKey])) {
                 logger.info(`Recursive parameter ${propertyKey} not set.`);
@@ -118,7 +120,7 @@ export function RecursiveParameter(details: RecursiveParameterDetails) {
             }
             recursiveParameters.required = false;
             recursiveParameters.displayable = false;
-            target.addRecursiveParameterProperty(details, propertyKey);
+            target.addRecursiveParameterProperty(recursiveParameters, propertyKey);
         }
         declareParameter(target, propertyKey, recursiveParameters);
     };

@@ -34,7 +34,7 @@ import {isSuccessCode} from "../../util/shared/Http";
 export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
 
-    public static RecursiveKeys = {
+    private static RecursiveKeys = {
         teamName: "TEAM_NAME",
         projectName: "PROJECT_NAME",
         applicationName: "APPLICATION_NAME",

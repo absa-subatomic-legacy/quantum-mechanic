@@ -32,7 +32,7 @@ import {isSuccessCode} from "../../util/shared/Http";
 export class NewBitbucketProject extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
-    public static RecursiveKeys = {
+    private static RecursiveKeys = {
         teamName: "TEAM_NAME",
         projectName: "PROJECT_NAME",
     };
@@ -112,7 +112,7 @@ export class ListExistingBitbucketProject
     extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
-    public static RecursiveKeys = {
+    private static RecursiveKeys = {
         teamName: "TEAM_NAME",
         projectName: "PROJECT_NAME",
     };

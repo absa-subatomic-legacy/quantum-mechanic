@@ -24,7 +24,7 @@ import {isSuccessCode} from "../../util/shared/Http";
 export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    public static RecursiveKeys = {
+    private static RecursiveKeys = {
         teamName: "TEAM_NAME",
     };
 

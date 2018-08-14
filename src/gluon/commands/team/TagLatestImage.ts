@@ -32,7 +32,7 @@ import {
 export class TagLatestImage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    public static RecursiveKeys = {
+    private static RecursiveKeys = {
         teamName: "TEAM_NAME",
         imageName: "IMAGE_NAME",
     };

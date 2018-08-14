@@ -29,7 +29,7 @@ import {isSuccessCode} from "../../util/shared/Http";
 export class CreateProject extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonTenantNameSetter {
 
-    public static RecursiveKeys = {
+    private static RecursiveKeys = {
         teamName: "TEAM_NAME",
         tenantName: "TENANT_NAME",
     };

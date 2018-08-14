@@ -29,7 +29,7 @@ import {
 export class ListTeamProjects extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    public static RecursiveKeys = {
+    private static RecursiveKeys = {
         teamName: "TEAM_NAME",
     };
 
