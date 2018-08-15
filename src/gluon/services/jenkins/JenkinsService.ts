@@ -5,7 +5,6 @@ import * as https from "https";
 import * as _ from "lodash";
 import * as qs from "query-string";
 import * as util from "util";
-import {AwaitAxios} from "../../util/shared/AwaitAxios";
 import {addAxiosLogger} from "../../util/shared/AxiosLogger";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
@@ -13,15 +12,13 @@ import {retryFunction} from "../../util/shared/RetryFunction";
 
 export class JenkinsService {
 
-    private axiosInstance = new AwaitAxios();
-
     public kickOffFirstBuild(jenkinsHost: string,
                              token: string,
                              gluonProjectName: string,
                              gluonApplicationName: string): AxiosPromise {
         logger.debug(`Trying to kick of first jenkins build. jenkinsHost: ${jenkinsHost}; token: ${token}; gluonProjectName: ${gluonProjectName}; gluonApplicationName: ${gluonApplicationName} `);
         const axios = jenkinsAxios();
-        return this.axiosInstance.post(`https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/job/${_.kebabCase(gluonApplicationName).toLowerCase()}/build?delay=0sec`,
+        return axios.post(`https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/job/${_.kebabCase(gluonApplicationName).toLowerCase()}/build?delay=0sec`,
             "", {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -35,7 +32,7 @@ export class JenkinsService {
                         gluonApplicationName: string): AxiosPromise {
         logger.debug(`Trying to kick of a jenkins build. jenkinsHost: ${jenkinsHost}; token: ${token}; gluonProjectName: ${gluonProjectName}; gluonApplicationName: ${gluonApplicationName} `);
         const axios = jenkinsAxios();
-        return this.axiosInstance.post(`https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/job/${_.kebabCase(gluonApplicationName).toLowerCase()}/job/master/build?delay=0sec`,
+        return axios.post(`https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/job/${_.kebabCase(gluonApplicationName).toLowerCase()}/job/master/build?delay=0sec`,
             "", {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -57,7 +54,7 @@ export class JenkinsService {
             return request;
         });
 
-        return this.axiosInstance.post(`https://${jenkinsHost}/credentials/store/system/domain/_/createCredentials`,
+        return axios.post(`https://${jenkinsHost}/credentials/store/system/domain/_/createCredentials`,
             {
                 json: `${JSON.stringify(jenkinsCredentials)}`,
             },
@@ -84,7 +81,7 @@ export class JenkinsService {
         form.append("file", fs.createReadStream(filePath), fileName);
 
         const axios = jenkinsAxios();
-        return this.axiosInstance.post(`https://${jenkinsHost}/credentials/store/system/domain/_/createCredentials`,
+        return axios.post(`https://${jenkinsHost}/credentials/store/system/domain/_/createCredentials`,
             form,
             {
                 headers: {
@@ -97,7 +94,7 @@ export class JenkinsService {
     public async createJenkinsJob(jenkinsHost: string, token: string, gluonProjectName: string, gluonApplicationName, jobConfig: string): Promise<any> {
         logger.debug(`Trying to create jenkins job. jenkinsHost: ${jenkinsHost}; token: ${token}; gluonProjectName: ${gluonProjectName}; gluonApplicationName: ${gluonApplicationName}`);
         const axios = jenkinsAxios();
-        return await this.axiosInstance.post(`https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/createItem?name=${_.kebabCase(gluonApplicationName).toLowerCase()}`,
+        return await axios.post(`https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/createItem?name=${_.kebabCase(gluonApplicationName).toLowerCase()}`,
             jobConfig,
             {
                 headers: {
@@ -110,7 +107,7 @@ export class JenkinsService {
     public async createOpenshiftEnvironmentCredentials(jenkinsHost: string, token: string, gluonProjectName: string, credentialsConfig: string): Promise<any> {
         logger.debug(`Trying to create jenkins openshift credentials. jenkinsHost: ${jenkinsHost}; token: ${token}; gluonProjectName: ${gluonProjectName}`);
         const axios = jenkinsAxios();
-        return await this.axiosInstance.post(`https://${jenkinsHost}/createItem?name=${_.kebabCase(gluonProjectName).toLowerCase()}`,
+        return await axios.post(`https://${jenkinsHost}/createItem?name=${_.kebabCase(gluonProjectName).toLowerCase()}`,
             credentialsConfig,
             {
                 headers: {
