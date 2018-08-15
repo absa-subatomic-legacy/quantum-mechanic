@@ -1,7 +1,6 @@
 import {logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
-import axios from "axios";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateProject} from "../../commands/project/CreateProject";
@@ -11,13 +10,14 @@ import {isSuccessCode} from "../../util/shared/Http";
 
 export class ProjectService {
 
-    private axiosInstance = new AwaitAxios();
+    constructor(public axiosInstance = new AwaitAxios()) {
+    }
 
     public async gluonProjectFromProjectName(projectName: string,
                                              requestActionOnFailure: boolean = true): Promise<any> {
         logger.debug(`Trying to get gluon project by projectName. projectName: ${projectName} `);
 
-        const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?name=${projectName}`);
+        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?name=${projectName}`);
 
         if (!isSuccessCode(result.status) || _.isEmpty(result.data._embedded)) {
             const errorMessage = `Project with name ${projectName} does not exist`;
@@ -58,7 +58,7 @@ Consider creating a new project called ${projectName}. Click the button below to
     public async gluonProjectsWhichBelongToGluonTeam(teamName: string, promptToCreateIfNoProjects = true): Promise<any[]> {
         logger.debug(`Trying to get gluon projects associated to team. teamName: ${teamName} `);
 
-        const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?teamName=${teamName}`);
+        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/projects?teamName=${teamName}`);
 
         if (!isSuccessCode(result.status)) {
             throw new QMError(`Failed to get project associated to ${teamName}`);
@@ -93,7 +93,7 @@ Consider creating a new project called ${projectName}. Click the button below to
 
         logger.debug(`Trying to get all gluon projects.`);
 
-        const result = await axios.get(`${QMConfig.subatomic.gluon.baseUrl}/projects`);
+        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/projects`);
 
         if (!isSuccessCode(result.status)) {
             throw new QMError(`Failed to get projects.`);
@@ -126,7 +126,6 @@ Consider creating a new project called ${projectName}. Click the button below to
 
     public async createGluonProject(projectDetails: any): Promise<any> {
         logger.debug(`Trying to create gluon projects`);
-
         return await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/projects`,
             projectDetails);
 
@@ -134,13 +133,13 @@ Consider creating a new project called ${projectName}. Click the button below to
 
     public async confirmBitbucketProjectCreated(projectId: string, bitbucketConfirmationDetails: any): Promise<any> {
         logger.debug(`Trying to confirm bitbucket project created. projectId: ${projectId}`);
-        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+        return await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
             bitbucketConfirmationDetails);
     }
 
     public async requestProjectEnvironment(projectId: string, memberId: string): Promise<any> {
         logger.debug(`Trying to request project environments. projectId: ${projectId}; memberId: ${memberId}`);
-        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+        return await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
             {
                 projectEnvironment: {
                     requestedBy: memberId,
@@ -150,12 +149,12 @@ Consider creating a new project called ${projectName}. Click the button below to
 
     public async associateTeamToProject(projectId: string, associationDetails: any): Promise<any> {
         logger.debug(`Trying to associate team to project. projectId: ${projectId}`);
-        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`, associationDetails);
+        return await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`, associationDetails);
     }
 
     public async updateProjectWithBitbucketDetails(projectId: string, bitbucketDetails: any): Promise<any> {
         logger.debug(`Trying to update project with bitbucket details. projectId: ${projectId}`);
-        return await axios.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+        return await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
             bitbucketDetails);
     }
 }

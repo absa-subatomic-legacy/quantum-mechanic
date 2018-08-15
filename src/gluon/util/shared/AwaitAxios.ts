@@ -24,4 +24,20 @@ export class AwaitAxios {
         }
     }
 
+    public async put(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+        try {
+            return await this.axiosInstance.put(url, data, config);
+        } catch (error) {
+            return error.response;
+        }
+    }
+
+    public async get(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse> {
+        try {
+            return await this.axiosInstance.get(url, config);
+        } catch (error) {
+            return error.response;
+        }
+    }
+
 }

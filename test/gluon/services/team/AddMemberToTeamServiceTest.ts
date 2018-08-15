@@ -11,7 +11,6 @@ import {TestMessageClient} from "../../TestMessageClient";
 
 describe("AddMemberToTeamService getNewMember", () => {
     it("should return error that member is part of team already", async () => {
-        const axiosWrapper = new AwaitAxios();
         const mockedMemberService = mock(MemberService);
         when(mockedMemberService.gluonMemberFromScreenName("Dex")).thenReturn(Promise.resolve({
             id: "User1",
@@ -26,7 +25,7 @@ describe("AddMemberToTeamService getNewMember", () => {
                 screenName: "Dex",
             },
         }));
-        const gluonService = new GluonService(axiosWrapper, undefined, instance(mockedMemberService));
+        const gluonService = new GluonService(undefined, undefined, instance(mockedMemberService));
         const service = new AddMemberToTeamService(gluonService);
 
         let errorThrown: QMError = null;
@@ -41,7 +40,6 @@ describe("AddMemberToTeamService getNewMember", () => {
     });
 
     it("should return member details", async () => {
-        const axiosWrapper = new AwaitAxios();
         const mockedMemberService = mock(MemberService);
         when(mockedMemberService.gluonMemberFromScreenName("Dex")).thenReturn(Promise.resolve({
             id: "User1",
@@ -56,7 +54,7 @@ describe("AddMemberToTeamService getNewMember", () => {
                 screenName: "Dex",
             },
         }));
-        const gluonService = new GluonService(axiosWrapper, undefined, instance(mockedMemberService));
+        const gluonService = new GluonService(undefined, undefined, instance(mockedMemberService));
         const service = new AddMemberToTeamService(gluonService);
 
         const result = await service.getNewMember("Dex", "Channel2");
@@ -68,12 +66,11 @@ describe("AddMemberToTeamService getNewMember", () => {
 
 describe("AddMemberToTeamService addUserToGluonTeam", () => {
     it("should fail to add member to gluon team", async () => {
-        const axiosWrapper = new AwaitAxios();
         const mockedTeamService = mock(TeamService);
         when(mockedTeamService.addMemberToTeam("team1", anything())).thenReturn(Promise.resolve({
             status: 400,
         }));
-        const gluonService = new GluonService(axiosWrapper, instance(mockedTeamService));
+        const gluonService = new GluonService(undefined, instance(mockedTeamService));
         const service = new AddMemberToTeamService(gluonService);
 
         let errorThrown: QMError = null;
@@ -88,12 +85,11 @@ describe("AddMemberToTeamService addUserToGluonTeam", () => {
     });
 
     it("should extract the correct gluon team id from url", async () => {
-        const axiosWrapper = new AwaitAxios();
         const mockedTeamService = mock(TeamService);
         when(mockedTeamService.addMemberToTeam("team1", anything())).thenReturn(Promise.resolve({
             status: 200,
         }));
-        const gluonService = new GluonService(axiosWrapper, instance(mockedTeamService));
+        const gluonService = new GluonService(undefined, instance(mockedTeamService));
         const service = new AddMemberToTeamService(gluonService);
 
         await service.addUserToGluonTeam("User1", "User2", "http://gluon/teams/team1");
@@ -102,12 +98,11 @@ describe("AddMemberToTeamService addUserToGluonTeam", () => {
     });
 
     it("should successfully execute gluon add", async () => {
-        const axiosWrapper = new AwaitAxios();
         const mockedTeamService = mock(TeamService);
         when(mockedTeamService.addMemberToTeam("team1", anything())).thenReturn(Promise.resolve({
             status: 200,
         }));
-        const gluonService = new GluonService(axiosWrapper, instance(mockedTeamService));
+        const gluonService = new GluonService(undefined, instance(mockedTeamService));
         const service = new AddMemberToTeamService(gluonService);
 
         let errorThrown: boolean = false;
