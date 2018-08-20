@@ -30,3 +30,7 @@ export async function loadScreenNameByUserId(ctx: HandlerContext, userId: string
     }
     return null;
 }
+
+export interface QMMember {
+    domainUsername: string;
+}

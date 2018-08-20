@@ -12,6 +12,7 @@ import {OCCommon} from "../../../openshift/OCCommon";
 import {getProjectDisplayName} from "../../util/project/Project";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
 import {QuotaLoader} from "../../util/resources/QuotaLoader";
+import {QMTeam} from "../../util/team/Teams";
 import {OCImageService} from "./OCImageService";
 
 export class OCService {
@@ -252,7 +253,7 @@ export class OCService {
             ]);
     }
 
-    public async addTeamMembershipPermissionsToProject(projectId: string, team: { owners: Array<{ domainUsername }>, members: Array<{ domainUsername }> }) {
+    public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {
         logger.debug(`Trying to add team membership permission to project.`);
         await team.owners.map(async owner => {
             const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];

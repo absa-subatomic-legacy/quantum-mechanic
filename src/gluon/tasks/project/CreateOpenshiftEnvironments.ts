@@ -3,7 +3,10 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {OCService} from "../../services/openshift/OCService";
-import {getProjectId} from "../../util/project/Project";
+import {
+    getProjectId,
+    OpenshiftProjectEnvironmentRequest,
+} from "../../util/project/Project";
 import {OCResultError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -13,7 +16,8 @@ export class CreateOpenshiftEnvironments extends Task {
 
     private readonly TASK_CREATE_POD_NETWORK = "PodNetwork";
 
-    constructor(private environmentsRequestedEvent, private ocService = new OCService()) {
+    constructor(private environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest,
+                private ocService = new OCService()) {
         super();
     }
 
@@ -54,7 +58,7 @@ export class CreateOpenshiftEnvironments extends Task {
         }
     }
 
-    private async createOpenshiftProject(projectId: string, environmentsRequestedEvent, environment) {
+    private async createOpenshiftProject(projectId: string, environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest, environment) {
         try {
             await this.ocService.newSubatomicProject(
                 projectId,
