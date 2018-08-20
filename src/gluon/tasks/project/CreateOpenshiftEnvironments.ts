@@ -1,5 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import * as _ from "lodash";
+import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {OCService} from "../../services/openshift/OCService";
 import {getProjectId} from "../../util/project/Project";
@@ -17,9 +18,9 @@ export class CreateOpenshiftEnvironments extends Task {
     }
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
-        this.taskListMessage.addTask("devEnvironment", "Create Dev Environment");
-        this.taskListMessage.addTask("sitEnvironment", "Create SIT Environment");
-        this.taskListMessage.addTask("uatEnvironment", "Create UAT Environment");
+        for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
+            this.taskListMessage.addTask(`${environment.id}Environment`, `Create ${environment.id} Environment`);
+        }
         this.taskListMessage.addTask(this.TASK_CREATE_POD_NETWORK, "Create project/devops pod network");
     }
 
@@ -37,9 +38,10 @@ export class CreateOpenshiftEnvironments extends Task {
     }
 
     private async createOpenshiftEnvironments() {
-        const environments = [["dev", "Development"],
-            ["sit", "Integration testing"],
-            ["uat", "User acceptance"]];
+        const environments = [];
+        for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
+            environments.push([environment.id, environment.description]);
+        }
 
         await this.ocService.login();
 
@@ -78,11 +80,12 @@ export class CreateOpenshiftEnvironments extends Task {
 
     private async createPodNetwork(teamName: string, tenantName: string, projectName: string) {
         const teamDevOpsProjectId = getDevOpsEnvironmentDetails(teamName).openshiftProjectId;
-        const projectIdDev = getProjectId(tenantName, projectName, "dev");
-        const projectIdSit = getProjectId(tenantName, projectName, "sit");
-        const projectIdUat = getProjectId(tenantName, projectName, "uat");
+        const projectEnvironments = [];
+        for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
+            projectEnvironments.push(getProjectId(tenantName, projectName, environment.id));
+        }
         try {
-            await this.ocService.createPodNetwork([projectIdDev, projectIdSit, projectIdUat], teamDevOpsProjectId);
+            await this.ocService.createPodNetwork(projectEnvironments, teamDevOpsProjectId);
         } catch (error) {
             if (error instanceof OCCommandResult) {
                 const multitenantNetworkPluginMissingError = "error: managing pod network is only supported for openshift multitenant network plugin";

@@ -20,7 +20,7 @@ import {
 import {isSuccessCode} from "../../util/shared/Http";
 
 @CommandHandler("Check whether to create a new OpenShift DevOps environment or use an existing one", QMConfig.subatomic.commandPrefix + " request devops environment")
-@Tags("subatomic", "slack", "team", "openshift", "devops")
+@Tags("subatomic", "slack", "team", "openshiftNonProd", "devops")
 export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 

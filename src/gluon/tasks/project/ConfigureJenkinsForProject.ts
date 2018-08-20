@@ -55,12 +55,11 @@ export class ConfigureJenkinsForProject extends Task {
     }
 
     private async addEditRolesToJenkinsServiceAccount(teamDevOpsProjectId: string, projectName: string, tenant: string) {
-        const environments = ["dev", "sit", "uat"];
 
         await this.ocService.login();
 
-        for (const environment of environments) {
-            const openshiftProjectId = getProjectId(tenant, projectName, environment);
+        for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
+            const openshiftProjectId = getProjectId(tenant, projectName, environment.id);
             await this.ocService.addRoleToUserInNamespace(
                 `system:serviceaccount:${teamDevOpsProjectId}:jenkins`,
                 "edit",
@@ -70,16 +69,17 @@ export class ConfigureJenkinsForProject extends Task {
 
     private async createJenkinsBuildTemplate(environmentsRequestedEvent, teamDevOpsProjectId: string, jenkinsHost: string, token: string) {
         const projectTemplate: QMTemplate = new QMTemplate("resources/templates/jenkins/jenkins-openshift-environment-credentials.xml");
-        const builtTemplate: string = projectTemplate.build(
-            {
-                projectName: environmentsRequestedEvent.project.name,
-                docsUrl: QMConfig.subatomic.docs.baseUrl,
-                teamDevOpsProjectId,
-                devProjectId: getProjectId(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, "dev"),
-                sitProjectId: getProjectId(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, "sit"),
-                uatProjectId: getProjectId(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, "uat"),
-            },
-        );
+        const parameters: { [k: string]: any } = {
+            projectName: environmentsRequestedEvent.project.name,
+            docsUrl: QMConfig.subatomic.docs.baseUrl,
+            teamDevOpsProjectId,
+        };
+
+        for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
+            parameters[`${environment.id}ProjectId`] = getProjectId(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, environment.id);
+        }
+
+        const builtTemplate: string = projectTemplate.build(parameters);
         logger.info("Template found and built successfully.");
         const jenkinsCreateItemResult = await this.jenkinsService.createOpenshiftEnvironmentCredentials(jenkinsHost, token, environmentsRequestedEvent.project.name, builtTemplate);
 

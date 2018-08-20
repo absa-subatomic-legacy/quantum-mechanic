@@ -23,7 +23,7 @@ export class OCService {
     }
 
     public async login() {
-        return await OCClient.login(QMConfig.subatomic.openshift.masterUrl, QMConfig.subatomic.openshift.auth.token);
+        return await OCClient.login(QMConfig.subatomic.openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftNonProd.auth.token);
     }
 
     public async newDevOpsProject(openshiftProjectId: string, teamName: string): Promise<OCCommandResult> {
@@ -138,8 +138,8 @@ export class OCService {
             "JENKINS_ADMIN_EMAIL=subatomic@local",
             // TODO the registry Cluster IP we will have to get by introspecting the registry Service
             // If no team email then the address of the createdBy member
-            `MAVEN_SLAVE_IMAGE=${QMConfig.subatomic.openshift.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-maven-subatomic:2.0`,
-            `NODEJS_SLAVE_IMAGE=${QMConfig.subatomic.openshift.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-nodejs-subatomic:2.0`,
+            `MAVEN_SLAVE_IMAGE=${QMConfig.subatomic.openshiftNonProd.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-maven-subatomic:2.0`,
+            `NODEJS_SLAVE_IMAGE=${QMConfig.subatomic.openshiftNonProd.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-nodejs-subatomic:2.0`,
         ];
         return await this.processOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
     }
@@ -201,7 +201,7 @@ export class OCService {
             "jenkins",
             [],
             [
-                new SimpleOption("-overwrite", "haproxy.router.openshift.io/timeout=120s"),
+                new SimpleOption("-overwrite", "haproxy.router.openshiftNonProd.io/timeout=120s"),
                 new SimpleOption("-namespace", namespace),
             ]);
     }
