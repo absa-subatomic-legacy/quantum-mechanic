@@ -8,6 +8,7 @@ import {
     success,
     Tags,
 } from "@atomist/automation-client";
+import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -97,7 +98,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand
             if (projectEnvironmentRequestResult.status === 403) {
                 throw new QMError(`Member ${memberId} is not a member of project ${projectId}.`, this.teamMembershipMessages.notAMemberOfTheTeam());
             } else {
-                logger.error(`Failed to request project environment for project ${this.projectName}. Error: ${JSON.stringify(projectEnvironmentRequestResult)}`);
+                logger.error(`Failed to request project environment for project ${this.projectName}. Error: ${inspect(projectEnvironmentRequestResult)}`);
                 throw new QMError("Failed to request project environment. Network error.");
             }
         }
