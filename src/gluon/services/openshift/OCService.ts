@@ -1,6 +1,7 @@
 import {logger} from "@atomist/automation-client";
 import * as fs from "fs";
 import _ = require("lodash");
+import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {AbstractOption} from "../../../openshift/base/options/AbstractOption";
@@ -23,8 +24,8 @@ export class OCService {
     constructor(private ocImageService = new OCImageService()) {
     }
 
-    public async login() {
-        return await OCClient.login(QMConfig.subatomic.openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftNonProd.auth.token);
+    public async login(openshiftDetails: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd) {
+        return await OCClient.login(openshiftDetails.masterUrl, openshiftDetails.auth.token);
     }
 
     public async newDevOpsProject(openshiftProjectId: string, teamName: string): Promise<OCCommandResult> {

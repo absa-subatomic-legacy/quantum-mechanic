@@ -92,7 +92,7 @@ export class CreateProdEnvironments extends RecursiveParameterRequestCommand
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            const request: OpenshiftProjectEnvironmentRequest = this.createEnvironmentRequest(project);
+            const request: OpenshiftProjectEnvironmentRequest = await this.createEnvironmentRequest(project);
 
             for (const prodOpenshift of QMConfig.subatomic.openshiftProd) {
                 taskRunner.addTask(
@@ -113,11 +113,14 @@ export class CreateProdEnvironments extends RecursiveParameterRequestCommand
         this.addRecursiveSetter(CreateProdEnvironments.RecursiveKeys.projectName, setGluonProjectName);
     }
 
-    private createEnvironmentRequest(gluonProject): OpenshiftProjectEnvironmentRequest {
+    private async createEnvironmentRequest(gluonProject): Promise<OpenshiftProjectEnvironmentRequest> {
+
+        const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(gluonProject.owningTenant);
+
         const request: OpenshiftProjectEnvironmentRequest = {
             teams: [createQMTeam(gluonProject.owningTeam.name)],
             project: createQMProject(gluonProject.name),
-            owningTenant: createQMTenant(gluonProject.owningTenant),
+            owningTenant: createQMTenant(tenant.name),
         };
         for (const team of gluonProject.teams) {
             request.teams.push(createQMTeam(team.name));

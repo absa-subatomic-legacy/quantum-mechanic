@@ -14,6 +14,7 @@ import {LinkExistingLibrary} from "./gluon/commands/packages/LinkExistingLibrary
 import {AddConfigServer} from "./gluon/commands/project/AddConfigServer";
 import {AssociateTeam} from "./gluon/commands/project/AssociateTeam";
 import {CreateOpenShiftPvc} from "./gluon/commands/project/CreateOpenShiftPvc";
+import {CreateProdEnvironments} from "./gluon/commands/project/CreateProdEnvironments";
 import {CreateProject} from "./gluon/commands/project/CreateProject";
 import {NewProjectEnvironments} from "./gluon/commands/project/NewProjectEnvironments";
 import {
@@ -114,6 +115,7 @@ export const configuration: any = {
         ConfigureBasicPackage,
         TagAllLatestImages,
         TagLatestImage,
+        CreateProdEnvironments,
     ],
     events: [
         TeamsLinkedToProject,

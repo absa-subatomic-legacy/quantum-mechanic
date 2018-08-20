@@ -1,6 +1,5 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
-import {QMConfig} from "../../../config/QMConfig";
 import {OCService} from "../../services/openshift/OCService";
 import {
     getProjectId,
@@ -31,11 +30,11 @@ export class CreateOpenshiftProductionEnvironment extends Task {
 
     private async createOpenshiftEnvironments() {
         const environments = [];
-        for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
+        for (const environment of this.prodOpenshiftEnvironment.defaultEnvironments) {
             environments.push([environment.id, environment.description]);
         }
 
-        await this.ocService.login();
+        await this.ocService.login(this.prodOpenshiftEnvironment);
 
         for (const environment of environments) {
             const projectId = getProjectId(this.requestDetails.owningTenant.name, this.requestDetails.project.name, environment[0]);
