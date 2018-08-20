@@ -9,6 +9,7 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
+import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMTeamService} from "../../services/team/QMTeamService";
 import {CreateOpenshiftProductionEnvironment} from "../../tasks/project/CreateOpenshiftProductionEnvironment";
@@ -65,6 +66,8 @@ export class CreateProdEnvironments extends RecursiveParameterRequestCommand
         forceSet: false,
     })
     public teamName: string = null;
+
+    private teamMembershipMessages = new TeamMembershipMessages();
 
     constructor(public gluonService = new GluonService(), public qmTeamService = new QMTeamService()) {
         super();
@@ -124,7 +127,7 @@ export class CreateProdEnvironments extends RecursiveParameterRequestCommand
 
     private verifyUser(gluonProject) {
         if (!this.qmTeamService.isUserMemberOfValidTeam(this.screenName, this.getAllAssociateProjectTeams(gluonProject))) {
-            throw new QMError("Not a member");
+            throw new QMError(`ScreenName ${this.screenName} is not a member of project ${gluonProject.projectId}.`, this.teamMembershipMessages.notAMemberOfTheTeam());
         }
     }
 
