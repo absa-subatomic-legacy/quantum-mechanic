@@ -36,6 +36,7 @@ import {
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
+import {ApplicationType} from "../../util/packages/Applications";
 
 @CommandHandler("Configure an existing application/library", QMConfig.subatomic.commandPrefix + " configure custom package")
 export class ConfigurePackage extends RecursiveParameterRequestCommand
@@ -123,22 +124,25 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
 
         const taskListMessage = new TaskListMessage(":rocket: Configuring package...", new ResponderMessageClient(ctx));
         const taskRunner = new TaskRunner(taskListMessage);
+        if (application.packageType === ApplicationType.DEPLOYABLE.toString()) {
+            taskRunner.addTask(
+                new ConfigurePackageInOpenshift(
+                    {
+                        buildEnvironmentVariables: this.buildEnvironmentVariables,
+                        openshiftTemplate: this.openshiftTemplate,
+                        baseS2IImage: this.baseS2IImage,
+                    },
+                    {
+                        teamName: this.teamName,
+                        projectName: this.projectName,
+                        packageName: application.name,
+                        packageType: application.applicationType,
+                        bitbucketRepoRemoteUrl: application.bitbucketRepository.remoteUrl,
+                        owningTeamName: project.owningTeam.name,
+                    }),
+            );
+        }
         taskRunner.addTask(
-            new ConfigurePackageInOpenshift(
-                {
-                    buildEnvironmentVariables: this.buildEnvironmentVariables,
-                    openshiftTemplate: this.openshiftTemplate,
-                    baseS2IImage: this.baseS2IImage,
-                },
-                {
-                    teamName: this.teamName,
-                    projectName: this.projectName,
-                    packageName: application.name,
-                    packageType: application.applicationType,
-                    bitbucketRepoRemoteUrl: application.bitbucketRepository.remoteUrl,
-                    owningTeamName: project.owningTeam.name,
-                }),
-        ).addTask(
             new ConfigurePackageInJenkins(
                 application,
                 project,
