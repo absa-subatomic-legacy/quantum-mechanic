@@ -14,6 +14,7 @@ import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageIn
 import {ConfigurePackageInOpenshift} from "../../tasks/packages/ConfigurePackageInOpenshift";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {ApplicationType} from "../../util/packages/Applications";
 import {
     GluonApplicationNameSetter,
     GluonProjectNameSetter,
@@ -36,7 +37,6 @@ import {
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
-import {ApplicationType} from "../../util/packages/Applications";
 
 @CommandHandler("Configure an existing application/library", QMConfig.subatomic.commandPrefix + " configure custom package")
 export class ConfigurePackage extends RecursiveParameterRequestCommand
