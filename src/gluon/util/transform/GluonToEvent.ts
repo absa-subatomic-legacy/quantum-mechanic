@@ -36,11 +36,21 @@ export class GluonToEvent {
         };
     }
 
-    public static team(gluonTeam) {
+    public static teamMinimal(gluonTeam) {
         return {
             teamId: gluonTeam.teamId,
             name: gluonTeam.name,
             slackIdentity: gluonTeam.slack,
+        };
+    }
+
+    public static team(gluonTeamFull) {
+        return {
+            teamId: gluonTeamFull.teamId,
+            name: gluonTeamFull.name,
+            slackIdentity: gluonTeamFull.slack,
+            owners: gluonTeamFull.owners,
+            members: gluonTeamFull.members,
         };
     }
 }

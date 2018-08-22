@@ -31,10 +31,10 @@ export class TeamService {
             returnValue = result.data._embedded.teamResources;
         } else if (requestActionOnFailure) {
             const slackMessage: SlackMessage = {
-                text: "Unfortunately, you are not a member of any team. To associate this project you need to be a member of at least one team.",
+                text: "Unfortunately, you are not a member of any team. To associate this project you need to be a member of at least one teamMinimal.",
                 attachments: [{
-                    text: "You can either create a new team or apply to join an existing team",
-                    fallback: "You can either create a new team or apply to join an existing team",
+                    text: "You can either create a new team or apply to join an existing teamMinimal",
+                    fallback: "You can either create a new team or apply to join an existing teamMinimal",
                     actions: [
                         buttonForCommand(
                             {
@@ -113,5 +113,16 @@ export class TeamService {
                     requestedBy: memberId,
                 },
             });
+    }
+
+    public async getTeamsAssociatedToProject(projectId: string, rawResult = false): Promise<any> {
+        logger.debug(`Trying to get teams associated to project. projectId: ${projectId}`);
+        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?projectId=${projectId}`);
+        if (rawResult) {
+            return result;
+        } else if (!isSuccessCode(result.status)) {
+            throw new QMError(`Unable to find any teams associated with the project ${projectId}`);
+        }
+        return result.data._embedded.teamResources;
     }
 }

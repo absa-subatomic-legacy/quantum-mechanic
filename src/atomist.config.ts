@@ -14,8 +14,8 @@ import {LinkExistingLibrary} from "./gluon/commands/packages/LinkExistingLibrary
 import {AddConfigServer} from "./gluon/commands/project/AddConfigServer";
 import {AssociateTeam} from "./gluon/commands/project/AssociateTeam";
 import {CreateOpenShiftPvc} from "./gluon/commands/project/CreateOpenShiftPvc";
-import {CreateProdEnvironments} from "./gluon/commands/project/CreateProdEnvironments";
 import {CreateProject} from "./gluon/commands/project/CreateProject";
+import {CreateProjectProdEnvironments} from "./gluon/commands/project/CreateProjectProdEnvironments";
 import {NewProjectEnvironments} from "./gluon/commands/project/NewProjectEnvironments";
 import {
     ListProjectDetails,
@@ -55,6 +55,7 @@ import {
 import {
     ProjectCreatedEvent,
     ProjectEnvironmentsRequestedEvent,
+    ProjectProductionEnvironmentsRequestedEvent,
     TeamsLinkedToProjectEvent,
 } from "./gluon/ingesters/projectIngester";
 import {
@@ -115,7 +116,7 @@ export const configuration: any = {
         ConfigureBasicPackage,
         TagAllLatestImages,
         TagLatestImage,
-        CreateProdEnvironments,
+        CreateProjectProdEnvironments,
     ],
     events: [
         TeamsLinkedToProject,
@@ -141,6 +142,7 @@ export const configuration: any = {
         BitbucketProjectAddedEvent,
         DevOpsEnvironmentRequestedEvent,
         ProjectEnvironmentsRequestedEvent,
+        ProjectProductionEnvironmentsRequestedEvent,
         ApplicationCreatedEvent,
         MembershipRequestCreatedEvent,
         Project,
