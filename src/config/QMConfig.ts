@@ -15,6 +15,8 @@ export class QMConfig {
 
     public static http: HttpAuth;
 
+    public static cluster: number;
+
     public static publicConfig() {
         return new PublicQMConfig();
     }
@@ -26,6 +28,10 @@ export class QMConfig {
         QMConfig.teamId = config.teamId;
         QMConfig.token = config.token;
         QMConfig.http = config.http;
+        QMConfig.cluster = config.cluster || {
+            enabled: process.env.NODE_ENV === "production",
+                workers: 10,
+        };
     }
 
     private static getConfigFile() {
