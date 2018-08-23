@@ -2,6 +2,7 @@ import {logger} from "@atomist/automation-client";
 import fs = require("fs");
 import _ = require("lodash");
 import stripJsonComments = require("strip-json-comments");
+import {Cluster} from "./Cluster";
 import {HttpAuth} from "./HttpAuth";
 import {SubatomicConfig} from "./SubatomicConfig";
 
@@ -15,7 +16,7 @@ export class QMConfig {
 
     public static http: HttpAuth;
 
-    public static cluster: number;
+    public static cluster: Cluster;
 
     public static publicConfig() {
         return new PublicQMConfig();
@@ -30,7 +31,7 @@ export class QMConfig {
         QMConfig.http = config.http;
         QMConfig.cluster = config.cluster || {
             enabled: process.env.NODE_ENV === "production",
-                workers: 10,
+            workers: 10,
         };
     }
 
