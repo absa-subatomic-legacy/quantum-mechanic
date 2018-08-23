@@ -4,7 +4,6 @@ import {GluonService} from "../../../../src/gluon/services/gluon/GluonService";
 import {MemberService} from "../../../../src/gluon/services/gluon/MemberService";
 import {TeamService} from "../../../../src/gluon/services/gluon/TeamService";
 import {TeamSlackChannelService} from "../../../../src/gluon/services/team/TeamSlackChannelService";
-import {AwaitAxios} from "../../../../src/gluon/util/shared/AwaitAxios";
 import {TestGraphClient} from "../../TestGraphClient";
 import {TestMessageClient} from "../../TestMessageClient";
 
@@ -95,6 +94,7 @@ describe("TeamSlackChannelService createTeamSlackChannel", () => {
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
+            workspaceId: "2341234123",
             messageClient: new TestMessageClient(),
             graphClient: new TestGraphClient(),
         };
@@ -120,6 +120,7 @@ describe("TeamSlackChannelService createTeamSlackChannel", () => {
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
+            workspaceId: "2341234123",
             messageClient: new TestMessageClient(),
             graphClient: new TestGraphClient(),
         };
@@ -144,6 +145,7 @@ describe("TeamSlackChannelService createTeamSlackChannel", () => {
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
+            workspaceId: "2341234123",
             messageClient: new TestMessageClient(),
             graphClient: new TestGraphClient(),
         };
@@ -173,6 +175,7 @@ describe("TeamSlackChannelService tryInviteGluonMemberToChannel", () => {
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
+            workspaceId: "2341234123",
             messageClient: new TestMessageClient(),
             graphClient: new TestGraphClient(),
         };
@@ -199,6 +202,7 @@ describe("TeamSlackChannelService tryInviteGluonMemberToChannel", () => {
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
+            workspaceId: "2341234123",
             messageClient: new TestMessageClient(),
             graphClient: new TestGraphClient(),
         };
@@ -225,6 +229,7 @@ describe("TeamSlackChannelService tryInviteGluonMemberToChannel", () => {
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
+            workspaceId: "2341234123",
             messageClient: new TestMessageClient(),
             graphClient: new TestGraphClient(),
         };
@@ -257,6 +262,7 @@ describe("TeamSlackChannelService inviteListOfGluonMembersToChannel", () => {
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
+            workspaceId: "2341234123",
             messageClient: new TestMessageClient(),
             graphClient: new TestGraphClient(),
         };
