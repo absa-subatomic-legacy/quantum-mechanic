@@ -1,5 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import * as _ from "lodash";
+import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {OCService} from "../../services/openshift/OCService";
@@ -8,35 +9,45 @@ import {
     OpenshiftProjectEnvironmentRequest,
 } from "../../util/project/Project";
 import {OCResultError} from "../../util/shared/Error";
-import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {
+    DevOpsEnvironmentDetails,
+    getDevOpsEnvironmentDetails,
+} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
 export class CreateOpenshiftEnvironments extends Task {
 
-    private readonly TASK_CREATE_POD_NETWORK = "PodNetwork";
+    private readonly TASK_HEADER = TaskListMessage.createUniqueTaskName("CreateOpenshiftEnvironments");
+    private readonly TASK_CREATE_POD_NETWORK = TaskListMessage.createUniqueTaskName("PodNetwork");
+    private dynamicTaskNameStore: { [k: string]: string } = {};
 
     constructor(private environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest,
+                private devopsEnvironmentDetails: DevOpsEnvironmentDetails = getDevOpsEnvironmentDetails(environmentsRequestedEvent.teams[0].name),
+                private openshiftEnvironment: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd,
                 private ocService = new OCService()) {
         super();
     }
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
+        this.taskListMessage.addTask(this.TASK_HEADER, `*Create project environments on ${this.openshiftEnvironment.name}*`);
         for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
-            this.taskListMessage.addTask(`${environment.id}Environment`, `Create ${environment.id} Environment`);
+            const internalTaskId = `${environment.id}Environment`;
+            this.dynamicTaskNameStore[internalTaskId] = TaskListMessage.createUniqueTaskName(internalTaskId);
+            this.taskListMessage.addTask(this.dynamicTaskNameStore[internalTaskId], `\tCreate ${environment.id} Environment`);
         }
-        this.taskListMessage.addTask(this.TASK_CREATE_POD_NETWORK, "Create project/devops pod network");
+        this.taskListMessage.addTask(this.TASK_CREATE_POD_NETWORK, "\tCreate project/devops pod network");
     }
 
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
         await this.createOpenshiftEnvironments();
 
         await this.createPodNetwork(
-            this.environmentsRequestedEvent.teams[0].name,
             this.environmentsRequestedEvent.owningTenant.name,
             this.environmentsRequestedEvent.project.name);
 
         await this.taskListMessage.succeedTask(this.TASK_CREATE_POD_NETWORK);
+        await this.taskListMessage.succeedTask(this.TASK_HEADER);
 
         return true;
     }
@@ -47,14 +58,14 @@ export class CreateOpenshiftEnvironments extends Task {
             environments.push([environment.id, environment.description]);
         }
 
-        await this.ocService.login();
+        await this.ocService.login(this.openshiftEnvironment);
 
         for (const environment of environments) {
             const projectId = getProjectId(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, environment[0]);
             logger.info(`Working with OpenShift project Id: ${projectId}`);
 
             await this.createOpenshiftProject(projectId, this.environmentsRequestedEvent, environment);
-            await this.taskListMessage.succeedTask(`${environment[0]}Environment`);
+            await this.taskListMessage.succeedTask(this.dynamicTaskNameStore[`${environment[0]}Environment`]);
         }
     }
 
@@ -82,8 +93,8 @@ export class CreateOpenshiftEnvironments extends Task {
         await this.ocService.createProjectDefaultLimits(projectId);
     }
 
-    private async createPodNetwork(teamName: string, tenantName: string, projectName: string) {
-        const teamDevOpsProjectId = getDevOpsEnvironmentDetails(teamName).openshiftProjectId;
+    private async createPodNetwork(tenantName: string, projectName: string) {
+        const teamDevOpsProjectId = this.devopsEnvironmentDetails.openshiftProjectId;
         const projectEnvironments = [];
         for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
             projectEnvironments.push(getProjectId(tenantName, projectName, environment.id));

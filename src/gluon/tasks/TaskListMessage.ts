@@ -5,6 +5,10 @@ import {QMMessageClient} from "../util/shared/Error";
 
 export class TaskListMessage {
 
+    public static createUniqueTaskName(name: string) {
+        return name + uuid();
+    }
+
     private statusCosmetics = new Map<TaskStatus, { color: string, symbol: string }>();
     private readonly messageId: string;
     private readonly tasks: { [k: string]: Task };

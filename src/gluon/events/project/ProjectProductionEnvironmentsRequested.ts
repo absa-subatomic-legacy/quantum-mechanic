@@ -11,15 +11,17 @@ import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMTeamService} from "../../services/team/QMTeamService";
-import {CreateOpenshiftProductionEnvironment} from "../../tasks/project/CreateOpenshiftProductionEnvironment";
+import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
 import {OpenshiftProjectEnvironmentRequest} from "../../util/project/Project";
 import {
     ChannelMessageClient,
     handleQMError,
     QMError,
 } from "../../util/shared/Error";
+import {getDevOpsEnvironmentDetailsProd} from "../../util/team/Teams";
 
 @EventHandler("Receive ProjectProductionEnvironmentsRequestedEvent events", `
 subscription ProjectProductionEnvironmentsRequestedEvent {
@@ -87,6 +89,8 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
             const project = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
             await this.verifyUser(project, environmentsRequestedEvent.requestedBy.slackIdentity.screenName);
 
+            const owningTeam = this.findOwningTeam(environmentsRequestedEvent, project.owningTeam.teamId);
+
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Provisioning of environment's for project *${projectName}* started:`,
                 qmMessageClient);
 
@@ -95,8 +99,12 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
             const request: OpenshiftProjectEnvironmentRequest = await this.createEnvironmentRequest(environmentsRequestedEvent);
 
             for (const prodOpenshift of QMConfig.subatomic.openshiftProd) {
+
+                const devopsEnvironmentDetails = getDevOpsEnvironmentDetailsProd(owningTeam.name);
+
+                taskRunner.addTask(new CreateTeamDevOpsEnvironment({team: owningTeam}, devopsEnvironmentDetails, prodOpenshift));
                 taskRunner.addTask(
-                    new CreateOpenshiftProductionEnvironment(prodOpenshift, request),
+                    new CreateOpenshiftEnvironments(request, devopsEnvironmentDetails, prodOpenshift),
                 );
             }
 
@@ -106,6 +114,15 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
         } catch (error) {
             return await handleQMError(qmMessageClient, error);
         }
+    }
+
+    private findOwningTeam(environmentRequest, owningTeamId: string) {
+        for (const team of environmentRequest.teams) {
+            if (team.teamId === owningTeamId) {
+                return team;
+            }
+        }
+        throw new QMError("Project's owning team could not be found in list of teams. Ingested event is malformed.");
     }
 
     private async createEnvironmentRequest(environmentRequestEvent): Promise<OpenshiftProjectEnvironmentRequest> {
