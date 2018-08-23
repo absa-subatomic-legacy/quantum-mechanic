@@ -37,6 +37,7 @@ import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
 import {ProjectCreated} from "./gluon/events/project/ProjectCreated";
 import {ProjectEnvironmentsRequested} from "./gluon/events/project/ProjectEnvironmentsRequested";
+import {ProjectProductionEnvironmentsRequested} from "./gluon/events/project/ProjectProductionEnvironmentsRequested";
 import {TeamsLinkedToProject} from "./gluon/events/project/TeamAssociated";
 import {BotJoinedChannel} from "./gluon/events/team/BotJoinedChannel";
 import {DevOpsEnvironmentRequested} from "./gluon/events/team/DevOpsEnvironmentRequested";
@@ -131,6 +132,7 @@ export const configuration: any = {
         MembershipRequestCreated,
         BotJoinedChannel,
         MembersAddedToTeam,
+        ProjectProductionEnvironmentsRequested,
     ],
     ingesters: [
         SlackIdentity,

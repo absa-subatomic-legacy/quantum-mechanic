@@ -65,7 +65,7 @@ subscription ProjectProductionEnvironmentsRequestedEvent {
   }
 }
 `)
-export class ProjectEnvironmentsRequested implements HandleEvent<any> {
+export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> {
 
     private teamMembershipMessages = new TeamMembershipMessages();
 
@@ -81,20 +81,13 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
 
         const projectName = environmentsRequestedEvent.project.name;
 
-        const project = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
-
-        const teamChannel = project.owningTeam.slack.teamChannel;
+        const qmMessageClient = this.createMessageClient(ctx, environmentsRequestedEvent.teams);
 
         try {
-            await ctx.messageClient.addressChannels({
-                text: `Requesting production environments's for project *${projectName}*`,
-            }, teamChannel);
-
+            const project = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
             await this.verifyUser(project, environmentsRequestedEvent.requestedBy.slackIdentity.screenName);
 
-            const qmMessageClient = this.createMessageClient(ctx, project);
-
-            const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Provisioning of environment's for project *${project.name}* started:`,
+            const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Provisioning of environment's for project *${projectName}* started:`,
                 qmMessageClient);
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
@@ -111,7 +104,7 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
 
             return await success();
         } catch (error) {
-            return await this.handleError(ctx, error, teamChannel);
+            return await handleQMError(qmMessageClient, error);
         }
     }
 
@@ -138,15 +131,11 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
     }
 
     private createMessageClient(ctx: HandlerContext,
-                                gluonProject: { owningTeam: { slack: { teamChannel: string } }, teams: Array<{ slack: { teamChannel: string } }> }) {
+                                teams: Array<{ slackIdentity: { teamChannel: string } }>) {
         const messageClient = new ChannelMessageClient(ctx);
-        this.getAllAssociatedProjectTeams(gluonProject).map(team => {
-            messageClient.addDestination(team.slack.teamChannel);
+        teams.map(team => {
+            messageClient.addDestination(team.slackIdentity.teamChannel);
         });
         return messageClient;
-    }
-
-    private async handleError(ctx: HandlerContext, error, teamChannel: string) {
-        return await handleQMError(new ChannelMessageClient(ctx).addDestination(teamChannel), error);
     }
 }

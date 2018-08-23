@@ -85,12 +85,26 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
     }
 
     private buildCreateProjectProdEnvironmentsEvent(project, teams, owningTenant, requestedBy) {
+
+        for (const team of teams) {
+            team.owners = this.getGluonMemberDetails(team.owners);
+            team.members = this.getGluonMemberDetails(team.members);
+        }
+
         return {
             project: GluonToEvent.project(project),
             teams: teams.map(team => GluonToEvent.team(team)),
             owningTenant,
-            requestedBy,
+            requestedBy: GluonToEvent.member(requestedBy),
         };
+    }
+
+    private async getGluonMemberDetails(gluonMembers: Array<{ memberId: string }>): Promise<any[]> {
+        const memberDetails = [];
+        for (const member of gluonMembers) {
+            memberDetails.push(GluonToEvent.member(this.gluonService.members.gluonMemberFromMemberId(member.memberId)));
+        }
+        return memberDetails;
     }
 
     private async handleError(ctx: HandlerContext, error) {
