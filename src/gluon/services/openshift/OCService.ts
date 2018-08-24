@@ -318,4 +318,10 @@ export class OCService {
         }
         return null;
     }
+
+    public async exportAllResources(projectId: string) {
+        const listOfResourcesResult = await OCCommon.commonCommand("export", "all",
+            [], [new SimpleOption("-output", "json"), new SimpleOption("-namespace", projectId)]);
+        return JSON.parse(listOfResourcesResult.output);
+    }
 }
