@@ -13,8 +13,9 @@
     "url": "https://github.com/absa-subatomic/quantum-mechanic/issues"
   },
   "dependencies": {
-    "@atomist/automation-client": "^0.21.7",
-    "@atomist/lifecycle-automation": "^0.10.0",
+    "@atomist/cli": "^1.0.0-M.2",
+    "@atomist/automation-client": "^1.0.0-M.2",
+    "@atomist/lifecycle-automation": "^0.10.5",
     "@atomist/slack-messages": "^0.12.1",
     "app-root-path": "^2.0.1",
     "axios-https-proxy-fix": "^0.17.1",
@@ -74,7 +75,7 @@
     "fmt": "tsfmt --replace",
     "git:info": "node node_modules/@atomist/automation-client/start.git-info.js",
     "gql:copy": "copyfiles \"src/**/*.graphql\" build",
-    "gql:gen": "atomist gql-gen --no-install \"{graphql,src}/**/*.graphql\"",
+    "gql:gen": "atm-gql-gen",
     "lint": "tslint --format verbose --project . --exclude \"{build,node_modules}/**\" \"**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
     "sendCodeCoverage": "nyc report --reporter=json && codecov -f coverage/*.json",
