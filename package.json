@@ -73,7 +73,7 @@
     "compile:gql": "npm-run-all gql:gen gql:copy",
     "compile:ts": "tsc --project .",
     "fmt": "tsfmt --replace",
-    "git:info": "node node_modules/@atomist/automation-client/start.git-info.js",
+    "git:info": "atm-git-info",
     "gql:copy": "copyfiles \"src/**/*.graphql\" build",
     "gql:gen": "atm-gql-gen",
     "lint": "tslint --format verbose --project . --exclude \"{build,node_modules}/**\" \"**/*.ts\"",

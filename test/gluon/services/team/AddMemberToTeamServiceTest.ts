@@ -130,7 +130,7 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
         };
 
         // Force invite to fail
-        fakeContext.graphClient.executeMutationFromFileResults.push({result: false});
+        fakeContext.graphClient.executeMutationResults.push({result: false});
 
         await service.inviteUserToSlackChannel(fakeContext,
             "Jude",
