@@ -2,6 +2,7 @@ import {logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import * as _ from "lodash";
+import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateTeam} from "../../commands/team/CreateTeam";
 import {JoinTeam} from "../../commands/team/JoinTeam";
@@ -73,10 +74,19 @@ export class TeamService {
         return await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
     }
 
-    public async gluonTeamByName(teamName: string): Promise<any> {
+    public async gluonTeamByName(teamName: string, rawResult = false): Promise<any> {
         logger.debug(`Trying to get gluon team with by name. teamName: ${teamName} `);
 
-        return await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
+        const teamQueryResult = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
+
+        if (rawResult) {
+            return teamQueryResult;
+        } else if (!isSuccessCode(teamQueryResult.status)) {
+            logger.error(`Failed to find team ${teamName}. Error: ${inspect(teamQueryResult)}`);
+            throw new QMError(`Team ${teamName} does not appear to be a valid SubAtomic team.`);
+        }
+
+        return teamQueryResult.data._embedded.teamResources[0];
     }
 
     public async createGluonTeam(teamName: string, teamDescription: string, createdBy: string): Promise<any> {

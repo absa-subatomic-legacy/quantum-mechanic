@@ -30,16 +30,7 @@ describe("TeamSlackChannelService getGluonTeam", () => {
         when(mockedTeamService.gluonTeamByName("Team1"))
             .thenResolve(
                 {
-                    status: 200,
-                    data: {
-                        _embedded: {
-                            teamResources: [
-                                {
-                                    id: "Team1Id",
-                                },
-                            ],
-                        },
-                    },
+                    id: "Team1Id",
                 });
         const gluonService = new GluonService(undefined, instance(mockedTeamService));
         const service = new TeamSlackChannelService(gluonService);

@@ -31,7 +31,7 @@ export class CreateOpenshiftEnvironments extends Task {
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
         this.taskListMessage.addTask(this.TASK_HEADER, `*Create project environments on ${this.openshiftEnvironment.name}*`);
-        for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
+        for (const environment of this.openshiftEnvironment.defaultEnvironments) {
             const internalTaskId = `${environment.id}Environment`;
             this.dynamicTaskNameStore[internalTaskId] = TaskListMessage.createUniqueTaskName(internalTaskId);
             this.taskListMessage.addTask(this.dynamicTaskNameStore[internalTaskId], `\tCreate ${environment.id} Environment`);
@@ -54,7 +54,7 @@ export class CreateOpenshiftEnvironments extends Task {
 
     private async createOpenshiftEnvironments() {
         const environments = [];
-        for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
+        for (const environment of this.openshiftEnvironment.defaultEnvironments) {
             environments.push([environment.id, environment.description]);
         }
 

@@ -5,12 +5,14 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
+    Parameter,
 } from "@atomist/automation-client";
-import _ = require("lodash");
-import {OpenshiftProjectEnvironment} from "../../../config/OpenShiftConfig";
+import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
+import {ApplicationProdRequestMessages} from "../../messages/package/ApplicationProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
+import {PackageOpenshiftResourceService} from "../../services/packages/PackageOpenshiftResourceService";
 import {getProjectId} from "../../util/project/Project";
 import {
     GluonApplicationNameSetter,
@@ -24,13 +26,15 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {
+    ChannelMessageClient,
     handleQMError,
-    QMError,
+    QMMessageClient,
     ResponderMessageClient,
 } from "../../util/shared/Error";
 
-@CommandHandler("Create application to prod", QMConfig.subatomic.commandPrefix + " request application prod")
+@CommandHandler("Create application in prod", QMConfig.subatomic.commandPrefix + " request application prod")
 export class CreateApplicationProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
 
@@ -66,30 +70,47 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
     })
     public projectName: string;
 
-    constructor(public gluonService = new GluonService(), public ocService = new OCService()) {
+    @Parameter({
+        required: false,
+        displayable: false,
+    })
+    public approval: ApprovalEnum = ApprovalEnum.CONFIRM;
+
+    @Parameter({
+        required: false,
+        displayable: false,
+    })
+    public correlationId: string;
+
+    @Parameter({
+        required: false,
+        displayable: false,
+    })
+    public openShiftResourcesJSON: string;
+
+    private applicationProdRequestMessages = new ApplicationProdRequestMessages();
+
+    constructor(public gluonService = new GluonService(), public ocService = new OCService(), public packageOpenshiftResourceService = new PackageOpenshiftResourceService()) {
         super();
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
-        // get memberId for createdBy
         try {
-            await ctx.messageClient.respond({
-                text: "🚀 Finding available resources...",
-            });
+            const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
+            const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+            if (this.approval === ApprovalEnum.CONFIRM) {
+                this.correlationId = uuid();
+                return await this.getRequestConfirmation(qmMessageClient);
+            } else if (this.approval === ApprovalEnum.APPROVED) {
 
-            const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+                await this.createApplicationProdRequest();
 
-            const resources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, this.getPreProdEnvironment().id));
+                return await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+            } else if (this.approval === ApprovalEnum.REJECTED) {
+                return await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+            }
 
-            const applicationDc = this.findApplicationDeploymentConfig(this.applicationName, resources);
-
-            logger.info(resources);
-
-            return await ctx.messageClient.respond({
-                text: "🚀 Resources found successfully",
-            });
         } catch (error) {
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
@@ -101,31 +122,92 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
         this.addRecursiveSetter(CreateApplicationProd.RecursiveKeys.applicationName, setGluonApplicationName);
     }
 
-    private getPreProdEnvironment(): OpenshiftProjectEnvironment {
-        const nEnvironments = QMConfig.subatomic.openshiftNonProd.defaultEnvironments.length;
-        return QMConfig.subatomic.openshiftNonProd.defaultEnvironments[nEnvironments - 1];
-    }
+    private getConfirmationResultMesssage(result: ApprovalEnum) {
+        const message = {
+            text: `*Prod request status:*`,
+            attachments: [],
+        };
 
-    private findApplicationDeploymentConfig(applicationName: string, openshiftResources) {
-        const kebabbedName = _.kebabCase(applicationName.toLowerCase());
-
-        for (const resource of openshiftResources.items) {
-            if (resource.kind === "DeploymentConfig" && resource.metadata.name === kebabbedName) {
-                return resource;
-            }
+        if (result === ApprovalEnum.APPROVED) {
+            message.attachments.push({
+                text: `*Confirmed*`,
+                fallback: "*Confirmed*",
+                color: "#45B254",
+            });
+        } else if (result === ApprovalEnum.REJECTED) {
+            message.attachments.push({
+                text: `*Cancelled*`,
+                fallback: "*Cancelled*",
+                color: "#D94649",
+            });
         }
 
-        throw new QMError("Failed to find DeploymentConfig for selected application.");
+        return message;
     }
 
-    /*
-    Find DC
-        look through spec>template>volumes>pvc get list of pvc
-        look through spec>triggers>imageChangeParams>from for imagestreams or just create
-    Find Services
-        match to dc using spec>selector>name and compare to dc name
-    Find Routes
-        match to service using spec>to>name and compare to service name
-     */
+    private async getRequestConfirmation(qmMessageClient: QMMessageClient) {
+        await qmMessageClient.send({
+            text: "🚀 Finding available resources...",
+        });
 
+        await this.findAndListResources(qmMessageClient);
+
+        const message = this.applicationProdRequestMessages.confirmProdRequest(this);
+
+        return await qmMessageClient.send(message, {id: this.correlationId});
+    }
+
+    private async findAndListResources(qmMessageClient: QMMessageClient) {
+
+        const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+
+        const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+
+        await this.ocService.login(QMConfig.subatomic.openshiftNonProd);
+
+        const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, this.packageOpenshiftResourceService.getPreProdEnvironment().id));
+
+        const resources = await this.packageOpenshiftResourceService.getAllApplicationRelatedResources(
+            this.applicationName,
+            allResources,
+        );
+
+        logger.info(resources);
+
+        this.openShiftResourcesJSON = JSON.stringify(resources.items.map(resource => {
+                return {
+                    kind: resource.kind,
+                    name: resource.metadata.name,
+                    resourceDetails: JSON.stringify(resource),
+                };
+            },
+        ));
+
+        return await qmMessageClient.send({
+            text: this.packageOpenshiftResourceService.getDisplayMessage(resources),
+        });
+
+    }
+
+    private async createApplicationProdRequest() {
+        const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+
+        const application = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, project.name);
+
+        const actionedBy = await this.gluonService.members.gluonMemberFromScreenName(this.screenName, false);
+
+        const openShiftResources = JSON.parse(this.openShiftResourcesJSON);
+
+        // logger.info("Current resources JSON = " + this.openShiftResourcesJSON);
+
+        const request = {
+            applicationId: application.applicationId,
+            actionedBy: actionedBy.memberId,
+            openShiftResources,
+        };
+
+        logger.info(`Prod request: ${JSON.stringify(request, null, 2)}`);
+
+        await this.gluonService.prod.application.createApplicationProdRequest(request);
+    }
 }

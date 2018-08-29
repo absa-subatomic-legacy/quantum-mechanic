@@ -9,6 +9,7 @@ import {OnboardMember} from "./gluon/commands/member/OnboardMember";
 import {ConfigureBasicPackage} from "./gluon/commands/packages/ConfigureBasicPackage";
 import {ConfigurePackage} from "./gluon/commands/packages/ConfigurePackage";
 import {CreateApplication} from "./gluon/commands/packages/CreateApplication";
+import {CreateApplicationProd} from "./gluon/commands/packages/CreateApplicationProd";
 import {LinkExistingApplication} from "./gluon/commands/packages/LinkExistingApplication";
 import {LinkExistingLibrary} from "./gluon/commands/packages/LinkExistingLibrary";
 import {AddConfigServer} from "./gluon/commands/project/AddConfigServer";
@@ -35,6 +36,7 @@ import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAd
 import {BitbucketProjectRequested} from "./gluon/events/bitbucket/BitbucketProjectRequested";
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
+import {ApplicationProdRequested} from "./gluon/events/packages/ApplicationProdRequested";
 import {ProjectCreated} from "./gluon/events/project/ProjectCreated";
 import {ProjectEnvironmentsRequested} from "./gluon/events/project/ProjectEnvironmentsRequested";
 import {ProjectProductionEnvironmentsRequested} from "./gluon/events/project/ProjectProductionEnvironmentsRequested";
@@ -45,6 +47,7 @@ import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
 import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClosed";
 import {MembershipRequestCreated} from "./gluon/events/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/events/team/TeamCreated";
+import {ApplicationProdRequestedEvent} from "./gluon/ingesters/applicationProdRequested";
 import {
     ApplicationCreatedEvent,
     PackageConfiguredEvent,
@@ -64,6 +67,7 @@ import {
     BitbucketProject,
     BitbucketRepository,
     DevOpsEnvironmentDetails,
+    GluonApplication,
     GluonTeam,
     GluonTenant,
     GluonTenantId,
@@ -118,6 +122,7 @@ export const configuration: any = {
         TagAllLatestImages,
         TagLatestImage,
         CreateProjectProdEnvironments,
+        CreateApplicationProd,
     ],
     events: [
         TeamsLinkedToProject,
@@ -133,6 +138,7 @@ export const configuration: any = {
         BotJoinedChannel,
         MembersAddedToTeam,
         ProjectProductionEnvironmentsRequested,
+        ApplicationProdRequested,
     ],
     ingesters: [
         SlackIdentity,
@@ -159,6 +165,8 @@ export const configuration: any = {
         DevOpsEnvironmentDetails,
         PackageConfiguredEvent,
         TeamDevOpsDetails,
+        GluonApplication,
+        ApplicationProdRequestedEvent,
     ],
     token,
     http,
