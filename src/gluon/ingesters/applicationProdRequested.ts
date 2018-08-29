@@ -8,6 +8,13 @@ export const ApplicationProdRequestedEvent: Ingester = {
             name: "ApplicationProdRequestedEvent",
             fields: [
                 {
+                    name: "applicationProdRequest",
+                    type: {
+                        kind: "OBJECT",
+                        name: "ApplicationProdRequest",
+                    },
+                },
+                {
                     name: "application",
                     type: {
                         kind: "OBJECT",
@@ -43,6 +50,19 @@ export const ApplicationProdRequestedEvent: Ingester = {
                     type: {
                         kind: "OBJECT",
                         name: "ActionedBy",
+                    },
+                },
+            ],
+        },
+        {
+            kind: "OBJECT",
+            name: "ApplicationProdRequest",
+            fields: [
+                {
+                    name: "applicationProdRequestId",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
                     },
                 },
             ],

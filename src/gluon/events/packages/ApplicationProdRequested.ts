@@ -5,18 +5,22 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    success,
 } from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {PackageOpenshiftResourceService} from "../../services/packages/PackageOpenshiftResourceService";
-import {getProjectId} from "../../util/project/Project";
+import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
+import {TaskListMessage} from "../../tasks/TaskListMessage";
+import {TaskRunner} from "../../tasks/TaskRunner";
+import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 
 @EventHandler("Receive ApplicationProdRequestedEvent events", `
 subscription ApplicationProdRequestedEvent {
   ApplicationProdRequestedEvent {
     id
+    applicationProdRequest{
+      applicationProdRequestId
+    }
     application {
       applicationId
       name
@@ -56,52 +60,62 @@ subscription ApplicationProdRequestedEvent {
 `)
 export class ApplicationProdRequested implements HandleEvent<any> {
 
-    constructor(public packageOpenshiftResourceService = new PackageOpenshiftResourceService(),
-                public ocService = new OCService(),
+    constructor(public ocService = new OCService(),
                 public gluonService = new GluonService()) {
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested ApplicationProdRequestedEvent event: ${JSON.stringify(event.data)}`);
 
-        const applicationCreatedEvent = event.data.ApplicationProdRequestedEvent[0];
+        const applicationProdRequestedEvent = event.data.ApplicationProdRequestedEvent[0];
 
-        const project = applicationCreatedEvent.project;
+        const qmMessageClient = this.createMessageClient(ctx, applicationProdRequestedEvent.teams);
 
-        const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.tenant.tenantId);
+        try {
+            const project = applicationProdRequestedEvent.project;
 
-        const application = applicationCreatedEvent.application;
+            const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.tenant.tenantId);
 
-        await this.ocService.login(QMConfig.subatomic.openshiftNonProd);
+            const applicationProdRequest = await this.gluonService.prod.application.getApplicationProdRequestById(applicationProdRequestedEvent.applicationProdRequest.applicationProdRequestId);
 
-        const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, this.packageOpenshiftResourceService.getPreProdEnvironment().id));
+            const resources = this.getRequestedProdResources(applicationProdRequest);
 
-        const resources = await this.packageOpenshiftResourceService.getAllApplicationRelatedResources(
-            application.name,
-            allResources,
-        );
+            const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Creating requested application resources in project *${project.name}* production environments started:`,
+                qmMessageClient);
 
-        logger.info(resources);
+            const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-        await ctx.messageClient.respond({
-            text: this.packageOpenshiftResourceService.getDisplayMessage(resources),
-        });
-
-        for (const openshiftProd of QMConfig.subatomic.openshiftProd) {
-            await this.ocService.login(openshiftProd);
-
-            for (const environment of openshiftProd.defaultEnvironments) {
-                const prodProjectId = getProjectId(tenant.name, project.name, environment.id);
-
-                await ctx.messageClient.respond({
-                    text: `Creating resources in ${openshiftProd.name}`,
-                });
-
-                await this.ocService.createResourceFromDataInNamespace(resources, prodProjectId);
+            for (const openshiftProd of QMConfig.subatomic.openshiftProd) {
+                taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
             }
-        }
 
-        return await success();
+            await taskRunner.execute(ctx);
+
+            return await qmMessageClient.send("Resources successfully created in production environments.");
+        } catch (error) {
+            return await handleQMError(qmMessageClient, error);
+        }
+    }
+
+    private getRequestedProdResources(applicationProdRequest: any) {
+        const resources = {
+            kind: "List",
+            apiVersion: "v1",
+            metadata: {},
+            items: [],
+        };
+        for (const openShiftResource of applicationProdRequest.openShiftResources) {
+            resources.items.push(JSON.parse(openShiftResource.resourceDetails));
+        }
+        return resources;
+    }
+
+    private createMessageClient(ctx: HandlerContext, teams) {
+        const qmMessageClient = new ChannelMessageClient(ctx);
+        for (const team of teams) {
+            qmMessageClient.addDestination(team.slackIdentity.teamChannel);
+        }
+        return qmMessageClient;
     }
 
 }

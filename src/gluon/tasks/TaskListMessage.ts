@@ -1,4 +1,4 @@
-import {HandlerResult} from "@atomist/automation-client";
+import {HandlerResult, logger} from "@atomist/automation-client";
 import {Attachment, SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
 import {QMMessageClient} from "../util/shared/Error";
@@ -42,6 +42,7 @@ export class TaskListMessage {
     }
 
     public async setTaskStatus(key: string, status: TaskStatus): Promise<HandlerResult> {
+        logger.info(JSON.stringify(this.tasks));
         this.tasks[key].status = status;
         return await this.display();
     }
