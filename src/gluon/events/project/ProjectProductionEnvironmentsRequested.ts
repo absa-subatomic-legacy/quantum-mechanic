@@ -110,6 +110,8 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
 
             await taskRunner.execute(ctx);
 
+            await qmMessageClient.send("Successfully created requested project environments.");
+
             return await success();
         } catch (error) {
             return await handleQMError(qmMessageClient, error);
