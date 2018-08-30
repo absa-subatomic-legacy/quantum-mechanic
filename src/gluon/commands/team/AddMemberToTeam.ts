@@ -15,7 +15,7 @@ import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessag
 import {GluonService} from "../../services/gluon/GluonService";
 import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService";
 import {getScreenName, loadScreenNameByUserId} from "../../util/member/Members";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Add a member to a team", QMConfig.subatomic.commandPrefix + " add team member")
 @Tags("subatomic", "team", "member")
@@ -54,6 +54,11 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
             logger.info(`Got ChatId: ${chatId}`);
 
             const newMember = await this.addMemberToTeamService.getNewMember(chatId, this.teamChannel);
+
+            if (newMember.text === "This command requires the member to be onboarded onto subatomic") {
+                await ctx.messageClient.addressUsers(newMember, screenName);
+                throw new QMError(`Member ${chatId} appears to not be onboarded. Please retry once they have been onboarded.`);
+            }
 
             logger.info(`Gluon member found: ${JSON.stringify(newMember)}`);
 

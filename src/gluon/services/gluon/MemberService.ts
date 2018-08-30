@@ -43,7 +43,7 @@ To create a team you must first onboard yourself. Click the button below to do t
                         ],
                     }],
                 };
-                throw new QMError(errorMessage, msg);
+                return msg;
             } else {
                 throw new QMError(errorMessage);
             }
