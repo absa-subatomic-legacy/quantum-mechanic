@@ -89,6 +89,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand
             });
 
             return await this.packageCommandService.linkBitbucketRepoToGluonPackage(
+                ctx,
                 this.screenName,
                 this.name,
                 this.description,

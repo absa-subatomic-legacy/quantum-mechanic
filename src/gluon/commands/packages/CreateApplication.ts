@@ -85,7 +85,7 @@ export class CreateApplication extends RecursiveParameterRequestCommand
                 text: "🚀 Your new application is being created...",
             });
 
-            const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const member = await this.gluonService.members.gluonMemberFromScreenName(ctx, this.screenName);
 
             const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 

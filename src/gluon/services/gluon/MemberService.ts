@@ -1,4 +1,4 @@
-import {logger} from "@atomist/automation-client";
+import {HandlerContext, logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
@@ -13,7 +13,8 @@ export class MemberService {
     constructor(public axiosInstance = new AwaitAxios()) {
     }
 
-    public async gluonMemberFromScreenName(screenName: string,
+    public async gluonMemberFromScreenName(ctx: HandlerContext,
+                                           screenName: string,
                                            requestOnboardingIfFailure: boolean = true): Promise<any> {
         logger.info(`Trying to get gluon member from screen name. screenName: ${screenName} `);
 
@@ -43,7 +44,8 @@ To create a team you must first onboard yourself. Click the button below to do t
                         ],
                     }],
                 };
-                throw new QMError(errorMessage, msg);
+                await ctx.messageClient.addressUsers(msg, screenName);
+                throw new QMError(`Member ${screenName} appears to not be onboarded. Please retry once they have been onboarded.`);
             } else {
                 throw new QMError(errorMessage);
             }

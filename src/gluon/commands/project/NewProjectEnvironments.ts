@@ -72,7 +72,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand
                 text: `Requesting project environment's for project *${this.projectName}*`,
             }, this.teamChannel);
 
-            const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const member = await this.gluonService.members.gluonMemberFromScreenName(ctx, this.screenName);
 
             const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 

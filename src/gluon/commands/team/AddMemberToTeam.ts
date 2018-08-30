@@ -15,7 +15,7 @@ import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessag
 import {GluonService} from "../../services/gluon/GluonService";
 import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService";
 import {getScreenName, loadScreenNameByUserId} from "../../util/member/Members";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Add a member to a team", QMConfig.subatomic.commandPrefix + " add team member")
 @Tags("subatomic", "team", "member")
@@ -53,13 +53,13 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
 
             logger.info(`Got ChatId: ${chatId}`);
 
-            const newMember = await this.addMemberToTeamService.getNewMember(chatId, this.teamChannel);
+            const newMember = await this.addMemberToTeamService.getNewMember(ctx, chatId, this.teamChannel);
 
             logger.info(`Gluon member found: ${JSON.stringify(newMember)}`);
 
             logger.info(`Getting teams that ${this.screenName} (you) are a part of...`);
 
-            const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(ctx, this.screenName);
 
             logger.info(`Got member's teams you belong to: ${JSON.stringify(actioningMember)}`);
 

@@ -1,4 +1,4 @@
-import {HandlerResult, logger, success} from "@atomist/automation-client";
+import {HandlerContext, HandlerResult, logger, success} from "@atomist/automation-client";
 import * as _ from "lodash";
 import {inspect} from "util";
 import {ApplicationType} from "../../util/packages/Applications";
@@ -13,7 +13,8 @@ export class PackageCommandService {
                 private bitbucketService = new BitbucketService()) {
     }
 
-    public async linkBitbucketRepoToGluonPackage(slackScreeName: string,
+    public async linkBitbucketRepoToGluonPackage(ctx: HandlerContext,
+                                                 slackScreeName: string,
                                                  packageName: string,
                                                  packageDescription: string,
                                                  bitbucketRepositorySlug: string,
@@ -28,7 +29,7 @@ export class PackageCommandService {
             return (clone as any).name === "ssh";
         }) as any;
 
-        const member = await this.gluonService.members.gluonMemberFromScreenName(slackScreeName);
+        const member = await this.gluonService.members.gluonMemberFromScreenName(ctx, slackScreeName);
 
         return await this.linkBitbucketRepository(
             member.memberId,
