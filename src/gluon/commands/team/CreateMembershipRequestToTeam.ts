@@ -44,7 +44,7 @@ export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResul
 
             const chatId = await loadScreenNameByUserId(ctx, screenName);
 
-            const memberDetails = await this.gluonService.members.gluonMemberFromScreenName(chatId);
+            const memberDetails = await this.gluonService.members.gluonMemberFromScreenName(ctx, chatId);
 
             await this.createMembershipRequest(memberDetails);
 

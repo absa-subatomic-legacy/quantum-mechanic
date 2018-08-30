@@ -53,18 +53,13 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
 
             logger.info(`Got ChatId: ${chatId}`);
 
-            const newMember = await this.addMemberToTeamService.getNewMember(chatId, this.teamChannel);
-
-            if (newMember.text === "This command requires the member to be onboarded onto subatomic") {
-                await ctx.messageClient.addressUsers(newMember, screenName);
-                throw new QMError(`Member ${chatId} appears to not be onboarded. Please retry once they have been onboarded.`);
-            }
+            const newMember = await this.addMemberToTeamService.getNewMember(ctx, chatId, this.teamChannel);
 
             logger.info(`Gluon member found: ${JSON.stringify(newMember)}`);
 
             logger.info(`Getting teams that ${this.screenName} (you) are a part of...`);
 
-            const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(ctx, this.screenName);
 
             logger.info(`Got member's teams you belong to: ${JSON.stringify(actioningMember)}`);
 

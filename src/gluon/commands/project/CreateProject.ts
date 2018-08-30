@@ -83,7 +83,7 @@ export class CreateProject extends RecursiveParameterRequestCommand
     private async requestNewProjectForTeamAndTenant(ctx: HandlerContext, screenName: string,
                                                     teamName: string, tenantId: string): Promise<any> {
 
-        const member = await this.gluonService.members.gluonMemberFromScreenName(screenName);
+        const member = await this.gluonService.members.gluonMemberFromScreenName(ctx, screenName);
 
         const team = await this.getGluonTeamFromName(teamName);
 

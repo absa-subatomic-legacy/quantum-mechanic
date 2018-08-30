@@ -44,7 +44,7 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
         logger.info(`Creating team for member: ${this.screenName}`);
 
         try {
-            const member = await this.getGluonMemberFromScreenName(this.screenName);
+            const member = await this.getGluonMemberFromScreenName(ctx, this.screenName);
 
             await this.createTeamInGluon(this.name, this.description, member.memberId);
 
@@ -54,8 +54,8 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
         }
     }
 
-    private async getGluonMemberFromScreenName(screenName: string) {
-        return await this.gluonService.members.gluonMemberFromScreenName(screenName);
+    private async getGluonMemberFromScreenName(ctx: HandlerContext, screenName: string) {
+        return await this.gluonService.members.gluonMemberFromScreenName(ctx, screenName);
     }
 
     private async createTeamInGluon(teamName: string, teamDescription: string, createdBy: string) {

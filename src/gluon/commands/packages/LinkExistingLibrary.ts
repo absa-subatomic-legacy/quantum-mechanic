@@ -85,6 +85,7 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
             }, this.teamChannel);
 
             return await this.packageCommandService.linkBitbucketRepoToGluonPackage(
+                ctx,
                 this.screenName,
                 this.name,
                 this.description,

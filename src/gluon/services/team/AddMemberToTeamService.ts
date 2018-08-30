@@ -13,8 +13,8 @@ export class AddMemberToTeamService {
     constructor(private gluonService = new GluonService()) {
     }
 
-    public async getNewMember(chatId: string, teamChannel: string) {
-        const newMember = await this.gluonService.members.gluonMemberFromScreenName(chatId);
+    public async getNewMember(ctx: HandlerContext, chatId: string, teamChannel: string) {
+        const newMember = await this.gluonService.members.gluonMemberFromScreenName(ctx, chatId);
 
         if (!_.isEmpty(_.find(newMember.teams,
             (team: any) => team.slack.teamChannel === teamChannel))) {

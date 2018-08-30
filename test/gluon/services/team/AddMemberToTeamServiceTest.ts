@@ -12,7 +12,7 @@ import {TestMessageClient} from "../../TestMessageClient";
 describe("AddMemberToTeamService getNewMember", () => {
     it("should return error that member is part of team already", async () => {
         const mockedMemberService = mock(MemberService);
-        when(mockedMemberService.gluonMemberFromScreenName("Dex")).thenReturn(Promise.resolve({
+        when(mockedMemberService.gluonMemberFromScreenName(null, "Dex")).thenReturn(Promise.resolve({
             id: "User1",
             teams: [
                 {
@@ -30,7 +30,7 @@ describe("AddMemberToTeamService getNewMember", () => {
 
         let errorThrown: QMError = null;
         try {
-            await service.getNewMember("Dex", "Channel1");
+            await service.getNewMember(null, "Dex", "Channel1");
         } catch (error) {
             errorThrown = error;
         }
@@ -41,7 +41,7 @@ describe("AddMemberToTeamService getNewMember", () => {
 
     it("should return member details", async () => {
         const mockedMemberService = mock(MemberService);
-        when(mockedMemberService.gluonMemberFromScreenName("Dex")).thenReturn(Promise.resolve({
+        when(mockedMemberService.gluonMemberFromScreenName(null, "Dex")).thenReturn(Promise.resolve({
             id: "User1",
             teams: [
                 {
@@ -57,7 +57,7 @@ describe("AddMemberToTeamService getNewMember", () => {
         const gluonService = new GluonService(undefined, undefined, instance(mockedMemberService));
         const service = new AddMemberToTeamService(gluonService);
 
-        const result = await service.getNewMember("Dex", "Channel2");
+        const result = await service.getNewMember(null, "Dex", "Channel2");
 
         assert.equal(result.id, "User1");
 

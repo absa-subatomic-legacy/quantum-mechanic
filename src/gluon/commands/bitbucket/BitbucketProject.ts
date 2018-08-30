@@ -69,7 +69,7 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand
         logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
 
         try {
-            const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const member = await this.gluonService.members.gluonMemberFromScreenName(ctx, this.screenName);
 
             const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
@@ -165,7 +165,7 @@ export class ListExistingBitbucketProject
     private async configBitbucket(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
 
-        const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+        const member = await this.gluonService.members.gluonMemberFromScreenName(ctx, this.screenName);
         const gluonProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
         const projectUiUrl = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.bitbucketProjectKey}`;
