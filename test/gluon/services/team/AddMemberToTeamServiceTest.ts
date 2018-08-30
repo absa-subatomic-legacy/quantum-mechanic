@@ -4,7 +4,6 @@ import {GluonService} from "../../../../src/gluon/services/gluon/GluonService";
 import {MemberService} from "../../../../src/gluon/services/gluon/MemberService";
 import {TeamService} from "../../../../src/gluon/services/gluon/TeamService";
 import {AddMemberToTeamService} from "../../../../src/gluon/services/team/AddMemberToTeamService";
-import {AwaitAxios} from "../../../../src/gluon/util/shared/AwaitAxios";
 import {QMError} from "../../../../src/gluon/util/shared/Error";
 import {TestGraphClient} from "../../TestGraphClient";
 import {TestMessageClient} from "../../TestMessageClient";
@@ -27,10 +26,15 @@ describe("AddMemberToTeamService getNewMember", () => {
         }));
         const gluonService = new GluonService(undefined, undefined, instance(mockedMemberService));
         const service = new AddMemberToTeamService(gluonService);
+        const fakeContext = {
+            teamId: "TEST",
+            correlationId: "1231343234234",
+            messageClient: new TestMessageClient(),
+        };
 
         let errorThrown: QMError = null;
         try {
-            await service.getNewMember("Dex", "Channel1");
+            await service.getNewMember(fakeContext, "Dex", "Channel1");
         } catch (error) {
             errorThrown = error;
         }
@@ -56,8 +60,13 @@ describe("AddMemberToTeamService getNewMember", () => {
         }));
         const gluonService = new GluonService(undefined, undefined, instance(mockedMemberService));
         const service = new AddMemberToTeamService(gluonService);
+        const fakeContext = {
+            teamId: "TEST",
+            correlationId: "1231343234234",
+            messageClient: new TestMessageClient(),
+        };
 
-        const result = await service.getNewMember("Dex", "Channel2");
+        const result = await service.getNewMember(fakeContext, "Dex", "Channel2");
 
         assert.equal(result.id, "User1");
 

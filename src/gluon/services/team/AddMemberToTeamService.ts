@@ -1,6 +1,10 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
+import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/handlers/command/slack/AssociateRepo";
+import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
+import {QMConfig} from "../../../config/QMConfig";
+import {OnboardMember} from "../../commands/member/OnboardMember";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
@@ -13,15 +17,19 @@ export class AddMemberToTeamService {
     constructor(private gluonService = new GluonService()) {
     }
 
-    public async getNewMember(chatId: string, teamChannel: string) {
-        const newMember = await this.gluonService.members.gluonMemberFromScreenName(chatId);
+    public async getNewMember(ctx: HandlerContext, chatId: string, teamChannel: string) {
+        try {
+            const newMember = await this.gluonService.members.gluonMemberFromScreenName(chatId);
 
-        if (!_.isEmpty(_.find(newMember.teams,
-            (team: any) => team.slack.teamChannel === teamChannel))) {
-            throw new QMError(`${newMember.slack.screenName} is already a member of this team.`);
+            return this.partOfTeam(newMember, teamChannel);
+        } catch (error) {
+            if (error.message === `${chatId} is already a member of this team.`) {
+                throw new QMError(`${chatId} is already a member of this team.`);
+            }
+            await this.onboardMessage(ctx, chatId, teamChannel);
+            throw new QMError(`Failed to get member details. Member ${chatId} appears to not be onboarded.`);
         }
 
-        return newMember;
     }
 
     public async inviteUserToSlackChannel(ctx: HandlerContext,
@@ -68,5 +76,39 @@ export class AddMemberToTeamService {
         if (!isSuccessCode(updateTeamResult.status)) {
             throw new QMError(`Failed to add member to the team. Server side failure.`);
         }
+    }
+
+    private async partOfTeam(newMember, teamChannel: string) {
+        if (!_.isEmpty(_.find(newMember.teams,
+            (team: any) => team.slack.teamChannel === teamChannel))) {
+            throw new QMError(`${newMember.slack.screenName} is already a member of this team.`);
+        }
+        return newMember;
+    }
+
+    private async onboardMessage(ctx, chatId: string, teamChannel: string) {
+        const msg: SlackMessage = {
+            text: `Someone tried to add you to the team channel ${teamChannel}.`,
+            attachments: [{
+                text: `
+Unfortunately you do not seem to have been onboarded to Subatomic.
+Click the button below to do that now.
+                            `,
+                fallback: "You are not onboarded to Subatomic",
+                footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
+                    "documentation")}`,
+                color: "#ffcc00",
+                mrkdwn_in: ["text"],
+                thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
+                actions: [
+                    buttonForCommand(
+                        {
+                            text: "Onboard me",
+                        },
+                        new OnboardMember()),
+                ],
+            }],
+        };
+        return await ctx.messageClient.addressUsers(msg, chatId);
     }
 }
