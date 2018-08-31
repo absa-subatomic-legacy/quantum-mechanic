@@ -29,6 +29,7 @@ describe("AddMemberToTeamService getNewMember", () => {
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
+            workspaceId: "2341234123",
             messageClient: new TestMessageClient(),
         };
 
@@ -63,6 +64,7 @@ describe("AddMemberToTeamService getNewMember", () => {
         const fakeContext = {
             teamId: "TEST",
             correlationId: "1231343234234",
+            workspaceId: "2341234123",
             messageClient: new TestMessageClient(),
         };
 
