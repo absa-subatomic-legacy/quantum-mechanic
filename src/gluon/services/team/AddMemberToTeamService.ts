@@ -5,6 +5,7 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {OnboardMember} from "../../commands/member/OnboardMember";
+import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {QMError} from "../../util/shared/Error";
 import {isSuccessCode} from "../../util/shared/Http";
@@ -23,11 +24,32 @@ export class AddMemberToTeamService {
 
             return this.partOfTeam(newMember, teamChannel);
         } catch (error) {
-            if (error.message === `${chatId} is already a member of this team.`) {
-                throw new QMError(`${chatId} is already a member of this team.`);
+            const isQMError = error instanceof QMError;
+            if (!isQMError || (isQMError && error.message === `${chatId} is already a member of this team.`)) {
+                throw error;
             }
             await this.onboardMessage(ctx, chatId, teamChannel);
-            throw new QMError(`Failed to get member details. Member ${chatId} appears to not be onboarded.`);
+            const errorMessage = `Failed to get member's details. Member *${chatId}* appears to not be onboarded.`;
+            const msg: SlackMessage = {
+                text: errorMessage,
+                attachments: [{
+                    text: `
+They have been sent a request to onboard, once they've successfully onboarded you can re-run the command or click the button below.
+                            `,
+                    fallback: "Failed to get member details.",
+                    footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
+                        "documentation")}`,
+                    color: "#ffcc00",
+                    mrkdwn_in: ["text"],
+                    thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
+                    actions: [
+                        buttonForCommand(
+                            {text: "Add team members"},
+                            new AddMemberToTeam()),
+                    ],
+                }],
+            };
+            throw new QMError(errorMessage, msg);
         }
 
     }
