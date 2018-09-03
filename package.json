@@ -31,7 +31,7 @@
     "@types/app-root-path": "^1.2.4",
     "@types/mocha": "^2.2.48",
     "@types/node": "^9.4.1",
-    "@types/power-assert": "^1.4.29",
+    "@types/power-assert": "^1.5.0",
     "@types/handlebars": "^4.0.37",
     "axios-mock-adapter": "^1.14.1",
     "codecov": "^3.0.2",
