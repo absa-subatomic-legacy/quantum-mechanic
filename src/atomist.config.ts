@@ -40,6 +40,7 @@ import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
 import {ApplicationProdRequested} from "./gluon/events/packages/ApplicationProdRequested";
 import {ProjectCreated} from "./gluon/events/project/ProjectCreated";
 import {ProjectEnvironmentsRequested} from "./gluon/events/project/ProjectEnvironmentsRequested";
+import {ProjectProductionEnvironmentsRequestClosed} from "./gluon/events/project/ProjectProductionEnvironmentsRequestClosed";
 import {ProjectProductionEnvironmentsRequested} from "./gluon/events/project/ProjectProductionEnvironmentsRequested";
 import {TeamsLinkedToProject} from "./gluon/events/project/TeamAssociated";
 import {BotJoinedChannel} from "./gluon/events/team/BotJoinedChannel";
@@ -62,7 +63,10 @@ import {
     ProjectEnvironmentsRequestedEvent,
     TeamsLinkedToProjectEvent,
 } from "./gluon/ingesters/projectIngester";
-import {ProjectProductionEnvironmentsRequestedEvent} from "./gluon/ingesters/projectProductionRequests";
+import {
+    ProjectProductionEnvironmentsRequestClosedEvent,
+    ProjectProductionEnvironmentsRequestedEvent,
+} from "./gluon/ingesters/projectProductionRequests";
 import {
     ActionedBy,
     BitbucketProject,
@@ -141,6 +145,7 @@ export const configuration: any = {
         MembersAddedToTeam,
         ProjectProductionEnvironmentsRequested,
         ApplicationProdRequested,
+        ProjectProductionEnvironmentsRequestClosed,
     ],
     ingesters: [
         SlackIdentity,
@@ -153,6 +158,7 @@ export const configuration: any = {
         DevOpsEnvironmentRequestedEvent,
         ProjectEnvironmentsRequestedEvent,
         ProjectProductionEnvironmentsRequestedEvent,
+        ProjectProductionEnvironmentsRequestClosedEvent,
         ApplicationCreatedEvent,
         MembershipRequestCreatedEvent,
         Project,

@@ -101,7 +101,7 @@ export class TeamService {
             throw new QMError(`Team with id ${teamId} does not appear to be a valid Subatomic team.`);
         }
 
-        return teamQueryResult.data._embedded.teamResources[0];
+        return teamQueryResult.data;
     }
 
     public async createGluonTeam(teamName: string, teamDescription: string, createdBy: string): Promise<any> {

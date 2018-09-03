@@ -18,3 +18,22 @@ export const ProjectProductionEnvironmentsRequestedEvent: Ingester = {
         },
     ],
 };
+
+export const ProjectProductionEnvironmentsRequestClosedEvent: Ingester = {
+    root_type: "ProjectProductionEnvironmentsRequestClosedEvent",
+    types: [
+        {
+            kind: "OBJECT",
+            name: "ProjectProductionEnvironmentsRequestClosedEvent",
+            fields: [
+                {
+                    name: "projectProdRequestId",
+                    type: {
+                        kind: "SCALAR",
+                        name: "String",
+                    },
+                },
+            ],
+        },
+    ],
+};
