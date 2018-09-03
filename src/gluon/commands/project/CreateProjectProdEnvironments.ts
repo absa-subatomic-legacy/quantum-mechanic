@@ -5,9 +5,9 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
+    success,
     Tags,
 } from "@atomist/automation-client";
-import {addressEvent} from "@atomist/automation-client/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
@@ -66,14 +66,15 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
 
             const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-            const teams = await this.gluonService.teams.getTeamsAssociatedToProject(project.projectId);
+            // const teams = await this.gluonService.teams.getTeamsAssociatedToProject(project.projectId);
 
-            const owningTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+            // const owningTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
             const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-            return ctx.messageClient.send(this.buildCreateProjectProdEnvironmentsEvent(project, teams, owningTenant, member)
-                , addressEvent("ProjectProductionEnvironmentsRequestedEvent"));
+            await this.gluonService.prod.project.createProjectProdRequest(member.memberId, project.projectId);
+
+            return success();
         } catch (error) {
             return await this.handleError(ctx, error);
         }
@@ -82,21 +83,6 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
     protected configureParameterSetters() {
         this.addRecursiveSetter(CreateProjectProdEnvironments.RecursiveKeys.teamName, setGluonTeamName);
         this.addRecursiveSetter(CreateProjectProdEnvironments.RecursiveKeys.projectName, setGluonProjectName);
-    }
-
-    private buildCreateProjectProdEnvironmentsEvent(project, teams, owningTenant, requestedBy) {
-
-        for (const team of teams) {
-            team.owners = this.getGluonMemberDetails(team.owners);
-            team.members = this.getGluonMemberDetails(team.members);
-        }
-
-        return {
-            project: GluonToEvent.project(project),
-            teams: teams.map(team => GluonToEvent.team(team)),
-            owningTenant,
-            requestedBy: GluonToEvent.member(requestedBy),
-        };
     }
 
     private async getGluonMemberDetails(gluonMembers: Array<{ memberId: string }>): Promise<any[]> {

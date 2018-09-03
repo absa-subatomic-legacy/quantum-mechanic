@@ -22,6 +22,7 @@ import {
     ListProjectDetails,
     ListTeamProjects,
 } from "./gluon/commands/project/ProjectDetails";
+import {UpdateProjectProdRequest} from "./gluon/commands/project/UpdateProjectProdRequest";
 import {AddMemberToTeam} from "./gluon/commands/team/AddMemberToTeam";
 import {CreateMembershipRequestToTeam} from "./gluon/commands/team/CreateMembershipRequestToTeam";
 import {CreateTeam} from "./gluon/commands/team/CreateTeam";
@@ -59,9 +60,9 @@ import {
 import {
     ProjectCreatedEvent,
     ProjectEnvironmentsRequestedEvent,
-    ProjectProductionEnvironmentsRequestedEvent,
     TeamsLinkedToProjectEvent,
 } from "./gluon/ingesters/projectIngester";
+import {ProjectProductionEnvironmentsRequestedEvent} from "./gluon/ingesters/projectProductionRequests";
 import {
     ActionedBy,
     BitbucketProject,
@@ -123,6 +124,7 @@ export const configuration: any = {
         TagLatestImage,
         CreateProjectProdEnvironments,
         CreateApplicationProd,
+        UpdateProjectProdRequest,
     ],
     events: [
         TeamsLinkedToProject,
