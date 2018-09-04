@@ -10,10 +10,12 @@ import {
 import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
+import {OCService} from "../../services/openshift/OCService";
 import {QMTeamService} from "../../services/team/QMTeamService";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {AddJenkinsToProdEnvironment} from "../../tasks/team/AddJenkinsToProdEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
 import {OpenshiftProjectEnvironmentRequest} from "../../util/project/Project";
 import {
@@ -71,7 +73,7 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
 
     private teamMembershipMessages = new TeamMembershipMessages();
 
-    constructor(public gluonService = new GluonService(), public qmTeamService = new QMTeamService()) {
+    constructor(public gluonService = new GluonService(), public qmTeamService = new QMTeamService(), private ocService = new OCService()) {
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -102,10 +104,13 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
 
                 const devopsEnvironmentDetails = getDevOpsEnvironmentDetailsProd(owningTeam.name);
 
-                taskRunner.addTask(new CreateTeamDevOpsEnvironment({team: owningTeam}, devopsEnvironmentDetails, prodOpenshift));
-                taskRunner.addTask(
+                taskRunner.addTask(new CreateTeamDevOpsEnvironment({team: owningTeam}, devopsEnvironmentDetails, prodOpenshift),
+                ).addTask(
+                    new AddJenkinsToProdEnvironment({team: owningTeam}, prodOpenshift),
+                ).addTask(
                     new CreateOpenshiftEnvironments(request, devopsEnvironmentDetails, prodOpenshift),
                 );
+
             }
 
             await taskRunner.execute(ctx);

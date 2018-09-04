@@ -25,9 +25,9 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
     }
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
-        taskListMessage.addTask(this.TASK_TAG_TEMPLATE, "Tag jenkins template to environment");
-        taskListMessage.addTask(this.TASK_ROLLOUT_JENKINS, "Rollout Jenkins instance");
-        taskListMessage.addTask(this.TASK_CONFIG_JENKINS, "Configure Jenkins");
+        taskListMessage.addTask(this.TASK_TAG_TEMPLATE, "\tTag jenkins template to environment");
+        taskListMessage.addTask(this.TASK_ROLLOUT_JENKINS, "\tRollout Jenkins instance");
+        taskListMessage.addTask(this.TASK_CONFIG_JENKINS, "\tConfigure Jenkins");
     }
 
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
