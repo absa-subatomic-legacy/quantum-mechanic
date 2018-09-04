@@ -3,6 +3,7 @@ import * as fs from "fs";
 import _ = require("lodash");
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {AbstractOption} from "../../../openshift/base/options/AbstractOption";
 import {NamedSimpleOption} from "../../../openshift/base/options/NamedSimpleOption";
@@ -18,6 +19,8 @@ import {OCImageService} from "./OCImageService";
 
 export class OCService {
 
+    public openShiftApi: OpenShiftApi;
+
     private quotaLoader: QuotaLoader = new QuotaLoader();
     private baseProjectTemplateLoader: BaseProjectTemplateLoader = new BaseProjectTemplateLoader();
 
@@ -25,6 +28,8 @@ export class OCService {
     }
 
     public async login(openshiftDetails: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd) {
+        this.openShiftApi = new OpenShiftApi(openshiftDetails);
+        this.ocImageService.openShiftApi = this.openShiftApi;
         return await OCClient.login(openshiftDetails.masterUrl, openshiftDetails.auth.token);
     }
 
@@ -33,6 +38,9 @@ export class OCService {
         return await OCClient.newProject(openshiftProjectId,
             `${teamName} DevOps`,
             `DevOps environment for ${teamName} [managed by Subatomic]`);
+        /*return await this.openShiftApi.newProject(openshiftProjectId,
+            `${teamName} DevOps`,
+            `DevOps environment for ${teamName} [managed by Subatomic]`);*/
     }
 
     public async newSubatomicProject(openshiftProjectId: string, projectName: string, owningTenant: string, environment: string[]): Promise<OCCommandResult> {

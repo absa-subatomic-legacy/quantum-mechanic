@@ -1,12 +1,12 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {isSuccessCode} from "../../../http/Http";
 import {QMTemplate} from "../../../template/QMTemplate";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getProjectId} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
-import {isSuccessCode} from "../../util/shared/Http";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";

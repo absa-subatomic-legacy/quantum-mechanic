@@ -1,9 +1,12 @@
 import {logger} from "@atomist/automation-client";
+import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
 import {OCCommon} from "../../../openshift/OCCommon";
 
 export class OCImageService {
+
+    public openShiftApi: OpenShiftApi;
 
     public async getSubatomicImageStreamTags(namespace = "subatomic"): Promise<OCCommandResult> {
         logger.debug(`Trying to get subatomic image stream. namespace: ${namespace}`);

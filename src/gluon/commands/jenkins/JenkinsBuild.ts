@@ -8,6 +8,7 @@ import {
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
+import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
@@ -28,7 +29,6 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
-import {isSuccessCode} from "../../util/shared/Http";
 
 @CommandHandler("Kick off a Jenkins build", QMConfig.subatomic.commandPrefix + " jenkins build")
 export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
