@@ -1,8 +1,11 @@
 import {logger} from "@atomist/automation-client";
+import {AxiosResponse} from "axios-https-proxy-fix";
 import * as fs from "fs";
 import _ = require("lodash");
+import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {isSuccessCode} from "../../../http/Http";
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {AbstractOption} from "../../../openshift/base/options/AbstractOption";
@@ -14,6 +17,7 @@ import {OCCommon} from "../../../openshift/OCCommon";
 import {getProjectDisplayName} from "../../util/project/Project";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
 import {QuotaLoader} from "../../util/resources/QuotaLoader";
+import {QMError} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
 import {OCImageService} from "./OCImageService";
 
@@ -33,14 +37,19 @@ export class OCService {
         return await OCClient.login(openshiftDetails.masterUrl, openshiftDetails.auth.token);
     }
 
-    public async newDevOpsProject(openshiftProjectId: string, teamName: string): Promise<OCCommandResult> {
+    public async newDevOpsProject(openshiftProjectId: string, teamName: string, rawResult = false): Promise<AxiosResponse> {
         logger.debug(`Trying to create new Dev Ops environment. openshiftProjectId: ${openshiftProjectId}; teamName: ${teamName} `);
-        return await OCClient.newProject(openshiftProjectId,
+
+        const createResult = await this.openShiftApi.newProject(openshiftProjectId,
             `${teamName} DevOps`,
             `DevOps environment for ${teamName} [managed by Subatomic]`);
-        /*return await this.openShiftApi.newProject(openshiftProjectId,
-            `${teamName} DevOps`,
-            `DevOps environment for ${teamName} [managed by Subatomic]`);*/
+        if (rawResult) {
+            return createResult;
+        } else if (!isSuccessCode(createResult.status)) {
+            logger.error(`Failed to create DevOps project: ${inspect(createResult)}`);
+            throw new QMError("Failed to create the OpenShift DevOps project as requested");
+        }
+        return createResult.data;
     }
 
     public async newSubatomicProject(openshiftProjectId: string, projectName: string, owningTenant: string, environment: string[]): Promise<OCCommandResult> {
