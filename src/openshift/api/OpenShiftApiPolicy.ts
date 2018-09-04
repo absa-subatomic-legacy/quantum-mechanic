@@ -1,5 +1,5 @@
 import {logger} from "@atomist/automation-client";
-import {AxiosInstance} from "axios";
+import {AwaitAxios} from "../../http/AwaitAxios";
 import {OpenShiftApiElement} from "./base/OpenShiftApiElement";
 import {OpenshiftApiResult} from "./base/OpenshiftApiResult";
 import {OpenshiftResource} from "./resources/OpenshiftResource";
@@ -57,7 +57,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
         });
     }
 
-    private findExistingRole(axios: AxiosInstance, role: string, namespace: string): Promise<OpenshiftResource> {
+    private findExistingRole(axios: AwaitAxios, role: string, namespace: string): Promise<OpenshiftResource> {
         return axios.get(`namespaces/${namespace}/rolebindings`).then(response => {
             logger.debug(JSON.stringify(response.status));
             logger.debug(JSON.stringify(response.data));

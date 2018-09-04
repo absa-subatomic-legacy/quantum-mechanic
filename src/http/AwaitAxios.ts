@@ -1,7 +1,7 @@
 import Axios, {
     AxiosInstance,
     AxiosRequestConfig,
-    AxiosResponse
+    AxiosResponse,
 } from "axios-https-proxy-fix";
 import * as https from "https";
 
