@@ -25,7 +25,19 @@ import {OCImageService} from "./OCImageService";
 
 export class OCService {
 
-    public openShiftApi: OpenShiftApi;
+    get openShiftApi(): OpenShiftApi {
+        if (this.openShiftApiInstance === undefined) {
+            logger.error(`Failed to access the openShiftApiInstance. Make sure the you have performed an OCService.login command`);
+            throw new QMError("OpenShift login failure!");
+        }
+        return this.openShiftApiInstance;
+    }
+
+    set openShiftApi(value: OpenShiftApi) {
+        this.openShiftApiInstance = value;
+    }
+
+    private openShiftApiInstance: OpenShiftApi;
 
     private quotaLoader: QuotaLoader = new QuotaLoader();
     private baseProjectTemplateLoader: BaseProjectTemplateLoader = new BaseProjectTemplateLoader();
@@ -33,10 +45,12 @@ export class OCService {
     constructor(private ocImageService = new OCImageService()) {
     }
 
-    public async login(openshiftDetails: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd) {
+    public async login(openshiftDetails: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd, softLogin = false) {
         this.openShiftApi = new OpenShiftApi(openshiftDetails);
         this.ocImageService.openShiftApi = this.openShiftApi;
-        return await OCClient.login(openshiftDetails.masterUrl, openshiftDetails.auth.token);
+        if (!softLogin) {
+            return await OCClient.login(openshiftDetails.masterUrl, openshiftDetails.auth.token);
+        }
     }
 
     public async newDevOpsProject(openshiftProjectId: string, teamName: string, rawResult = false): Promise<any> {
@@ -172,7 +186,6 @@ export class OCService {
                         template.kind = "Template";
                         template.apiVersion = "template.openshift.io/v1";
                         templates.push(template);
-                        break;
                     }
                 }
             }
@@ -221,8 +234,9 @@ export class OCService {
     }
 
     public async tagAllSubatomicImageStreamsToDevOpsEnvironment(devopsProjectId) {
-        const imageStreamTagsResult = await this.getSubatomicImageStreamTags();
-        const imageStreamTags = JSON.parse(imageStreamTagsResult.output).items;
+        const imageStreamTags = await this.getSubatomicImageStreamTags();
+
+        logger.info(JSON.stringify(imageStreamTags, undefined, 2));
 
         await this.ocImageService.tagAllImagesToNamespace("subatomic", imageStreamTags.map(item => item.metadata.name), devopsProjectId);
     }
