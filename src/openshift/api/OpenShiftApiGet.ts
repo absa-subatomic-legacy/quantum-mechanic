@@ -6,7 +6,7 @@ import {ResourceUrl} from "./resources/ResourceUrl";
 
 export class OpenShiftApiGet extends OpenShiftApiElement {
 
-    public async get(resourceKind: string, resourceName: string, apiVersion: string = "v1", namespace: string = "default"): Promise<OpenshiftApiResult> {
+    public async get(resourceKind: string, resourceName: string, namespace: string = "default", apiVersion: string = "v1"): Promise<OpenshiftApiResult> {
         const resourceDefinition = ResourceFactory.baseResource(resourceKind, apiVersion);
         resourceDefinition.metadata.name = resourceName;
         const instance = this.getAxiosInstanceForResource(resourceDefinition);
@@ -15,7 +15,7 @@ export class OpenShiftApiGet extends OpenShiftApiElement {
         return await instance.get(url);
     }
 
-    public async getAllFromNamespace(resourceKind: string, apiVersion: string = "v1", namespace: string = "default"): Promise<OpenshiftApiResult> {
+    public async getAllFromNamespace(resourceKind: string, namespace: string = "default", apiVersion: string = "v1"): Promise<OpenshiftApiResult> {
         const resourceDefinition = ResourceFactory.baseResource(resourceKind, apiVersion);
         const instance = this.getAxiosInstanceForResource(resourceDefinition);
         const url = ResourceUrl.getResourceKindUrl(resourceDefinition, namespace);

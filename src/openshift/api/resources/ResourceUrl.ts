@@ -15,8 +15,7 @@ export class ResourceUrl {
                     break;
                 }
             }
-            url = url
-                .replace("${namespace}", namespace);
+            url = url.replace("${namespace}", namespace);
         } else {
             url = `namespaces/${namespace}/${resourceKind}s`;
         }

@@ -15,6 +15,7 @@ import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
 import {StandardOption} from "../../../openshift/base/options/StandardOption";
 import {OCClient} from "../../../openshift/OCClient";
 import {OCCommon} from "../../../openshift/OCCommon";
+import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
 import {getProjectDisplayName} from "../../util/project/Project";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
 import {QuotaLoader} from "../../util/resources/QuotaLoader";
@@ -160,7 +161,7 @@ export class OCService {
 
     public async getSubatomicAppTemplates(namespace = "subatomic"): Promise<OpenshiftResource[]> {
         logger.debug(`Trying to get subatomic templates. namespace: ${namespace}`);
-        const queryResult = await this.openShiftApi.get.getAllFromNamespace("Template", "template.openshift.io/v1", namespace);
+        const queryResult = await this.openShiftApi.get.getAllFromNamespace("Template", namespace, "template.openshift.io/v1");
 
         if (isSuccessCode(queryResult.status)) {
             const templates = [];
@@ -318,27 +319,28 @@ export class OCService {
             ]);
     }
 
-    public async getSecretFromNamespace(secretName: string, namespace: string): Promise<OCCommandResult> {
+    public async getSecretFromNamespace(secretName: string, namespace: string): Promise<OpenshiftApiResult> {
         logger.debug(`Trying to get secret in namespace. secretName: ${secretName}, namespace: ${namespace}`);
-        return await OCCommon.commonCommand("get secrets",
-            secretName,
-            [],
-            [
-                new SimpleOption("-namespace", namespace),
-            ]);
+        const secretResult = await this.openShiftApi.get.get("Secret", secretName, namespace);
+        if (!isSuccessCode(secretResult.status)) {
+            throw new QMError(`Failed to secret ${secretName} from namespace ${namespace}`);
+        }
+        return secretResult;
     }
 
-    public async createBitbucketSSHAuthSecret(secretName: string, namespace: string): Promise<OCCommandResult> {
+    public async createBitbucketSSHAuthSecret(secretName: string, namespace: string, apply = true): Promise<OpenshiftApiResult> {
         logger.debug(`Trying to create bitbucket ssh auth secret in namespace. secretName: ${secretName}, namespace: ${namespace}`);
 
-        return await OCCommon.commonCommand("create secret generic",
-            secretName,
-            [],
-            [
-                new NamedSimpleOption("-from-file=ssh-privatekey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
-                new NamedSimpleOption("-from-file=ca.crt", QMConfig.subatomic.bitbucket.caPath),
-                new SimpleOption("-namespace", namespace),
-            ]);
+        const secret = new OpaqueSecret(secretName);
+        secret.addFile("ssh-privatekey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath);
+        secret.addFile("ca.crt", QMConfig.subatomic.bitbucket.caPath);
+
+        const createSecretResult = await this.openShiftApi.create.create(secret, namespace, apply);
+        if (!isSuccessCode(createSecretResult.status)) {
+            logger.error(`Failed to create the secret ${secretName} in namespace ${namespace}: ${inspect(createSecretResult)}`);
+            throw new QMError(`Failed to create secret ${secretName}.`);
+        }
+        return createSecretResult;
     }
 
     public async createConfigServerSecret(namespace: string): Promise<OCCommandResult> {
