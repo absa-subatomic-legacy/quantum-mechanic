@@ -72,7 +72,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         const jenkinsTemplate: any = JSON.parse(jenkinsTemplateJSON.output);
         jenkinsTemplate.metadata.namespace = projectId;
-        await this.ocService.createResourceFromDataInNamespace(jenkinsTemplate, projectId);
+        await this.ocService.applyResourceFromDataInNamespace(jenkinsTemplate, projectId);
     }
 
     private async createJenkinsDeploymentConfig(projectId: string) {
@@ -84,7 +84,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
             await this.ocService.getDeploymentConfigInNamespace("jenkins", projectId);
             logger.warn("Jenkins QMTemplate has already been processed, deployment exists");
         } catch (error) {
-            await this.ocService.createResourceFromDataInNamespace(JSON.parse(jenkinsTemplateResultJSON.output), projectId);
+            await this.ocService.applyResourceFromDataInNamespace(JSON.parse(jenkinsTemplateResultJSON.output), projectId);
         }
     }
 
@@ -100,7 +100,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
                 name: "subatomic-jenkins",
             },
         };
-        await this.ocService.createResourceFromDataInNamespace(serviceAccountDefinition, projectId);
+        await this.ocService.applyResourceFromDataInNamespace(serviceAccountDefinition, projectId);
 
         const roleBindingDefinition = {
             apiVersion: "rbac.authorization.k8s.io/v1beta1",
@@ -122,7 +122,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
             }],
         };
 
-        await this.ocService.createResourceFromDataInNamespace(roleBindingDefinition, projectId, true);
+        await this.ocService.applyResourceFromDataInNamespace(roleBindingDefinition, projectId, true);
     }
 
     private async rolloutJenkinsDeployment(projectId) {

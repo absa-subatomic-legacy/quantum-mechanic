@@ -90,7 +90,7 @@ export class CreateTeamDevOpsEnvironment extends Task {
         for (const item of appTemplates.items) {
             item.metadata.namespace = projectId;
         }
-        await this.ocService.createResourceFromDataInNamespace(appTemplates, projectId);
+        await this.ocService.applyResourceFromDataInNamespace(appTemplates, projectId);
     }
 
     private async addBitbucketSSHSecret(projectId: string) {

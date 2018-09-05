@@ -2,10 +2,10 @@ import {GenericResource} from "./GenericResource";
 import {OpenshiftResource} from "./OpenshiftResource";
 
 export class ResourceFactory {
-    public static baseResource(kind: string): OpenshiftResource {
+    public static baseResource(kind: string, apiVersion: string = "v1"): OpenshiftResource {
         return {
             kind,
-            apiVersion: "v1",
+            apiVersion,
             metadata: {},
         };
     }
@@ -79,17 +79,6 @@ export class ResourceFactory {
             name: serviceAccountName,
             creationTimestamp: null,
         };
-        return baseResource;
-    }
-
-    public static userResource(username: string): OpenshiftResource {
-        const baseResource = ResourceFactory.baseResource("User");
-        baseResource.metadata = {
-            name: username,
-            creationTimeStamp: null,
-        };
-        baseResource.identities = [];
-        baseResource.groups = [];
         return baseResource;
     }
 

@@ -24,7 +24,8 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
             if (existingRole === null) {
                 const newRole = ResourceFactory.serviceAccountRoleBindingResource(namespace, role, serviceAccount);
                 logger.debug("Role not found. Creating new role binding");
-                return instance.post(ResourceUrl.getResourceKindUrl("rolebinding", namespace), newRole);
+
+                return instance.post(ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace), newRole);
             } else {
                 existingRole.subjects.push({
                     kind: "ServiceAccount",
@@ -33,7 +34,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
                 });
                 existingRole.userNames.push(`system:serviceaccount:${namespace}:${serviceAccount}`);
                 logger.debug("Found role. Added service account to role binding list");
-                return instance.put(`${ResourceUrl.getResourceKindUrl("rolebinding", namespace)}/${role}`, existingRole);
+                return instance.put(`${ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace)}/${role}`, existingRole);
             }
         });
     }
@@ -44,7 +45,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
             if (existingRole === null) {
                 const newRole = ResourceFactory.userRoleBindingResource(namespace, role, username);
                 logger.debug("Role not found. Creating new role binding");
-                return instance.post(ResourceUrl.getResourceKindUrl("rolebinding", namespace), newRole);
+                return instance.post(ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace), newRole);
             } else {
                 existingRole.subjects.push({
                     kind: "User",
@@ -52,7 +53,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
                 });
                 existingRole.userNames.push(username);
                 logger.debug("Found role. Added user to role binding list");
-                return instance.put(`${ResourceUrl.getResourceKindUrl("rolebinding", namespace)}/${role}`, existingRole);
+                return instance.put(`${ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace)}/${role}`, existingRole);
             }
         });
     }

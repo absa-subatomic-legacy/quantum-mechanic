@@ -7,6 +7,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OpenshiftApiResult} from "../../../openshift/api/base/OpenshiftApiResult";
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
+import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {AbstractOption} from "../../../openshift/base/options/AbstractOption";
 import {NamedSimpleOption} from "../../../openshift/base/options/NamedSimpleOption";
@@ -92,13 +93,13 @@ export class OCService {
         return createResult.data;
     }
 
-    public async createDevOpsDefaultLimits(openshiftProjectId: string, replace = true, rawResult = false): Promise<any> {
+    public async createDevOpsDefaultLimits(openshiftProjectId: string, apply = true, rawResult = false): Promise<any> {
         logger.debug(`Trying to create DevOps default limits. openshiftProjectId: ${openshiftProjectId}`);
 
         const createResult = await this.openShiftApi.create.create(
             this.quotaLoader.getDevOpsDefaultLimitRange(),
             openshiftProjectId,
-            true,
+            apply,
         );
 
         if (rawResult) {
@@ -110,13 +111,13 @@ export class OCService {
         return createResult.data;
     }
 
-    public async createProjectDefaultResourceQuota(openshiftProjectId: string, replace = true, rawResult = false): Promise<any> {
+    public async createProjectDefaultResourceQuota(openshiftProjectId: string, apply = true, rawResult = false): Promise<any> {
         logger.debug(`Trying to create project default resource quota. openshiftProjectId: ${openshiftProjectId}`);
 
         const createResult = await this.openShiftApi.create.create(
             this.quotaLoader.getProjectDefaultResourceQuota(),
             openshiftProjectId,
-            replace,
+            apply,
         );
 
         if (rawResult) {
@@ -128,13 +129,13 @@ export class OCService {
         return createResult.data;
     }
 
-    public async createProjectDefaultLimits(openshiftProjectId: string, replace = true, rawResult = false): Promise<any> {
+    public async createProjectDefaultLimits(openshiftProjectId: string, apply = true, rawResult = false): Promise<any> {
         logger.debug(`Trying to create project default limits. openshiftProjectId: ${openshiftProjectId}`);
 
         const createResult = await this.openShiftApi.create.create(
             this.quotaLoader.getProjectDefaultLimitRange(),
             openshiftProjectId,
-            replace,
+            apply,
         );
 
         if (rawResult) {
@@ -184,13 +185,22 @@ export class OCService {
         return this.ocImageService.getSubatomicImageStreamTags(namespace);
     }
 
-    public async createResourceFromDataInNamespace(resourceDefinition: any, projectNamespace: string, applyNotReplace: boolean = false): Promise<OCCommandResult> {
+    public async applyResourceFromDataInNamespace(resourceDefinition: OpenshiftResource, projectNamespace: string, applyNotReplace: boolean = false): Promise<OpenshiftApiResult> {
         logger.debug(`Trying to create resource from data in namespace. projectNamespace: ${projectNamespace}`);
-        return await OCCommon.createFromData(resourceDefinition,
-            [
-                new SimpleOption("-namespace", projectNamespace),
-            ]
-            , applyNotReplace);
+
+        let response: OpenshiftApiResult;
+        if (applyNotReplace) {
+            response = await this.openShiftApi.create.apply(resourceDefinition, projectNamespace);
+        } else {
+            response = await this.openShiftApi.create.replace(resourceDefinition, projectNamespace);
+        }
+
+        if (!isSuccessCode(response.status)) {
+            logger.error(`Failed to create requested resource: ${inspect(response, undefined, 4)}`);
+            throw new QMError("Failed to create requested resource");
+        }
+
+        return response;
     }
 
     public async tagSubatomicImageToNamespace(imageStreamTagName: string, destinationProjectNamespace: string, destinationImageStreamTagName: string = imageStreamTagName): Promise<OCCommandResult> {
@@ -354,13 +364,6 @@ export class OCService {
         logger.debug(`Trying to create pod network. projectToJoin: ${projectToJoin}; projectToJoinTo: ${projectToJoinTo}`);
 
         return this.openShiftApi.adm.podNetworkJoinToProject(projectToJoin, projectToJoinTo);
-        /*return await OCCommon.commonCommand(
-            "adm pod-network",
-            "join-projects",
-            projectsToJoin,
-            [
-                new StandardOption("to", `${projectToJoinTo}`),
-            ]);*/
     }
 
     public async addRoleToUserInNamespace(user: string, role: string, namespace: string): Promise<OCCommandResult> {
@@ -375,14 +378,14 @@ export class OCService {
         return await OCClient.createPvc(pvcName, namespace);
     }
 
-    public async initilizeProjectWithDefaultProjectTemplate(projectId: string, replace = true) {
+    public async initilizeProjectWithDefaultProjectTemplate(projectId: string, apply = true) {
         const template = this.baseProjectTemplateLoader.getTemplate();
         if (!_.isEmpty(template.objects)) {
             logger.info(`Applying base project template to ${projectId}`);
             const fileName = Date.now() + ".json";
             fs.writeFileSync(`/tmp/${fileName}`, JSON.stringify(template));
             const processedTemplateResult = await OCCommon.commonCommand("process", `-f /tmp/${fileName}`);
-            const result = await this.openShiftApi.create.create(JSON.parse(processedTemplateResult.output), projectId, replace);
+            const result = await this.openShiftApi.create.create(JSON.parse(processedTemplateResult.output), projectId, apply);
             if (!isSuccessCode(result.status)) {
                 logger.error(`Template failed to create properly: ${inspect(result)}`);
                 throw new QMError("Failed to create all items in base project template.");

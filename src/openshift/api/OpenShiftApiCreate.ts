@@ -1,3 +1,5 @@
+import {logger} from "@atomist/automation-client";
+import {inspect} from "util";
 import {isSuccessCode} from "../../http/Http";
 import {OpenShiftApiElement} from "./base/OpenShiftApiElement";
 import {OpenshiftApiResult} from "./base/OpenshiftApiResult";
@@ -14,44 +16,73 @@ export class OpenShiftApiCreate extends OpenShiftApiElement {
         );
     }
 
-    public async create(resource: OpenshiftResource, namespace: string = "default", replace = false): Promise<OpenshiftApiResult> {
-        if (replace) {
-            return await this.replace(resource, namespace);
+    public async create(resource: OpenshiftResource, namespace: string = "default", apply = false): Promise<OpenshiftApiResult> {
+        logger.info("Creating");
+        if (apply) {
+            return await this.apply(resource, namespace);
         }
         if (resource.kind === "List") {
-            return await this.processList(resource, namespace, false);
+            return await this.processList(resource, namespace, CreateType.create);
         }
-        const instance = this.getAxiosInstanceForResource(resource.kind);
-        const url = ResourceUrl.getResourceKindUrl(resource.kind, namespace);
+        const instance = this.getAxiosInstanceForResource(resource);
+        const url = ResourceUrl.getResourceKindUrl(resource, namespace);
         return await instance.post(url, resource);
+    }
+
+    public async apply(resource: OpenshiftResource, namespace: string = "default"): Promise<OpenshiftApiResult> {
+        logger.info("Applying");
+        if (resource.kind === "List") {
+            return await this.processList(resource, namespace, CreateType.apply);
+        }
+        const instance = this.getAxiosInstanceForResource(resource);
+        const namedUrl = ResourceUrl.getNamedResourceUrl(resource, namespace);
+        const exists = await instance.get(namedUrl);
+        logger.info(inspect(exists));
+        if (isSuccessCode(exists.status)) {
+            return exists;
+        }
+
+        return this.create(resource, namespace);
     }
 
     public async replace(resource: OpenshiftResource, namespace: string = "default"): Promise<OpenshiftApiResult> {
+        logger.info("Replacing");
         if (resource.kind === "List") {
-            return await this.processList(resource, namespace, true);
+            return await this.processList(resource, namespace, CreateType.replace);
         }
-        const instance = this.getAxiosInstanceForResource(resource.kind);
-        const namedUrl = ResourceUrl.getNamedResourceUrl(resource.kind, resource.metadata.name, namespace);
+        const instance = this.getAxiosInstanceForResource(resource);
+        const namedUrl = ResourceUrl.getNamedResourceUrl(resource, namespace);
         const exists = await instance.get(namedUrl);
         if (isSuccessCode(exists.status)) {
-            return await instance.put(namedUrl, resource);
+            logger.info("Updating resource: " + namedUrl);
+            if (exists.data.metadata.uid !== undefined && resource.metadata.uid !== undefined) {
+                resource.metadata.uid = exists.data.metadata.uid;
+            }
+            if (exists.data.metadata.resourceVersion !== undefined) {
+                resource.metadata.resourceVersion = exists.data.metadata.resourceVersion;
+            }
+            const replaceResult = await instance.put(namedUrl, resource);
+            logger.info(inspect(replaceResult));
+            return replaceResult;
         }
 
-        const url = ResourceUrl.getResourceKindUrl(resource.kind, namespace);
+        const url = ResourceUrl.getResourceKindUrl(resource, namespace);
         return await instance.post(url, resource);
     }
 
-    private async processList(resource: OpenshiftResource, namespace: string, replace = false): Promise<OpenshiftApiResult> {
+    private async processList(resource: OpenshiftResource, namespace: string, createType: CreateType): Promise<OpenshiftApiResult> {
         let status = 200;
         const result = {
             items: [],
         };
         for (const item of resource.items) {
             let createResult;
-            if (replace) {
+            if (createType === CreateType.replace) {
                 createResult = await this.replace(item, namespace);
-            } else {
+            } else if (createType === CreateType.create) {
                 createResult = await this.create(item, namespace);
+            } else {
+                createResult = await this.apply(item, namespace);
             }
             if (isSuccessCode(createResult.status)) {
                 result.items.push(
@@ -76,4 +107,10 @@ export class OpenShiftApiCreate extends OpenShiftApiElement {
         };
     }
 
+}
+
+enum CreateType {
+    create = "create",
+    apply = "apply",
+    replace = "replace",
 }

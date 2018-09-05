@@ -1,6 +1,8 @@
 import Axios from "axios-https-proxy-fix";
 import https = require("https");
+import _ = require("lodash");
 import {AwaitAxios} from "../../../http/AwaitAxios";
+import {OpenshiftResource} from "../resources/OpenshiftResource";
 import {ResourceUrl} from "../resources/ResourceUrl";
 import {OpenshiftApiBaseRoute} from "./OpenshiftApiBaseRoute";
 import {OpenShiftConfigContract} from "./OpenShiftConfigContract";
@@ -10,9 +12,9 @@ export abstract class OpenShiftApiElement {
     protected constructor(protected openShiftConfig: OpenShiftConfigContract) {
     }
 
-    protected getAxiosInstanceOApi(): AwaitAxios {
+    protected getAxiosInstanceOApi(resourceApi: string = "v1"): AwaitAxios {
         const instance = Axios.create({
-            baseURL: `${this.openShiftConfig.masterUrl}/oapi/v1/`,
+            baseURL: `${this.openShiftConfig.masterUrl}/oapi/${resourceApi}/`,
             httpsAgent: new https.Agent({
                 rejectUnauthorized: false,
             }),
@@ -21,9 +23,13 @@ export abstract class OpenShiftApiElement {
         return new AwaitAxios(instance);
     }
 
-    protected getAxiosInstanceApi(): AwaitAxios {
+    protected getAxiosInstanceApi(resourceApi: string = "v1"): AwaitAxios {
+        let baseApi = "apis";
+        if (resourceApi === "v1") {
+            baseApi = "api";
+        }
         const instance = Axios.create({
-            baseURL: `${this.openShiftConfig.masterUrl}/api/v1/`,
+            baseURL: `${this.openShiftConfig.masterUrl}/${baseApi}/${resourceApi}/`,
             httpsAgent: new https.Agent({
                 rejectUnauthorized: false,
             }),
@@ -43,11 +49,14 @@ export abstract class OpenShiftApiElement {
         return new AwaitAxios(instance);
     }
 
-    protected getAxiosInstanceForResource(resourceKind: string) {
-        if (ResourceUrl.getResourceApi(resourceKind) === OpenshiftApiBaseRoute.API) {
-            return this.getAxiosInstanceApi();
+    protected getAxiosInstanceForResource(resource: OpenshiftResource) {
+        if (_.isEmpty(resource.apiVersion)) {
+            resource.apiVersion = "v1";
+        }
+        if (ResourceUrl.getResourceApi(resource) === OpenshiftApiBaseRoute.API) {
+            return this.getAxiosInstanceApi(resource.apiVersion);
         } else {
-            return this.getAxiosInstanceOApi();
+            return this.getAxiosInstanceOApi(resource.apiVersion);
         }
     }
 

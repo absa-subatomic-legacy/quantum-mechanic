@@ -1,12 +1,21 @@
 import {OpenshiftApiBaseRoute} from "../base/OpenshiftApiBaseRoute";
+import {OpenshiftResource} from "./OpenshiftResource";
 
 export class ResourceUrl {
 
-    public static getResourceKindUrl(resourceKind: string, namespace: string = "default"): string {
-        resourceKind = resourceKind.toLowerCase();
+    public static getResourceKindUrl(resource: OpenshiftResource, namespace: string = "default"): string {
+        const resourceKind = resource.kind.toLowerCase();
         let url: string;
         if (ResourceUrl.urlMap.hasOwnProperty(resourceKind)) {
-            url = ResourceUrl.urlMap[resourceKind].url
+            const urlDetails = ResourceUrl.urlMap[resourceKind];
+            url = urlDetails[0].url;
+            for (const urlDetail of urlDetails) {
+                if (urlDetail.apiVersion === resource.apiVersion) {
+                    url = urlDetail.url;
+                    break;
+                }
+            }
+            url = url
                 .replace("${namespace}", namespace);
         } else {
             url = `namespaces/${namespace}/${resourceKind}s`;
@@ -14,15 +23,22 @@ export class ResourceUrl {
         return url;
     }
 
-    public static getNamedResourceUrl(resourceKind: string, resourceName: string, namespace: string = "default") {
-        return ResourceUrl.getResourceKindUrl(resourceKind, namespace) + `/${resourceName}`;
+    public static getNamedResourceUrl(resource: OpenshiftResource, namespace: string = "default") {
+        return ResourceUrl.getResourceKindUrl(resource, namespace) + `/${resource.metadata.name}`;
     }
 
-    public static getResourceApi(resourceKind: string): OpenshiftApiBaseRoute {
-        resourceKind = resourceKind.toLowerCase();
+    public static getResourceApi(resource: OpenshiftResource): OpenshiftApiBaseRoute {
+        const resourceKind = resource.kind.toLowerCase();
         let api: OpenshiftApiBaseRoute;
         if (ResourceUrl.urlMap.hasOwnProperty(resourceKind)) {
-            api = ResourceUrl.urlMap[resourceKind].api;
+            const urlDetails = ResourceUrl.urlMap[resourceKind];
+            api = urlDetails[0].api;
+            for (const urlDetail of urlDetails) {
+                if (urlDetail.apiVersion === resource.apiVersion) {
+                    api = urlDetail.api;
+                    break;
+                }
+            }
         } else {
             api = OpenshiftApiBaseRoute.API;
         }
@@ -38,22 +54,30 @@ export class ResourceUrl {
     }
 
     private static urlMap: UrlMap = {
-        user: {
+        user: [{
+            apiVersion: "v1",
             url: "users",
             api: OpenshiftApiBaseRoute.OAPI,
-        },
-        rolebinding: {
+        }],
+        rolebinding: [{
+            apiVersion: "v1",
             url: "namespaces/${namespace}/rolebindings",
             api: OpenshiftApiBaseRoute.OAPI,
+        }, {
+            apiVersion: "rbac.authorization.k8s.io/v1beta1",
+            url: "namespaces/${namespace}/rolebindings",
+            api: OpenshiftApiBaseRoute.API,
         },
+        ],
     };
 }
 
 interface UrlMap {
-    [key: string]: UrlDetail;
+    [key: string]: UrlDetail[];
 }
 
 interface UrlDetail {
+    apiVersion: string;
     url: string;
     api: OpenshiftApiBaseRoute;
 }
