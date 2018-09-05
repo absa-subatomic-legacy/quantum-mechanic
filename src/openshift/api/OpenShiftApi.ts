@@ -1,8 +1,8 @@
 import {AxiosResponse} from "axios";
 import {OpenShiftApiElement} from "./base/OpenShiftApiElement";
 import {OpenShiftConfigContract} from "./base/OpenShiftConfigContract";
+import {OpenShiftApiAdm} from "./OpenShiftApiAdm";
 import {OpenShiftApiCreate} from "./OpenShiftApiCreate";
-import {OpenShiftApiDelete} from "./OpenShiftApiDelete";
 import {OpenShiftApiPolicy} from "./OpenShiftApiPolicy";
 import {OpenshiftResource} from "./resources/OpenshiftResource";
 import {ResourceFactory} from "./resources/ResourceFactory";
@@ -10,16 +10,16 @@ import {ResourceFactory} from "./resources/ResourceFactory";
 export class OpenShiftApi extends OpenShiftApiElement {
 
     public create: OpenShiftApiCreate;
-    public delete: OpenShiftApiDelete;
     public policy: OpenShiftApiPolicy;
+    public adm: OpenShiftApiAdm;
 
     constructor(
         openshiftConfig: OpenShiftConfigContract,
     ) {
         super(openshiftConfig);
         this.create = new OpenShiftApiCreate(openshiftConfig);
-        this.delete = new OpenShiftApiDelete(openshiftConfig);
         this.policy = new OpenShiftApiPolicy(openshiftConfig);
+        this.adm = new OpenShiftApiAdm(openshiftConfig);
     }
 
     public newProject(projectName: string,
@@ -32,11 +32,6 @@ export class OpenShiftApi extends OpenShiftApiElement {
     public newProjectFromResource(projectResource: OpenshiftResource): Promise<AxiosResponse> {
         const instance = this.getAxiosInstanceOApi();
         return instance.post("projectrequests", projectResource);
-    }
-
-    public deleteProject(projectName: string): Promise<AxiosResponse> {
-        const instance = this.getAxiosInstanceOApi();
-        return instance.delete(`projects/${projectName}`);
     }
 
 }

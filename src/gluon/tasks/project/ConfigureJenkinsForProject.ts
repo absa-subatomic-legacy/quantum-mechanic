@@ -35,6 +35,8 @@ export class ConfigureJenkinsForProject extends Task {
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
         const teamDevOpsProjectId = getDevOpsEnvironmentDetails(this.environmentsRequestedEvent.teams[0].name).openshiftProjectId;
 
+        await this.ocService.login(this.openshiftEnvironment);
+
         await this.addEditRolesToJenkinsServiceAccount(
             teamDevOpsProjectId,
             this.environmentsRequestedEvent.project.name,
@@ -61,8 +63,6 @@ export class ConfigureJenkinsForProject extends Task {
     }
 
     private async addEditRolesToJenkinsServiceAccount(teamDevOpsProjectId: string, projectName: string, tenant: string) {
-
-        await this.ocService.login(this.openshiftEnvironment);
 
         for (const environment of this.openshiftEnvironment.defaultEnvironments) {
             const openshiftProjectId = getProjectId(tenant, projectName, environment.id);

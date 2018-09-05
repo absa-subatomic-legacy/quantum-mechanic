@@ -2,6 +2,7 @@ import {HandlerContext, logger} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCService} from "../../services/openshift/OCService";
+import {QMError, QMErrorType} from "../../util/shared/Error";
 import {
     DevOpsEnvironmentDetails,
     getDevOpsEnvironmentDetails,
@@ -66,7 +67,11 @@ export class CreateTeamDevOpsEnvironment extends Task {
         try {
             await this.ocService.newDevOpsProject(projectId, teamName);
         } catch (error) {
-            logger.warn("DevOps project already seems to exist. Trying to continue.");
+            if (error instanceof QMError && error.errorType === QMErrorType.conflict) {
+                logger.warn("DevOps project already exists. Continuing.");
+            } else {
+                throw error;
+            }
         }
 
         await this.ocService.createDevOpsDefaultResourceQuota(projectId);

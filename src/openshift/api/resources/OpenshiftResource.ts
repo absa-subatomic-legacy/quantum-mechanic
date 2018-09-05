@@ -1,6 +1,6 @@
 export interface OpenshiftResource {
     kind: string;
     apiVersion: string;
-    metadata: object;
+    metadata: { [key: string]: any };
     [key: string]: any;
 }
