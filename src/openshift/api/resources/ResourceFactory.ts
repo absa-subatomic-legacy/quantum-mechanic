@@ -82,4 +82,10 @@ export class ResourceFactory {
         return baseResource;
     }
 
+    public static resourceList(): OpenshiftResource {
+        const baseResource = ResourceFactory.baseResource("List");
+        baseResource.items = [];
+        return baseResource;
+    }
+
 }

@@ -158,16 +158,28 @@ export class OCService {
         );
     }
 
-    public async getSubatomicAppTemplates(namespace = "subatomic"): Promise<OCCommandResult> {
+    public async getSubatomicAppTemplates(namespace = "subatomic"): Promise<OpenshiftResource[]> {
         logger.debug(`Trying to get subatomic templates. namespace: ${namespace}`);
-        return await OCCommon.commonCommand("get", "templates",
-            [],
-            [
-                new SimpleOption("l", "usage=subatomic-app"),
-                new SimpleOption("-namespace", namespace),
-                new SimpleOption("-output", "json"),
-            ],
-        );
+        const queryResult = await this.openShiftApi.get.getAllFromNamespace("Template", "template.openshift.io/v1", namespace);
+
+        if (isSuccessCode(queryResult.status)) {
+            const templates = [];
+            for (const template of queryResult.data.items) {
+                if (template.metadata.labels !== undefined) {
+                    if (template.metadata.labels.usage === "subatomic-app") {
+                        // These aren't set for some reason
+                        template.kind = "Template";
+                        template.apiVersion = "template.openshift.io/v1";
+                        templates.push(template);
+                        break;
+                    }
+                }
+            }
+            return templates;
+        } else {
+            logger.error(`Failed to find Subatomic App Templates in Subatomic namespace: ${inspect(queryResult)}`);
+            throw new QMError("Failed to find Subatomic App Templates in the Subatomic namespace");
+        }
     }
 
     public async getJenkinsTemplate(): Promise<OCCommandResult> {
@@ -196,7 +208,7 @@ export class OCService {
         }
 
         if (!isSuccessCode(response.status)) {
-            logger.error(`Failed to create requested resource: ${inspect(response, undefined, 4)}`);
+            logger.error(`Failed to create requested resource.\nResource: ${JSON.stringify(resourceDefinition)}\n\nResult: ${inspect(response.data)}`);
             throw new QMError("Failed to create requested resource");
         }
 

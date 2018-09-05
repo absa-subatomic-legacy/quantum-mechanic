@@ -54,20 +54,51 @@ export class ResourceUrl {
     }
 
     private static urlMap: UrlMap = {
-        user: [{
-            apiVersion: "v1",
-            url: "users",
-            api: OpenshiftApiBaseRoute.OAPI,
-        }],
-        rolebinding: [{
-            apiVersion: "v1",
-            url: "namespaces/${namespace}/rolebindings",
-            api: OpenshiftApiBaseRoute.OAPI,
-        }, {
-            apiVersion: "rbac.authorization.k8s.io/v1beta1",
-            url: "namespaces/${namespace}/rolebindings",
-            api: OpenshiftApiBaseRoute.API,
-        },
+        user: [
+            {
+                apiVersion: "v1",
+                url: "users",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
+        imagestream: [
+            {
+                apiVersion: "v1",
+                url: "namespaces/${namespace}/imagestreams",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
+        imagestreamtag: [
+            {
+                apiVersion: "v1",
+                url: "namespaces/${namespace}/imagestreamtags",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
+        buildconfig: [
+            {
+                apiVersion: "v1",
+                url: "namespaces/${namespace}/buildconfigs",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
+        deploymentconfig: [
+            {
+                apiVersion: "v1",
+                url: "namespaces/${namespace}/deploymentconfigs",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
+        rolebinding: [
+            {
+                apiVersion: "v1",
+                url: "namespaces/${namespace}/rolebindings",
+                api: OpenshiftApiBaseRoute.OAPI,
+            }, {
+                apiVersion: "rbac.authorization.k8s.io/v1beta1",
+                url: "namespaces/${namespace}/rolebindings",
+                api: OpenshiftApiBaseRoute.API,
+            },
         ],
     };
 }

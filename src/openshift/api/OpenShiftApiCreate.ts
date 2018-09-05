@@ -1,5 +1,4 @@
 import {logger} from "@atomist/automation-client";
-import {inspect} from "util";
 import {isSuccessCode} from "../../http/Http";
 import {OpenShiftApiElement} from "./base/OpenShiftApiElement";
 import {OpenshiftApiResult} from "./base/OpenshiftApiResult";
@@ -17,27 +16,30 @@ export class OpenShiftApiCreate extends OpenShiftApiElement {
     }
 
     public async create(resource: OpenshiftResource, namespace: string = "default", apply = false): Promise<OpenshiftApiResult> {
-        logger.info("Creating");
+        logger.info(`Creating resource ${resource.kind} in ${namespace}`);
         if (apply) {
             return await this.apply(resource, namespace);
         }
         if (resource.kind === "List") {
             return await this.processList(resource, namespace, CreateType.create);
         }
+
+        delete resource.metadata.uid;
+        delete resource.metadata.resourceVersion;
+
         const instance = this.getAxiosInstanceForResource(resource);
         const url = ResourceUrl.getResourceKindUrl(resource, namespace);
         return await instance.post(url, resource);
     }
 
     public async apply(resource: OpenshiftResource, namespace: string = "default"): Promise<OpenshiftApiResult> {
-        logger.info("Applying");
+        logger.info(`Applying resource ${resource.kind} in ${namespace}`);
         if (resource.kind === "List") {
             return await this.processList(resource, namespace, CreateType.apply);
         }
         const instance = this.getAxiosInstanceForResource(resource);
         const namedUrl = ResourceUrl.getNamedResourceUrl(resource, namespace);
         const exists = await instance.get(namedUrl);
-        logger.info(inspect(exists));
         if (isSuccessCode(exists.status)) {
             return exists;
         }
@@ -46,24 +48,26 @@ export class OpenShiftApiCreate extends OpenShiftApiElement {
     }
 
     public async replace(resource: OpenshiftResource, namespace: string = "default"): Promise<OpenshiftApiResult> {
-        logger.info("Replacing");
+        logger.info(`Replacing resource ${resource.kind} in ${namespace}`);
         if (resource.kind === "List") {
             return await this.processList(resource, namespace, CreateType.replace);
         }
+
+        delete resource.metadata.uid;
+        delete resource.metadata.resourceVersion;
+
         const instance = this.getAxiosInstanceForResource(resource);
         const namedUrl = ResourceUrl.getNamedResourceUrl(resource, namespace);
         const exists = await instance.get(namedUrl);
         if (isSuccessCode(exists.status)) {
             logger.info("Updating resource: " + namedUrl);
-            if (exists.data.metadata.uid !== undefined && resource.metadata.uid !== undefined) {
+            if (exists.data.metadata.uid !== undefined) {
                 resource.metadata.uid = exists.data.metadata.uid;
             }
             if (exists.data.metadata.resourceVersion !== undefined) {
                 resource.metadata.resourceVersion = exists.data.metadata.resourceVersion;
             }
-            const replaceResult = await instance.put(namedUrl, resource);
-            logger.info(inspect(replaceResult));
-            return replaceResult;
+            return await instance.put(namedUrl, resource);
         }
 
         const url = ResourceUrl.getResourceKindUrl(resource, namespace);

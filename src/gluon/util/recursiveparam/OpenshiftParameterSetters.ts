@@ -19,8 +19,7 @@ export async function setOpenshiftTemplate(
     }
 
     const namespace = getDevOpsEnvironmentDetails(commandHandler.teamName).openshiftProjectId;
-    const templatesResult = await commandHandler.ocService.getSubatomicAppTemplates(namespace);
-    const templates = JSON.parse(templatesResult.output).items;
+    const templates = await commandHandler.ocService.getSubatomicAppTemplates(namespace);
     return await createMenu(ctx, templates.map(template => {
             return {
                 value: template.metadata.name,
