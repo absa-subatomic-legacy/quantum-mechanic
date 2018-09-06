@@ -67,7 +67,7 @@ export class ProjectProductionEnvironmentsRequestClosed implements HandleEvent<a
 
                     taskRunner.addTask(new CreateTeamDevOpsEnvironment({team: owningTeam}, devopsEnvironmentDetails, prodOpenshift),
                     ).addTask(
-                        new AddJenkinsToProdEnvironment({team: owningTeam}, prodOpenshift),
+                        new AddJenkinsToProdEnvironment({team: owningTeam}, request, prodOpenshift),
                     ).addTask(
                         new CreateOpenshiftEnvironments(request, devopsEnvironmentDetails, prodOpenshift),
                     );
