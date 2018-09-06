@@ -39,8 +39,7 @@ export class AddJenkinsToProdEnvironment extends Task {
         await this.createJenkinsServiceAccount(projectId);
 
         await this.taskListMessage.succeedTask(this.TASK_CREATE_JENKINS_SA);
-        logger.info(`!!!!${JSON.stringify(this.devOpsRequestedEvent)}`);
-        logger.info(`!!!!${JSON.stringify(this.openshiftEnvironment)}`);
+
         await this.addEditRolesToJenkinsServiceAccount(teamDevOpsProjectId);
 
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_SA_RIGHTS);
@@ -48,7 +47,6 @@ export class AddJenkinsToProdEnvironment extends Task {
         const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
         const jenkinsHost = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
 
-        logger.info(`!!!!!${token.output}`);
         await this.createJenkinsCredentials(teamDevOpsProjectId, jenkinsHost.output, token.output, this.openshiftEnvironment.name);
 
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_CREDENTIALS);
