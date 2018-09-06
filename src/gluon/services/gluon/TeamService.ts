@@ -4,11 +4,11 @@ import {SlackMessage} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
+import {AwaitAxios} from "../../../http/AwaitAxios";
+import {isSuccessCode} from "../../../http/Http";
 import {CreateTeam} from "../../commands/team/CreateTeam";
 import {JoinTeam} from "../../commands/team/JoinTeam";
-import {AwaitAxios} from "../../util/shared/AwaitAxios";
 import {QMError} from "../../util/shared/Error";
-import {isSuccessCode} from "../../util/shared/Http";
 
 export class TeamService {
 
@@ -87,6 +87,21 @@ export class TeamService {
         }
 
         return teamQueryResult.data._embedded.teamResources[0];
+    }
+
+    public async gluonTeamById(teamId: string, rawResult = false): Promise<any> {
+        logger.debug(`Trying to get gluon team with by name. teamId: ${teamId} `);
+
+        const teamQueryResult = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`);
+
+        if (rawResult) {
+            return teamQueryResult;
+        } else if (!isSuccessCode(teamQueryResult.status)) {
+            logger.error(`Failed to find team ${teamId}. Error: ${inspect(teamQueryResult)}`);
+            throw new QMError(`Team with id ${teamId} does not appear to be a valid Subatomic team.`);
+        }
+
+        return teamQueryResult.data;
     }
 
     public async createGluonTeam(teamName: string, teamDescription: string, createdBy: string): Promise<any> {

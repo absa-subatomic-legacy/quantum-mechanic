@@ -4,6 +4,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {DevOpsMessages} from "../../messages/team/DevOpsMessages";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
+import {
+    roleBindingDefinition,
+    serviceAccountDefinition,
+} from "../../util/jenkins/JenkinsOpenshiftResources";
 import {QMError} from "../../util/shared/Error";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -14,9 +18,10 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
     private devopsMessages = new DevOpsMessages();
 
-    private readonly TASK_TAG_TEMPLATE = "TagTemplate";
-    private readonly TASK_ROLLOUT_JENKINS = "RolloutJenkins";
-    private readonly TASK_CONFIG_JENKINS = "ConfigJenkins";
+    private readonly TASK_HEADER = TaskListMessage.createUniqueTaskName("ConfigureDevOpsJenkins");
+    private readonly TASK_TAG_TEMPLATE = TaskListMessage.createUniqueTaskName("TagTemplate");
+    private readonly TASK_ROLLOUT_JENKINS = TaskListMessage.createUniqueTaskName("RolloutJenkins");
+    private readonly TASK_CONFIG_JENKINS = TaskListMessage.createUniqueTaskName("ConfigJenkins");
 
     constructor(private devOpsRequestedEvent,
                 private jenkinsService = new JenkinsService(),
@@ -25,6 +30,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
     }
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
+        taskListMessage.addTask(this.TASK_HEADER, `*Create DevOps Jenkins*`);
         taskListMessage.addTask(this.TASK_TAG_TEMPLATE, "\tTag jenkins template to environment");
         taskListMessage.addTask(this.TASK_ROLLOUT_JENKINS, "\tRollout Jenkins instance");
         taskListMessage.addTask(this.TASK_CONFIG_JENKINS, "\tConfigure Jenkins");
@@ -51,13 +57,15 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         const jenkinsHost: string = await this.createJenkinsRoute(projectId);
 
-        const token: string = await this.getJenkinsServiceAccountToken(projectId);
+        const token: string = await this.ocService.getServiceAccountToken("subatomic-jenkins", projectId);
 
         logger.info(`Using Service Account token: ${token}`);
 
         await this.addJenkinsCredentials(projectId, jenkinsHost, token);
 
         await this.taskListMessage.succeedTask(this.TASK_CONFIG_JENKINS);
+
+        await this.taskListMessage.succeedTask(this.TASK_HEADER);
 
         await ctx.messageClient.addressChannels(
             this.devopsMessages.jenkinsSuccessfullyProvisioned(jenkinsHost, this.devOpsRequestedEvent.team.name),
@@ -72,7 +80,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         const jenkinsTemplate: any = JSON.parse(jenkinsTemplateJSON.output);
         jenkinsTemplate.metadata.namespace = projectId;
-        await this.ocService.createResourceFromDataInNamespace(jenkinsTemplate, projectId);
+        await this.ocService.applyResourceFromDataInNamespace(jenkinsTemplate, projectId);
     }
 
     private async createJenkinsDeploymentConfig(projectId: string) {
@@ -84,45 +92,14 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
             await this.ocService.getDeploymentConfigInNamespace("jenkins", projectId);
             logger.warn("Jenkins QMTemplate has already been processed, deployment exists");
         } catch (error) {
-            await this.ocService.createResourceFromDataInNamespace(JSON.parse(jenkinsTemplateResultJSON.output), projectId);
+            await this.ocService.applyResourceFromDataInNamespace(JSON.parse(jenkinsTemplateResultJSON.output), projectId);
         }
     }
 
     private async createJenkinsServiceAccount(projectId: string) {
-        const serviceAccountDefinition = {
-            apiVersion: "v1",
-            kind: "ServiceAccount",
-            metadata: {
-                annotations: {
-                    "subatomic.bison.co.za/managed": "true",
-                    "serviceaccounts.openshift.io/oauth-redirectreference.jenkins": '{"kind":"OAuthRedirectReference", "apiVersion":"v1","reference":{"kind":"Route","name":"jenkins"}}',
-                },
-                name: "subatomic-jenkins",
-            },
-        };
-        await this.ocService.createResourceFromDataInNamespace(serviceAccountDefinition, projectId);
+        await this.ocService.applyResourceFromDataInNamespace(serviceAccountDefinition(), projectId);
 
-        const roleBindingDefinition = {
-            apiVersion: "rbac.authorization.k8s.io/v1beta1",
-            kind: "RoleBinding",
-            metadata: {
-                annotations: {
-                    "subatomic.bison.co.za/managed": "true",
-                },
-                name: "subatomic-jenkins-edit",
-            },
-            roleRef: {
-                apiGroup: "rbac.authorization.k8s.io",
-                kind: "ClusterRole",
-                name: "admin",
-            },
-            subjects: [{
-                kind: "ServiceAccount",
-                name: "subatomic-jenkins",
-            }],
-        };
-
-        await this.ocService.createResourceFromDataInNamespace(roleBindingDefinition, projectId, true);
+        await this.ocService.applyResourceFromDataInNamespace(roleBindingDefinition(), projectId, true);
     }
 
     private async rolloutJenkinsDeployment(projectId) {
@@ -143,11 +120,6 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
             retries: 59,
             minTimeout: 20000,
         });
-    }
-
-    private async getJenkinsServiceAccountToken(projectId: string) {
-        const tokenResult = await this.ocService.getServiceAccountToken("subatomic-jenkins", projectId);
-        return tokenResult.output;
     }
 
     private async createJenkinsRoute(projectId: string): Promise<string> {
