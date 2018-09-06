@@ -39,7 +39,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
         });
     }
 
-    private addRoleToUserAccount(username: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
+    public addRoleToUserAccount(username: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
         const instance = this.getAxiosInstanceOApi();
         return this.findExistingRole(instance, role, namespace).then(existingRole => {
             if (existingRole === null) {

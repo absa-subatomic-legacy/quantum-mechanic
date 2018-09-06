@@ -4,7 +4,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {DevOpsMessages} from "../../messages/team/DevOpsMessages";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
-import {roleBindingDefinition, serviceAccountDefinition} from "../../util/jenkins/JenkinsOpenshiftResources";
+import {
+    roleBindingDefinition,
+    serviceAccountDefinition,
+} from "../../util/jenkins/JenkinsOpenshiftResources";
 import {QMError} from "../../util/shared/Error";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -61,6 +64,8 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         await this.addJenkinsCredentials(projectId, jenkinsHost, token);
 
         await this.taskListMessage.succeedTask(this.TASK_CONFIG_JENKINS);
+
+        await this.taskListMessage.succeedTask(this.TASK_HEADER);
 
         await ctx.messageClient.addressChannels(
             this.devopsMessages.jenkinsSuccessfullyProvisioned(jenkinsHost, this.devOpsRequestedEvent.team.name),

@@ -61,7 +61,11 @@ export class OCImageService {
             imageStreamTag.referencePolicy = {
                 type: "Source",
             };
-            imageStreamTag.metadata.namespace = namespace;
+            imageStreamTag.metadata = {
+                namespace,
+                name: imageStreamTag.metadata.name,
+                creationTimestamp: null,
+            };
             imageStreamTag.tag = {
                 name: "",
                 annotations: null,
@@ -70,8 +74,13 @@ export class OCImageService {
                     namespace: originalNamespace,
                     name: imageName,
                 },
+                generation: null,
+                importPolicy: {},
+                referencePolicy: {
+                    type: "Source",
+                },
             };
-            delete imageStreamTag.metadata.selfLink;
+            imageStreamTag.apiVersion = "image.openshift.io/v1";
         }
         return imageStreamTags;
     }

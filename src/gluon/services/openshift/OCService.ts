@@ -427,11 +427,14 @@ export class OCService {
         return this.openShiftApi.adm.podNetworkJoinToProject(projectToJoin, projectToJoinTo);
     }
 
-    public async addRoleToUserInNamespace(user: string, role: string, namespace: string): Promise<OCCommandResult> {
+    public async addRoleToUserInNamespace(user: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
         logger.debug(`Trying to add role to user in namespace: user: ${user}; role: ${role}; namespace: ${namespace}`);
-        return await OCClient.policy.addRoleToUser(user,
-            role,
-            namespace);
+        const addRoleResult = await this.openShiftApi.policy.addRoleToUser(user, role, namespace);
+        if (!isSuccessCode(addRoleResult.status)) {
+            logger.error(`Failed to grant the role ${role} to account ${user}. Error: ${inspect(addRoleResult)}`);
+            throw new QMError(`Failed to grant the role ${role} to account ${user}.`);
+        }
+        return addRoleResult;
     }
 
     public async createPVC(pvcName: string, namespace: string): Promise<OCCommandResult> {
