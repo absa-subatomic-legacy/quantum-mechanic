@@ -154,7 +154,7 @@ export class ConfigurePackageInJenkins extends Task {
 
         const createJenkinsJobResponse = await this.jenkinsService.createJenkinsJob(
             jenkinsHost.output,
-            token.output,
+            token,
             gluonProjectName,
             gluonApplicationName,
             builtTemplate);

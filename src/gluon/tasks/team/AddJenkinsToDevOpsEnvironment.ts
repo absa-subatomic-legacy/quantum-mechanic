@@ -51,7 +51,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         const jenkinsHost: string = await this.createJenkinsRoute(projectId);
 
-        const token: string = await this.getJenkinsServiceAccountToken(projectId);
+        const token: string = await this.ocService.getServiceAccountToken("subatomic-jenkins", projectId);
 
         logger.info(`Using Service Account token: ${token}`);
 
@@ -143,11 +143,6 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
             retries: 59,
             minTimeout: 20000,
         });
-    }
-
-    private async getJenkinsServiceAccountToken(projectId: string) {
-        const tokenResult = await this.ocService.getServiceAccountToken("subatomic-jenkins", projectId);
-        return tokenResult.output;
     }
 
     private async createJenkinsRoute(projectId: string): Promise<string> {

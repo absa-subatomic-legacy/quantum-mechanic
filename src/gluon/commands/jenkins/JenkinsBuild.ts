@@ -103,7 +103,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
 
         const kickOffBuildResult = await this.jenkinsService.kickOffBuild(
             jenkinsHost.output,
-            token.output,
+            token,
             gluonProjectName,
             gluonApplicationName,
         );
@@ -116,7 +116,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
                 logger.warn(`This is probably the first build and therefore a master branch job does not exist`);
                 await this.jenkinsService.kickOffFirstBuild(
                     jenkinsHost.output,
-                    token.output,
+                    token,
                     gluonProjectName,
                     gluonApplicationName,
                 );

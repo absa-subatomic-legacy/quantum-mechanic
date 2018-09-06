@@ -312,15 +312,35 @@ export class OCService {
             ], true);
     }
 
-    public async getServiceAccountToken(serviceAccountName: string, namespace: string): Promise<OCCommandResult> {
+    public async getServiceAccountToken(serviceAccountName: string, namespace: string): Promise<string> {
         logger.debug(`Trying to get service account token in namespace. serviceAccountName: ${serviceAccountName}, namespace: ${namespace}`);
-        return await OCCommon.commonCommand("serviceaccounts",
-            "get-token",
-            [
-                serviceAccountName,
-            ], [
-                new SimpleOption("-namespace", namespace),
-            ]);
+
+        const serviceAccountResult = await this.openShiftApi.get.get("ServiceAccount", serviceAccountName, namespace);
+
+        if (!isSuccessCode(serviceAccountResult.status)) {
+            logger.error(`Failed to find service account ${serviceAccountName} in namespace ${namespace}. Error: ${inspect(serviceAccountResult)}`);
+            throw new QMError(`Failed to find service account ${serviceAccountName} in namespace ${namespace}. Please make sure it exists.`);
+        }
+
+        let tokenSecretName: string = "";
+        for (const secret of serviceAccountResult.data.secrets) {
+            if (secret.name.startsWith(`${serviceAccountName}-token`)) {
+                tokenSecretName = secret.name;
+            }
+        }
+
+        if (_.isEmpty(tokenSecretName)) {
+            throw new QMError(`Failed to find token for ServiceAccount ${serviceAccountName}`);
+        }
+
+        const secretDetailsResult = await this.openShiftApi.get.get("Secret", tokenSecretName, namespace);
+
+        if (!isSuccessCode(secretDetailsResult.status)) {
+            logger.error(`Failed to find secret ${tokenSecretName}. Error: ${inspect(secretDetailsResult)}`);
+            throw new QMError(`Failed to find secret containing the jenkins token. Please make sure it exists.`);
+        }
+
+        return Buffer.from(secretDetailsResult.data.data.token, "base64").toString("ascii");
     }
 
     public async annotateJenkinsRoute(namespace: string): Promise<OCCommandResult> {
