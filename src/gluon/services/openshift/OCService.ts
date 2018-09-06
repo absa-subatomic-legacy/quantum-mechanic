@@ -8,6 +8,7 @@ import {isSuccessCode} from "../../../http/Http";
 import {OpenshiftApiResult} from "../../../openshift/api/base/OpenshiftApiResult";
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
+import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {AbstractOption} from "../../../openshift/base/options/AbstractOption";
 import {NamedSimpleOption} from "../../../openshift/base/options/NamedSimpleOption";
@@ -222,7 +223,16 @@ export class OCService {
         }
 
         if (!isSuccessCode(response.status)) {
-            logger.error(`Failed to create requested resource.\nResource: ${JSON.stringify(resourceDefinition)}\n\nResult: ${inspect(response.data)}`);
+            logger.error(`Failed to create requested resource.\nResource: ${JSON.stringify(resourceDefinition)}`);
+            if (!_.isEmpty(response.data.items)) {
+                for (const item of response.data.items) {
+                    if (!isSuccessCode(item.status)) {
+                        logger.error(`Resource Failed: ${inspect(item.data)}`);
+                    }
+                }
+            } else {
+                logger.error(`Resource Failed: ${response}`);
+            }
             throw new QMError("Failed to create requested resource");
         }
 
@@ -234,9 +244,14 @@ export class OCService {
     }
 
     public async tagAllSubatomicImageStreamsToDevOpsEnvironment(devopsProjectId) {
-        const imageStreamTags = await this.getSubatomicImageStreamTags();
+        const imageStreamTagsFromSubatomicNamespace = await this.getSubatomicImageStreamTags();
 
-        await this.ocImageService.tagAllImagesToNamespace("subatomic", imageStreamTags.map(item => item.metadata.name), devopsProjectId);
+        const imageStreamTags = await this.ocImageService.modifyImageStreamTagsToImportIntoNamespace(imageStreamTagsFromSubatomicNamespace, devopsProjectId);
+
+        const resourceList = ResourceFactory.resourceList();
+        resourceList.items.push(...imageStreamTags);
+
+        await this.applyResourceFromDataInNamespace(resourceList, devopsProjectId, false);
     }
 
     public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string): Promise<OCCommandResult> {

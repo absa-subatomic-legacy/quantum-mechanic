@@ -9,7 +9,7 @@ export class ResourceUrl {
         let url: string;
         if (ResourceUrl.urlMap.hasOwnProperty(resourceKind)) {
             const urlDetails = ResourceUrl.urlMap[resourceKind];
-            url = urlDetails[0].url;
+            url = `${resourceKind}s`;
             for (const urlDetail of urlDetails) {
                 if (urlDetail.apiVersion === resource.apiVersion) {
                     url = urlDetail.url;
@@ -32,7 +32,7 @@ export class ResourceUrl {
         let api: OpenshiftApiBaseRoute;
         if (ResourceUrl.urlMap.hasOwnProperty(resourceKind)) {
             const urlDetails = ResourceUrl.urlMap[resourceKind];
-            api = urlDetails[0].api;
+            api = OpenshiftApiBaseRoute.API;
             for (const urlDetail of urlDetails) {
                 if (urlDetail.apiVersion === resource.apiVersion) {
                     api = urlDetail.api;
@@ -78,6 +78,13 @@ export class ResourceUrl {
             {
                 apiVersion: "v1",
                 url: "deploymentconfigs",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
+        route: [
+            {
+                apiVersion: "v1",
+                url: "routes",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
