@@ -57,6 +57,7 @@ import {
     BitbucketProjectAddedEvent,
     BitbucketProjectRequestedEvent,
 } from "./gluon/ingesters/bitbucketIngester";
+import {GenericProdRequestedEvent} from "./gluon/ingesters/genericProdRequested";
 import {
     ProjectCreatedEvent,
     ProjectEnvironmentsRequestedEvent,
@@ -173,6 +174,7 @@ export const configuration: any = {
         TeamDevOpsDetails,
         GluonApplication,
         ApplicationProdRequestedEvent,
+        GenericProdRequestedEvent,
     ],
     token,
     http,
