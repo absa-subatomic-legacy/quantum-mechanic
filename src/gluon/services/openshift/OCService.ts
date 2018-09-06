@@ -236,8 +236,6 @@ export class OCService {
     public async tagAllSubatomicImageStreamsToDevOpsEnvironment(devopsProjectId) {
         const imageStreamTags = await this.getSubatomicImageStreamTags();
 
-        logger.info(JSON.stringify(imageStreamTags, undefined, 2));
-
         await this.ocImageService.tagAllImagesToNamespace("subatomic", imageStreamTags.map(item => item.metadata.name), devopsProjectId);
     }
 

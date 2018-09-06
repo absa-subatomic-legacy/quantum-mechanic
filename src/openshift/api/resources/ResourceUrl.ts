@@ -1,9 +1,10 @@
+import _ = require("lodash");
 import {OpenshiftApiBaseRoute} from "../base/OpenshiftApiBaseRoute";
 import {OpenshiftResource} from "./OpenshiftResource";
 
 export class ResourceUrl {
 
-    public static getResourceKindUrl(resource: OpenshiftResource, namespace: string = "default"): string {
+    public static getResourceKindUrl(resource: OpenshiftResource, namespace: string = ""): string {
         const resourceKind = resource.kind.toLowerCase();
         let url: string;
         if (ResourceUrl.urlMap.hasOwnProperty(resourceKind)) {
@@ -15,14 +16,14 @@ export class ResourceUrl {
                     break;
                 }
             }
-            url = url.replace("${namespace}", namespace);
+            url = processNamespacingForUrl(url, namespace);
         } else {
-            url = `namespaces/${namespace}/${resourceKind}s`;
+            url = processNamespacingForUrl(`${resourceKind}s`, namespace);
         }
         return url;
     }
 
-    public static getNamedResourceUrl(resource: OpenshiftResource, namespace: string = "default") {
+    public static getNamedResourceUrl(resource: OpenshiftResource, namespace: string = "") {
         return ResourceUrl.getResourceKindUrl(resource, namespace) + `/${resource.metadata.name}`;
     }
 
@@ -44,14 +45,6 @@ export class ResourceUrl {
         return api;
     }
 
-    public static getNetworkResourceUrl(resourceKind: string, name = ""): string {
-        let url = `${resourceKind}s`;
-        if (name.length > 0) {
-            url += `/${name}`;
-        }
-        return url;
-    }
-
     private static urlMap: UrlMap = {
         user: [
             {
@@ -63,43 +56,51 @@ export class ResourceUrl {
         imagestream: [
             {
                 apiVersion: "v1",
-                url: "namespaces/${namespace}/imagestreams",
+                url: "imagestreams",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         imagestreamtag: [
             {
                 apiVersion: "v1",
-                url: "namespaces/${namespace}/imagestreamtags",
+                url: "imagestreamtags",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         buildconfig: [
             {
                 apiVersion: "v1",
-                url: "namespaces/${namespace}/buildconfigs",
+                url: "buildconfigs",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         deploymentconfig: [
             {
                 apiVersion: "v1",
-                url: "namespaces/${namespace}/deploymentconfigs",
+                url: "deploymentconfigs",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         rolebinding: [
             {
                 apiVersion: "v1",
-                url: "namespaces/${namespace}/rolebindings",
+                url: "rolebindings",
                 api: OpenshiftApiBaseRoute.OAPI,
             }, {
                 apiVersion: "rbac.authorization.k8s.io/v1beta1",
-                url: "namespaces/${namespace}/rolebindings",
+                url: "rolebindings",
                 api: OpenshiftApiBaseRoute.API,
             },
         ],
     };
+}
+
+function processNamespacingForUrl(urlCore: string, namespace: string): string {
+    let url: string = urlCore;
+    if (!_.isEmpty(namespace)) {
+        url = `namespaces/${namespace}/${urlCore}`;
+    }
+    return url;
 }
 
 interface UrlMap {

@@ -38,17 +38,6 @@ export abstract class OpenShiftApiElement {
         return new AwaitAxios(instance);
     }
 
-    protected getAxiosInstanceNetworksApi(): AwaitAxios {
-        const instance = Axios.create({
-            baseURL: `${this.openShiftConfig.masterUrl}/apis/network.openshift.io/v1/`,
-            httpsAgent: new https.Agent({
-                rejectUnauthorized: false,
-            }),
-        });
-        instance.defaults.headers.common.Authorization = "bearer " + this.openShiftConfig.auth.token;
-        return new AwaitAxios(instance);
-    }
-
     protected getAxiosInstanceForResource(resource: OpenshiftResource) {
         if (_.isEmpty(resource.apiVersion)) {
             resource.apiVersion = "v1";

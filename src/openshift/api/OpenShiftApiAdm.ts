@@ -6,14 +6,29 @@ import {ResourceUrl} from "./resources/ResourceUrl";
 export class OpenShiftApiAdm extends OpenShiftApiElement {
 
     public async podNetworkJoinToProject(projectToJoin: string, projectToJoinTo: string): Promise<OpenshiftApiResult> {
-        const instance = this.getAxiosInstanceNetworksApi();
-        const checkForSupportUrl = ResourceUrl.getNetworkResourceUrl("clusternetwork", "default");
+        const clusterNetworkResource = {
+            kind: "ClusterNetwork",
+            apiVersion: "network.openshift.io/v1",
+            metadata: {
+                name: "default",
+            },
+        };
+        let instance = this.getAxiosInstanceForResource(clusterNetworkResource);
+        const checkForSupportUrl = ResourceUrl.getNamedResourceUrl(clusterNetworkResource);
         const supported = await instance.get(checkForSupportUrl);
         if (!isSuccessCode(supported.status)) {
             return supported;
         }
 
-        const projectNetNamespaceUrl = ResourceUrl.getNetworkResourceUrl("netnamespace", projectToJoin);
+        const netNamespaceResource = {
+            kind: "NetNamespace",
+            apiVersion: "network.openshift.io/v1",
+            metadata: {
+                name: projectToJoin,
+            },
+        };
+        instance = this.getAxiosInstanceForResource(netNamespaceResource);
+        const projectNetNamespaceUrl = ResourceUrl.getNamedResourceUrl(netNamespaceResource);
         const netNamespaceExists = await instance.get(projectNetNamespaceUrl);
         if (!isSuccessCode(netNamespaceExists.status)) {
             return netNamespaceExists;
