@@ -119,6 +119,17 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     }
 
     private async handleMembershipRequestResult(ctx: HandlerContext) {
+        const msg: SlackMessage = {
+            text: `User @${this.userScreenName} has requested to be added as a team member.`,
+            attachments: [{
+                fallback: `User @${this.userScreenName} has requested to be added as a team member`,
+                text: `
+                        A team owner should approve/reject this user's membership request`,
+                mrkdwn_in: ["text"],
+            }],
+        };
+        await ctx.messageClient.addressChannels(msg, this.teamChannel, {id: "membership-buttons"});
+
         if (this.approvalStatus === "APPROVED") {
             return await this.handleApprovedMembershipRequest(ctx, this.slackChannelId, this.userScreenName, this.slackTeam, this.approverUserName, this.teamChannel);
         } else {

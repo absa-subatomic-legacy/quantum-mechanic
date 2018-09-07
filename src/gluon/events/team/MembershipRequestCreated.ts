@@ -81,7 +81,7 @@ export class MembershipRequestCreated implements HandleEvent<any> {
                 }],
             };
             logger.info(membershipRequestCreatedEvent.team.slackIdentity.teamChannel);
-            return await ctx.messageClient.addressChannels(msg, membershipRequestCreatedEvent.team.slackIdentity.teamChannel);
+            return await ctx.messageClient.addressChannels(msg, membershipRequestCreatedEvent.team.slackIdentity.teamChannel, {id: "membership-buttons"});
         }
 
         return await this.tryAddressMember(ctx, "Please note, the team applied to has no associated slack channel. Approval needs to occur through other avenues.", membershipRequestCreatedEvent.requestedBy);
