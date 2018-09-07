@@ -12,7 +12,7 @@ export class GenericProdRequestService {
 
     public async createGenericProdRequest(genericProdRequestDetails: any, rawResult: boolean = false): Promise<any> {
         logger.debug(`Trying to create generic prod request.`);
-        const prodRequestResult = await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/genericProdRequest`, genericProdRequestDetails);
+        const prodRequestResult = await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/genericProdRequests`, genericProdRequestDetails);
         if (rawResult) {
             return prodRequestResult;
         }
@@ -27,7 +27,7 @@ export class GenericProdRequestService {
 
     public async getGenericProdRequestById(genericProdRequestId: string, rawResult: boolean = false): Promise<any> {
         logger.debug(`Trying to create generic prod request. genericProdRequestId: ${genericProdRequestId}`);
-        const prodRequestResult = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/genericProdRequest/${genericProdRequestId}`);
+        const prodRequestResult = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/genericProdRequests/${genericProdRequestId}`);
         if (rawResult) {
             return prodRequestResult;
         }

@@ -188,8 +188,12 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         const openShiftResources = JSON.parse(this.openShiftResourcesJSON);
 
         const request = {
-            projectId: project.projectId,
-            actionedBy: actionedBy.memberId,
+            project: {
+                projectId: project.projectId,
+            },
+            actionedBy: {
+                memberId: actionedBy.memberId,
+            },
             openShiftResources,
         };
 

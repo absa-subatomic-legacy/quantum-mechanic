@@ -200,15 +200,11 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
 
         const openShiftResources = JSON.parse(this.openShiftResourcesJSON);
 
-        // logger.info("Current resources JSON = " + this.openShiftResourcesJSON);
-
         const request = {
             applicationId: application.applicationId,
             actionedBy: actionedBy.memberId,
             openShiftResources,
         };
-
-        logger.info(`Prod request: ${JSON.stringify(request, null, 2)}`);
 
         await this.gluonService.prod.application.createApplicationProdRequest(request);
     }

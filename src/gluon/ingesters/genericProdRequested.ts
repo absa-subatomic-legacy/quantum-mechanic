@@ -8,19 +8,6 @@ export const GenericProdRequestedEvent: Ingester = {
             name: "GenericProdRequestedEvent",
             fields: [
                 {
-                    name: "genericProdRequest",
-                    type: {
-                        kind: "OBJECT",
-                        name: "GenericProdRequest",
-                    },
-                },
-            ],
-        },
-        {
-            kind: "OBJECT",
-            name: "GenericProdRequest",
-            fields: [
-                {
                     name: "genericProdRequestId",
                     type: {
                         kind: "SCALAR",

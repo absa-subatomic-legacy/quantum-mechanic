@@ -18,9 +18,7 @@ import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 subscription GenericProdRequestedEvent {
   GenericProdRequestedEvent {
     id
-    genericProdRequest{
-      genericProdRequestId
-    }
+    genericProdRequestId
   }
 }
 `)
@@ -37,14 +35,16 @@ export class GenericProdRequested implements HandleEvent<any> {
 
         const genericProdRequest = await this.gluonService.prod.generic.getGenericProdRequestById(genericProdRequestedEvent.genericProdRequestId);
 
+        logger.info(JSON.stringify(genericProdRequest));
+
         const associatedTeams = await this.gluonService.teams.getTeamsAssociatedToProject(genericProdRequest.project.projectId);
 
         const qmMessageClient = this.createMessageClient(ctx, associatedTeams);
 
         try {
-            const project = genericProdRequestedEvent.project;
+            const project = genericProdRequest.project;
 
-            const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.tenant.tenantId);
+            const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
             const resources = this.getRequestedProdResources(genericProdRequest);
 
@@ -81,7 +81,7 @@ export class GenericProdRequested implements HandleEvent<any> {
     private createMessageClient(ctx: HandlerContext, teams) {
         const qmMessageClient = new ChannelMessageClient(ctx);
         for (const team of teams) {
-            qmMessageClient.addDestination(team.slackIdentity.teamChannel);
+            qmMessageClient.addDestination(team.slack.teamChannel);
         }
         return qmMessageClient;
     }
