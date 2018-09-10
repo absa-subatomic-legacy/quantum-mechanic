@@ -68,7 +68,7 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
 
             if (!_.isEmpty(teamSlackChannel)) {
                 await this.addMemberToTeamService.addUserToGluonTeam(newMember.memberId, actioningMember.memberId, teamSlackChannel._links.self.href);
-                return await this.addMemberToTeamService.inviteUserToSlackChannel(
+                /*return await this.addMemberToTeamService.inviteUserToSlackChannel(
                     ctx,
                     newMember.firstName,
                     actioningMember.slack.userId,
@@ -77,7 +77,7 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
                     newMember.slack.userId,
                     this.teamId,
                     this.teamChannel,
-                    this.slackName);
+                    this.slackName);*/
             } else {
                 return ctx.messageClient.respond(this.addMemberToTeamMessages.alertTeamDoesNotExist(this.teamChannel));
             }
