@@ -10,8 +10,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {addressSlackUsers} from "@atomist/automation-client/spi/message/MessageClient";
-import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/handlers/command/slack/AssociateRepo";
-import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -119,24 +117,9 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     }
 
     private async handleMembershipRequestResult(ctx: HandlerContext) {
-        if (this.approvalStatus === "APPROVED") {
-            return await this.handleApprovedMembershipRequest(ctx, this.slackChannelId, this.userScreenName, this.slackTeam, this.approverUserName, this.teamChannel);
-        } else {
+        if (this.approvalStatus === "REJECTED") {
             return await this.handleRejectedMembershipRequest(ctx, this.teamName, this.approverUserName, this.userScreenName, this.teamChannel);
         }
-    }
-
-    private async handleApprovedMembershipRequest(ctx: HandlerContext, slackChannelId: string, approvedUserScreenName: string, slackTeam: string, approvingUserSlackId: string, slackTeamChannel: string) {
-        logger.info(`Added team member! Inviting to channel [${slackChannelId}] -> member @${approvedUserScreenName}`);
-        await inviteUserToSlackChannel(ctx,
-            slackTeam,
-            slackChannelId,
-            approvingUserSlackId);
-
-        const msg: SlackMessage = {
-            text: `Welcome to the team *@${approvedUserScreenName}*!`,
-        };
-        return await ctx.messageClient.addressChannels(msg, slackTeamChannel);
     }
 
     private async handleRejectedMembershipRequest(ctx: HandlerContext, teamName: string, rejectingUserScreenName: string, rejectedUserScreenName: string, teamChannel: string) {
