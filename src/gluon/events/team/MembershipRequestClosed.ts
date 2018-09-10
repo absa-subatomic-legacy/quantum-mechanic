@@ -117,16 +117,17 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     }
 
     private async handleMembershipRequestResult(ctx: HandlerContext) {
+
+        await ctx.messageClient.addressChannels(`Membership request closed with status: ${this.approvalStatus}`, this.teamChannel);
+
         if (this.approvalStatus === "REJECTED") {
-            return await this.handleRejectedMembershipRequest(ctx, this.teamName, this.approverUserName, this.userScreenName, this.teamChannel);
+            return await this.handleRejectedMembershipRequest(ctx, this.teamName, this.approverUserName, this.userScreenName);
         }
     }
 
-    private async handleRejectedMembershipRequest(ctx: HandlerContext, teamName: string, rejectingUserScreenName: string, rejectedUserScreenName: string, teamChannel: string) {
-        await ctx.messageClient.send(`Your membership request to team '${teamName}' has been rejected by @${rejectingUserScreenName}`,
+    private async handleRejectedMembershipRequest(ctx: HandlerContext, teamName: string, rejectingUserScreenName: string, rejectedUserScreenName: string) {
+        return await ctx.messageClient.send(`Your membership request to team '${teamName}' has been rejected by @${rejectingUserScreenName}`,
             addressSlackUsers(QMConfig.teamId, rejectedUserScreenName));
-
-        return await ctx.messageClient.addressChannels("Membership request rejected", teamChannel);
     }
 
     private async handleError(ctx: HandlerContext, error) {
