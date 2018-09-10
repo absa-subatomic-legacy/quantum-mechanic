@@ -21,6 +21,7 @@ import {getProjectDisplayName} from "../../util/project/Project";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
 import {QuotaLoader} from "../../util/resources/QuotaLoader";
 import {QMError, QMErrorType} from "../../util/shared/Error";
+import {retryFunction} from "../../util/shared/RetryFunction";
 import {QMTeam} from "../../util/team/Teams";
 import {OCImageService} from "./OCImageService";
 
@@ -176,7 +177,7 @@ export class OCService {
 
     public async getSubatomicAppTemplates(namespace = "subatomic"): Promise<OpenshiftResource[]> {
         logger.debug(`Trying to get subatomic templates. namespace: ${namespace}`);
-        const queryResult = await this.openShiftApi.get.getAllFromNamespace("Template", namespace, "template.openshift.io/v1");
+        const queryResult = await this.openShiftApi.get.getAllFromNamespace("Template", namespace, "v1");
 
         if (isSuccessCode(queryResult.status)) {
             const templates = [];
@@ -185,7 +186,7 @@ export class OCService {
                     if (template.metadata.labels.usage === "subatomic-app") {
                         // These aren't set for some reason
                         template.kind = "Template";
-                        template.apiVersion = "template.openshift.io/v1";
+                        template.apiVersion = "v1";
                         templates.push(template);
                     }
                 }
@@ -231,7 +232,7 @@ export class OCService {
                     }
                 }
             } else {
-                logger.error(`Resource Failed: ${response}`);
+                logger.error(`Resource Failed: ${inspect(response)}`);
             }
             throw new QMError("Failed to create requested resource");
         }
@@ -315,14 +316,29 @@ export class OCService {
     public async getServiceAccountToken(serviceAccountName: string, namespace: string): Promise<string> {
         logger.debug(`Trying to get service account token in namespace. serviceAccountName: ${serviceAccountName}, namespace: ${namespace}`);
 
-        const serviceAccountResult = await this.openShiftApi.get.get("ServiceAccount", serviceAccountName, namespace);
+        let serviceAccountResult = {data: {secrets: []}, status: 200};
+        await retryFunction(4, 5000, async (attemptNumber: number) => {
+            logger.warn(`Trying to get service account token. Attempt number ${attemptNumber}.`);
 
-        if (!isSuccessCode(serviceAccountResult.status)) {
-            logger.error(`Failed to find service account ${serviceAccountName} in namespace ${namespace}. Error: ${inspect(serviceAccountResult)}`);
-            throw new QMError(`Failed to find service account ${serviceAccountName} in namespace ${namespace}. Please make sure it exists.`);
-        }
+            serviceAccountResult = await this.openShiftApi.get.get("ServiceAccount", serviceAccountName, namespace);
+
+            if (!isSuccessCode(serviceAccountResult.status)) {
+                logger.error(`Failed to find service account ${serviceAccountName} in namespace ${namespace}. Error: ${inspect(serviceAccountResult)}`);
+                throw new QMError(`Failed to find service account ${serviceAccountName} in namespace ${namespace}`);
+            }
+
+            if (_.isEmpty(serviceAccountResult.data.secrets)) {
+                if (attemptNumber < 4) {
+                    logger.warn(`Waiting to retry again in ${5000}ms...`);
+                }
+                return false;
+            }
+
+            return true;
+        });
 
         let tokenSecretName: string = "";
+        logger.info(JSON.stringify(serviceAccountResult.data));
         for (const secret of serviceAccountResult.data.secrets) {
             if (secret.name.startsWith(`${serviceAccountName}-token`)) {
                 tokenSecretName = secret.name;
@@ -448,8 +464,10 @@ export class OCService {
             logger.info(`Applying base project template to ${projectId}`);
             const fileName = Date.now() + ".json";
             fs.writeFileSync(`/tmp/${fileName}`, JSON.stringify(template));
+            // log client into non prod to process template - hacky! Need to fix.
+            await OCClient.login(QMConfig.subatomic.openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftNonProd.auth.token);
             const processedTemplateResult = await OCCommon.commonCommand("process", `-f /tmp/${fileName}`);
-            const result = await this.openShiftApi.create.create(JSON.parse(processedTemplateResult.output), projectId, apply);
+            const result = await this.applyResourceFromDataInNamespace(JSON.parse(processedTemplateResult.output), projectId, apply);
             if (!isSuccessCode(result.status)) {
                 logger.error(`Template failed to create properly: ${inspect(result)}`);
                 throw new QMError("Failed to create all items in base project template.");

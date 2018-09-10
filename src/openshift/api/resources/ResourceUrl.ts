@@ -88,6 +88,20 @@ export class ResourceUrl {
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
+        endpoints: [
+            {
+                apiVersion: "v1",
+                url: "endpoints",
+                api: OpenshiftApiBaseRoute.API,
+            },
+        ],
+        template: [
+            {
+                apiVersion: "v1",
+                url: "templates",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
         rolebinding: [
             {
                 apiVersion: "v1",
@@ -97,6 +111,20 @@ export class ResourceUrl {
                 apiVersion: "rbac.authorization.k8s.io/v1beta1",
                 url: "rolebindings",
                 api: OpenshiftApiBaseRoute.API,
+            },
+        ],
+        clusternetwork: [
+            {
+                apiVersion: "v1",
+                url: "clusternetworks",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
+        netnamespace: [
+            {
+                apiVersion: "v1",
+                url: "netnamespaces",
+                api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
     };
