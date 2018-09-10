@@ -56,6 +56,7 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
             attachments: [{
                 fallback: `Team Owners: ${teamOwners}`,
                 text: `Team Members: ${teamMembers}`,
+                color: "#0000ff",
                 mrkdwn_in: ["text"],
             }],
         };
