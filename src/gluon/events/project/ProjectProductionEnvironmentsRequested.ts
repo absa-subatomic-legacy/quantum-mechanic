@@ -62,7 +62,6 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
                     teamMember.slack.screenName,
                     {id: requestCorrelationId},
                 );
-
             }
 
             await qmMessageClient.send("Successfully created project production request. Approval requests have been sent out.");
