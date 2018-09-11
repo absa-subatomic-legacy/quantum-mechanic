@@ -12,7 +12,7 @@ import {
     buttonForCommand,
 } from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
-import uuid = require("uuid");
+import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
 import {MembershipRequestClosed} from "./MembershipRequestClosed";
 
