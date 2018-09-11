@@ -27,6 +27,9 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
     };
 
+    @MappedParameter(MappedParameters.SlackChannelName)
+    public teamChannel: string;
+
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
 
@@ -52,13 +55,20 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
         const teamMembers = this.getTeamMemberNames(teamDetails.members);
 
         const msg: SlackMessage = {
-            text: `Team Owners: ${teamOwners}`,
-            attachments: [{
-                fallback: `Team Owners:${teamOwners}`,
-                text: `Team Members:${teamMembers}`,
-                color: "#00ddff",
-                mrkdwn_in: ["text"],
-            }],
+            text: `Team: *${this.teamName}*`,
+            attachments: [
+                {
+                    fallback: `Team: *${this.teamName}*`,
+                    text: `Team Owners:${teamOwners}`,
+                    color: "#00ddff",
+                    mrkdwn_in: ["text"],
+                },
+                {
+                    fallback: `Team: *${this.teamName}*`,
+                    text: `Team Members:${teamMembers}`,
+                    color: "#c000ff",
+                    mrkdwn_in: ["text"],
+                }],
         };
 
         return await ctx.messageClient.respond(msg);
@@ -68,10 +78,10 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
     }
 
     private getTeamMemberNames(teamDetails: any): string[] {
-        const teamMemberNames = new Array();
+        const teamMemberNames = [];
 
         for (const member of teamDetails) {
-            teamMemberNames.push(` *${member.slack.screenName}*`);
+            teamMemberNames.push(` @${member.slack.screenName}`);
         }
 
         return teamMemberNames;
