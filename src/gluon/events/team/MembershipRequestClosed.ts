@@ -67,6 +67,12 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     })
     public approvalStatus: string;
 
+    @Parameter({
+        required: true,
+        description: "correlation id of the message that invoked this command",
+    })
+    public correlationId: string;
+
     constructor(private gluonService = new GluonService()) {
     }
 
@@ -119,20 +125,11 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     }
 
     private async handleMembershipRequestResult(ctx: HandlerContext) {
-        const msg: SlackMessage = {
-            text: `User @${this.userScreenName} has requested to be added as a team member.`,
-            attachments: [{
-                fallback: `User @${this.userScreenName} has requested to be added as a team member`,
-                text: `
-                        A team owner should approve/reject this user's membership request`,
-                mrkdwn_in: ["text"],
-            }],
-        };
-        await ctx.messageClient.addressChannels(msg, this.teamChannel, {id: "membership-buttons"});
-
         if (this.approvalStatus === "APPROVED") {
+            await this.editRequestMessage(ctx, "APPROVED", "#45B254");
             return await this.handleApprovedMembershipRequest(ctx, this.slackChannelId, this.userScreenName, this.slackTeam, this.approverUserName, this.teamChannel);
         } else {
+            await this.editRequestMessage(ctx, "REJECTED", "#D94649");
             return await this.handleRejectedMembershipRequest(ctx, this.teamName, this.approverUserName, this.userScreenName, this.teamChannel);
         }
     }
@@ -160,5 +157,18 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     private async handleError(ctx: HandlerContext, error) {
         const messageClient = new ResponderMessageClient(ctx);
         return await handleQMError(messageClient, error);
+    }
+
+    private async editRequestMessage(ctx: HandlerContext, status: string, color: string) {
+        const msg: SlackMessage = {
+            text: `User @${this.userScreenName} has requested to be added as a team member.`,
+            attachments: [{
+                fallback: `User @${this.userScreenName} has requested to be added as a team member`,
+                color: `${color}`,
+                text: `${status}`,
+                mrkdwn_in: ["text"],
+            }],
+        };
+        await ctx.messageClient.addressChannels(msg, this.teamChannel, {id: this.correlationId});
     }
 }
