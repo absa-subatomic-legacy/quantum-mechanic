@@ -45,7 +45,7 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
     }
 
     protected async runCommand(ctx: HandlerContext) {
-        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams/${this.teamName}`);
+        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams/?name=${this.teamName}`);
 
         const teamDetails = result.data._embedded.teamResources[0];
         const teamOwners = this.getTeamMemberNames(teamDetails.owners);
@@ -54,9 +54,9 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
         const msg: SlackMessage = {
             text: `Team Owners: ${teamOwners}`,
             attachments: [{
-                fallback: `Team Owners: ${teamOwners}`,
-                text: `Team Members: ${teamMembers}`,
-                color: "#0000ff",
+                fallback: `Team Owners:${teamOwners}`,
+                text: `Team Members:${teamMembers}`,
+                color: "#00ddff",
                 mrkdwn_in: ["text"],
             }],
         };
@@ -71,7 +71,7 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
         const teamMemberNames = new Array();
 
         for (const member of teamDetails) {
-            teamMemberNames.push(member.slack.screenName);
+            teamMemberNames.push(` *${member.slack.screenName}*`);
         }
 
         return teamMemberNames;
