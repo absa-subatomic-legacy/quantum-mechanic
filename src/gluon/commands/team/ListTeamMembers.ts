@@ -42,8 +42,7 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
     })
     public teamName: string;
 
-    constructor(public gluonService = new GluonService(),
-                public axiosInstance = new AwaitAxios()) {
+    constructor(public gluonService = new GluonService()) {
         super();
     }
 
