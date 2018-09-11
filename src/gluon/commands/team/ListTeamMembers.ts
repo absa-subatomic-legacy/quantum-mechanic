@@ -48,11 +48,9 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
     }
 
     protected async runCommand(ctx: HandlerContext) {
-        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams/?name=${this.teamName}`);
-
-        const teamDetails = result.data._embedded.teamResources[0];
-        const teamOwners = this.getTeamMemberNames(teamDetails.owners);
-        const teamMembers = this.getTeamMemberNames(teamDetails.members);
+        const result = await this.gluonService.teams.gluonTeamByName(this.teamName);
+        const teamOwners = this.getTeamMemberNames(result.owners);
+        const teamMembers = this.getTeamMemberNames(result.members);
 
         const msg: SlackMessage = {
             text: `Team: *${this.teamName}*`,
