@@ -219,8 +219,12 @@ export class OCService {
         );
     }
 
-    public async getSubatomicImageStreamTags(namespace = "subatomic") {
-        return this.ocImageService.getSubatomicImageStreamTags(namespace);
+    public async getSubatomicImageStreamTags() {
+        return this.ocImageService.getSubatomicImageStreamTags();
+    }
+
+    public async getAllImageStreamTags(namespace: string) {
+        return this.ocImageService.getAllImageStreamTags(namespace);
     }
 
     public async applyResourceFromDataInNamespace(resourceDefinition: OpenshiftResource, projectNamespace: string, applyNotReplace: boolean = false): Promise<OpenshiftApiResult> {
@@ -250,12 +254,30 @@ export class OCService {
         return response;
     }
 
-    public async tagSubatomicImageToNamespace(imageStreamTagName: string, destinationProjectNamespace: string, destinationImageStreamTagName: string = imageStreamTagName): Promise<OCCommandResult> {
-        return await this.ocImageService.tagImageToNamespace("subatomic", imageStreamTagName, destinationProjectNamespace, destinationImageStreamTagName);
+    public async tagSubatomicImageToNamespace(imageStreamTagName: string, destinationProjectNamespace: string, destinationImageStreamTagName: string = imageStreamTagName): Promise<OpenshiftApiResult> {
+        return await this.tagImageToNamespace("subatomic", imageStreamTagName, destinationProjectNamespace, destinationImageStreamTagName);
+    }
+
+    public async tagImageToNamespace(sourceNamespace: string, imageStreamTagName: string, destinationProjectNamespace: string, destinationImageStreamTagName: string = imageStreamTagName): Promise<OpenshiftApiResult> {
+        const allImages = await this.openShiftApi.get.getAllFromNamespace("ImageStreamTag", sourceNamespace);
+
+        logger.info(`All images: ${inspect(allImages)}`);
+
+        const imageStreamTagResult = await this.openShiftApi.get.get("ImageStreamTag", imageStreamTagName, sourceNamespace);
+
+        if (!isSuccessCode(imageStreamTagResult.status)) {
+            throw new QMError(`Unable to find ImageStreamTag ${imageStreamTagName} in namespace ${sourceNamespace}`);
+        }
+
+        const imageStreamTag = await this.ocImageService.modifyImageStreamTagToImportIntoNamespace(imageStreamTagResult.data, destinationProjectNamespace);
+
+        imageStreamTag.metadata.name = destinationImageStreamTagName;
+
+        return await this.applyResourceFromDataInNamespace(imageStreamTag, destinationProjectNamespace, true);
     }
 
     public async tagAllSubatomicImageStreamsToDevOpsEnvironment(devopsProjectId) {
-        const imageStreamTagsFromSubatomicNamespace = await this.getSubatomicImageStreamTags();
+        const imageStreamTagsFromSubatomicNamespace = await this.ocImageService.getSubatomicImageStreamTags();
 
         const imageStreamTags = await this.ocImageService.modifyImageStreamTagsToImportIntoNamespace(imageStreamTagsFromSubatomicNamespace, devopsProjectId);
 
@@ -502,5 +524,26 @@ export class OCService {
         const listOfResourcesResult = await OCCommon.commonCommand("export", "all",
             [], [new SimpleOption("-output", "json"), new SimpleOption("-namespace", projectId)]);
         return JSON.parse(listOfResourcesResult.output);
+    }
+
+    public async patchResourceInNamespace(resourcePatch: OpenshiftResource, namespace: string) {
+
+        const response = await this.openShiftApi.patch.patch(resourcePatch, namespace);
+
+        if (!isSuccessCode(response.status)) {
+            logger.error(`Failed to patch requested resource.\nResource: ${JSON.stringify(resourcePatch)}`);
+            if (!_.isEmpty(response.data.items)) {
+                for (const item of response.data.items) {
+                    if (!isSuccessCode(item.status)) {
+                        logger.error(`Resource Failed: ${inspect(item.data)}`);
+                    }
+                }
+            } else {
+                logger.error(`Resource Failed: ${inspect(response)}`);
+            }
+            throw new QMError("Failed to patch requested resource");
+        }
+
+        return response;
     }
 }
