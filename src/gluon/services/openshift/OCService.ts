@@ -26,6 +26,13 @@ import {QMTeam} from "../../util/team/Teams";
 import {OCImageService} from "./OCImageService";
 
 export class OCService {
+    get loggedIn(): boolean {
+        return this.isLoggedIn;
+    }
+
+    set loggedIn(value: boolean) {
+        this.isLoggedIn = value;
+    }
 
     get openShiftApi(): OpenShiftApi {
         if (this.openShiftApiInstance === undefined) {
@@ -41,6 +48,8 @@ export class OCService {
 
     private openShiftApiInstance: OpenShiftApi;
 
+    private isLoggedIn: boolean;
+
     private quotaLoader: QuotaLoader = new QuotaLoader();
     private baseProjectTemplateLoader: BaseProjectTemplateLoader = new BaseProjectTemplateLoader();
 
@@ -50,6 +59,7 @@ export class OCService {
     public async login(openshiftDetails: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd, softLogin = false) {
         this.openShiftApi = new OpenShiftApi(openshiftDetails);
         this.ocImageService.openShiftApi = this.openShiftApi;
+        this.loggedIn = true;
         if (!softLogin) {
             return await OCClient.login(openshiftDetails.masterUrl, openshiftDetails.auth.token);
         }

@@ -1,4 +1,5 @@
 import {HandlerContext, HandlerResult} from "@atomist/automation-client";
+import {QMConfig} from "../../../config/QMConfig";
 import {OCService} from "../../services/openshift/OCService";
 import {QMError} from "../shared/Error";
 import {createMenu} from "../shared/GenericMenu";
@@ -16,6 +17,10 @@ export async function setOpenshiftTemplate(
 
     if (commandHandler.teamName === undefined) {
         throw new QMError(`setOpenshiftTemplate commandHandler requires the teamName parameter to be defined`);
+    }
+
+    if (!commandHandler.ocService.loggedIn) {
+        await commandHandler.ocService.login(QMConfig.subatomic.openshiftNonProd, true);
     }
 
     const namespace = getDevOpsEnvironmentDetails(commandHandler.teamName).openshiftProjectId;
@@ -45,6 +50,10 @@ export async function setImageName(
     selectionMessage: string = "Please select an image") {
     if (commandHandler.ocService === undefined) {
         throw new QMError(`setImageName commandHandler requires ocService parameter to be defined`);
+    }
+
+    if (!commandHandler.ocService.loggedIn) {
+        await commandHandler.ocService.login(QMConfig.subatomic.openshiftNonProd, true);
     }
 
     const images = await commandHandler.ocService.getSubatomicImageStreamTags();
