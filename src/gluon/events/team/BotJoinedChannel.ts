@@ -13,6 +13,7 @@ import {
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {OnboardMember} from "../../commands/member/OnboardMember";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {NewDevOpsEnvironment} from "../../commands/team/DevOpsEnvironment";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -87,39 +88,55 @@ export class BotJoinedChannel implements HandleEvent<any> {
                 const userName = botJoinedChannel.user.screenName;
 
                 logger.info("Checking whether the user onboarded");
-                await this.gluonService.members.gluonMemberFromScreenName(userName);
+                let existingUser;
+                try {
+                    existingUser = await this.gluonService.members.gluonMemberFromScreenName(userName);
 
-                logger.info("Checking whether the user is a part of the team");
-                for (const member of teams.members) {
-                    if (member.slack.screenName === userName) {
-                        logger.info("User is a member of team.");
-                        return await success();
+                    logger.info("Checking whether the user is a part of the team");
+                    for (const teamChannelName of existingUser.teams) {
+                        if (teamChannelName.slack.teamChannel === botJoinedChannel.channel.name) {
+                            logger.info("User is a part of this team.");
+                            return await success();
+                        }
                     }
-                }
 
-                for (const owner of teams.owners) {
-                    if (owner.slack.screenName === userName) {
-                        logger.info("User is a owner of team.");
-                        return await success();
-                    }
+                    const slackMessage: SlackMessage = {
+                        text: `Welcome to *${botJoinedChannel.channel.name}* team channel @${userName}!`,
+                        attachments: [{
+                            fallback: `Welcome to *${botJoinedChannel.channel.name}* team channel!`,
+                            text: "Unfortunately you are not registered as a member/owner of this team. If you would like to join this team please get a team owner (sub list team members`) to add you.",
+                            actions: [
+                                buttonForCommand(
+                                    {
+                                        text: `Add ${userName}`,
+                                        style: "primary",
+                                    },
+                                    new AddMemberToTeam(),
+                                    {
+                                        slackName: botJoinedChannel.user.userId
+                                        ,
+                                    }),
+                            ],
+                        }],
+                    };
+                    return ctx.messageClient.addressChannels(slackMessage, botJoinedChannel.channel.channelId);
+                } catch (error) {
+                    const msg: SlackMessage = {
+                        text: `Welcome to *${botJoinedChannel.channel.name}* team channel @${userName}!`,
+                        attachments: [{
+                            fallback: `Welcome to *${botJoinedChannel.channel.name}* team channel!`,
+                            text: "Unfortunately you do not seem to have been onboarded to Subatomic. To onboard yourself press the button below.",
+                            actions: [
+                                buttonForCommand(
+                                    {
+                                        text: "Onboard me",
+                                    },
+                                    new OnboardMember()),
+                            ],
+                        }],
+                    };
+                    return ctx.messageClient.addressChannels(msg, botJoinedChannel.channel.channelId);
                 }
-
-                const slackMessage: SlackMessage = {
-                    text: `Unfortunately, @${userName} is not a member/owner of this team.`,
-                    attachments: [{
-                        text: "Click the button below to add them.",
-                        fallback: "Click the button below to add them.",
-                        actions: [
-                            buttonForCommand(
-                                {
-                                    text: "Add team members",
-                                    style: "primary",
-                                },
-                                new AddMemberToTeam()),
-                        ],
-                    }],
-                };
-                return ctx.messageClient.addressChannels(slackMessage, botJoinedChannel.channel.channelId);
             }
             return await success();
         } catch (error) {
@@ -129,9 +146,9 @@ export class BotJoinedChannel implements HandleEvent<any> {
 
     private async sendBotTeamWelcomeMessage(ctx: HandlerContext, channelNameString: string, channelId: string) {
         const msg: SlackMessage = {
-            text: `Welcome to ${channelNameString} team channel!`,
+            text: `Welcome to *${channelNameString}* team channel!`,
             attachments: [{
-                fallback: `Welcome to the ${channelNameString} team channel!`,
+                fallback: `Welcome to the *${channelNameString}* team channel!`,
                 footer: `For more information, please read the ${this.docs()}`,
                 text: `
 If you haven't already, you might want to:
