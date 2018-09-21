@@ -83,6 +83,43 @@ export class BotJoinedChannel implements HandleEvent<any> {
                 const channelNameString = `the ${botJoinedChannel.channel.name}`;
 
                 return await this.sendBotTeamWelcomeMessage(ctx, channelNameString, botJoinedChannel.channel.channelId);
+            } else {
+                const userName = botJoinedChannel.user.screenName;
+
+                logger.info("Checking whether the user onboarded");
+                await this.gluonService.members.gluonMemberFromScreenName(userName);
+
+                logger.info("Checking whether the user is a part of the team");
+                for (const member of teams.members) {
+                    if (member.slack.screenName === userName) {
+                        logger.info("User is a member of team.");
+                        return await success();
+                    }
+                }
+
+                for (const owner of teams.owners) {
+                    if (owner.slack.screenName === userName) {
+                        logger.info("User is a owner of team.");
+                        return await success();
+                    }
+                }
+
+                const slackMessage: SlackMessage = {
+                    text: `Unfortunately, @${userName} is not a member/owner of this team.`,
+                    attachments: [{
+                        text: "Click the button below to add them.",
+                        fallback: "Click the button below to add them.",
+                        actions: [
+                            buttonForCommand(
+                                {
+                                    text: "Add team members",
+                                    style: "primary",
+                                },
+                                new AddMemberToTeam()),
+                        ],
+                    }],
+                };
+                return ctx.messageClient.addressChannels(slackMessage, botJoinedChannel.channel.channelId);
             }
             return await success();
         } catch (error) {
