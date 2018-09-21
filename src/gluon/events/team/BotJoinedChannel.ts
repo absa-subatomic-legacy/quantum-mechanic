@@ -86,7 +86,7 @@ export class BotJoinedChannel implements HandleEvent<any> {
             } else {
                 const userName = botJoinedChannel.user.screenName;
 
-                logger.info("Checking whether the user onboarded");
+                logger.info("Checking whether the user is onboarded");
                 await this.gluonService.members.gluonMemberFromScreenName(userName);
 
                 logger.info("Checking whether the user is a part of the team");
@@ -99,7 +99,7 @@ export class BotJoinedChannel implements HandleEvent<any> {
 
                 for (const owner of teams.owners) {
                     if (owner.slack.screenName === userName) {
-                        logger.info("User is a owner of team.");
+                        logger.info("User is an owner of team.");
                         return await success();
                     }
                 }
