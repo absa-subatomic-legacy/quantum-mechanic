@@ -8,7 +8,7 @@ import {QMError} from "../../../../src/gluon/util/shared/Error";
 import {TestGraphClient} from "../../TestGraphClient";
 import {TestMessageClient} from "../../TestMessageClient";
 
-describe("AddMemberToTeamService getNewMember", () => {
+describe("AddMemberToTeamService getNewMemberGluonDetails", () => {
     it("should return error that member is part of team already", async () => {
         const mockedMemberService = mock(MemberService);
         when(mockedMemberService.gluonMemberFromScreenName("Dex")).thenReturn(Promise.resolve({
@@ -35,7 +35,7 @@ describe("AddMemberToTeamService getNewMember", () => {
 
         let errorThrown: QMError = null;
         try {
-            await service.getNewMember(fakeContext, "Dex", "Channel1");
+            await service.getNewMemberGluonDetails(fakeContext, "Dex", "Channel1");
         } catch (error) {
             errorThrown = error;
         }
@@ -68,7 +68,7 @@ describe("AddMemberToTeamService getNewMember", () => {
             messageClient: new TestMessageClient(),
         };
 
-        const result = await service.getNewMember(fakeContext, "Dex", "Channel2");
+        const result = await service.getNewMemberGluonDetails(fakeContext, "Dex", "Channel2");
 
         assert.equal(result.id, "User1");
 

@@ -37,5 +37,6 @@ export interface QMMember {
 }
 
 export enum MemberRole {
-    OWNER, MEMBER,
+    owner = "Owner",
+    member = "Member",
 }
