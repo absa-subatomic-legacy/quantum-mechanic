@@ -15,9 +15,9 @@ import {AddMemberToTeamTask} from "../../tasks/team/AddMemberToTeamTask";
 import {MemberRole} from "../../util/member/Members";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
-@CommandHandler("Add a member as an owner to a team", QMConfig.subatomic.commandPrefix + " add team member")
+@CommandHandler("Add a member as an owner to a team", QMConfig.subatomic.commandPrefix + " add team owner")
 @Tags("subatomic", "team", "member")
-export class AddMemberToTeam implements HandleCommand<HandlerResult> {
+export class AddOwnerToTeam implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName: string;
@@ -32,7 +32,7 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
     public teamChannel: string;
 
     @Parameter({
-        description: "slack name (@User.Name) of the member to make a member",
+        description: "slack name (@User.Name) of the member to make an owner",
     })
     public slackName: string;
 
@@ -43,7 +43,7 @@ export class AddMemberToTeam implements HandleCommand<HandlerResult> {
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            taskRunner.addTask(new AddMemberToTeamTask(this.slackName, this.teamChannel, this.screenName, MemberRole.MEMBER));
+            taskRunner.addTask(new AddMemberToTeamTask(this.slackName, this.teamChannel, this.screenName, MemberRole.OWNER));
 
             await taskRunner.execute(ctx);
         } catch (error) {

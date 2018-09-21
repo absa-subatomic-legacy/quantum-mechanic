@@ -8,6 +8,7 @@ import {isSuccessCode} from "../../../http/Http";
 import {OnboardMember} from "../../commands/member/OnboardMember";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
+import {MemberRole} from "../../util/member/Members";
 import {QMError} from "../../util/shared/Error";
 import {
     getTeamSlackChannel,
@@ -83,11 +84,31 @@ They have been sent a request to onboard, once they've successfully onboarded yo
         }
     }
 
-    public async addUserToGluonTeam(newMemberId: string, actioningMemberId: string, gluonTeamUrl: string) {
+    public async addUserToGluonTeam(newMemberId: string, actioningMemberId: string, gluonTeamUrl: string, memberRole: MemberRole = MemberRole.MEMBER) {
         logger.info(`Adding member [${newMemberId}] to team ${gluonTeamUrl}`);
 
         const splitLink = gluonTeamUrl.split("/");
         const gluonTeamId = splitLink[splitLink.length - 1];
+
+        const memberDetails = {
+            members: [],
+            owners: [],
+            createdBy: actioningMemberId,
+        };
+
+        if (memberRole === MemberRole.OWNER) {
+            memberDetails.owners.push(
+                {
+                    memberId: newMemberId,
+                },
+            );
+        } else {
+            memberDetails.members.push(
+                {
+                    memberId: newMemberId,
+                },
+            );
+        }
 
         const updateTeamResult = await this.gluonService.teams.addMemberToTeam(gluonTeamId,
             {
