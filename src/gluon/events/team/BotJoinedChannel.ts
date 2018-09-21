@@ -93,8 +93,8 @@ export class BotJoinedChannel implements HandleEvent<any> {
                     existingUser = await this.gluonService.members.gluonMemberFromScreenName(userName);
 
                     logger.info("Checking whether the user is a part of the team");
-                    for (const teamChannelName of existingUser.teams) {
-                        if (teamChannelName.slack.teamChannel === botJoinedChannel.channel.name) {
+                    for (const team of existingUser.teams) {
+                        if (team.slack.teamChannel === botJoinedChannel.channel.name) {
                             logger.info("User is a part of this team.");
                             return await success();
                         }
