@@ -11,6 +11,7 @@ import {
     addressSlackUsers,
     buttonForCommand,
 } from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
@@ -85,7 +86,7 @@ export class MembershipRequestCreated implements HandleEvent<any> {
                 }],
             };
             logger.info(membershipRequestCreatedEvent.team.slackIdentity.teamChannel);
-            return await ctx.messageClient.addressChannels(msg, membershipRequestCreatedEvent.team.slackIdentity.teamChannel, {id: correlationId});
+            return await ctx.messageClient.send(msg, addressSlackChannels(QMConfig.teamId, membershipRequestCreatedEvent.team.slackIdentity.teamChannel), {id: correlationId});
         }
 
         return await this.tryAddressMember(ctx, "Please note, the team applied to has no associated slack channel. Approval needs to occur through other avenues.", membershipRequestCreatedEvent.requestedBy);

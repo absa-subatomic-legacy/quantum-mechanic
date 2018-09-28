@@ -10,6 +10,7 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {addressSlackUsers} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
@@ -152,6 +153,6 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
                 mrkdwn_in: ["text"],
             }],
         };
-        await ctx.messageClient.addressChannels(msg, this.teamChannel, {id: this.correlationId});
+        await ctx.messageClient.send(msg, addressSlackChannels(QMConfig.teamId, this.teamChannel), {id: this.correlationId});
     }
 }

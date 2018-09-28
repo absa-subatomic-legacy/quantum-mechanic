@@ -9,6 +9,7 @@ import {
     Parameter,
     Tags,
 } from "@atomist/automation-client";
+import {addressSlackUsers} from "@atomist/automation-client/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OnboardMemberMessages} from "../../messages/member/OnboardMemberMessages";
@@ -72,7 +73,7 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
                     },
                 });
             const message = this.onboardMessages.presentTeamCreationAndApplicationOptions(this.firstName);
-            return await ctx.messageClient.addressUsers(message, this.userId);
+            return await ctx.messageClient.send(message, addressSlackUsers(QMConfig.teamId, this.userId));
         } catch (error) {
             return await this.handleError(ctx, error);
         }

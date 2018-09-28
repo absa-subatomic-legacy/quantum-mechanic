@@ -10,7 +10,8 @@ import {
     success,
     Tags,
 } from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannels, buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackUsers} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {OnboardMember} from "../../commands/member/OnboardMember";
@@ -119,7 +120,7 @@ export class BotJoinedChannel implements HandleEvent<any> {
                             ],
                         }],
                     };
-                    return ctx.messageClient.addressChannels(slackMessage, botJoinedChannel.channel.channelId);
+                    return ctx.messageClient.send(slackMessage, addressSlackChannels(QMConfig.teamId, botJoinedChannel.channel.channelId));
                 } catch (error) {
                     const msg: SlackMessage = {
                         text: `Welcome to *${botJoinedChannel.channel.name}* team channel @${userName}!`,
@@ -135,7 +136,7 @@ export class BotJoinedChannel implements HandleEvent<any> {
                             ],
                         }],
                     };
-                    return ctx.messageClient.addressChannels(msg, botJoinedChannel.channel.channelId);
+                    return ctx.messageClient.send(msg, addressSlackChannels(QMConfig.teamId, botJoinedChannel.channel.channelId));
                 }
             }
             return await success();
@@ -168,7 +169,7 @@ If you haven't already, you might want to:
                 ],
             }],
         };
-        return ctx.messageClient.addressChannels(msg, channelId);
+        return ctx.messageClient.send(msg, addressSlackChannels(QMConfig.teamId, channelId));
     }
 
     private async getTeams(channelName: string) {

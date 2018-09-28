@@ -7,6 +7,7 @@ import {
     success,
     Tags,
 } from "@atomist/automation-client";
+import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -61,9 +62,9 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
                                            teamName: string,
                                            teamChannel: string): Promise<any> {
 
-        await ctx.messageClient.addressChannels({
+        await ctx.messageClient.send({
             text: `Requesting DevOps environment for *${teamName}* team.`,
-        }, teamChannel);
+        }, addressSlackChannels(QMConfig.teamId, teamChannel));
 
         const member = await this.gluonService.members.gluonMemberFromScreenName(screenName);
 

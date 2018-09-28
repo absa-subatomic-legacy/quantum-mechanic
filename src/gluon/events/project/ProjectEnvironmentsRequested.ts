@@ -6,6 +6,7 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
+import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
@@ -125,9 +126,9 @@ A package is either an application or a library, click the button below to creat
             }],
         };
 
-        return ctx.messageClient.addressChannels(msg,
-            teams.map(team =>
-                team.slackIdentity.teamChannel));
+        return ctx.messageClient.send(msg,
+            addressSlackChannels(QMConfig.teamId, teams.map(team =>
+                team.slackIdentity.teamChannel)));
     }
 
     private docs(): string {

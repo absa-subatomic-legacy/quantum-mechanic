@@ -1,5 +1,7 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
+import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackUsers} from "@atomist/automation-client/spi/message/MessageClient";
 import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/handlers/command/slack/AssociateRepo";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {inspect} from "util";
@@ -71,11 +73,11 @@ They have been sent a request to onboard, once they've successfully onboarded yo
 
             const message = this.addMemberToTeamMessages.welcomeMemberToTeam(newMemberFirstName, gluonTeamName);
 
-            return await ctx.messageClient.addressChannels(message, channelName);
+            return await ctx.messageClient.send(message, addressSlackChannels(QMConfig.teamId, channelName));
         } catch (error) {
             logger.warn(error);
-            return await ctx.messageClient.addressChannels(`User ${slackName} successfully added to your gluon team. Private channels do not currently support automatic user invitation.` +
-                " Please invite the user to this slack channel manually.", channelName);
+            return await ctx.messageClient.send(`User ${slackName} successfully added to your gluon team. Private channels do not currently support automatic user invitation.` +
+                " Please invite the user to this slack channel manually.", addressSlackChannels(QMConfig.teamId, channelName));
         }
     }
 
@@ -150,6 +152,6 @@ Click the button below to do that now.
                 ],
             }],
         };
-        return await ctx.messageClient.addressUsers(msg, chatId);
+        return await ctx.messageClient.send(msg, addressSlackUsers(QMConfig.teamId, chatId));
     }
 }

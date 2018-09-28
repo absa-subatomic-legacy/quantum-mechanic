@@ -8,6 +8,7 @@ import {
     Parameter,
     success,
 } from "@atomist/automation-client";
+import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
@@ -170,9 +171,9 @@ export class ListExistingBitbucketProject
 
         const projectUiUrl = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.bitbucketProjectKey}`;
 
-        await ctx.messageClient.addressChannels({
+        await ctx.messageClient.send({
             text: `🚀 The Bitbucket project with key ${this.bitbucketProjectKey} is being configured...`,
-        }, this.teamChannel);
+        }, addressSlackChannels(QMConfig.teamId, this.teamChannel));
 
         const bitbucketProject = await this.getBitbucketProject(this.bitbucketProjectKey);
 

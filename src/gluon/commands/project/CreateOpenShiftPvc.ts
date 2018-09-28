@@ -7,6 +7,7 @@ import {
     MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
+import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
 import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {Attachment} from "@atomist/slack-messages/SlackMessages";
@@ -126,7 +127,7 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
             } as Attachment),
         };
 
-        return await ctx.messageClient.addressChannels(msg, this.teamChannel);
+        return await ctx.messageClient.send(msg, addressSlackChannels(QMConfig.teamId, this.teamChannel));
     }
 
     private docs(): string {

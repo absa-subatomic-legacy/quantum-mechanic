@@ -7,6 +7,7 @@ import {
     MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
+import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
@@ -165,7 +166,7 @@ spring:
             }],
         };
 
-        return await ctx.messageClient.addressChannels(slackMessage, this.teamChannel);
+        return await ctx.messageClient.send(slackMessage, addressSlackChannels(QMConfig.teamId, this.teamChannel));
     }
 
     private docs(): string {
