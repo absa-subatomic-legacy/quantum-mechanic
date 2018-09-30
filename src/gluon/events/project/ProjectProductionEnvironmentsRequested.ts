@@ -7,12 +7,11 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
-import {addressSlackUsers} from "@atomist/automation-client/spi/message/MessageClient";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackUsersFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {v4 as uuid} from "uuid";
-import {QMConfig} from "../../../config/QMConfig";
 import {UpdateProjectProdRequest} from "../../commands/project/UpdateProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ProjectProdRequestApprovalResponse} from "../../util/project/Project";
@@ -55,13 +54,14 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
 
             for (const teamMember of membersToMessage) {
                 const requestCorrelationId: string = uuid();
+                const destination =  await addressSlackUsersFromContext(ctx, teamMember.slack.screenName);
                 await ctx.messageClient.send({
                     text: `The project *${projectName}* owned by team *${project.owningTeam.name}* has been requested to move into prod. As a member of the team you have please select an option below indicating whether you approve of this request.`,
-                }, addressSlackUsers(QMConfig.teamId, teamMember.slack.screenName));
+                }, destination);
 
                 await ctx.messageClient.send(
                     this.createPersonalisedMessage(teamMember, projectProdRequest.projectProdRequestId, requestCorrelationId),
-                    addressSlackUsers(QMConfig.teamId, teamMember.slack.screenName),
+                    destination,
                     {id: requestCorrelationId},
                 );
             }

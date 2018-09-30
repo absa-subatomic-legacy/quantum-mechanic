@@ -7,7 +7,7 @@ import {
     logger,
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
-import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {AssociateTeam} from "../../commands/project/AssociateTeam";
@@ -79,7 +79,7 @@ export class BitbucketProjectAdded implements HandleEvent<any> {
 
         const associateTeamCommand: AssociateTeam = new AssociateTeam();
         associateTeamCommand.projectName = addedEvent.project.name;
-
+        const destination =  await addressSlackChannelsFromContext(ctx, addedEvent.teams.map(team => team.slackIdentity.teamChannel));
         return await ctx.messageClient.send({
             text: `
 The *${addedEvent.bitbucketProject.name}* Bitbucket project has been configured successfully and linked to the *${addedEvent.project.name}* Subatomic project.
@@ -118,7 +118,7 @@ If you would like to associate more teams to the *${addedEvent.project.name}* pr
                             associateTeamCommand),
                     ],
                 }],
-        }, addressSlackChannels(QMConfig.teamId, addedEvent.teams.map(team => team.slackIdentity.teamChannel)));
+        }, destination);
     }
 
     private docs(extension): string {

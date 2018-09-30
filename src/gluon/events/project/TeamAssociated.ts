@@ -6,7 +6,7 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 
@@ -33,13 +33,14 @@ subscription TeamsLinkedToProjectEvent {
 `)
 export class TeamsLinkedToProject implements HandleEvent<any> {
 
-    public handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
+    public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested TeamAssociated event: ${JSON.stringify(event.data)}`);
 
         const teamsLinkedToProjectEvent = event.data.TeamsLinkedToProjectEvent[0];
 
+        const destination =  await addressSlackChannelsFromContext(ctx, teamsLinkedToProjectEvent.team[0].slackIdentity.teamChannel);
         return ctx.messageClient.send(`Your team has been successfully associated with ${teamsLinkedToProjectEvent.id}`,
-            addressSlackChannels(QMConfig.teamId, teamsLinkedToProjectEvent.team[0].slackIdentity.teamChannel));
+            destination);
     }
 
     private docs(): string {

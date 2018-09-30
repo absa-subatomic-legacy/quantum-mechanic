@@ -7,7 +7,7 @@ import {
     MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
-import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
@@ -158,6 +158,7 @@ spring:
     }
 
     private async sendSuccessResponse(ctx: HandlerContext, devOpsProjectId: string) {
+        const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
         const slackMessage: SlackMessage = {
             text: `Your Subatomic Config Server has been added to your *${devOpsProjectId}* OpenShift project successfully`,
             attachments: [{
@@ -166,7 +167,7 @@ spring:
             }],
         };
 
-        return await ctx.messageClient.send(slackMessage, addressSlackChannels(QMConfig.teamId, this.teamChannel));
+        return await ctx.messageClient.send(slackMessage, destination);
     }
 
     private docs(): string {

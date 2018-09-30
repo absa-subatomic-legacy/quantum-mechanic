@@ -8,7 +8,7 @@ import {
     success,
     Tags,
 } from "@atomist/automation-client";
-import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
@@ -60,9 +60,10 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
         logger.info("Creating project OpenShift production environments...");
 
         try {
+            const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
             await ctx.messageClient.send({
                 text: `Requesting production environments's for project *${this.projectName}*`,
-            }, addressSlackChannels(QMConfig.teamId, this.teamChannel));
+            }, destination);
 
             const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 

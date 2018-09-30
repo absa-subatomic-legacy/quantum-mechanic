@@ -7,7 +7,7 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
-import {addressSlackChannels} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
@@ -89,7 +89,8 @@ export class ProjectProductionEnvironmentsRequestClosed implements HandleEvent<a
             await handleQMError(qmMessageClient, error);
             const project = await this.gluonService.projects.gluonProjectFromProjectName(projectProdRequest.project.name);
             const correlationId: string = uuid();
-            return await ctx.messageClient.send(this.createRetryButton(projectProdRequest.projectProdRequestId, correlationId), addressSlackChannels(QMConfig.teamId, project.owningTeam.slack.teamChannel), {id: correlationId});
+            const destination =  await addressSlackChannelsFromContext(ctx, project.owningTeam.slack.teamChannel);
+            return await ctx.messageClient.send(this.createRetryButton(projectProdRequest.projectProdRequestId, correlationId), destination, {id: correlationId});
         }
     }
 
