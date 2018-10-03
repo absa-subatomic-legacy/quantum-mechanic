@@ -14,7 +14,7 @@ import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService";
-import {getProjectDisplayName, getProjectId} from "../../util/project/Project";
+import {getProjectId} from "../../util/project/Project";
 import {
     ChannelMessageClient,
     handleQMError,
