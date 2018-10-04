@@ -291,7 +291,7 @@ export class OCService {
         logger.debug(`Trying to process jenkins template for devops project template. devopsNamespace: ${devopsNamespace}`);
         const parameters = [
             `NAMESPACE=${devopsNamespace}`,
-            "JENKINS_IMAGE_STREAM_TAG=jenkins-subatomic:2.0",
+            "JENKINS_IMAGE_STREAM_TAG=jenkins-subatomic:2.1",
             "BITBUCKET_NAME=Subatomic Bitbucket",
             `BITBUCKET_URL=${QMConfig.subatomic.bitbucket.baseUrl}`,
             `BITBUCKET_CREDENTIALS_ID=${devopsNamespace}-bitbucket`,
@@ -465,7 +465,7 @@ export class OCService {
         await team.members.map(async member => {
             const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
             await logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
-            return await this.openShiftApi.policy.addRoleToUser(memberUsername, "view", projectId);
+            return await this.openShiftApi.policy.addRoleToUser(memberUsername, "edit", projectId);
         });
     }
 
