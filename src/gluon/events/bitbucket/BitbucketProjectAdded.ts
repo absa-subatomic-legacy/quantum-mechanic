@@ -79,6 +79,7 @@ export class BitbucketProjectAdded implements HandleEvent<any> {
 
         const associateTeamCommand: AssociateTeam = new AssociateTeam();
         associateTeamCommand.projectName = addedEvent.project.name;
+
         const destination =  await addressSlackChannelsFromContext(ctx, addedEvent.teams.map(team => team.slackIdentity.teamChannel));
         return await ctx.messageClient.send({
             text: `

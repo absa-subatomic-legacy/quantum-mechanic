@@ -23,13 +23,6 @@ export class TestGraphClient implements GraphClient {
         ],
     };
 
-    constructor() {
-        this.executeQueryFromFileResults = [];
-        this.executeMutationFromFileResults = [];
-        this.executeQueryResults = [];
-        this.executeMutationResults = [];
-    }
-
     public executeQueryFromFile<T, Q>(path: string, variables?: Q, options?: any, current?: string): Promise<any> {
         this.path = path;
         if (this.executeQueryFromFileResults.length > 0) {

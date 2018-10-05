@@ -52,6 +52,7 @@ export class ProjectCreated implements HandleEvent<any> {
 
         const associateTeamCommand = new AssociateTeam();
         associateTeamCommand.projectName = projectCreatedEvent.project.name;
+
         const destination =  await addressSlackChannelsFromContext(ctx, projectCreatedEvent.team.slackIdentity.teamChannel);
         return await ctx.messageClient.send({
             text: `The *${projectCreatedEvent.project.name}* project has been created successfully.`,
