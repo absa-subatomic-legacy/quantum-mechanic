@@ -3,15 +3,23 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
+    Parameter,
 } from "@atomist/automation-client";
 import {
     BaseParameter,
     declareParameter,
 } from "@atomist/automation-client/internal/metadata/decoratorSupport";
 import _ = require("lodash");
+import uuid = require("uuid");
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 
 export abstract class RecursiveParameterRequestCommand implements HandleCommand<HandlerResult> {
+
+    @Parameter({
+        required: false,
+        displayable: false,
+    })
+    public messagePresentationCorrelationId: string;
 
     private recursiveParameterOrder: string[] = [];
 
@@ -20,6 +28,9 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
     private recursiveParameterMap: { [key: string]: RecursiveParameterMapping };
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
+        if (_.isEmpty(this.messagePresentationCorrelationId)) {
+            this.messagePresentationCorrelationId = uuid.v4();
+        }
 
         this.configureParameterSetters();
         if (!this.recursiveParametersAreSet()) {
@@ -76,7 +87,16 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
             const propertyKey = this.recursiveParameterMap[recursiveKey].propertyName;
             if (_.isEmpty(dynamicClassInstance[propertyKey])) {
                 logger.info(`Setting parameter ${propertyKey}.`);
-                return await this.recursiveParameterMap[recursiveKey].parameterSetter(ctx, this, this.recursiveParameterMap[recursiveKey].selectionMessage);
+                const result = await this.recursiveParameterMap[recursiveKey].parameterSetter(ctx, this, this.recursiveParameterMap[recursiveKey].selectionMessage);
+                if (result.setterSuccess) {
+                    return await this.handle(ctx);
+                } else {
+                    return ctx.messageClient.respond({
+                        attachments: [
+                            result.messagePrompt,
+                        ],
+                    }, {id: this.messagePresentationCorrelationId});
+                }
             }
         }
     }
@@ -134,7 +154,7 @@ export interface RecursiveParameterDetails extends BaseParameter {
 
 interface RecursiveParameterMapping {
     propertyName: string;
-    parameterSetter: (ctx: HandlerContext, commandHandler: HandleCommand, selectionMessage: string) => Promise<any>;
+    parameterSetter: (ctx: HandlerContext, commandHandler: HandleCommand, selectionMessage: string) => Promise<RecursiveSetterResult>;
     selectionMessage: string;
     forceSet: boolean;
 }

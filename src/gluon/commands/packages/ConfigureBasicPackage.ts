@@ -23,7 +23,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
-import {createMenu} from "../../util/shared/GenericMenu";
+import {createAndSendMenu} from "../../util/shared/GenericMenu";
 import {ConfigurePackage} from "./ConfigurePackage";
 
 const PACKAGE_DEFINITION_EXTENSION = ".json";
@@ -129,7 +129,7 @@ async function setPackageType(ctx: HandlerContext, commandHandler: ConfigureBasi
 
 async function setPackageDefinitionFile(ctx: HandlerContext, commandHandler: ConfigureBasicPackage, selectionMessage: string): Promise<HandlerResult> {
     const packageDefinitionOptions: string [] = readPackageDefinitions(commandHandler.packageType);
-    return await createMenu(ctx, packageDefinitionOptions.map(packageDefinition => {
+    return await createAndSendMenu(ctx, packageDefinitionOptions.map(packageDefinition => {
             return {
                 value: packageDefinition,
                 text: packageDefinition,
