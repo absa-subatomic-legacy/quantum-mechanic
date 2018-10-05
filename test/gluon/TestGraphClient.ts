@@ -1,9 +1,5 @@
-import {
-    GraphClient,
-    MutationOptions,
-    QueryOptions,
-} from "@atomist/automation-client/spi/graph/GraphClient";
-import {isUndefined} from "util";
+import {GraphClient, MutationOptions, QueryOptions} from "@atomist/automation-client/spi/graph/GraphClient";
+import _ = require("lodash");
 
 export class TestGraphClient implements GraphClient {
 
@@ -26,6 +22,13 @@ export class TestGraphClient implements GraphClient {
             },
         ],
     };
+
+    constructor() {
+        this.executeQueryFromFileResults = [];
+        this.executeMutationFromFileResults = [];
+        this.executeQueryResults = [];
+        this.executeMutationResults = [];
+    }
 
     public executeQueryFromFile<T, Q>(path: string, variables?: Q, options?: any, current?: string): Promise<any> {
         this.path = path;
@@ -82,7 +85,7 @@ export class TestGraphClient implements GraphClient {
     }
 
     private returnPredefinedResult(predefinedResult: { result: boolean, returnValue?: any }) {
-        const returnValue = isUndefined(predefinedResult.returnValue) ? this.defaultReturn : predefinedResult.returnValue;
+        const returnValue = _.isEmpty(predefinedResult.returnValue) ? this.defaultReturn : predefinedResult.returnValue;
         if (predefinedResult.result) {
             return Promise.resolve(returnValue);
         } else {

@@ -153,6 +153,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
                 mrkdwn_in: ["text"],
             }],
         };
+        logger.info(JSON.stringify(ctx));
         const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
 
         return await ctx.messageClient.send(msg, destination, {id: this.correlationId});
