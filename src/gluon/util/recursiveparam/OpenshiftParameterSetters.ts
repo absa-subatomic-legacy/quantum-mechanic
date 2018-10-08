@@ -14,7 +14,7 @@ export async function setOpenshiftTemplate(
     ctx: HandlerContext,
     commandHandler: OpenshiftTemplateSetter,
     selectionMessage: string = "Please select an Openshift template",
-) {
+): Promise<RecursiveSetterResult> {
 
     if (commandHandler.ocService === undefined) {
         throw new QMError(`setOpenshiftTemplate commandHandler requires the ocService parameter to be defined`);
@@ -76,7 +76,7 @@ export async function setImageName(
 export async function setImageNameFromDevOps(
     ctx: HandlerContext,
     commandHandler: ImageNameSetter,
-    selectionMessage: string = "Please select an image") {
+    selectionMessage: string = "Please select an image"): Promise<RecursiveSetterResult> {
     if (commandHandler.ocService === undefined) {
         throw new QMError(`setImageName commandHandler requires ocService parameter to be defined`);
     }

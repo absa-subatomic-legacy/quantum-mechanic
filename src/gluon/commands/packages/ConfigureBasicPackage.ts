@@ -23,7 +23,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
-import {createAndSendMenu} from "../../util/shared/GenericMenu";
+import {createMenuAttachment} from "../../util/shared/GenericMenu";
 import {ConfigurePackage} from "./ConfigurePackage";
 
 const PACKAGE_DEFINITION_EXTENSION = ".json";
@@ -112,6 +112,7 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         configurePackage.applicationName = this.applicationName;
         configurePackage.teamName = this.teamName;
         configurePackage.projectName = this.projectName;
+        configurePackage.messagePresentationCorrelationId = this.messagePresentationCorrelationId;
 
         return await configurePackage.handle(ctx);
     }
@@ -121,24 +122,30 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
     }
 }
 
-async function setPackageType(ctx: HandlerContext, commandHandler: ConfigureBasicPackage) {
+async function setPackageType(ctx: HandlerContext, commandHandler: ConfigureBasicPackage): Promise<RecursiveSetterResult> {
     const application = await commandHandler.gluonService.applications.gluonApplicationForNameAndProjectName(commandHandler.applicationName, commandHandler.projectName, false);
     commandHandler.packageType = application.applicationType;
-    return await commandHandler.handle(ctx);
+    return {
+        setterSuccess: true,
+    };
 }
 
-async function setPackageDefinitionFile(ctx: HandlerContext, commandHandler: ConfigureBasicPackage, selectionMessage: string): Promise<HandlerResult> {
+async function setPackageDefinitionFile(ctx: HandlerContext, commandHandler: ConfigureBasicPackage, selectionMessage: string): Promise<RecursiveSetterResult> {
     const packageDefinitionOptions: string [] = readPackageDefinitions(commandHandler.packageType);
-    return await createAndSendMenu(ctx, packageDefinitionOptions.map(packageDefinition => {
-            return {
-                value: packageDefinition,
-                text: packageDefinition,
-            };
-        }),
-        commandHandler,
-        selectionMessage,
-        "Select a package definition",
-        "packageDefinition");
+    return {
+        setterSuccess: false,
+        messagePrompt: createMenuAttachment(packageDefinitionOptions.map(packageDefinition => {
+                return {
+                    value: packageDefinition,
+                    text: packageDefinition,
+                };
+            }),
+            commandHandler,
+            selectionMessage,
+            selectionMessage,
+            "Select a package definition",
+            "packageDefinition"),
+    };
 }
 
 function readPackageDefinitions(packageType: string) {
