@@ -94,6 +94,7 @@ import {
     TeamCreatedEvent,
 } from "./gluon/ingesters/teamIngester";
 import {TeamMemberCreatedEvent} from "./gluon/ingesters/teamMemberIngester";
+import {RemoveMemberFromTeam} from "./gluon/commands/team/RemoveMemberFromTeam";
 
 const token = QMConfig.token;
 const http = QMConfig.http;
@@ -112,6 +113,7 @@ export const configuration: any = {
         AddSlackDetails,
         JoinTeam,
         AddMemberToTeam,
+        RemoveMemberFromTeam,
         AddOwnerToTeam,
         AssociateTeam,
         CreateTeam,
