@@ -1,4 +1,5 @@
 import {SlackMessage} from "@atomist/slack-messages";
+import {ParameterDisplayType} from "./RecursiveParameterRequestCommand";
 
 export class ParameterStatusDisplay {
 
@@ -15,16 +16,25 @@ export class ParameterStatusDisplay {
         this.paramOrder.push(paramName);
     }
 
-    public getDisplayMessage(commandName: string): SlackMessage {
-        let textDisplay = `Preparing command *${commandName}*: \n`;
+    public getDisplayMessage(commandName: string, displayRequested: ParameterDisplayType): SlackMessage {
+        const attachments = [];
+        if (displayRequested === ParameterDisplayType.show) {
+            let textDisplay = `Preparing command *${commandName}*: \n`;
 
-        for (const parameter of this.paramOrder) {
-            textDisplay += `*${parameter}*: ${this.setParameters[parameter]}\n`;
+            for (const parameter of this.paramOrder) {
+                textDisplay += `*${parameter}*\n${this.setParameters[parameter]}\n\n`;
+            }
+            attachments.push(
+                {
+                    text: textDisplay,
+                    color: "#45B254",
+                    fallback: "",
+                },
+            );
         }
 
         return {
-            text: textDisplay,
-            attachments: [],
+            attachments,
         };
     }
 }

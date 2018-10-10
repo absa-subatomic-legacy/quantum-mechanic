@@ -22,6 +22,12 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
     })
     public messagePresentationCorrelationId: string;
 
+    @Parameter({
+        required: false,
+        displayable: false,
+    })
+    public displayResultMenu: ParameterDisplayType;
+
     private recursiveParameterOrder: string[] = [];
 
     private recursiveParameterList: string[];
@@ -35,6 +41,10 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
             this.messagePresentationCorrelationId = uuid.v4();
         }
 
+        if (_.isEmpty(this.displayResultMenu)) {
+            this.displayResultMenu = ParameterDisplayType.show;
+        }
+
         this.recursiveParameterOrder = [];
         this.configureParameterSetters();
         this.updateParameterStatusDisplayMessage();
@@ -46,7 +56,9 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
             }
         }
 
-        await ctx.messageClient.respond(this.parameterStatusDisplay.getDisplayMessage(this.getIntent()), {id: this.messagePresentationCorrelationId});
+        const displayMessage = this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
+
+        await ctx.messageClient.respond(displayMessage, {id: this.messagePresentationCorrelationId});
 
         return await this.runCommand(ctx);
     }
@@ -99,7 +111,8 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
                 if (result.setterSuccess) {
                     return await this.handle(ctx);
                 } else {
-                    const displayMessage = this.parameterStatusDisplay.getDisplayMessage(this.getIntent());
+                    const displayMessage = this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
+                    result.messagePrompt.color = "#00a5ff";
                     displayMessage.attachments.push(result.messagePrompt);
                     return await ctx.messageClient.respond(displayMessage, {id: this.messagePresentationCorrelationId});
                 }
@@ -140,8 +153,7 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
             const propertyKey = this.recursiveParameterMap[recursiveKey].propertyName;
             const propertyValue = dynamicClassInstance[propertyKey];
 
-            if (!(this.recursiveParameterMap[recursiveKey].forceSet &&
-                _.isEmpty(propertyValue))) {
+            if (!(_.isEmpty(propertyValue))) {
                 this.parameterStatusDisplay.setParam(propertyKey, propertyValue);
             }
         }
@@ -189,4 +201,9 @@ interface RecursiveParameterMapping {
     parameterSetter: (ctx: HandlerContext, commandHandler: HandleCommand, selectionMessage: string) => Promise<RecursiveSetterResult>;
     selectionMessage: string;
     forceSet: boolean;
+}
+
+export enum ParameterDisplayType {
+    show = "show",
+    hide = "hide",
 }

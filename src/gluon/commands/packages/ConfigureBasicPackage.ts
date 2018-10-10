@@ -19,6 +19,7 @@ import {
     setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
+    ParameterDisplayType,
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
@@ -113,6 +114,7 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         configurePackage.teamName = this.teamName;
         configurePackage.projectName = this.projectName;
         configurePackage.messagePresentationCorrelationId = this.messagePresentationCorrelationId;
+        configurePackage.displayResultMenu = ParameterDisplayType.hide;
 
         return await configurePackage.handle(ctx);
     }
