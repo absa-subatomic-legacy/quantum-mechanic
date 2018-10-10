@@ -22,10 +22,11 @@ import {
     QMError,
 } from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
 
-@EventHandler("Receive MembersAddedToTeamEvent events", `
-subscription MembersAddedToTeamEvent {
-  MembersAddedToTeamEvent {
+@EventHandler("Receive MemberRemovedFromTeam events", `
+subscription MemberRemovedFromTeamEvent {
+ MemberRemovedFromTeamEvent {
     team {
       teamId
       name
@@ -33,14 +34,14 @@ subscription MembersAddedToTeamEvent {
         teamChannel
       }
     }
-    owners{
+    memberRemoved{
       firstName
       slackIdentity {
         screenName
         userId
       }
     }
-    members{
+    memberRequester{
       firstName
       domainUsername
       slackIdentity {
@@ -51,33 +52,36 @@ subscription MembersAddedToTeamEvent {
   }
 }
 `)
-export class MembersAddedToTeam implements HandleEvent<any> {
+export class MemberRemovedFromTeam implements HandleEvent<any> {
 
     constructor(private gluonService = new GluonService(),
-                private addMemberToTeamService = new AddMemberToTeamService(),
+                private removeMemberTeamService = new RemoveMemberFromTeamService(),
                 private bitbucketService = new BitbucketService(),
                 private ocService = new OCService()) {
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
-        logger.info(`Ingested MembersAddedToTeamEvent event: ${JSON.stringify(event.data)}`);
 
-        const membersAddedToTeamEvent = event.data.MembersAddedToTeamEvent[0];
+        logger.info(`Andre: Ingested MemberRemovedFromTeamEvent event.data = ${JSON.stringify(event.data)}`);
+
+        const memberRemovedFromTeam = event.data.MemberRemovedFromTeam[0]
+
+        logger.debug(`Andre: event.data.MemberRemovedFromTeam[0] = ${memberRemovedFromTeam}`)
 
         try {
-            await this.inviteMembersToChannel(ctx, membersAddedToTeamEvent);
-
-            const team = membersAddedToTeamEvent.team;
-
-            const projects = await this.getListOfTeamProjects(team.name);
-
-            const bitbucketConfiguration = this.getBitbucketConfiguration(membersAddedToTeamEvent);
-
-            await this.addPermissionsForUserToTeams(bitbucketConfiguration, team.name, projects, membersAddedToTeamEvent);
-
-            return await ctx.messageClient.addressChannels("New user permissions successfully added to associated projects.", team.slackIdentity.teamChannel);
+            // await this.inviteMembersToChannel(ctx, memberRemovedFromTeam);
+            //
+            // const team = memberRemovedFromTeam.team;
+            //
+            // const projects = await this.getListOfTeamProjects(team.name);
+            //
+            // const bitbucketConfiguration = this.getBitbucketConfiguration(memberRemovedFromTeam);
+            //
+            // await this.addPermissionsForUserToTeams(bitbucketConfiguration, team.name, projects, memberRemovedFromTeam);
+            //
+            // return await ctx.messageClient.addressChannels("New user permissions successfully added to associated projects.", team.slackIdentity.teamChannel);
         } catch (error) {
-            return await this.handleError(ctx, error, membersAddedToTeamEvent.team.slackIdentity.teamChannel);
+            return await this.handleError(ctx, error, memberRemovedFromTeam.team.slackIdentity.teamChannel);
         }
     }
 
@@ -102,25 +106,25 @@ export class MembersAddedToTeam implements HandleEvent<any> {
 
     private async inviteMembersToChannel(ctx: HandlerContext, addMembersToTeamEvent) {
 
-        for (const member of addMembersToTeamEvent.members) {
-            await this.addMemberToTeamService.inviteUserToSlackChannel(
-                ctx,
-                member.firstName,
-                addMembersToTeamEvent.team.name,
-                addMembersToTeamEvent.team.slackIdentity.teamChannel,
-                member.slackIdentity.userId,
-                member.slackIdentity.screenName);
-        }
-
-        for (const owner of addMembersToTeamEvent.owners) {
-            await this.addMemberToTeamService.inviteUserToSlackChannel(
-                ctx,
-                owner.firstName,
-                addMembersToTeamEvent.team.name,
-                addMembersToTeamEvent.team.slackIdentity.teamChannel,
-                owner.slackIdentity.userId,
-                owner.slackIdentity.screenName);
-        }
+        // for (const member of addMembersToTeamEvent.members) {
+        //     await this.addMemberToTeamService.inviteUserToSlackChannel(
+        //         ctx,
+        //         member.firstName,
+        //         addMembersToTeamEvent.team.name,
+        //         addMembersToTeamEvent.team.slackIdentity.teamChannel,
+        //         member.slackIdentity.userId,
+        //         member.slackIdentity.screenName);
+        // }
+        //
+        // for (const owner of addMembersToTeamEvent.owners) {
+        //     await this.addMemberToTeamService.inviteUserToSlackChannel(
+        //         ctx,
+        //         owner.firstName,
+        //         addMembersToTeamEvent.team.name,
+        //         addMembersToTeamEvent.team.slackIdentity.teamChannel,
+        //         owner.slackIdentity.userId,
+        //         owner.slackIdentity.screenName);
+        // }
 
     }
 
