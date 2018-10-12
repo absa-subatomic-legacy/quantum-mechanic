@@ -35,6 +35,7 @@ import {LinkExistingTeamSlackChannel} from "./gluon/commands/team/LinkExistingTe
 import {ListTeamMembers} from "./gluon/commands/team/ListTeamMembers";
 import {NewOrUseTeamSlackChannel} from "./gluon/commands/team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "./gluon/commands/team/NewSlackChannel";
+import {RemoveMemberFromTeam} from "./gluon/commands/team/RemoveMemberFromTeam";
 import {TagAllLatestImages} from "./gluon/commands/team/TagAllLatestImages";
 import {TagLatestImage} from "./gluon/commands/team/TagLatestImage";
 import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAdded";
@@ -50,8 +51,8 @@ import {ProjectProductionEnvironmentsRequested} from "./gluon/events/project/Pro
 import {TeamsLinkedToProject} from "./gluon/events/project/TeamAssociated";
 import {BotJoinedChannel} from "./gluon/events/team/BotJoinedChannel";
 import {DevOpsEnvironmentRequested} from "./gluon/events/team/DevOpsEnvironmentRequested";
-import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
 import {MemberRemovedFromTeam} from "./gluon/events/team/MemberRemovedFromTeam";
+import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
 import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClosed";
 import {MembershipRequestCreated} from "./gluon/events/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/events/team/TeamCreated";
@@ -90,13 +91,12 @@ import {TeamDevOpsDetails} from "./gluon/ingesters/teamDevOpsDetails";
 import {
     DevOpsEnvironmentProvisionedEvent,
     DevOpsEnvironmentRequestedEvent,
-    MembersAddedToTeamEvent,
     MemberRemovedFromTeamEvent,
+    MembersAddedToTeamEvent,
     MembershipRequestCreatedEvent,
     TeamCreatedEvent,
 } from "./gluon/ingesters/teamIngester";
 import {TeamMemberCreatedEvent} from "./gluon/ingesters/teamMemberIngester";
-import {RemoveMemberFromTeam} from "./gluon/commands/team/RemoveMemberFromTeam";
 
 const token = QMConfig.token;
 const http = QMConfig.http;

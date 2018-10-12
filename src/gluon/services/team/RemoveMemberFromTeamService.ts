@@ -62,7 +62,7 @@ export class RemoveMemberFromTeamService {
         if (memberRole === MemberRole.owner) {
             for (const owner of team.owners) {
                 if (owner.memberId === newMember.memberId) {
-                    throw new QMError(`${newMember.slack.screenName} is an owner of this team and cannot be removed.`); //TODO: CAN CHANGE LATER
+                    throw new QMError(`${newMember.slack.screenName} is an owner of this team and cannot be removed.`); // TODO: CAN CHANGE LATER
                 }
             }
         } else {

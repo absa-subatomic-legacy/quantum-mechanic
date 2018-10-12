@@ -11,6 +11,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {RemoveMemberFromTeamTask} from "../../tasks/team/RemoveMemberFromTeamTask";
 import {MemberRole} from "../../util/member/Members";
 import {
     GluonTeamNameSetter,
@@ -21,7 +22,6 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
-import {RemoveMemberFromTeamTask} from "../../tasks/team/RemoveMemberFromTeamTask";
 
 @CommandHandler("Remove a member from a team", QMConfig.subatomic.commandPrefix + " remove team member")
 @Tags("subatomic", "team", "member")
