@@ -47,12 +47,23 @@ export class BitbucketConfigurationService {
         ]);
     }
 
+    public removeUserFromBitbucketProject(bitbucketProjectKey: string): Promise<any[]> {
+        logger.info(`Remove user from BitBucket project: ${bitbucketProjectKey}`);
+        return Promise.all([
+            this.teamMembers.map(teamMember => this.removeProjectPermission(bitbucketProjectKey, teamMember)),
+        ]);
+    }
+
     private addAdminProjectPermission(projectKey: string, user: string): AxiosPromise {
         return this.bitbucketService.addProjectPermission(projectKey, user, "PROJECT_ADMIN");
     }
 
     private addWriteProjectPermission(projectKey: string, user: string): AxiosPromise {
         return this.bitbucketService.addProjectPermission(projectKey, user, "PROJECT_WRITE");
+    }
+
+    private removeProjectPermission(projectKey: string, user: string): AxiosPromise {
+        return this.bitbucketService.removeProjectPermission(projectKey, user);
     }
 
     private async addBranchPermissions(bitbucketProjectKey: string, owners: string[], additional: string[] = []) {

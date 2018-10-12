@@ -179,14 +179,14 @@ export const MemberRemovedFromTeamEvent: Ingester = {
                     name: "memberRemoved",
                     type: {
                         kind: "OBJECT",
-                        name: "Owner",
+                        name: "Member",
                     },
                 },
                 {
                     name: "memberRequester",
                     type: {
                         kind: "OBJECT",
-                        name: "Member",
+                        name: "Owner",
                     },
                 },
             ],

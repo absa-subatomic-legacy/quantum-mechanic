@@ -6,14 +6,13 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService";
+import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
 import {getProjectId} from "../../util/project/Project";
 import {
     ChannelMessageClient,
@@ -22,7 +21,6 @@ import {
     QMError,
 } from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
-import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
 
 @EventHandler("Receive MemberRemovedFromTeam events", `
 subscription MemberRemovedFromTeamEvent {
@@ -36,6 +34,7 @@ subscription MemberRemovedFromTeamEvent {
     }
     memberRemoved{
       firstName
+      domainUsername
       slackIdentity {
         screenName
         userId
@@ -62,24 +61,19 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
 
-        logger.info(`Andre: Ingested MemberRemovedFromTeamEvent event.data = ${JSON.stringify(event.data)}`);
-
-        const memberRemovedFromTeam = event.data.MemberRemovedFromTeam[0]
-
-        logger.debug(`Andre: event.data.MemberRemovedFromTeam[0] = ${memberRemovedFromTeam}`)
-
+        logger.info(`Ingested MemberRemovedFromTeamEvent event.data = ${JSON.stringify(event.data)}`);
+        const memberRemovedFromTeam = event.data.MemberRemovedFromTeamEvent[0];
         try {
-            // await this.inviteMembersToChannel(ctx, memberRemovedFromTeam);
-            //
-            // const team = memberRemovedFromTeam.team;
-            //
-            // const projects = await this.getListOfTeamProjects(team.name);
-            //
-            // const bitbucketConfiguration = this.getBitbucketConfiguration(memberRemovedFromTeam);
-            //
-            // await this.addPermissionsForUserToTeams(bitbucketConfiguration, team.name, projects, memberRemovedFromTeam);
-            //
-            // return await ctx.messageClient.addressChannels("New user permissions successfully added to associated projects.", team.slackIdentity.teamChannel);
+            // WIP: Remove user from Slack channel when removing user from a project #448
+            // https://github.com/absa-subatomic/quantum-mechanic/issues/448
+            // await this.removeMemberFromChannel(ctx, memberRemovedFromTeam);
+
+            const team = memberRemovedFromTeam.team;
+            const projects = await this.getListOfTeamProjects(team.name);
+            const bitbucketConfiguration = new BitbucketConfigurationService([], [memberRemovedFromTeam.memberRemoved.domainUsername], this.bitbucketService);
+            await this.removePermissionsForUserFromTeams(bitbucketConfiguration, team.name, projects, memberRemovedFromTeam);
+
+            return await ctx.messageClient.addressChannels("User permissions successfully removed from associated projects. Please manually remove the user from the relevant Slack channels.", team.slackIdentity.teamChannel);
         } catch (error) {
             return await this.handleError(ctx, error, memberRemovedFromTeam.team.slackIdentity.teamChannel);
         }
@@ -95,53 +89,23 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
         return projects;
     }
 
-    private getBitbucketConfiguration(membersAddedToTeamEvent): BitbucketConfigurationService {
-        let teamOwnersUsernames: string[] = [];
-        let teamMembersUsernames: string[] = [];
-
-        teamOwnersUsernames = _.union(teamOwnersUsernames, membersAddedToTeamEvent.owners.map(owner => owner.domainUsername));
-        teamMembersUsernames = _.union(teamMembersUsernames, membersAddedToTeamEvent.members.map(member => member.domainUsername));
-        return new BitbucketConfigurationService(teamOwnersUsernames, teamMembersUsernames, this.bitbucketService);
-    }
-
-    private async inviteMembersToChannel(ctx: HandlerContext, addMembersToTeamEvent) {
-
-        // for (const member of addMembersToTeamEvent.members) {
-        //     await this.addMemberToTeamService.inviteUserToSlackChannel(
-        //         ctx,
-        //         member.firstName,
-        //         addMembersToTeamEvent.team.name,
-        //         addMembersToTeamEvent.team.slackIdentity.teamChannel,
-        //         member.slackIdentity.userId,
-        //         member.slackIdentity.screenName);
-        // }
-        //
-        // for (const owner of addMembersToTeamEvent.owners) {
-        //     await this.addMemberToTeamService.inviteUserToSlackChannel(
-        //         ctx,
-        //         owner.firstName,
-        //         addMembersToTeamEvent.team.name,
-        //         addMembersToTeamEvent.team.slackIdentity.teamChannel,
-        //         owner.slackIdentity.userId,
-        //         owner.slackIdentity.screenName);
-        // }
-
-    }
-
-    private async addPermissionsForUserToTeams(bitbucketConfiguration: BitbucketConfigurationService, teamName: string, projects, membersAddedToTeamEvent) {
+    private async removePermissionsForUserFromTeams(bitbucketConfiguration: BitbucketConfigurationService, teamName: string, projects, memberRemovedFromTeam) {
         try {
             await this.ocService.login();
             const devopsProject = getDevOpsEnvironmentDetails(teamName).openshiftProjectId;
-            await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
+            await this.ocService.removeTeamMembershipPermissionsFromProject(devopsProject, memberRemovedFromTeam.memberRemoved.domainUsername);
+
             for (const project of projects) {
-                logger.info(`Configuring permissions for project: ${project}`);
-                // Add to bitbucket
-                await bitbucketConfiguration.configureBitbucketProject(project.bitbucketProject.key);
-                // Add to openshift environments
+                logger.info(`Removing permissions for project: ${project}`);
+
+                // Remove from BitBucket
+                await bitbucketConfiguration.removeUserFromBitbucketProject(project.bitbucketProject.key);
+
+                // Remove from OpenShift environments
                 for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
                     const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
                     const projectId = getProjectId(tenant.name, project.name, environment.id);
-                    await this.ocService.addTeamMembershipPermissionsToProject(projectId, membersAddedToTeamEvent);
+                    await this.ocService.removeTeamMembershipPermissionsFromProject(projectId, memberRemovedFromTeam.memberRemoved.domainUsername);
                 }
             }
         } catch (error) {
