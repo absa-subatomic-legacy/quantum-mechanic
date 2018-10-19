@@ -137,7 +137,7 @@ export class BotJoinedChannel implements HandleEvent<any> {
                 text: `Welcome to *${botJoinedChannel.channel.name}* team channel @${userName}!`,
                 attachments: [{
                     fallback: `Welcome to *${botJoinedChannel.channel.name}* team channel!`,
-                    text: "Unfortunately you do not seem to have been onboarded to Subatomic. To onboard yourself press the button below.",
+                    text: "You don't have a Subatomic account",
                     actions: [
                         buttonForCommand(
                             {
