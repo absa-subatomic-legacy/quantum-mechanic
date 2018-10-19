@@ -202,4 +202,7 @@ export const configuration: any = {
         banner: true,
     },
     cluster: QMConfig.cluster,
+    ws: {
+        timeout: 20000,
+    },
 };

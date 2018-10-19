@@ -4,6 +4,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {usernameFromDomainUsername} from "../../util/member/Members";
 import {BitbucketService} from "./BitbucketService";
+import {QMError} from "../../util/shared/Error";
 
 export class BitbucketConfigurationService {
 
@@ -47,11 +48,13 @@ export class BitbucketConfigurationService {
         ]);
     }
 
-    public removeUserFromBitbucketProject(bitbucketProjectKey: string): Promise<any[]> {
-        logger.info(`Remove user from BitBucket project: ${bitbucketProjectKey}`);
-        return Promise.all([
-            this.teamMembers.map(teamMember => this.removeProjectPermission(bitbucketProjectKey, teamMember)),
-        ]);
+    public  async removeUserFromBitbucketProject(bitbucketProjectKey: string) {
+        logger.info(`Trying to remove user from BitBucket project: ${bitbucketProjectKey}`);
+        try {
+            return this.teamMembers.map(teamMember => this.bitbucketService.removeProjectPermission(bitbucketProjectKey, teamMember));
+        } catch (error) {
+            throw new QMError(error, `Failed to remove BitBucket permissions for user`);
+        }
     }
 
     private addAdminProjectPermission(projectKey: string, user: string): AxiosPromise {
@@ -62,9 +65,9 @@ export class BitbucketConfigurationService {
         return this.bitbucketService.addProjectPermission(projectKey, user, "PROJECT_WRITE");
     }
 
-    private removeProjectPermission(projectKey: string, user: string): AxiosPromise {
-        return this.bitbucketService.removeProjectPermission(projectKey, user);
-    }
+    // private removeProjectPermission(projectKey: string, user: string): AxiosPromise {
+    //     return this.bitbucketService.removeProjectPermission(projectKey, user);
+    // }
 
     private async addBranchPermissions(bitbucketProjectKey: string, owners: string[], additional: string[] = []) {
         const allUsers = owners.concat(additional);

@@ -70,7 +70,7 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
 
             const team = memberRemovedFromTeam.team;
             const projects = await this.getListOfTeamProjects(team.name);
-            const bitbucketConfiguration = new BitbucketConfigurationService([], [memberRemovedFromTeam.memberRemoved.domainUsername], this.bitbucketService);
+            const bitbucketConfiguration = new BitbucketConfigurationService([], [], this.bitbucketService);
             await this.removePermissionsForUserFromTeams(bitbucketConfiguration, team.name, projects, memberRemovedFromTeam);
 
             return await ctx.messageClient.addressChannels("User permissions successfully removed from associated projects. Please manually remove the user from the relevant Slack channels.", team.slackIdentity.teamChannel);
