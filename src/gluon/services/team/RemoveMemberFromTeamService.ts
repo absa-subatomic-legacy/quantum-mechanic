@@ -59,18 +59,16 @@ export class RemoveMemberFromTeamService {
     }
 
     public verifyRemoveMemberRequest(newMember: { memberId: string, slack: { screenName: string } }, team: { owners: Array<{ memberId: string }>, members: Array<{ memberId: string }> }, memberRole: MemberRole) {
-        if (memberRole === MemberRole.owner) {
-            for (const owner of team.owners) {
-                if (owner.memberId === newMember.memberId) {
-                    throw new QMError(`${newMember.slack.screenName} is an owner of this team and cannot be removed.`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
-                }
-            }
-        } else {
+        if (memberRole !== MemberRole.owner) {
             for (const member of team.members) {
                 if (member.memberId !== newMember.memberId) {
                     throw new QMError(`${newMember.slack.screenName} is not a member of this team.`);
+                } else {
+                    logger.info(`Verified user is not an owner and is a member of the team`);
                 }
             }
+        } else {
+            throw new QMError(`${newMember.slack.screenName} is an owner of this team and cannot be removed.`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
         }
     }
 }

@@ -69,24 +69,14 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
             // await this.removeMemberFromChannel(ctx, memberRemovedFromTeam);
 
             const team = memberRemovedFromTeam.team;
-            const projects = await this.getListOfTeamProjects(team.name);
+            const projects = await this.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(team.name, false);
             const bitbucketConfiguration = new BitbucketConfigurationService([], [], this.bitbucketService);
             await this.removePermissionsForUserFromTeams(bitbucketConfiguration, team.name, projects, memberRemovedFromTeam);
 
             return await ctx.messageClient.addressChannels("User permissions successfully removed from associated projects. Please manually remove the user from the relevant Slack channels.", team.slackIdentity.teamChannel);
         } catch (error) {
-            return await this.handleError(ctx, error, memberRemovedFromTeam.team.slackIdentity.teamChannel);
+            return await handleQMError(new ChannelMessageClient(ctx).addDestination(memberRemovedFromTeam.team.slackIdentity.teamChannel), error);
         }
-    }
-
-    private async getListOfTeamProjects(teamName: string) {
-        let projects;
-        try {
-            projects = await this.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(teamName, false);
-        } catch (error) {
-            throw new QMError(error, "Failed to get list of projects associated with this team.");
-        }
-        return projects;
     }
 
     private async removePermissionsForUserFromTeams(bitbucketConfiguration: BitbucketConfigurationService, teamName: string, projects, memberRemovedFromTeam) {
@@ -110,15 +100,9 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
             }
         } catch (error) {
             if (error instanceof OCCommandResult) {
-                throw new OCResultError(error, `Failed to add openshift team member permissions to the team projects.`);
+                throw new OCResultError(error, `Failed to remove openshift team member permissions from the team projects.`);
             }
             throw error;
         }
-    }
-
-    private async handleError(ctx: HandlerContext, error, teamChannel: string) {
-        const messageClient = new ChannelMessageClient(ctx);
-        messageClient.addDestination(teamChannel);
-        return await handleQMError(messageClient, error);
     }
 }
