@@ -91,7 +91,7 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
 
     private async removePermissionsForUserFromTeams(bitbucketConfiguration: BitbucketConfigurationService, teamName: string, projects, memberRemovedFromTeam) {
         try {
-            await this.ocService.login();
+            await this.ocService.login(QMConfig.subatomic.openshiftNonProd, true);
             const devopsProject = getDevOpsEnvironmentDetails(teamName).openshiftProjectId;
             await this.ocService.removeTeamMembershipPermissionsFromProject(devopsProject, memberRemovedFromTeam.memberRemoved.domainUsername);
 
