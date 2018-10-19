@@ -58,7 +58,7 @@ export class RemoveMemberFromTeamService {
         }
     }
 
-    public verifyRemoveMemberRequest(newMember: { memberId: string, slack: { screenName: string } }, team: { owners: Array<{ memberId: string }>, members: Array<{ memberId: string }> }, memberRole: MemberRole) {
+    public verifyCanRemoveMemberRequest(newMember: { memberId: string, slack: { screenName: string } }, team: { owners: Array<{ memberId: string }>, members: Array<{ memberId: string }> }, memberRole: MemberRole) {
         if (memberRole !== MemberRole.owner) {
             for (const member of team.members) {
                 if (member.memberId !== newMember.memberId) {

@@ -38,7 +38,7 @@ export class RemoveMemberFromTeamTask extends Task {
             const screenName = getScreenName(this.slackName);
             const chatId = await loadScreenNameByUserId(ctx, screenName);
             const newMember = await this.removeMemberFromTeamService.getMemberGluonDetails(ctx, chatId, teamChannel);
-            this.removeMemberFromTeamService.verifyRemoveMemberRequest(newMember, team, this.memberRole);
+            this.removeMemberFromTeamService.verifyCanRemoveMemberRequest(newMember, team, this.memberRole);
 
             const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
             await this.taskListMessage.succeedTask(this.TASK_GATHER_REQUEST_DETAILS);
