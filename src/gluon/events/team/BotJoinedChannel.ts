@@ -116,7 +116,7 @@ export class BotJoinedChannel implements HandleEvent<any> {
                 text: `Welcome to *${botJoinedChannel.channel.name}* team channel @${userName}!`,
                 attachments: [{
                     fallback: `Welcome to *${botJoinedChannel.channel.name}* team channel!`,
-                    text: "Unfortunately you are not registered as a member/owner of this team. If you would like to join this team please get a team owner (sub list team members`) to add you.",
+                    text: "You are not part of this team. To join this team get a team owner (`sub list team members`) to add you.",
                     actions: [
                         buttonForCommand(
                             {
