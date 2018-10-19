@@ -3,8 +3,8 @@ import {AxiosPromise} from "axios-https-proxy-fix";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {usernameFromDomainUsername} from "../../util/member/Members";
-import {BitbucketService} from "./BitbucketService";
 import {QMError} from "../../util/shared/Error";
+import {BitbucketService} from "./BitbucketService";
 
 export class BitbucketConfigurationService {
 
