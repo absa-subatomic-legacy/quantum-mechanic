@@ -65,10 +65,6 @@ export class BitbucketConfigurationService {
         return this.bitbucketService.addProjectPermission(projectKey, user, "PROJECT_WRITE");
     }
 
-    // private removeProjectPermission(projectKey: string, user: string): AxiosPromise {
-    //     return this.bitbucketService.removeProjectPermission(projectKey, user);
-    // }
-
     private async addBranchPermissions(bitbucketProjectKey: string, owners: string[], additional: string[] = []) {
         const allUsers = owners.concat(additional);
 
