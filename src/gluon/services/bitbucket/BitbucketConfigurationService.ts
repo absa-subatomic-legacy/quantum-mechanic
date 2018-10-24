@@ -16,39 +16,48 @@ export class BitbucketConfigurationService {
         this.teamMembers = this.teamMembers.map(member => usernameFromDomainUsername(member));
     }
 
-    public configureBitbucketProject(bitbucketProjectKey: string): Promise<any[]> {
+    public async configureBitbucketProject(bitbucketProjectKey: string) {
         logger.info(`Configuring project for key: ${bitbucketProjectKey}`);
 
-        return Promise.all([
-            this.owners.map(owner => this.addAdminProjectPermission(bitbucketProjectKey, owner)),
-            this.teamMembers.map(teamMember => this.addWriteProjectPermission(bitbucketProjectKey, teamMember)),
-            this.addBranchPermissions(bitbucketProjectKey, this.owners, [QMConfig.subatomic.bitbucket.auth.username]),
-            this.addHooks(bitbucketProjectKey),
-
-            _.zipWith(this.owners, this.teamMembers, (owner, member) => {
-                this.bitbucketService.getDefaultReviewers(bitbucketProjectKey)
-                    .then(reviewers => {
-                        const jsonLength = reviewers.data.length;
-                        let reviewerExists = false;
-
-                        for (let i = 0; i < jsonLength; i++) {
-                            if (reviewers.data[i].reviewers[0].name === owner) {
-                                reviewerExists = true;
-                                break;
-                            }
-                        }
-                        if (reviewerExists !== true) {
-                            return Promise.all([
-                                this.addDefaultReviewers(bitbucketProjectKey, owner),
-                                this.addDefaultReviewers(bitbucketProjectKey, member),
-                            ]);
-                        }
-                    });
-            }),
-        ]);
+        await this.addAllMembersToProject(bitbucketProjectKey, this.owners);
+        await this.addAllOwnersToProject(bitbucketProjectKey, this.teamMembers);
+        await this.configureDefaultProjectSettings(bitbucketProjectKey, this.teamMembers, this.owners);
     }
 
-    public  async removeUserFromBitbucketProject(bitbucketProjectKey: string) {
+    public async configureDefaultProjectSettings(bitbucketProjectKey: string, members: string[], owners: string[]) {
+        await this.addBranchPermissions(bitbucketProjectKey, owners, [QMConfig.subatomic.bitbucket.auth.username]);
+        await this.addHooks(bitbucketProjectKey);
+        await _.zipWith(owners, members, async (owner, member) => {
+            const reviewers = await this.bitbucketService.getDefaultReviewers(bitbucketProjectKey);
+            const jsonLength = reviewers.data.length;
+            let reviewerExists = false;
+
+            for (let i = 0; i < jsonLength; i++) {
+                if (reviewers.data[i].reviewers[0].name === owner) {
+                    reviewerExists = true;
+                    break;
+                }
+            }
+            if (reviewerExists !== true) {
+                await this.addDefaultReviewers(bitbucketProjectKey, owner);
+                await this.addDefaultReviewers(bitbucketProjectKey, member);
+            }
+        });
+    }
+
+    public async addAllMembersToProject(projectKey: string, members: string[]) {
+        for (const member of members) {
+            await this.addWriteProjectPermission(projectKey, member);
+        }
+    }
+
+    public async addAllOwnersToProject(projectKey: string, owners: string[]) {
+        for (const owner of owners) {
+            await this.addAdminProjectPermission(projectKey, owner);
+        }
+    }
+
+    public async removeUserFromBitbucketProject(bitbucketProjectKey: string) {
         logger.info(`Trying to remove user from BitBucket project: ${bitbucketProjectKey}`);
         try {
             return this.teamMembers.map(teamMember => this.bitbucketService.removeProjectPermission(bitbucketProjectKey, teamMember));
@@ -66,6 +75,7 @@ export class BitbucketConfigurationService {
     }
 
     private async addBranchPermissions(bitbucketProjectKey: string, owners: string[], additional: string[] = []) {
+
         const allUsers = owners.concat(additional);
 
         await this.bitbucketService.addBranchPermissions(bitbucketProjectKey,
