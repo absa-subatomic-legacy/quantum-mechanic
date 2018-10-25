@@ -1,82 +1,38 @@
 import {logger} from "@atomist/automation-client";
 import {AxiosPromise} from "axios-https-proxy-fix";
 import * as _ from "lodash";
-import {QMConfig} from "../../../config/QMConfig";
-import {usernameFromDomainUsername} from "../../util/member/Members";
 import {QMError} from "../../util/shared/Error";
 import {BitbucketService} from "./BitbucketService";
 
 export class BitbucketConfigurationService {
 
-    constructor(private owners: string[], private teamMembers: string[], private bitbucketService = new BitbucketService()) {
-        logger.debug(`Configuring with team owners: ${JSON.stringify(owners)}`);
-        logger.debug(`Configuring with team members: ${JSON.stringify(teamMembers)}`);
-
-        this.owners = this.owners.map(owner => usernameFromDomainUsername(owner));
-        this.teamMembers = this.teamMembers.map(member => usernameFromDomainUsername(member));
+    constructor(private bitbucketService = new BitbucketService()) {
     }
 
-    public async configureBitbucketProject(bitbucketProjectKey: string) {
-        logger.info(`Configuring project for key: ${bitbucketProjectKey}`);
-
-        await this.addAllMembersToProject(bitbucketProjectKey, this.owners);
-        await this.addAllOwnersToProject(bitbucketProjectKey, this.teamMembers);
-        await this.configureDefaultProjectSettings(bitbucketProjectKey, this.teamMembers, this.owners);
-    }
-
-    public async configureDefaultProjectSettings(bitbucketProjectKey: string, members: string[], owners: string[]) {
-        await this.addBranchPermissions(bitbucketProjectKey, owners, [QMConfig.subatomic.bitbucket.auth.username]);
-        await this.addHooks(bitbucketProjectKey);
-        await _.zipWith(owners, members, async (owner, member) => {
-            const reviewers = await this.bitbucketService.getDefaultReviewers(bitbucketProjectKey);
-            const jsonLength = reviewers.data.length;
-            let reviewerExists = false;
-
-            for (let i = 0; i < jsonLength; i++) {
-                if (reviewers.data[i].reviewers[0].name === owner) {
-                    reviewerExists = true;
-                    break;
-                }
-            }
-            if (reviewerExists !== true) {
-                await this.addDefaultReviewers(bitbucketProjectKey, owner);
-                await this.addDefaultReviewers(bitbucketProjectKey, member);
-            }
-        });
-    }
-
-    public async addAllMembersToProject(projectKey: string, members: string[]) {
-        for (const member of members) {
+    public async addAllMembersToProject(projectKey: string, membersDomainUsernames: string[]) {
+        for (const member of membersDomainUsernames) {
             await this.addWriteProjectPermission(projectKey, member);
         }
     }
 
-    public async addAllOwnersToProject(projectKey: string, owners: string[]) {
-        for (const owner of owners) {
+    public async addAllOwnersToProject(projectKey: string, ownersDomainUsernames: string[]) {
+        for (const owner of ownersDomainUsernames) {
             await this.addAdminProjectPermission(projectKey, owner);
         }
     }
 
-    public async removeUserFromBitbucketProject(bitbucketProjectKey: string) {
+    public async removeUserFromBitbucketProject(bitbucketProjectKey: string, membersDomainUsernames: string[]) {
         logger.info(`Trying to remove user from BitBucket project: ${bitbucketProjectKey}`);
         try {
-            return this.teamMembers.map(teamMember => this.bitbucketService.removeProjectPermission(bitbucketProjectKey, teamMember));
+            return membersDomainUsernames.map(teamMember => this.bitbucketService.removeProjectPermission(bitbucketProjectKey, teamMember));
         } catch (error) {
             throw new QMError(error, `Failed to remove BitBucket permissions for user`);
         }
     }
 
-    private addAdminProjectPermission(projectKey: string, user: string): AxiosPromise {
-        return this.bitbucketService.addProjectPermission(projectKey, user, "PROJECT_ADMIN");
-    }
+    public async addBranchPermissions(bitbucketProjectKey: string, ownersDomainUsernames: string[], additionalUserDomainUsernames: string[] = []) {
 
-    private addWriteProjectPermission(projectKey: string, user: string): AxiosPromise {
-        return this.bitbucketService.addProjectPermission(projectKey, user, "PROJECT_WRITE");
-    }
-
-    private async addBranchPermissions(bitbucketProjectKey: string, owners: string[], additional: string[] = []) {
-
-        const allUsers = owners.concat(additional);
+        const allUsers = ownersDomainUsernames.concat(additionalUserDomainUsernames);
 
         await this.bitbucketService.addBranchPermissions(bitbucketProjectKey,
             {
@@ -121,7 +77,7 @@ export class BitbucketConfigurationService {
             });
     }
 
-    private addHooks(bitbucketProjectKey: string): Promise<any[]> {
+    public addHooks(bitbucketProjectKey: string): Promise<any[]> {
         // Enable and configure hooks
         return Promise.all([
             this.bitbucketService.addProjectWebHook(bitbucketProjectKey, "com.atlassian.bitbucket.server.bitbucket-bundled-hooks:verify-committer-hook"),
@@ -134,7 +90,30 @@ export class BitbucketConfigurationService {
         ]);
     }
 
-    private addDefaultReviewers(bitbucketProjectKey: string, bitbucketUsername: string): AxiosPromise {
+    public async addDefaultReviewers(bitbucketProjectKey: string, membersDomainUsernames: string[], ownersDomainUsernames: string[]) {
+        return await _.zipWith(ownersDomainUsernames, membersDomainUsernames, async (owner, member) => {
+            const reviewers = await this.bitbucketService.getDefaultReviewers(bitbucketProjectKey);
+            const jsonLength = reviewers.data.length;
+            let reviewerExists = false;
+
+            for (let i = 0; i < jsonLength; i++) {
+                if (reviewers.data[i].reviewers[0].name === owner) {
+                    reviewerExists = true;
+                    break;
+                }
+            }
+            if (reviewerExists !== true) {
+                if (owner !== undefined) {
+                    await this.addUserAsDefaultReviewer(bitbucketProjectKey, owner);
+                }
+                if (member !== undefined) {
+                    await this.addUserAsDefaultReviewer(bitbucketProjectKey, member);
+                }
+            }
+        });
+    }
+
+    private addUserAsDefaultReviewer(bitbucketProjectKey: string, bitbucketUsername: string): AxiosPromise {
         logger.debug(`Adding default reviewer [${bitbucketUsername}] to Bitbucket project: ${bitbucketProjectKey}`);
 
         // TODO Add default reviewers (the team owners - in future everyone with 'reviewer' role?)
@@ -171,4 +150,13 @@ export class BitbucketConfigurationService {
                 });
         }
     }
+
+    private addAdminProjectPermission(projectKey: string, userDomainUsername: string): AxiosPromise {
+        return this.bitbucketService.addProjectPermission(projectKey, userDomainUsername, "PROJECT_ADMIN");
+    }
+
+    private addWriteProjectPermission(projectKey: string, userDomainUsername: string): AxiosPromise {
+        return this.bitbucketService.addProjectPermission(projectKey, userDomainUsername, "PROJECT_WRITE");
+    }
+
 }
