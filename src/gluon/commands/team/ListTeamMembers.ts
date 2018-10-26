@@ -1,25 +1,15 @@
-import {
-    CommandHandler,
-    HandlerContext,
-    MappedParameter,
-    MappedParameters,
-    Tags,
-} from "@atomist/automation-client";
+import {CommandHandler, HandlerContext, MappedParameter, MappedParameters, Tags} from "@atomist/automation-client";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {AwaitAxios} from "../../../http/AwaitAxios";
 import {GluonService} from "../../services/gluon/GluonService";
-import {
-    GluonTeamNameSetter,
-    setGluonTeamName,
-} from "../../util/recursiveparam/GluonParameterSetters";
+import {GluonTeamNameSetter, setGluonTeamName} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 
 @CommandHandler("List members of a team", QMConfig.subatomic.commandPrefix + " list team members")
-@Tags("subatomic", "slack", "channel", "team")
+@Tags("subatomic", "slack", "channel", "member", "team")
 export class ListTeamMembers extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 

@@ -23,14 +23,10 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {
-    handleQMError,
-    QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
-@Tags("subatomic", "openshiftNonProd", "project")
+@Tags("subatomic", "openshiftNonProd", "project", "other")
 export class NewProjectEnvironments extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 

@@ -12,7 +12,7 @@ import {ProjectProdRequestApprovalResponse} from "../../util/project/Project";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Ignore a project prod request")
-@Tags("subatomic", "openshiftProd", "project")
+@Tags("subatomic", "openshiftProd", "project", "other")
 export class UpdateProjectProdRequest implements HandleCommand<HandlerResult> {
 
     @Parameter({

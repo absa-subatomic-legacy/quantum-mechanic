@@ -6,16 +6,14 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
+    Tags,
 } from "@atomist/automation-client";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {
-    GluonTeamNameSetter,
-    setGluonTeamName,
-} from "../../util/recursiveparam/GluonParameterSetters";
+import {GluonTeamNameSetter, setGluonTeamName} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -23,6 +21,7 @@ import {
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Add a new Subatomic Config Server", QMConfig.subatomic.commandPrefix + " add config server")
+@Tags("subatomic", "project")
 export class AddConfigServer extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 

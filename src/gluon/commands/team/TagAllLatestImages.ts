@@ -12,19 +12,12 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {getProjectDevOpsId} from "../../util/project/Project";
-import {
-    GluonTeamNameSetter,
-    setGluonTeamName,
-} from "../../util/recursiveparam/GluonParameterSetters";
+import {GluonTeamNameSetter, setGluonTeamName} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {
-    handleQMError,
-    QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Tag all latest subatomic images to a devops environment ", QMConfig.subatomic.commandPrefix + " tag all images")
 @Tags("subatomic", "devops", "team", "openshiftNonProd", "images")

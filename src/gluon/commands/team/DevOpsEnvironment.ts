@@ -10,10 +10,7 @@ import {
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
-import {
-    GluonTeamNameSetter,
-    setGluonTeamName,
-} from "../../util/recursiveparam/GluonParameterSetters";
+import {GluonTeamNameSetter, setGluonTeamName} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,

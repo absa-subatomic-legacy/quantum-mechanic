@@ -7,6 +7,7 @@ import {
     MappedParameters,
     Parameter,
     success,
+    Tags,
 } from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
@@ -22,13 +23,10 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {
-    handleQMError,
-    QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Create a new Bitbucket project")
+@Tags("empty")
 export class NewBitbucketProject extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
@@ -108,6 +106,7 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand
 }
 
 @CommandHandler("Link an existing Bitbucket project", QMConfig.subatomic.commandPrefix + " link bitbucket project")
+@Tags("subatomic", "bitbucket", "project")
 export class ListExistingBitbucketProject
     extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {

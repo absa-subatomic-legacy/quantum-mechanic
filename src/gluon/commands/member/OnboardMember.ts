@@ -13,14 +13,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OnboardMemberMessages} from "../../messages/member/OnboardMemberMessages";
 import {GluonService} from "../../services/gluon/GluonService";
-import {
-    handleQMError,
-    QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Onboard a new team member", QMConfig.subatomic.commandPrefix + " onboard me")
-@Tags("subatomic", "slack", "member")
+@Tags("subatomic", "slack", "member", "team")
 export class OnboardMember implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)

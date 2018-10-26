@@ -13,10 +13,7 @@ import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddMemberToTeamTask} from "../../tasks/team/AddMemberToTeamTask";
 import {MemberRole} from "../../util/member/Members";
-import {
-    GluonTeamNameSetter,
-    setGluonTeamName,
-} from "../../util/recursiveparam/GluonParameterSetters";
+import {GluonTeamNameSetter, setGluonTeamName} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -24,7 +21,7 @@ import {
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Add a member as an owner to a team", QMConfig.subatomic.commandPrefix + " add team owner")
-@Tags("subatomic", "team", "member")
+@Tags("subatomic", "member", "team")
 export class AddOwnerToTeam extends RecursiveParameterRequestCommand implements GluonTeamNameSetter {
 
     private static RecursiveKeys = {

@@ -15,7 +15,7 @@ import {getScreenName, loadScreenNameByUserId} from "../../util/member/Members";
 import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Request membership to a team")
-@Tags("subatomic", "team", "member")
+@Tags("empty")
 export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)

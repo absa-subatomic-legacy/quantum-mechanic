@@ -6,26 +6,21 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
+    Tags,
 } from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
-import {
-    GluonTeamNameSetter,
-    setGluonTeamName,
-} from "../../util/recursiveparam/GluonParameterSetters";
+import {GluonTeamNameSetter, setGluonTeamName} from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {
-    handleQMError,
-    logErrorAndReturnSuccess,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+import {handleQMError, logErrorAndReturnSuccess, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("List projects belonging to a team", QMConfig.subatomic.commandPrefix + " list projects")
+@Tags("subatomic", "project", "team")
 export class ListTeamProjects extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
@@ -107,6 +102,7 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand
 }
 
 @CommandHandler("List project details")
+@Tags("subatomic", "project")
 export class ListProjectDetails implements HandleCommand<HandlerResult> {
 
     @Parameter({

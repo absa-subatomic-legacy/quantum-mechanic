@@ -6,6 +6,7 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
+    Tags,
 } from "@atomist/automation-client";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
@@ -13,10 +14,7 @@ import {GenericProdRequestMessages} from "../../messages/project/GenericProdRequ
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {GenericOpenshiftResourceService} from "../../services/projects/GenericOpenshiftResourceService";
-import {
-    getHighestPreProdEnvironment,
-    getResourceDisplayMessage,
-} from "../../util/openshift/Helpers";
+import {getHighestPreProdEnvironment, getResourceDisplayMessage} from "../../util/openshift/Helpers";
 import {getProjectId} from "../../util/project/Project";
 import {
     GluonProjectNameSetter,
@@ -29,14 +27,10 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
-import {
-    ChannelMessageClient,
-    handleQMError,
-    QMMessageClient,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+import {ChannelMessageClient, handleQMError, QMMessageClient, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Move openshift resources to prod", QMConfig.subatomic.commandPrefix + " request generic prod")
+@Tags("subatomic", "project", "other")
 export class CreateGenericProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 

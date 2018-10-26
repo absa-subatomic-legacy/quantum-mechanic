@@ -6,6 +6,7 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
+    Tags,
 } from "@atomist/automation-client";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
@@ -13,10 +14,7 @@ import {ApplicationProdRequestMessages} from "../../messages/package/Application
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {PackageOpenshiftResourceService} from "../../services/packages/PackageOpenshiftResourceService";
-import {
-    getHighestPreProdEnvironment,
-    getResourceDisplayMessage,
-} from "../../util/openshift/Helpers";
+import {getHighestPreProdEnvironment, getResourceDisplayMessage} from "../../util/openshift/Helpers";
 import {getProjectId} from "../../util/project/Project";
 import {
     GluonApplicationNameSetter,
@@ -31,14 +29,10 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
-import {
-    ChannelMessageClient,
-    handleQMError,
-    QMMessageClient,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+import {ChannelMessageClient, handleQMError, QMMessageClient, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Create application in prod", QMConfig.subatomic.commandPrefix + " request application prod")
+@Tags("subatomic", "package")
 export class CreateApplicationProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
 
