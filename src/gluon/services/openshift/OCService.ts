@@ -461,17 +461,24 @@ export class OCService {
     }
 
     public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {
+
         logger.debug(`Trying to add team membership permission to project.`);
-        await team.owners.map(async owner => {
-            const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
-            logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
-            return await this.openShiftApi.policy.addRoleToUser(ownerUsername, "admin", projectId);
+
+        const teamOwners: string[] =  team.owners.map( owner => {
+            return /[^\\]*$/.exec(owner.domainUsername)[0];
         });
-        await team.members.map(async member => {
-            const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
-            await logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
-            return await this.openShiftApi.policy.addRoleToUser(memberUsername, "edit", projectId);
+        if (teamOwners.length > 0) {
+            await this.openShiftApi.policy.addRoleToUsers(teamOwners, "admin", projectId);
+        }
+
+        const teamMembers: string[] =   team.members.map( member => {
+            return /[^\\]*$/.exec(member.domainUsername)[0];
         });
+
+        if (teamMembers.length > 0) {
+            const foo =  await this.openShiftApi.policy.addRoleToUsers(teamMembers, "edit", projectId);
+            return foo;
+        }
     }
 
     public async removeTeamMembershipPermissionsFromProject(projectId: string, domainUserName: string) {
@@ -488,7 +495,7 @@ export class OCService {
 
     public async addRoleToUserInNamespace(user: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
         logger.debug(`Trying to add role to user in namespace: user: ${user}; role: ${role}; namespace: ${namespace}`);
-        const addRoleResult = await this.openShiftApi.policy.addRoleToUser(user, role, namespace);
+        const addRoleResult = await this.openShiftApi.policy.addRoleToUsers([user], role, namespace);
         if (!isSuccessCode(addRoleResult.status)) {
             logger.error(`Failed to grant the role ${role} to account ${user}. Error: ${inspect(addRoleResult)}`);
             throw new QMError(`Failed to grant the role ${role} to account ${user}.`);

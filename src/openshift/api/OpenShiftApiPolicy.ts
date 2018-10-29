@@ -8,14 +8,14 @@ import {ResourceUrl} from "./resources/ResourceUrl";
 
 export class OpenShiftApiPolicy extends OpenShiftApiElement {
 
-    public addRoleToUser(username: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
-        if (username.startsWith("system:serviceaccount")) {
-            const usernameSplit = username.split(":");
-            username = usernameSplit.pop();
+    public addRoleToUsers(usernames: string[], role: string, namespace: string): Promise<OpenshiftApiResult> {
+        if (usernames.length > 0 && usernames[0].startsWith("system:serviceaccount")) {
+            const usernameSplit = usernames[0].split(":");
+            usernames[0] = usernameSplit.pop();
             const sourceNamespace = usernameSplit.pop();
-            return this.addRoleToServiceAccount(username, sourceNamespace, role, namespace);
+            return this.addRoleToServiceAccount(usernames[0], sourceNamespace, role, namespace);
         } else {
-            return this.addRoleToUserAccount(username, role, namespace);
+            return this.addRoleToUserAccount(usernames, role, namespace, false);
         }
     }
 
@@ -41,23 +41,43 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
         });
     }
 
-    public addRoleToUserAccount(username: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
+    public async addRoleToUserAccount(usernames: string[], role: string, namespace: string, roleExists: boolean): Promise<OpenshiftApiResult> {
+
         const instance = this.getAxiosInstanceOApi();
-        return this.findExistingRole(instance, role, namespace).then(existingRole => {
-            if (existingRole === null) {
-                const newRole = ResourceFactory.userRoleBindingResource(namespace, role, username);
-                logger.debug("Role not found. Creating new role binding");
-                return instance.post(ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace), newRole);
-            } else {
-                existingRole.subjects.push({
-                    kind: "User",
-                    name: username,
-                });
-                existingRole.userNames.push(username);
-                logger.debug("Found role. Added user to role binding list");
-                return instance.put(`${ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace)}/${role}`, existingRole);
-            }
+
+        const roleBindingResourceObject = await this.getRoleBindingResource(role, namespace);
+        const openshiftRole = roleBindingResourceObject.roleBinding;
+
+        usernames.forEach( username => {
+            openshiftRole.subjects.push({
+                kind: "User",
+                name: username,
+            });
+            openshiftRole.userNames.push(username);
         });
+
+        if (roleBindingResourceObject.aNewRole) {
+            logger.debug("Role not found. Creating new role binding...");
+            return instance.post(ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace), openshiftRole);
+        } else {
+            logger.debug("Found role. Adding user to role binding list...");
+            return instance.put(`${ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace)}/${role}`, openshiftRole);
+        }
+    }
+
+    public async getRoleBindingResource(role: string, destinationNamespace) {
+
+        let newRole = false;
+
+        let openshiftRole = await this.findExistingRole(this.getAxiosInstanceOApi(), role, destinationNamespace);
+        if (openshiftRole === null) {
+            newRole = true;
+            openshiftRole = ResourceFactory.baseRoleBindingResource(destinationNamespace, role);
+            logger.debug("Role not found. Creating new role binding");
+        } else {
+            logger.debug("Role found OK");
+        };
+        return { roleBinding: openshiftRole, aNewRole: newRole };
     }
 
     public removeRoleFromUser(username: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
