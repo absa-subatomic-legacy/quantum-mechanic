@@ -14,7 +14,7 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Re-run a failed project production request")
-@Tags("subatomic", "openshiftProd", "project", "other")
+@Tags("empty")
 export class ReRunProjectProdRequest implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)

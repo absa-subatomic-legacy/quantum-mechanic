@@ -31,6 +31,7 @@ import {NewTeamSlackChannel} from "../../commands/team/NewSlackChannel";
 import {TagAllLatestImages} from "../../commands/team/TagAllLatestImages";
 import {TagLatestImage} from "../../commands/team/TagLatestImage";
 import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
+import {Constructor} from "../../../../node_modules/@atomist/automation-client/util/constructionUtils";
 
 export class HelpCategory {
 
@@ -86,7 +87,7 @@ export class HelpCategory {
             PatchBuildConfigBaseImage];
 
         for (const command of allCommands) {
-            const classTag = this.getTagsMetadata(command.prototype);
+            const classTag = this.getCommandMetadata(command.prototype);
             for (const tag of classTag.tags) {
                 if (this.forceCast<Tag>(tag).name === "empty") {
                     break;
@@ -99,9 +100,58 @@ export class HelpCategory {
         return this.commands;
     }
 
-    private getTagsMetadata(tagsPrototype: any): { tags: string[] } {
+    public findCommandByName(commandName: string) {
+        const allCommands = [
+            NewDevOpsEnvironment,
+            NewOrUseTeamSlackChannel,
+            NewTeamSlackChannel,
+            LinkExistingTeamSlackChannel,
+            OnboardMember,
+            AddSlackDetails,
+            JoinTeam,
+            AddMemberToTeam,
+            AddOwnerToTeam,
+            AssociateTeam,
+            CreateTeam,
+            CreateProject,
+            NewBitbucketProject,
+            NewProjectEnvironments,
+            CreateMembershipRequestToTeam,
+            MembershipRequestClosed,
+            ListExistingBitbucketProject,
+            LinkExistingApplication,
+            LinkExistingLibrary,
+            KickOffJenkinsBuild,
+            CreateOpenShiftPvc,
+            AddConfigServer,
+            ListTeamProjects,
+            ListProjectDetails,
+            ListTeamMembers,
+            ConfigurePackage,
+            ConfigureBasicPackage,
+            TagAllLatestImages,
+            TagLatestImage,
+            CreateProjectProdEnvironments,
+            CreateApplicationProd,
+            UpdateProjectProdRequest,
+            CreateGenericProd,
+            ReRunProjectProdRequest,
+            PatchBuildConfigBaseImage];
+
+        for (const command of allCommands) {
+            const commandMetaData = this.getCommandMetadata(command.prototype);
+
+            if (commandMetaData.name === commandName) {
+                return command;
+            }
+        }
+        return null;
+    }
+
+    private getCommandMetadata(commandPrototype: any): { tags: string[], name: string } {
         return {
-            tags: tagsPrototype.__tags,
+            tags: commandPrototype.__tags,
+            name: commandPrototype.__name,
         };
     }
 

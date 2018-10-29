@@ -32,7 +32,7 @@ export class Help implements HandleCommand<HandlerResult> {
         description: "Class of command to be run",
         required: false,
     })
-    public commandOfClass: any;
+    public commandClassName: string;
 
     @Parameter({
         description: "correlation id of the message that invoked this command",
@@ -67,7 +67,8 @@ export class Help implements HandleCommand<HandlerResult> {
                     attachments: this.optionsAttachments,
                 }, {id: this.correlationId});
             } else if (this.selectedOption.includes("sub")) {
-                logger.info(`!@!${this.commandOfClass}`);
+                logger.info(`!@!${this.optionFolders[0].findCommandByName(this.commandClassName)}`);
+                logger.info(typeof this.optionFolders[0].findCommandByName(this.commandClassName));
                 return await ctx.messageClient.respond({
                     text: `\`${this.selectedOption}\` - ${this.selectedDescription}`,
                     attachments: [
@@ -80,7 +81,7 @@ export class Help implements HandleCommand<HandlerResult> {
                                     {
                                         text: "Confirm",
                                     },
-                                    new this.commandOfClass(), {correlationId: this.correlationId}),
+                                    this.optionFolders[0].findCommandByName(this.commandClassName), {correlationId: this.correlationId}),
                             ],
                         }],
                 }, {id: this.correlationId});
@@ -123,7 +124,6 @@ export class Help implements HandleCommand<HandlerResult> {
     }
 
     private commandOptions(commandMetadata: any, command: any) {
-        logger.info(`----${command}`);
         this.optionsAttachments.push({
             text: `\`${commandMetadata.intent}\` - ${commandMetadata.description}`,
             fallback: "",
@@ -136,9 +136,10 @@ export class Help implements HandleCommand<HandlerResult> {
                     new Help(), {
                         selectedOption: `${commandMetadata.intent}`,
                         selectedDescription: `${commandMetadata.description}`,
-                        commandOfClass: command,
+                        commandClassName: command.prototype.__name,
                         correlationId: this.correlationId,
                     }),
+                // new command(), {correlationId: this.correlationId}),
             ],
         });
     }

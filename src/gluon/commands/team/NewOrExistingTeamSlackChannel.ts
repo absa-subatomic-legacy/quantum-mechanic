@@ -9,7 +9,7 @@ import {
 import {TeamSlackChannelMessages} from "../../messages/team/TeamSlackChannelMessages";
 
 @CommandHandler("Check whether to create a new team channel or use an existing channel")
-@Tags("subatomic", "slack", "channel", "team")
+@Tags("empty")
 export class NewOrUseTeamSlackChannel implements HandleCommand {
 
     @Parameter({

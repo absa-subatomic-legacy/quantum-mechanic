@@ -21,7 +21,7 @@ import {
 } from "../../util/shared/Error";
 
 @CommandHandler("Close a membership request")
-@Tags("subatomic", "team", "membership")
+@Tags("empty")
 export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
