@@ -24,7 +24,11 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
+import {
+    handleQMError,
+    QMError,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
 
 @CommandHandler("Create a new Bitbucket project")
 @Tags("empty")
@@ -170,7 +174,7 @@ export class ListExistingBitbucketProject
 
         const projectUiUrl = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.bitbucketProjectKey}`;
 
-        const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+        const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
         await ctx.messageClient.send({
             text: `🚀 The Bitbucket project with key ${this.bitbucketProjectKey} is being configured...`,
         }, destination);

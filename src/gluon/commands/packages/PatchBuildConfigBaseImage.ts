@@ -20,7 +20,10 @@ import {
     setGluonProjectName,
     setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {ImageNameSetter, setImageNameFromDevOps} from "../../util/recursiveparam/OpenshiftParameterSetters";
+import {
+    ImageNameSetter,
+    setImageNameFromDevOps,
+} from "../../util/recursiveparam/OpenshiftParameterSetters";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,

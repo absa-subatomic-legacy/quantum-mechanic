@@ -13,7 +13,10 @@ import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {PackageCommandService} from "../../services/packages/PackageCommandService";
 import {ApplicationType} from "../../util/packages/Applications";
-import {BitbucketRepoSetter, setBitbucketRepository} from "../../util/recursiveparam/BitbucketParamSetters";
+import {
+    BitbucketRepoSetter,
+    setBitbucketRepository,
+} from "../../util/recursiveparam/BitbucketParamSetters";
 import {
     GluonProjectNameSetter,
     GluonTeamNameSetter,

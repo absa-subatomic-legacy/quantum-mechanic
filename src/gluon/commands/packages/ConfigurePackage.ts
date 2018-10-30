@@ -24,7 +24,10 @@ import {
     setGluonProjectName,
     setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {JenkinsfileNameSetter, setJenkinsfileName} from "../../util/recursiveparam/JenkinsParameterSetters";
+import {
+    JenkinsfileNameSetter,
+    setJenkinsfileName,
+} from "../../util/recursiveparam/JenkinsParameterSetters";
 import {
     ImageNameSetter,
     OpenshiftTemplateSetter,
