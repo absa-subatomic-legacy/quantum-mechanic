@@ -6,7 +6,7 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import * as _ from "lodash";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
@@ -23,7 +23,7 @@ import {
 } from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 
-@EventHandler("Receive MembershipRequestCreated events", `
+@EventHandler("Receive MembersAddedToTeamEvent events", `
 subscription MembersAddedToTeamEvent {
   MembersAddedToTeamEvent {
     team {
@@ -71,11 +71,10 @@ export class MembersAddedToTeam implements HandleEvent<any> {
 
             const projects = await this.getListOfTeamProjects(team.name);
 
-            const bitbucketConfiguration = this.getBitbucketConfiguration(membersAddedToTeamEvent);
+            await this.addPermissionsForUserToTeams(team.name, projects, membersAddedToTeamEvent);
 
-            await this.addPermissionsForUserToTeams(bitbucketConfiguration, team.name, projects, membersAddedToTeamEvent);
-
-            return await ctx.messageClient.addressChannels("New user permissions successfully added to associated projects.", team.slackIdentity.teamChannel);
+            const destination = await addressSlackChannelsFromContext(ctx, team.slackIdentity.teamChannel);
+            return await ctx.messageClient.send("New user permissions successfully added to associated projects.", destination);
         } catch (error) {
             return await this.handleError(ctx, error, membersAddedToTeamEvent.team.slackIdentity.teamChannel);
         }
@@ -89,15 +88,6 @@ export class MembersAddedToTeam implements HandleEvent<any> {
             throw new QMError(error, "Failed to get list of projects associated with this team.");
         }
         return projects;
-    }
-
-    private getBitbucketConfiguration(membersAddedToTeamEvent): BitbucketConfigurationService {
-        let teamOwnersUsernames: string[] = [];
-        let teamMembersUsernames: string[] = [];
-
-        teamOwnersUsernames = _.union(teamOwnersUsernames, membersAddedToTeamEvent.owners.map(owner => owner.domainUsername));
-        teamMembersUsernames = _.union(teamMembersUsernames, membersAddedToTeamEvent.members.map(member => member.domainUsername));
-        return new BitbucketConfigurationService(teamOwnersUsernames, teamMembersUsernames, this.bitbucketService);
     }
 
     private async inviteMembersToChannel(ctx: HandlerContext, addMembersToTeamEvent) {
@@ -124,15 +114,22 @@ export class MembersAddedToTeam implements HandleEvent<any> {
 
     }
 
-    private async addPermissionsForUserToTeams(bitbucketConfiguration: BitbucketConfigurationService, teamName: string, projects, membersAddedToTeamEvent) {
+    private async addPermissionsForUserToTeams(teamName: string, projects, membersAddedToTeamEvent) {
         try {
+            const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
             await this.ocService.login();
             const devopsProject = getDevOpsEnvironmentDetails(teamName).openshiftProjectId;
             await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
             for (const project of projects) {
                 logger.info(`Configuring permissions for project: ${project}`);
                 // Add to bitbucket
-                await bitbucketConfiguration.configureBitbucketProject(project.bitbucketProject.key);
+                await bitbucketConfiguration.addAllMembersToProject(
+                    project.bitbucketProject.key,
+                    membersAddedToTeamEvent.members.map(member => member.domainUsername.substring(member.domainUsername.indexOf("\\") + 1)));
+                await bitbucketConfiguration.addAllOwnersToProject(
+                    project.bitbucketProject.key,
+                    membersAddedToTeamEvent.owners.map(owner => owner.domainUsername.substring(owner.domainUsername.indexOf("\\") + 1)),
+                );
                 // Add to openshift environments
                 for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
                     const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);

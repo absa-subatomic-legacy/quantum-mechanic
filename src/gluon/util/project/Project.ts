@@ -1,6 +1,7 @@
 import {HandleCommand, HandlerContext} from "@atomist/automation-client";
 import * as _ from "lodash";
-import {createMenu} from "../shared/GenericMenu";
+import {QMBitbucketProject} from "../bitbucket/Bitbucket";
+import {createMenuAttachment} from "../shared/GenericMenu";
 import {QMTenant} from "../shared/Tenants";
 import {QMTeam} from "../team/Teams";
 
@@ -20,10 +21,10 @@ export function getProjectDisplayName(tenant: string, project: string, environme
     return `${tenant} ${project} ${environment.toUpperCase()}`;
 }
 
-export function menuForProjects(ctx: HandlerContext, projects: any[],
-                                command: HandleCommand, message: string = "Please select a project",
-                                projectNameVariable: string = "projectName"): Promise<any> {
-    return createMenu(ctx,
+export function menuAttachmentForProjects(ctx: HandlerContext, projects: any[],
+                                          command: HandleCommand, message: string = "Please select a project",
+                                          projectNameVariable: string = "projectName") {
+    return createMenuAttachment(
         projects.map(project => {
             return {
                 value: project.name,
@@ -32,6 +33,7 @@ export function menuForProjects(ctx: HandlerContext, projects: any[],
         }),
         command,
         message,
+        message,
         "Select Project",
         projectNameVariable,
     );
@@ -39,12 +41,16 @@ export function menuForProjects(ctx: HandlerContext, projects: any[],
 
 export interface OpenshiftProjectEnvironmentRequest {
     teams: QMTeam[];
-    project: QMProject;
+    project: QMProjectBase;
     owningTenant: QMTenant;
 }
 
-export interface QMProject {
+export interface QMProjectBase {
     name: string;
+}
+
+export interface QMProject extends QMProjectBase {
+    bitbucketProject: QMBitbucketProject;
 }
 
 export enum ProjectProdRequestApprovalResponse {

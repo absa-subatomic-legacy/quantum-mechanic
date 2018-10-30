@@ -297,7 +297,6 @@ export class OCService {
         logger.debug(`Trying to process jenkins template for devops project template. devopsNamespace: ${devopsNamespace}`);
         const parameters = [
             `NAMESPACE=${devopsNamespace}`,
-            "JENKINS_IMAGE_STREAM_TAG=jenkins-subatomic:2.1",
             "BITBUCKET_NAME=Subatomic Bitbucket",
             `BITBUCKET_URL=${QMConfig.subatomic.bitbucket.baseUrl}`,
             `BITBUCKET_CREDENTIALS_ID=${devopsNamespace}-bitbucket`,
@@ -305,8 +304,8 @@ export class OCService {
             "JENKINS_ADMIN_EMAIL=subatomic@local",
             // TODO the registry Cluster IP we will have to get by introspecting the registry Service
             // If no team email then the address of the createdBy member
-            `MAVEN_SLAVE_IMAGE=${QMConfig.subatomic.openshiftNonProd.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-maven-subatomic:2.0`,
-            `NODEJS_SLAVE_IMAGE=${QMConfig.subatomic.openshiftNonProd.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-nodejs-subatomic:2.0`,
+            `MAVEN_SLAVE_IMAGE=${QMConfig.subatomic.openshiftNonProd.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-maven-subatomic:3.0`,
+            `NODEJS_SLAVE_IMAGE=${QMConfig.subatomic.openshiftNonProd.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-nodejs-subatomic:3.0`,
         ];
         return await this.processOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
     }
@@ -354,34 +353,33 @@ export class OCService {
     public async getServiceAccountToken(serviceAccountName: string, namespace: string): Promise<string> {
         logger.debug(`Trying to get service account token in namespace. serviceAccountName: ${serviceAccountName}, namespace: ${namespace}`);
 
-        let serviceAccountResult = {data: {secrets: []}, status: 200};
+        let tokenSecretName: string = "";
         await retryFunction(4, 5000, async (attemptNumber: number) => {
             logger.warn(`Trying to get service account token. Attempt number ${attemptNumber}.`);
 
-            serviceAccountResult = await this.openShiftApi.get.get("ServiceAccount", serviceAccountName, namespace);
+            const serviceAccountResult = await this.openShiftApi.get.get("ServiceAccount", serviceAccountName, namespace);
 
             if (!isSuccessCode(serviceAccountResult.status)) {
                 logger.error(`Failed to find service account ${serviceAccountName} in namespace ${namespace}. Error: ${inspect(serviceAccountResult)}`);
                 throw new QMError(`Failed to find service account ${serviceAccountName} in namespace ${namespace}`);
             }
 
-            if (_.isEmpty(serviceAccountResult.data.secrets)) {
-                if (attemptNumber < 4) {
-                    logger.warn(`Waiting to retry again in ${5000}ms...`);
+            if (!_.isEmpty(serviceAccountResult.data.secrets)) {
+                logger.info(JSON.stringify(serviceAccountResult.data));
+                for (const secret of serviceAccountResult.data.secrets) {
+                    if (secret.name.startsWith(`${serviceAccountName}-token`)) {
+                        tokenSecretName = secret.name;
+                        return true;
+                    }
                 }
-                return false;
             }
 
-            return true;
+            if (attemptNumber < 4) {
+                logger.warn(`Waiting to retry again in ${5000}ms...`);
+            }
+
+            return false;
         });
-
-        let tokenSecretName: string = "";
-        logger.info(JSON.stringify(serviceAccountResult.data));
-        for (const secret of serviceAccountResult.data.secrets) {
-            if (secret.name.startsWith(`${serviceAccountName}-token`)) {
-                tokenSecretName = secret.name;
-            }
-        }
 
         if (_.isEmpty(tokenSecretName)) {
             throw new QMError(`Failed to find token for ServiceAccount ${serviceAccountName}`);
@@ -473,6 +471,12 @@ export class OCService {
             await logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
             return await this.openShiftApi.policy.addRoleToUser(memberUsername, "edit", projectId);
         });
+    }
+
+    public async removeTeamMembershipPermissionsFromProject(projectId: string, domainUserName: string) {
+        const memberUsername = /[^\\]*$/.exec(domainUserName)[0];
+        logger.info(`Removing role from project [${projectId}] and member [${domainUserName}]: ${memberUsername}`);
+        return await this.openShiftApi.policy.removeRoleFromUser(memberUsername, "edit", projectId);
     }
 
     public async createPodNetwork(projectToJoin: string, projectToJoinTo: string): Promise<OpenshiftApiResult> {
