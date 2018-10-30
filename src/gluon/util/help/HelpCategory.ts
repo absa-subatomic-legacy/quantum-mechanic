@@ -1,3 +1,4 @@
+import {Constructor} from "../../../../node_modules/@atomist/automation-client/util/constructionUtils";
 import {ListExistingBitbucketProject, NewBitbucketProject} from "../../commands/bitbucket/BitbucketProject";
 import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
 import {AddSlackDetails} from "../../commands/member/AddSlackDetails";
@@ -31,11 +32,46 @@ import {NewTeamSlackChannel} from "../../commands/team/NewSlackChannel";
 import {TagAllLatestImages} from "../../commands/team/TagAllLatestImages";
 import {TagLatestImage} from "../../commands/team/TagLatestImage";
 import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
-import {Constructor} from "../../../../node_modules/@atomist/automation-client/util/constructionUtils";
 
 export class HelpCategory {
 
     private commands: any[] = [];
+    private allCommands = [
+        NewDevOpsEnvironment,
+        NewOrUseTeamSlackChannel,
+        NewTeamSlackChannel,
+        LinkExistingTeamSlackChannel,
+        OnboardMember,
+        AddSlackDetails,
+        JoinTeam,
+        AddMemberToTeam,
+        AddOwnerToTeam,
+        AssociateTeam,
+        CreateTeam,
+        CreateProject,
+        NewBitbucketProject,
+        NewProjectEnvironments,
+        CreateMembershipRequestToTeam,
+        MembershipRequestClosed,
+        ListExistingBitbucketProject,
+        LinkExistingApplication,
+        LinkExistingLibrary,
+        KickOffJenkinsBuild,
+        CreateOpenShiftPvc,
+        AddConfigServer,
+        ListTeamProjects,
+        ListProjectDetails,
+        ListTeamMembers,
+        ConfigurePackage,
+        ConfigureBasicPackage,
+        TagAllLatestImages,
+        TagLatestImage,
+        CreateProjectProdEnvironments,
+        CreateApplicationProd,
+        UpdateProjectProdRequest,
+        CreateGenericProd,
+        ReRunProjectProdRequest,
+        PatchBuildConfigBaseImage];
 
     constructor(protected name, protected description, protected tags: string) {
     }
@@ -49,44 +85,7 @@ export class HelpCategory {
     }
 
     public findListOfCommands(commandTag: string): any[] {
-        const allCommands = [
-            NewDevOpsEnvironment,
-            NewOrUseTeamSlackChannel,
-            NewTeamSlackChannel,
-            LinkExistingTeamSlackChannel,
-            OnboardMember,
-            AddSlackDetails,
-            JoinTeam,
-            AddMemberToTeam,
-            AddOwnerToTeam,
-            AssociateTeam,
-            CreateTeam,
-            CreateProject,
-            NewBitbucketProject,
-            NewProjectEnvironments,
-            CreateMembershipRequestToTeam,
-            MembershipRequestClosed,
-            ListExistingBitbucketProject,
-            LinkExistingApplication,
-            LinkExistingLibrary,
-            KickOffJenkinsBuild,
-            CreateOpenShiftPvc,
-            AddConfigServer,
-            ListTeamProjects,
-            ListProjectDetails,
-            ListTeamMembers,
-            ConfigurePackage,
-            ConfigureBasicPackage,
-            TagAllLatestImages,
-            TagLatestImage,
-            CreateProjectProdEnvironments,
-            CreateApplicationProd,
-            UpdateProjectProdRequest,
-            CreateGenericProd,
-            ReRunProjectProdRequest,
-            PatchBuildConfigBaseImage];
-
-        for (const command of allCommands) {
+        for (const command of this.allCommands) {
             const classTag = this.getCommandMetadata(command.prototype);
             for (const tag of classTag.tags) {
                 if (this.forceCast<Tag>(tag).name === "empty") {
@@ -101,44 +100,7 @@ export class HelpCategory {
     }
 
     public findCommandByName(commandName: string) {
-        const allCommands = [
-            NewDevOpsEnvironment,
-            NewOrUseTeamSlackChannel,
-            NewTeamSlackChannel,
-            LinkExistingTeamSlackChannel,
-            OnboardMember,
-            AddSlackDetails,
-            JoinTeam,
-            AddMemberToTeam,
-            AddOwnerToTeam,
-            AssociateTeam,
-            CreateTeam,
-            CreateProject,
-            NewBitbucketProject,
-            NewProjectEnvironments,
-            CreateMembershipRequestToTeam,
-            MembershipRequestClosed,
-            ListExistingBitbucketProject,
-            LinkExistingApplication,
-            LinkExistingLibrary,
-            KickOffJenkinsBuild,
-            CreateOpenShiftPvc,
-            AddConfigServer,
-            ListTeamProjects,
-            ListProjectDetails,
-            ListTeamMembers,
-            ConfigurePackage,
-            ConfigureBasicPackage,
-            TagAllLatestImages,
-            TagLatestImage,
-            CreateProjectProdEnvironments,
-            CreateApplicationProd,
-            UpdateProjectProdRequest,
-            CreateGenericProd,
-            ReRunProjectProdRequest,
-            PatchBuildConfigBaseImage];
-
-        for (const command of allCommands) {
+        for (const command of this.allCommands) {
             const commandMetaData = this.getCommandMetadata(command.prototype);
 
             if (commandMetaData.name === commandName) {
