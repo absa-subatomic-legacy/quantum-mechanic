@@ -459,13 +459,13 @@ export class OCService {
     }
 
     public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {
-        const teamOwners = team.owners.map( owner => /[^\\]*$/.exec(owner.domainUsername)[0] )
+        const teamOwners = team.owners.map( owner => /[^\\]*$/.exec(owner.domainUsername)[0] );
         if (teamOwners.length > 0) {
             logger.debug(`Trying to add team membership permission to project for role admin.`);
             await this.openShiftApi.policy.addRoleToUsers(teamOwners, "admin", projectId);
         }
 
-        const teamMembers = team.members.map( owner => /[^\\]*$/.exec(owner.domainUsername)[0] )
+        const teamMembers = team.members.map( owner => /[^\\]*$/.exec(owner.domainUsername)[0] );
         if (teamMembers.length > 0) {
             logger.debug(`Trying to add team membership permission to project for role admin.`);
             await this.openShiftApi.policy.addRoleToUsers(teamMembers, "edit", projectId);
