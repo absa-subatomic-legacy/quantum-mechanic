@@ -109,7 +109,6 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand
 }
 
 @CommandHandler("List project details")
-@Tags("empty")
 export class ListProjectDetails implements HandleCommand<HandlerResult> {
 
     @Parameter({

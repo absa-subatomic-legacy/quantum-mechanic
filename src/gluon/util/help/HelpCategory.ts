@@ -1,4 +1,4 @@
-import {Constructor} from "../../../../node_modules/@atomist/automation-client/util/constructionUtils";
+import * as _ from "lodash";
 import {ListExistingBitbucketProject, NewBitbucketProject} from "../../commands/bitbucket/BitbucketProject";
 import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
 import {AddSlackDetails} from "../../commands/member/AddSlackDetails";
@@ -88,7 +88,7 @@ export class HelpCategory {
         for (const command of this.allCommands) {
             const classTag = this.getCommandMetadata(command.prototype);
             for (const tag of classTag.tags) {
-                if (this.forceCast<Tag>(tag).name === "empty") {
+                if (_.isEmpty(tag)) {
                     break;
                 }
                 if (this.forceCast<Tag>(tag).name === commandTag) {
@@ -111,6 +111,12 @@ export class HelpCategory {
     }
 
     private getCommandMetadata(commandPrototype: any): { tags: string[], name: string } {
+        if (commandPrototype.__tags === undefined) {
+            return {
+                tags: [],
+                name: commandPrototype.__name,
+            };
+        }
         return {
             tags: commandPrototype.__tags,
             name: commandPrototype.__name,

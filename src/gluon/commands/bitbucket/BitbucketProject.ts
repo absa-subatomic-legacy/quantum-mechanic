@@ -31,7 +31,6 @@ import {
 } from "../../util/shared/Error";
 
 @CommandHandler("Create a new Bitbucket project")
-@Tags("empty")
 export class NewBitbucketProject extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
