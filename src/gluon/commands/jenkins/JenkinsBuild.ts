@@ -32,7 +32,7 @@ import {
 } from "../../util/shared/Error";
 
 @CommandHandler("Kick off a Jenkins build", QMConfig.subatomic.commandPrefix + " jenkins build")
-@Tags("subatomic", "jenkins", "project")
+@Tags("subatomic", "jenkins", "package")
 export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
 
