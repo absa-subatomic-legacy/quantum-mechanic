@@ -25,7 +25,7 @@ import {
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Add a new Subatomic Config Server", QMConfig.subatomic.commandPrefix + " add config server")
-@Tags("subatomic", "project")
+@Tags("subatomic", "team")
 export class AddConfigServer extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 

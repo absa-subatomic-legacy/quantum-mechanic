@@ -75,7 +75,7 @@ export class Help implements HandleCommand<HandlerResult> {
             logger.info(`Category: ${this.selectedOption} clicked`);
             if (this.selectedOption === undefined) {
                 return await this.displayCategories(ctx);
-            } else if (this.selectedOption.includes("sub")) {
+            } else if (this.selectedOption.startsWith(QMConfig.subatomic.commandPrefix)) {
                 return this.displayCommandToBeRun(ctx);
             } else {
                 return await this.displayCommands(ctx);

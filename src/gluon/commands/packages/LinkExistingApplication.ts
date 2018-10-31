@@ -30,7 +30,7 @@ import {
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Link an existing application", QMConfig.subatomic.commandPrefix + " link application")
-@Tags("subatomic", "package")
+@Tags("subatomic", "package", "project")
 export class LinkExistingApplication extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, BitbucketRepoSetter {
 

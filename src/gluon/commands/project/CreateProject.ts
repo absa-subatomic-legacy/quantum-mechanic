@@ -27,7 +27,7 @@ import {
 } from "../../util/shared/Error";
 
 @CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
-@Tags("subatomic", "project")
+@Tags("subatomic", "project", "team")
 export class CreateProject extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonTenantNameSetter {
 

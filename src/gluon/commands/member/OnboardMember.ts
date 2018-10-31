@@ -21,7 +21,7 @@ import {
 } from "../../util/shared/Error";
 
 @CommandHandler("Onboard a new team member", QMConfig.subatomic.commandPrefix + " onboard me")
-@Tags("subatomic", "slack", "member", "team")
+@Tags("subatomic", "slack", "member")
 export class OnboardMember implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)

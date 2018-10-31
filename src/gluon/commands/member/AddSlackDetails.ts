@@ -14,7 +14,7 @@ import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 
 @CommandHandler("Add Slack details to an existing team member", QMConfig.subatomic.commandPrefix + " add slack")
-@Tags("subatomic", "member", "team")
+@Tags("subatomic", "member")
 export class AddSlackDetails implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
