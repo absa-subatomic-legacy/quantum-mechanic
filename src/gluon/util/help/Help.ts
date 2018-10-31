@@ -47,13 +47,13 @@ export class Help implements HandleCommand<HandlerResult> {
 
     public optionsAttachments: any = [];
     public optionFolders = [
-        new HelpCategory("Bitbucket", "These commands do bitbucket stuff", "bitbucket"),
-        new HelpCategory("Jenkins", "These commands do jenkins things", "jenkins"),
-        new HelpCategory("Member", "These commands do member stuff", "member"),
-        new HelpCategory("Package", "These commands do package stuff", "package"),
-        new HelpCategory("Project", "These commands do project stuff", "project"),
-        new HelpCategory("Team", "These commands do team stuff", "team"),
-        new HelpCategory("Other", "Other stuff", "other"),
+        new HelpCategory("Bitbucket", "Bitbucket commands that control bitbucket project configuration and access controls.", "bitbucket"),
+        new HelpCategory("Jenkins", "Jenkins commands that allow the user to control builds and jenkins configuration.", "jenkins"),
+        new HelpCategory("Member", "Member commands allow you to manage Subatomic members. These include editing Slack details, onboarding, editing user roles and adding members to teams.", "member"),
+        new HelpCategory("Package", "Package commands are related to managing applications and libraries. These include deployment, build, prod promotion and image management.", "package"),
+        new HelpCategory("Project", "Project commands provide management capabilities around individual Projects and their associated resources. This includes environment management, application and library creation, jenkins and bitbucket configuration.", "project"),
+        new HelpCategory("Team", "Team commands allow you to manage your Subatomic team. These include team membership, team projects and DevOps environment configuration.", "team"),
+        new HelpCategory("Other", "All other general commands", "other"),
     ];
     public commands: any = [];
     public absaColors = [
