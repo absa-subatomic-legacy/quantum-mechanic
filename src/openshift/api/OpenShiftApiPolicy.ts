@@ -37,17 +37,17 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
             }
         });
 
-        return await this.addRoleAccount(openshiftRole, role, namespace, roleBindingResourceObject.aNewRole );
+        return await this.addRoleToAccount(openshiftRole, role, namespace, roleBindingResourceObject.aNewRole );
     }
 
-    public async addRoleAccount(openshiftRole: OpenshiftResource, role: string, namespace: string, newRole: boolean) {
+    public async addRoleToAccount(openshiftRole: OpenshiftResource, role: string, namespace: string, newRole: boolean) {
         //  If this is a new role then post else do a put
         if (newRole) {
-            logger.debug("Role not found. Creating new role binding...");
+            logger.debug("Role not found. Creating new role binding via post...");
             return await this.getAxiosInstanceOApi().post(ResourceUrl.getResourceKindUrl(
                 ResourceFactory.baseResource("RoleBinding"), namespace), openshiftRole);
         } else {
-            logger.debug("Found role. Adding user to role binding list...");
+            logger.debug("Found role. Adding user to role binding list via put...");
             return await this.getAxiosInstanceOApi().put(`${ResourceUrl.getResourceKindUrl(
                 ResourceFactory.baseResource("RoleBinding"), namespace)}/${role}`, openshiftRole);
         }
