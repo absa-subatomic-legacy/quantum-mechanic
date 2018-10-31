@@ -164,7 +164,6 @@ export class Help implements HandleCommand<HandlerResult> {
                 {
                     text: "Run Command",
                     style: "primary",
-                    confirm: {text: `You are about to run \`${this.selectedOption}\`.`},
                 },
                 this.optionFolders[0].findCommandByName(this.commandClassName), {correlationId: this.correlationId}),
             ],
