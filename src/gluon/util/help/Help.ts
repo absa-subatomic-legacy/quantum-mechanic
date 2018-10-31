@@ -74,38 +74,11 @@ export class Help implements HandleCommand<HandlerResult> {
             }
             logger.info(`Category: ${this.selectedOption} clicked`);
             if (this.selectedOption === undefined) {
-                for (const option of this.optionFolders) {
-                    this.folderOptions(option.getHelpName(), option.getHelpDescription());
-                    this.colorCount++;
-                }
-                return await ctx.messageClient.respond({
-                    text: "What would you like to do?",
-                    attachments: this.optionsAttachments,
-                }, {id: this.correlationId});
+                return await this.displayCategories(ctx);
             } else if (this.selectedOption.includes("sub")) {
-                this.finalMenuStep();
-                return await ctx.messageClient.respond({
-                    text: `\`${this.selectedOption}\` - ${this.selectedDescription}`,
-                    attachments: this.optionsAttachments,
-                }, {id: this.correlationId});
+                return this.displayCommandToBeRun(ctx);
             } else {
-                this.optionsAttachments = [];
-                for (const commandClass of this.optionFolders) {
-                    if (commandClass.getHelpName() === this.selectedOption) {
-                        this.commands = commandClass.findListOfCommands(commandClass.getHelpName().toLowerCase());
-                        for (const command of this.commands) {
-                            this.commandOptions(this.getCommandHandlerMetadata(command.prototype), command);
-                            this.colorCount++;
-                        }
-                        break;
-                    }
-                }
-                this.returnMenuButton(undefined, undefined, "Main");
-
-                return await ctx.messageClient.respond({
-                    text: `*${this.selectedOption}*`,
-                    attachments: this.optionsAttachments,
-                }, {id: this.correlationId});
+                return await this.displayCommands(ctx);
             }
 
         } catch (error) {
@@ -191,6 +164,45 @@ export class Help implements HandleCommand<HandlerResult> {
                     }),
             ],
         });
+    }
+
+    private async displayCategories(ctx: HandlerContext) {
+        for (const option of this.optionFolders) {
+            this.folderOptions(option.getHelpName(), option.getHelpDescription());
+            this.colorCount++;
+        }
+        return await ctx.messageClient.respond({
+            text: "What would you like to do?",
+            attachments: this.optionsAttachments,
+        }, {id: this.correlationId});
+    }
+
+    private async displayCommands(ctx: HandlerContext) {
+        this.optionsAttachments = [];
+        for (const commandClass of this.optionFolders) {
+            if (commandClass.getHelpName() === this.selectedOption) {
+                this.commands = commandClass.findListOfCommands(commandClass.getHelpName().toLowerCase());
+                for (const command of this.commands) {
+                    this.commandOptions(this.getCommandHandlerMetadata(command.prototype), command);
+                    this.colorCount++;
+                }
+                break;
+            }
+        }
+        this.returnMenuButton(undefined, undefined, "Main");
+
+        return await ctx.messageClient.respond({
+            text: `*${this.selectedOption}*`,
+            attachments: this.optionsAttachments,
+        }, {id: this.correlationId});
+    }
+
+    private async displayCommandToBeRun(ctx: HandlerContext) {
+        this.finalMenuStep();
+        return await ctx.messageClient.respond({
+            text: `\`${this.selectedOption}\` - ${this.selectedDescription}`,
+            attachments: this.optionsAttachments,
+        }, {id: this.correlationId});
     }
 
     private async handleError(ctx: HandlerContext, error) {
