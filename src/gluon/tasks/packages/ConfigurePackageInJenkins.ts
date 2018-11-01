@@ -31,7 +31,9 @@ import {TaskListMessage} from "../TaskListMessage";
 
 export class ConfigurePackageInJenkins extends Task {
 
-    private static JENKINSFILE_EXISTS_FLAG = "JENKINS_FILE_EXISTS";
+    private readonly JENKINSFILE_EXISTS_FLAG = "JENKINS_FILE_EXISTS";
+    private readonly JENKINSFILE_FOLDER = "resources/templates/jenkins/jenkinsfile-repo/";
+    private readonly JENKINSFILE_EXTENSION = ".groovy";
 
     private readonly TASK_ADD_JENKINS_FILE = "AddJenkinsfile";
     private readonly TASK_CREATE_JENKINS_JOB = "CreateJenkinsJob";
@@ -143,7 +145,7 @@ export class ConfigurePackageInJenkins extends Task {
 
     private async addJenkinsFile(jenkinsfileName, bitbucketProjectKey, bitbucketRepositorySlug, destinationJenkinsfileName: string = "Jenkinsfile"): Promise<HandlerResult> {
 
-        if (jenkinsfileName !== ConfigurePackageInJenkins.JENKINSFILE_EXISTS_FLAG) {
+        if (jenkinsfileName !== this.JENKINSFILE_EXISTS_FLAG) {
             const username = QMConfig.subatomic.bitbucket.auth.username;
             const password = QMConfig.subatomic.bitbucket.auth.password;
             const project: GitProject = await GitCommandGitProject.cloned({
@@ -181,8 +183,8 @@ export class ConfigurePackageInJenkins extends Task {
         return await success();
     }
 
-    private getPathFromJenkinsfileName(jenkinsfileName: string, jenkinsFileFolder: string = "resources/templates/jenkins/jenkinsfile-repo/", jenkinsFileExtension: string = ".groovy"): string {
-        return jenkinsFileFolder + jenkinsfileName + jenkinsFileExtension;
+    private getPathFromJenkinsfileName(jenkinsfileName: string): string {
+        return this.JENKINSFILE_FOLDER + jenkinsfileName + this.JENKINSFILE_EXTENSION;
     }
 
     private getDefaultSuccessMessage(applicationName: string, projectName: string, applicationType: ApplicationType): SlackMessage {
