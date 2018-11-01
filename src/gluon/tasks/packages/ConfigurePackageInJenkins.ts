@@ -1,9 +1,12 @@
 import {
+    BitBucketServerRepoRef,
     HandlerContext,
     HandlerResult,
     logger,
     success,
 } from "@atomist/automation-client";
+import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
+import {GitProject} from "@atomist/automation-client/project/git/GitProject";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import _ = require("lodash");
@@ -15,10 +18,9 @@ import {QMApplication} from "../../services/gluon/ApplicationService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {
-    addJenkinsFile,
     JenkinsJobTemplate,
     NonProdDefaultJenkinsJobTemplate,
-} from "../../util/jenkins/JenkinsFiles";
+} from "../../util/jenkins/JenkinsJobTemplates";
 import {ApplicationType} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
 import {ParameterDisplayType} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
@@ -28,6 +30,8 @@ import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
 export class ConfigurePackageInJenkins extends Task {
+
+    private static JENKINSFILE_EXISTS_FLAG = "JENKINS_FILE_EXISTS";
 
     private readonly TASK_ADD_JENKINS_FILE = "AddJenkinsfile";
     private readonly TASK_CREATE_JENKINS_JOB = "CreateJenkinsJob";
@@ -50,7 +54,7 @@ export class ConfigurePackageInJenkins extends Task {
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
         await this.ocService.login();
 
-        await addJenkinsFile(
+        await this.addJenkinsFile(
             this.jenkinsFile,
             this.project.bitbucketProject.key,
             this.application.bitbucketRepository.slug,
@@ -135,6 +139,50 @@ export class ConfigurePackageInJenkins extends Task {
 
         return await ctx.messageClient.addressChannels(returnableSuccessMessage, associatedTeams.map(team =>
             team.slack.teamChannel));
+    }
+
+    private async addJenkinsFile(jenkinsfileName, bitbucketProjectKey, bitbucketRepositorySlug, destinationJenkinsfileName: string = "Jenkinsfile"): Promise<HandlerResult> {
+
+        if (jenkinsfileName !== ConfigurePackageInJenkins.JENKINSFILE_EXISTS_FLAG) {
+            const username = QMConfig.subatomic.bitbucket.auth.username;
+            const password = QMConfig.subatomic.bitbucket.auth.password;
+            const project: GitProject = await GitCommandGitProject.cloned({
+                    username,
+                    password,
+                },
+                new BitBucketServerRepoRef(
+                    QMConfig.subatomic.bitbucket.baseUrl,
+                    bitbucketProjectKey,
+                    bitbucketRepositorySlug));
+            try {
+                await project.findFile(destinationJenkinsfileName);
+            } catch (error) {
+                logger.info("Jenkinsfile doesnt exist. Adding it!");
+                const jenkinsTemplate: QMTemplate = new QMTemplate(this.getPathFromJenkinsfileName(jenkinsfileName as string));
+                await project.addFile(destinationJenkinsfileName,
+                    jenkinsTemplate.build({}));
+            }
+
+            const clean = await project.isClean();
+            logger.debug(`Jenkinsfile has been added: ${clean.success}`);
+
+            if (!clean.success) {
+                await project.setUserConfig(
+                    QMConfig.subatomic.bitbucket.auth.username,
+                    QMConfig.subatomic.bitbucket.auth.email,
+                );
+                await project.commit(`Added Jenkinsfile`);
+                await project.push();
+            } else {
+                logger.debug("Jenkinsfile already exists");
+            }
+        }
+
+        return await success();
+    }
+
+    private getPathFromJenkinsfileName(jenkinsfileName: string, jenkinsFileFolder: string = "resources/templates/jenkins/jenkinsfile-repo/", jenkinsFileExtension: string = ".groovy"): string {
+        return jenkinsFileFolder + jenkinsfileName + jenkinsFileExtension;
     }
 
     private getDefaultSuccessMessage(applicationName: string, projectName: string, applicationType: ApplicationType): SlackMessage {

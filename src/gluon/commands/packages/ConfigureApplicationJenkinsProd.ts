@@ -16,7 +16,7 @@ import {QMProjectProdRequest} from "../../services/gluon/ProjectProdRequestServi
 import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {ProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsFiles";
+import {ProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
 import {QMMemberBase} from "../../util/member/Members";
 import {QMProject, QMProjectBase} from "../../util/project/Project";
 import {
