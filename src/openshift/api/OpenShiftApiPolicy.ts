@@ -22,18 +22,27 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
                 username = usernameSplit.pop();
                 const sourceNamespace = usernameSplit.pop();
 
-                openshiftRole.subjects.push({
+                const subjectObj = {
                     kind: "ServiceAccount",
                     namespace: sourceNamespace,
                     name: username,
-                });
-                openshiftRole.userNames.push(`system:serviceaccount:${sourceNamespace}:${username}`);
+                };
+
+                if (!openshiftRole.subjects.includes(subjectObj)) {
+                    openshiftRole.subjects.push(subjectObj);
+                    openshiftRole.userNames.push(`system:serviceaccount:${sourceNamespace}:${username}`);
+                }
             } else {
-                openshiftRole.subjects.push({
+
+                const subjectObj = {
                     kind: "User",
                     name: username,
-                });
-                openshiftRole.userNames.push(username);
+                };
+
+                if (!openshiftRole.subjects.includes(subjectObj)) {
+                    openshiftRole.subjects.push(subjectObj);
+                    openshiftRole.userNames.push(username);
+                }
             }
         });
 
