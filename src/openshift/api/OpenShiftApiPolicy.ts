@@ -76,10 +76,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
     }
 
     public removeRoleFromUser(username: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
-        if (username.startsWith("system:serviceaccount")) {
-            // Do not remove if service account - see Remove a team owner from a team
-            // #445 (https://github.com/absa-subatomic/quantum-mechanic/issues/445)
-        } else {
+        if (!username.startsWith("system:serviceaccount")) {
             return this.removeRoleFromUserAccount(username, role, namespace);
         }
     }
