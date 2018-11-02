@@ -4,6 +4,7 @@ import _ = require("lodash");
 import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {userFromDomainUser} from "../../../gluon/util/member/Members";
 import {isSuccessCode} from "../../../http/Http";
 import {OpenshiftApiResult} from "../../../openshift/api/base/OpenshiftApiResult";
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
@@ -459,21 +460,21 @@ export class OCService {
     }
 
     public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {
-        logger.debug(`Trying to add team membership permission to project.`);
-        await team.owners.map(async owner => {
-            const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
-            logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
-            return await this.openShiftApi.policy.addRoleToUser(ownerUsername, "admin", projectId);
-        });
-        await team.members.map(async member => {
-            const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
-            await logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
-            return await this.openShiftApi.policy.addRoleToUser(memberUsername, "edit", projectId);
-        });
+        const teamOwners = team.owners.map( owner => userFromDomainUser(owner.domainUsername) );
+        if (teamOwners.length > 0) {
+            logger.debug(`Trying to add team membership permission to project for role admin.`);
+            await this.openShiftApi.policy.addRoleToUsers(teamOwners, "admin", projectId);
+        }
+
+        const teamMembers = team.members.map( owner => userFromDomainUser(owner.domainUsername) );
+        if (teamMembers.length > 0) {
+            logger.debug(`Trying to add team membership permission to project for role admin.`);
+            await this.openShiftApi.policy.addRoleToUsers(teamMembers, "edit", projectId);
+        }
     }
 
     public async removeTeamMembershipPermissionsFromProject(projectId: string, domainUserName: string) {
-        const memberUsername = /[^\\]*$/.exec(domainUserName)[0];
+        const memberUsername = userFromDomainUser(domainUserName);
         logger.info(`Removing role from project [${projectId}] and member [${domainUserName}]: ${memberUsername}`);
         return await this.openShiftApi.policy.removeRoleFromUser(memberUsername, "edit", projectId);
     }
@@ -486,7 +487,7 @@ export class OCService {
 
     public async addRoleToUserInNamespace(user: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
         logger.debug(`Trying to add role to user in namespace: user: ${user}; role: ${role}; namespace: ${namespace}`);
-        const addRoleResult = await this.openShiftApi.policy.addRoleToUser(user, role, namespace);
+        const addRoleResult = await this.openShiftApi.policy.addRoleToUsers([user], role, namespace);
         if (!isSuccessCode(addRoleResult.status)) {
             logger.error(`Failed to grant the role ${role} to account ${user}. Error: ${inspect(addRoleResult)}`);
             throw new QMError(`Failed to grant the role ${role} to account ${user}.`);
