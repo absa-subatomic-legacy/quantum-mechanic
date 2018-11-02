@@ -1,7 +1,7 @@
 import {logger} from "@atomist/automation-client";
 import {AxiosPromise} from "axios-https-proxy-fix";
 import * as _ from "lodash";
-import {getUsernameFromDomainUsername} from "../../../gluon/util/member/Members";
+import {userFromDomainUser} from "../../../gluon/util/member/Members";
 import {QMError} from "../../util/shared/Error";
 import {BitbucketService} from "./BitbucketService";
 
@@ -25,7 +25,7 @@ export class BitbucketConfigurationService {
     public async removeUserFromBitbucketProject(bitbucketProjectKey: string, membersDomainUsernames: string[]) {
         logger.info(`Trying to remove user from BitBucket project: ${bitbucketProjectKey}`);
         try {
-            return membersDomainUsernames.map(teamMember => this.bitbucketService.removeProjectPermission(bitbucketProjectKey, getUsernameFromDomainUsername(membersDomainUsernames[0])));
+            return membersDomainUsernames.map(teamMember => this.bitbucketService.removeProjectPermission(bitbucketProjectKey, userFromDomainUser(membersDomainUsernames[0])));
         } catch (error) {
             throw new QMError(error, `Failed to remove BitBucket permissions for user`);
         }
