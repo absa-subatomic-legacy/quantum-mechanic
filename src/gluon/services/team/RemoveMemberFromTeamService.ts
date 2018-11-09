@@ -1,5 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
@@ -8,7 +9,9 @@ import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {MemberRole} from "../../util/member/Members";
 import {QMError} from "../../util/shared/Error";
+import {loadChannelIdByChannelName} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";
+import {kickUserFromSlackChannel} from "./KickUser";
 
 export class RemoveMemberFromTeamService {
 
@@ -69,6 +72,30 @@ export class RemoveMemberFromTeamService {
             }
         } else {
             throw new QMError(`${newMember.slack.screenName} is an owner of this team and cannot be removed.`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
+        }
+    }
+
+    public async removeUserFromSlackChannel(ctx: HandlerContext,
+                                            newMemberFirstName: string,
+                                            gluonTeamName: string,
+                                            channelName: string,
+                                            screenName: string,
+                                            slackName: string) {
+        const destination =  await addressSlackChannelsFromContext(ctx, channelName);
+        try {
+            logger.info(`Removing user from channel [${channelName}] -> member [${screenName}]`);
+            const channelId = await loadChannelIdByChannelName(ctx, channelName);
+            logger.info("Channel ID: " + channelId);
+
+            const chatTeamId = destination.team;
+            const userId = screenName;
+            await kickUserFromSlackChannel(ctx, chatTeamId, channelId, userId);
+
+            const message = `${slackName} has been removed from the Slack channel: ${channelName}`;
+            return await ctx.messageClient.send(message, destination);
+        } catch (error) {
+            logger.error(`${error}`);
+            // throw new QMError(`Exception: ${error}`);
         }
     }
 }

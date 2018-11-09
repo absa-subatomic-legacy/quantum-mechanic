@@ -63,16 +63,19 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
         logger.info(`Ingested MemberRemovedFromTeamEvent event.data = ${JSON.stringify(event.data)}`);
         const memberRemovedFromTeam = event.data.MemberRemovedFromTeamEvent[0];
         try {
-            // WIP: Remove user from Slack channel when removing user from a project #448
-            // https://github.com/absa-subatomic/quantum-mechanic/issues/448
-            // await this.removeMemberFromChannel(ctx, memberRemovedFromTeam);
+
+            try {
+                await this.removeMemberFromChannel(ctx, memberRemovedFromTeam);
+            } catch (error) {
+               logger.error(`removeMemberFromChannel exception: ${error}`);
+            }
 
             const team = memberRemovedFromTeam.team;
             const projects = await this.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(team.name, false);
             const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
             await this.removePermissionsForUserFromTeams(bitbucketConfiguration, team.name, projects, memberRemovedFromTeam);
 
-            return await ctx.messageClient.addressChannels("User permissions successfully removed from associated projects. Please manually remove the user from the relevant Slack channels.", team.slackIdentity.teamChannel);
+            return await ctx.messageClient.addressChannels("User permissions successfully removed from associated projects.", team.slackIdentity.teamChannel);
         } catch (error) {
             return await handleQMError(new ChannelMessageClient(ctx).addDestination(memberRemovedFromTeam.team.slackIdentity.teamChannel), error);
         }
@@ -103,5 +106,16 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
             }
             throw error;
         }
+    }
+
+    private async removeMemberFromChannel(ctx: HandlerContext, memberRemovedFromTeam) {
+        await this.removeMemberTeamService.removeUserFromSlackChannel(
+                ctx,
+            memberRemovedFromTeam.memberRemoved.firstName,
+            memberRemovedFromTeam.team.name,
+            memberRemovedFromTeam.team.slackIdentity.teamChannel,
+            memberRemovedFromTeam.memberRemoved.slackIdentity.userId,
+            memberRemovedFromTeam.memberRemoved.slackIdentity.screenName);
+
     }
 }
