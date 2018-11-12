@@ -67,7 +67,7 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
             try {
                 await this.removeMemberFromChannel(ctx, memberRemovedFromTeam);
             } catch (error) {
-               logger.error(`removeMemberFromChannel exception: ${error}`);
+                await handleQMError(new ChannelMessageClient(ctx).addDestination(memberRemovedFromTeam.team.slackIdentity.teamChannel), error);
             }
 
             const team = memberRemovedFromTeam.team;

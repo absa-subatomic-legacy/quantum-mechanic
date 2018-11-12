@@ -1,6 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
@@ -9,9 +9,8 @@ import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {MemberRole} from "../../util/member/Members";
 import {QMError} from "../../util/shared/Error";
-import {loadChannelIdByChannelName} from "../../util/team/Teams";
+import {kickUserFromSlackChannel, loadChannelIdByChannelName} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";
-import {kickUserFromSlackChannel} from "./KickUser";
 
 export class RemoveMemberFromTeamService {
 
@@ -83,7 +82,7 @@ export class RemoveMemberFromTeamService {
                                             slackName: string) {
         const destination =  await addressSlackChannelsFromContext(ctx, channelName);
         try {
-            logger.info(`Removing user from channel [${channelName}] -> member [${screenName}]`);
+            logger.info(`Removing user ${screenName} from channel ${channelName}...`);
             const channelId = await loadChannelIdByChannelName(ctx, channelName);
             logger.info("Channel ID: " + channelId);
 
@@ -94,8 +93,7 @@ export class RemoveMemberFromTeamService {
             const message = `${slackName} has been removed from the Slack channel: ${channelName}`;
             return await ctx.messageClient.send(message, destination);
         } catch (error) {
-            logger.error(`${error}`);
-            // throw new QMError(`Exception: ${error}`);
+            throw new QMError(`Exception: ${error}`);
         }
     }
 }
