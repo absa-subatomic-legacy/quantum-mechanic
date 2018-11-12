@@ -1,8 +1,8 @@
+import {logger} from "@atomist/automation-client";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {PluginResourceStore} from "./PluginResourceStore";
 
-// TODO: We need error handling on badly formed plugins.
 export class PluginManager {
 
     private static availablePlugins: { [key: string]: string[] };
@@ -18,19 +18,32 @@ export class PluginManager {
                 readdirSync(source).map(name => path.join(source, name)).filter(isDirectory);
 
             for (const plugin of getDirectories(QMConfig.subatomic.plugins.directory)) {
-                const pluginEntry = require(`${plugin}/entry`);
-                const entry = new pluginEntry.Entry();
+                this.tryLoadPlugin(plugin);
+            }
+        }
+    }
 
-                for (const hook of entry.getListOfHooks()) {
-                    if (!PluginManager.availablePlugins.hasOwnProperty(hook)) {
-                        PluginManager.availablePlugins[hook] = [];
-                    }
-                    const pluginName = path.basename(plugin);
-                    if (PluginManager.availablePlugins[hook].indexOf(pluginName) === -1) {
-                        PluginManager.availablePlugins[hook].push(pluginName);
-                    }
+    public tryLoadPlugin(pluginDirectory: string) {
+        const path = require("path");
+        const pluginName = path.basename(pluginDirectory);
+
+        try {
+
+            const pluginEntry = require(`${pluginDirectory}/entry`);
+            const entry = new pluginEntry.Entry();
+
+            for (const hook of entry.getListOfHooks()) {
+                if (!PluginManager.availablePlugins.hasOwnProperty(hook)) {
+                    PluginManager.availablePlugins[hook] = [];
+                }
+                if (PluginManager.availablePlugins[hook].indexOf(pluginName) === -1) {
+                    PluginManager.availablePlugins[hook].push(pluginName);
                 }
             }
+
+            logger.info("Successfully loaded plugin: " + pluginName);
+        } catch (error) {
+            logger.error(`Failed to load plugin: ${pluginName}. Error: ${error}`);
         }
     }
 
