@@ -94,7 +94,7 @@ export class RemoveMemberFromTeamService {
             return await ctx.messageClient.send(message, destination);
         } catch (error) {
             throw new QMError(error,
-                `Failed to remove ${screenName} from ${channelName}, please remove the user manually.`);
+                `Failed to remove ${slackName} from ${channelName}. The user might already have been removed or has already left. Please double check and remove the user manually if required.`);
         }
     }
 }
