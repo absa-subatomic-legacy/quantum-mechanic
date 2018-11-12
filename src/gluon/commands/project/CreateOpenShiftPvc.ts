@@ -6,7 +6,9 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
+    Tags,
 } from "@atomist/automation-client";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {Attachment} from "@atomist/slack-messages/SlackMessages";
@@ -27,6 +29,7 @@ import {
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Create a new OpenShift Persistent Volume Claim", QMConfig.subatomic.commandPrefix + " create openshift pvc")
+@Tags("subatomic", "project", "other")
 export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
@@ -113,6 +116,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     }
 
     private async sendPvcResultMessage(ctx: HandlerContext, pvcAttachments: any[]): Promise<HandlerResult> {
+        const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
         const msg: SlackMessage = {
             text: `Your Persistent Volume Claims have been processed...`,
             attachments: pvcAttachments.concat({
@@ -126,7 +130,7 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
             } as Attachment),
         };
 
-        return await ctx.messageClient.addressChannels(msg, this.teamChannel);
+        return await ctx.messageClient.send(msg, destination);
     }
 
     private docs(): string {

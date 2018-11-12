@@ -4,6 +4,7 @@ import _ = require("lodash");
 import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {userFromDomainUser} from "../../../gluon/util/member/Members";
 import {isSuccessCode} from "../../../http/Http";
 import {OpenshiftApiResult} from "../../../openshift/api/base/OpenshiftApiResult";
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
@@ -174,12 +175,12 @@ export class OCService {
         return createResult.data;
     }
 
-    public async getSubatomicTemplate(templateName: string): Promise<OCCommandResult> {
+    public async getSubatomicTemplate(templateName: string, namespace: string = "subatomic"): Promise<OCCommandResult> {
         logger.debug(`Trying to get subatomic template. templateName: ${templateName}`);
         return await OCCommon.commonCommand("get", "templates",
             [templateName],
             [
-                new SimpleOption("-namespace", "subatomic"),
+                new SimpleOption("-namespace", namespace),
                 new SimpleOption("-output", "json"),
             ],
         );
@@ -219,12 +220,8 @@ export class OCService {
         );
     }
 
-    public async getSubatomicImageStreamTags() {
-        return this.ocImageService.getSubatomicImageStreamTags();
-    }
-
-    public async getAllImageStreamTags(namespace: string) {
-        return this.ocImageService.getAllImageStreamTags(namespace);
+    public async getSubatomicImageStreamTags(namespace: string = "subatomic") {
+        return this.ocImageService.getSubatomicImageStreamTags(namespace);
     }
 
     public async applyResourceFromDataInNamespace(resourceDefinition: OpenshiftResource, projectNamespace: string, applyNotReplace: boolean = false): Promise<OpenshiftApiResult> {
@@ -259,9 +256,6 @@ export class OCService {
     }
 
     public async tagImageToNamespace(sourceNamespace: string, imageStreamTagName: string, destinationProjectNamespace: string, destinationImageStreamTagName: string = imageStreamTagName): Promise<OpenshiftApiResult> {
-        const allImages = await this.openShiftApi.get.getAllFromNamespace("ImageStreamTag", sourceNamespace);
-
-        logger.info(`All images: ${inspect(allImages)}`);
 
         const imageStreamTagResult = await this.openShiftApi.get.get("ImageStreamTag", imageStreamTagName, sourceNamespace);
 
@@ -269,15 +263,24 @@ export class OCService {
             throw new QMError(`Unable to find ImageStreamTag ${imageStreamTagName} in namespace ${sourceNamespace}`);
         }
 
+        const imageStreamLabels = imageStreamTagResult.data.metadata.labels;
+
         const imageStreamTag = await this.ocImageService.modifyImageStreamTagToImportIntoNamespace(imageStreamTagResult.data, destinationProjectNamespace);
 
         imageStreamTag.metadata.name = destinationImageStreamTagName;
 
-        return await this.applyResourceFromDataInNamespace(imageStreamTag, destinationProjectNamespace, true);
+        await this.applyResourceFromDataInNamespace(imageStreamTag, destinationProjectNamespace, true);
+
+        const labelPatch = this.createLabelPatch(destinationImageStreamTagName.split(":")[0], "ImageStream", "v1", imageStreamLabels);
+        return await this.patchResourceInNamespace(labelPatch, destinationProjectNamespace, false);
     }
 
     public async tagAllSubatomicImageStreamsToDevOpsEnvironment(devopsProjectId) {
         const imageStreamTagsFromSubatomicNamespace = await this.ocImageService.getSubatomicImageStreamTags();
+
+        const labelPatches = imageStreamTagsFromSubatomicNamespace.map(imageStreamTag => {
+            return this.createLabelPatch(imageStreamTag.metadata.name.split(":")[0], "ImageStream", "v1", imageStreamTag.metadata.labels);
+        });
 
         const imageStreamTags = await this.ocImageService.modifyImageStreamTagsToImportIntoNamespace(imageStreamTagsFromSubatomicNamespace, devopsProjectId);
 
@@ -285,13 +288,16 @@ export class OCService {
         resourceList.items.push(...imageStreamTags);
 
         await this.applyResourceFromDataInNamespace(resourceList, devopsProjectId, false);
+
+        for (const labelPatch of labelPatches) {
+            await this.patchResourceInNamespace(labelPatch, devopsProjectId, false);
+        }
     }
 
     public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string): Promise<OCCommandResult> {
         logger.debug(`Trying to process jenkins template for devops project template. devopsNamespace: ${devopsNamespace}`);
         const parameters = [
             `NAMESPACE=${devopsNamespace}`,
-            "JENKINS_IMAGE_STREAM_TAG=jenkins-subatomic:2.0",
             "BITBUCKET_NAME=Subatomic Bitbucket",
             `BITBUCKET_URL=${QMConfig.subatomic.bitbucket.baseUrl}`,
             `BITBUCKET_CREDENTIALS_ID=${devopsNamespace}-bitbucket`,
@@ -299,8 +305,7 @@ export class OCService {
             "JENKINS_ADMIN_EMAIL=subatomic@local",
             // TODO the registry Cluster IP we will have to get by introspecting the registry Service
             // If no team email then the address of the createdBy member
-            `MAVEN_SLAVE_IMAGE=${QMConfig.subatomic.openshiftNonProd.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-maven-subatomic:2.0`,
-            `NODEJS_SLAVE_IMAGE=${QMConfig.subatomic.openshiftNonProd.dockerRepoUrl}/${devopsNamespace}/jenkins-slave-nodejs-subatomic:2.0`,
+            `DEVOPS_URL=${QMConfig.subatomic.openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
         ];
         return await this.processOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
     }
@@ -348,34 +353,33 @@ export class OCService {
     public async getServiceAccountToken(serviceAccountName: string, namespace: string): Promise<string> {
         logger.debug(`Trying to get service account token in namespace. serviceAccountName: ${serviceAccountName}, namespace: ${namespace}`);
 
-        let serviceAccountResult = {data: {secrets: []}, status: 200};
+        let tokenSecretName: string = "";
         await retryFunction(4, 5000, async (attemptNumber: number) => {
             logger.warn(`Trying to get service account token. Attempt number ${attemptNumber}.`);
 
-            serviceAccountResult = await this.openShiftApi.get.get("ServiceAccount", serviceAccountName, namespace);
+            const serviceAccountResult = await this.openShiftApi.get.get("ServiceAccount", serviceAccountName, namespace);
 
             if (!isSuccessCode(serviceAccountResult.status)) {
                 logger.error(`Failed to find service account ${serviceAccountName} in namespace ${namespace}. Error: ${inspect(serviceAccountResult)}`);
                 throw new QMError(`Failed to find service account ${serviceAccountName} in namespace ${namespace}`);
             }
 
-            if (_.isEmpty(serviceAccountResult.data.secrets)) {
-                if (attemptNumber < 4) {
-                    logger.warn(`Waiting to retry again in ${5000}ms...`);
+            if (!_.isEmpty(serviceAccountResult.data.secrets)) {
+                logger.info(JSON.stringify(serviceAccountResult.data));
+                for (const secret of serviceAccountResult.data.secrets) {
+                    if (secret.name.startsWith(`${serviceAccountName}-token`)) {
+                        tokenSecretName = secret.name;
+                        return true;
+                    }
                 }
-                return false;
             }
 
-            return true;
+            if (attemptNumber < 4) {
+                logger.warn(`Waiting to retry again in ${5000}ms...`);
+            }
+
+            return false;
         });
-
-        let tokenSecretName: string = "";
-        logger.info(JSON.stringify(serviceAccountResult.data));
-        for (const secret of serviceAccountResult.data.secrets) {
-            if (secret.name.startsWith(`${serviceAccountName}-token`)) {
-                tokenSecretName = secret.name;
-            }
-        }
 
         if (_.isEmpty(tokenSecretName)) {
             throw new QMError(`Failed to find token for ServiceAccount ${serviceAccountName}`);
@@ -456,17 +460,23 @@ export class OCService {
     }
 
     public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {
-        logger.debug(`Trying to add team membership permission to project.`);
-        await team.owners.map(async owner => {
-            const ownerUsername = /[^\\]*$/.exec(owner.domainUsername)[0];
-            logger.info(`Adding role to project [${projectId}] and owner [${owner.domainUsername}]: ${ownerUsername}`);
-            return await this.openShiftApi.policy.addRoleToUser(ownerUsername, "admin", projectId);
-        });
-        await team.members.map(async member => {
-            const memberUsername = /[^\\]*$/.exec(member.domainUsername)[0];
-            await logger.info(`Adding role to project [${projectId}] and member [${member.domainUsername}]: ${memberUsername}`);
-            return await this.openShiftApi.policy.addRoleToUser(memberUsername, "view", projectId);
-        });
+        const teamOwners = team.owners.map( owner => userFromDomainUser(owner.domainUsername) );
+        if (teamOwners.length > 0) {
+            logger.debug(`Trying to add team membership permission to project for role admin.`);
+            await this.openShiftApi.policy.addRoleToUsers(teamOwners, "admin", projectId);
+        }
+
+        const teamMembers = team.members.map( member => userFromDomainUser(member.domainUsername) );
+        if (teamMembers.length > 0) {
+            logger.debug(`Trying to add team membership permission to project for role edit.`);
+            await this.openShiftApi.policy.addRoleToUsers(teamMembers, "edit", projectId);
+        }
+    }
+
+    public async removeTeamMembershipPermissionsFromProject(projectId: string, domainUserName: string) {
+        const memberUsername = userFromDomainUser(domainUserName);
+        logger.info(`Removing role from project [${projectId}] and member [${domainUserName}]: ${memberUsername}`);
+        return await this.openShiftApi.policy.removeRoleFromUser(memberUsername, "edit", projectId);
     }
 
     public async createPodNetwork(projectToJoin: string, projectToJoinTo: string): Promise<OpenshiftApiResult> {
@@ -477,7 +487,7 @@ export class OCService {
 
     public async addRoleToUserInNamespace(user: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
         logger.debug(`Trying to add role to user in namespace: user: ${user}; role: ${role}; namespace: ${namespace}`);
-        const addRoleResult = await this.openShiftApi.policy.addRoleToUser(user, role, namespace);
+        const addRoleResult = await this.openShiftApi.policy.addRoleToUsers([user], role, namespace);
         if (!isSuccessCode(addRoleResult.status)) {
             logger.error(`Failed to grant the role ${role} to account ${user}. Error: ${inspect(addRoleResult)}`);
             throw new QMError(`Failed to grant the role ${role} to account ${user}.`);
@@ -526,9 +536,9 @@ export class OCService {
         return JSON.parse(listOfResourcesResult.output);
     }
 
-    public async patchResourceInNamespace(resourcePatch: OpenshiftResource, namespace: string) {
+    public async patchResourceInNamespace(resourcePatch: OpenshiftResource, namespace: string, deleteMetaData: boolean = true) {
 
-        const response = await this.openShiftApi.patch.patch(resourcePatch, namespace);
+        const response = await this.openShiftApi.patch.patch(resourcePatch, namespace, deleteMetaData);
 
         if (!isSuccessCode(response.status)) {
             logger.error(`Failed to patch requested resource.\nResource: ${JSON.stringify(resourcePatch)}`);
@@ -545,5 +555,14 @@ export class OCService {
         }
 
         return response;
+    }
+
+    private createLabelPatch(resourceName: string, resourceKind: string, apiVersion: string, labels: { [key: string]: string }) {
+        const labelPatch = ResourceFactory.baseResource(resourceKind, apiVersion);
+        labelPatch.metadata = {
+            name: resourceName,
+            labels,
+        };
+        return labelPatch;
     }
 }

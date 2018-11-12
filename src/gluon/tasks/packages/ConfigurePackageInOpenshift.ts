@@ -90,6 +90,8 @@ export class ConfigurePackageInOpenshift extends Task {
                 name: appBuildName,
             },
             spec: {
+                failedBuildsHistoryLimit: 3,
+                successfulBuildsHistoryLimit: 2,
                 resources: {
                     limits: {
                         cpu: "0",
@@ -155,7 +157,7 @@ export class ConfigurePackageInOpenshift extends Task {
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);
             logger.info(`Processing app [${appName}] Template for: ${projectId}`);
 
-            const template = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate);
+            const template = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate, devOpsProjectId);
             const appBaseTemplate: any = JSON.parse(template.output);
             appBaseTemplate.metadata.namespace = projectId;
             await this.ocService.applyResourceFromDataInNamespace(appBaseTemplate, projectId);

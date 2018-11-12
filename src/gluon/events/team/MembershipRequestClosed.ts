@@ -7,11 +7,10 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
-    Tags,
 } from "@atomist/automation-client";
-import {addressSlackUsers} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackUsersFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
@@ -21,7 +20,6 @@ import {
 } from "../../util/shared/Error";
 
 @CommandHandler("Close a membership request")
-@Tags("subatomic", "team", "membership")
 export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
@@ -133,8 +131,9 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     }
 
     private async handleRejectedMembershipRequest(ctx: HandlerContext, teamName: string, rejectingUserScreenName: string, rejectedUserScreenName: string) {
+        const destination =  await addressSlackUsersFromContext(ctx, rejectedUserScreenName);
         return await ctx.messageClient.send(`Your membership request to team '${teamName}' has been rejected by @${rejectingUserScreenName}`,
-            addressSlackUsers(QMConfig.teamId, rejectedUserScreenName));
+            destination);
     }
 
     private async handleError(ctx: HandlerContext, error) {
@@ -152,6 +151,8 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
                 mrkdwn_in: ["text"],
             }],
         };
-        await ctx.messageClient.addressChannels(msg, this.teamChannel, {id: this.correlationId});
+        const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+
+        return await ctx.messageClient.send(msg, destination, {id: this.correlationId});
     }
 }

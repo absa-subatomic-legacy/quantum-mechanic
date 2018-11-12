@@ -5,6 +5,7 @@ import {
     logger,
     MappedParameter,
     MappedParameters,
+    Tags,
 } from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
 import {QMTemplate} from "../../../template/QMTemplate";
@@ -19,17 +20,20 @@ import {
     setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
+    ParameterDisplayType,
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveSetterResult} from "../../util/recursiveparam/RecursiveSetterResult";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
-import {createMenu} from "../../util/shared/GenericMenu";
+import {createMenuAttachment} from "../../util/shared/GenericMenu";
 import {ConfigurePackage} from "./ConfigurePackage";
 
 const PACKAGE_DEFINITION_EXTENSION = ".json";
 const PACKAGE_DEFINITION_FOLDER = "resources/package-definitions/";
 
 @CommandHandler("Configure an existing application/library using a predefined template", QMConfig.subatomic.commandPrefix + " configure package")
+@Tags("subatomic", "package")
 export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
 
@@ -105,13 +109,15 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         configurePackage.teamChannel = this.teamChannel;
         configurePackage.openshiftTemplate = definition.openshiftTemplate || "Default";
         configurePackage.jenkinsfileName = definition.jenkinsfile;
-        configurePackage.baseS2IImage = definition.buildConfig.imageStream;
+        configurePackage.imageName = definition.buildConfig.imageStream;
         if (definition.buildConfig.envVariables != null) {
             configurePackage.buildEnvironmentVariables = definition.buildConfig.envVariables;
         }
         configurePackage.applicationName = this.applicationName;
         configurePackage.teamName = this.teamName;
         configurePackage.projectName = this.projectName;
+        configurePackage.messagePresentationCorrelationId = this.messagePresentationCorrelationId;
+        configurePackage.displayResultMenu = ParameterDisplayType.hide;
 
         return await configurePackage.handle(ctx);
     }
@@ -121,24 +127,30 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
     }
 }
 
-async function setPackageType(ctx: HandlerContext, commandHandler: ConfigureBasicPackage) {
+async function setPackageType(ctx: HandlerContext, commandHandler: ConfigureBasicPackage): Promise<RecursiveSetterResult> {
     const application = await commandHandler.gluonService.applications.gluonApplicationForNameAndProjectName(commandHandler.applicationName, commandHandler.projectName, false);
     commandHandler.packageType = application.applicationType;
-    return await commandHandler.handle(ctx);
+    return {
+        setterSuccess: true,
+    };
 }
 
-async function setPackageDefinitionFile(ctx: HandlerContext, commandHandler: ConfigureBasicPackage, selectionMessage: string): Promise<HandlerResult> {
+async function setPackageDefinitionFile(ctx: HandlerContext, commandHandler: ConfigureBasicPackage, selectionMessage: string): Promise<RecursiveSetterResult> {
     const packageDefinitionOptions: string [] = readPackageDefinitions(commandHandler.packageType);
-    return await createMenu(ctx, packageDefinitionOptions.map(packageDefinition => {
-            return {
-                value: packageDefinition,
-                text: packageDefinition,
-            };
-        }),
-        commandHandler,
-        selectionMessage,
-        "Select a package definition",
-        "packageDefinition");
+    return {
+        setterSuccess: false,
+        messagePrompt: createMenuAttachment(packageDefinitionOptions.map(packageDefinition => {
+                return {
+                    value: packageDefinition,
+                    text: packageDefinition,
+                };
+            }),
+            commandHandler,
+            selectionMessage,
+            selectionMessage,
+            "Select a package definition",
+            "packageDefinition"),
+    };
 }
 
 function readPackageDefinitions(packageType: string) {

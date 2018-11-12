@@ -5,7 +5,9 @@ import {
     MappedParameter,
     MappedParameters,
     Parameter,
+    Tags,
 } from "@atomist/automation-client";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -28,6 +30,7 @@ import {
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Link an existing library", QMConfig.subatomic.commandPrefix + " link library")
+@Tags("subatomic", "package", "project")
 export class LinkExistingLibrary extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, BitbucketRepoSetter {
 
@@ -80,9 +83,10 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            await ctx.messageClient.addressChannels({
+            const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+            await ctx.messageClient.send({
                 text: "🚀 Your new library is being created...",
-            }, this.teamChannel);
+            }, destination);
 
             return await this.packageCommandService.linkBitbucketRepoToGluonPackage(
                 this.screenName,
