@@ -1,7 +1,8 @@
 import {HandlerContext} from "@atomist/automation-client";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
-import {QMProject} from "../../util/project/Project";
+import {userFromDomainUser} from "../../util/member/Members";
+import {QMProjectBase} from "../../util/project/Project";
 import {QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -13,7 +14,7 @@ export class ConfigureBitbucketProjectAccess extends Task {
     private readonly TASK_ADD_BITBUCKET_USERS = TaskListMessage.createUniqueTaskName("AddBitbucketUsers");
 
     constructor(private team: QMTeam,
-                private project: QMProject,
+                private project: QMProjectBase,
                 private bitbucketService: BitbucketService) {
         super();
     }
@@ -34,8 +35,8 @@ export class ConfigureBitbucketProjectAccess extends Task {
 
         await this.taskListMessage.succeedTask(this.TASK_ADD_SSH_KEYS);
 
-        await bitbucketConfigurationService.addAllOwnersToProject(bitbucketProjectKey, this.team.owners.map(owner => owner.domainUsername.substring(owner.domainUsername.indexOf("\\") + 1)));
-        await bitbucketConfigurationService.addAllMembersToProject(bitbucketProjectKey, this.team.members.map(member => member.domainUsername.substring(member.domainUsername.indexOf("\\") + 1)));
+        await bitbucketConfigurationService.addAllOwnersToProject(bitbucketProjectKey, this.team.owners.map(owner => userFromDomainUser(owner.domainUsername)));
+        await bitbucketConfigurationService.addAllMembersToProject(bitbucketProjectKey, this.team.members.map(member => userFromDomainUser(member.domainUsername)));
 
         await this.taskListMessage.succeedTask(this.TASK_ADD_BITBUCKET_USERS);
 

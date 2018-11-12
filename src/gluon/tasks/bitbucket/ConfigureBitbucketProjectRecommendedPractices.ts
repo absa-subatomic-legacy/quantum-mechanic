@@ -1,7 +1,8 @@
 import {HandlerContext} from "@atomist/automation-client";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
-import {QMProject} from "../../util/project/Project";
+import {userFromDomainUser} from "../../util/member/Members";
+import {QMProjectBase} from "../../util/project/Project";
 import {QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -14,7 +15,7 @@ export class ConfigureBitbucketProjectRecommendedPractices extends Task {
     private readonly TASK_ADD_DEFAULT_REVIEWERS = TaskListMessage.createUniqueTaskName("AddDefaultReviewers");
 
     constructor(private team: QMTeam,
-                private project: QMProject,
+                private project: QMProjectBase,
                 private bitbucketService: BitbucketService) {
         super();
     }
@@ -32,8 +33,8 @@ export class ConfigureBitbucketProjectRecommendedPractices extends Task {
 
         const bitbucketConfigurationService = new BitbucketConfigurationService(this.bitbucketService);
 
-        const ownerDomainUsernames = this.team.owners.map(owner => owner.domainUsername.substring(owner.domainUsername.indexOf("\\") + 1));
-        const memberDomainUsernames = this.team.members.map(member => member.domainUsername.substring(member.domainUsername.indexOf("\\") + 1));
+        const ownerDomainUsernames = this.team.owners.map(owner => userFromDomainUser(owner.domainUsername));
+        const memberDomainUsernames = this.team.members.map(member => userFromDomainUser(member.domainUsername));
 
         await bitbucketConfigurationService.addBranchPermissions(bitbucketProjectKey, ownerDomainUsernames, memberDomainUsernames);
 

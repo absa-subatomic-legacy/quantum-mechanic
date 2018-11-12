@@ -69,16 +69,6 @@ export interface DevOpsEnvironmentDetails {
     description: string;
 }
 
-export function createQMTeam(name: string = null,
-                             owners: QMMemberBase[] = [],
-                             members: QMMemberBase[] = []): QMTeam {
-    return {
-        name,
-        owners,
-        members,
-    };
-}
-
 export function isUserAMemberOfTheTeam(user: QMMemberBase, team: QMTeam) {
     for (const member of team.members) {
         if (user.memberId === member.memberId) {
@@ -95,8 +85,49 @@ export function isUserAMemberOfTheTeam(user: QMMemberBase, team: QMTeam) {
     return false;
 }
 
-export interface QMTeam {
+export interface QMTeamSlack {
+    teamChannel: string;
+}
+
+export interface QMTeamBase {
+    teamId: string;
     name: string;
+    slack?: QMTeamSlack;
+}
+
+export interface QMTeam extends QMTeamBase {
     owners: QMMemberBase[];
     members: QMMemberBase[];
+}
+
+const KickUserFromSlackChannelMutation = `mutation kickUserFromSlackChannel(
+    $teamId: String!
+    $channelId: String!
+    $userId: String!
+  ) {
+    kickUserFromSlackChannel(
+      chatTeamId: $teamId
+      channelId: $channelId
+      userId: $userId
+    ) {
+      id
+    }
+  }
+  `;
+
+export function kickUserFromSlackChannel(
+    ctx: HandlerContext,
+    teamId: string,
+    channelId: string,
+    userId: string,
+): Promise<any> {
+
+    return ctx.graphClient.mutate<any, any>({
+        mutation: KickUserFromSlackChannelMutation,
+        variables: {
+            teamId,
+            channelId,
+            userId,
+        },
+    });
 }
