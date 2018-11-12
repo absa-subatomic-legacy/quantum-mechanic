@@ -97,10 +97,12 @@ export class GITError extends Error {
                 text: `❗${this.message}`,
             };
         } else {
-            this.StartOfFriendlyMessage = this.gitCommandResult.message.indexOf("---        \n");
+            this.StartOfFriendlyMessage = this.gitCommandResult.message.indexOf("---        \nremote: ");
             this.EndOfFriendlyMessage = this.gitCommandResult.message.indexOf("\nremote: ---", this.StartOfFriendlyMessage);
             if ( this.StartOfFriendlyMessage > 0 && this.EndOfFriendlyMessage > 0 ) {
                 this.ErrorFriendlyMessage = this.gitCommandResult.message.slice(this.StartOfFriendlyMessage, this.EndOfFriendlyMessage);
+                this.ErrorFriendlyMessage = this.ErrorFriendlyMessage.replace("---        \nremote: ", "");
+                this.ErrorFriendlyMessage = this.ErrorFriendlyMessage.replace("remote: ", "");
                 logger.debug(`Derived error message from Error for GITError: ${this.ErrorFriendlyMessage}`);
             }
             return {
