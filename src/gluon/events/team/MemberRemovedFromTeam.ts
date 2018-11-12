@@ -125,8 +125,7 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
                 memberRemovedFromTeam.memberRemoved.firstName,
                 memberRemovedFromTeam.team.name,
                 memberRemovedFromTeam.team.slackIdentity.teamChannel,
-                // memberRemovedFromTeam.memberRemoved.slackIdentity.userId,
-                "1234",
+                memberRemovedFromTeam.memberRemoved.slackIdentity.userId,
                 memberRemovedFromTeam.memberRemoved.slackIdentity.screenName);
         } catch (error) {
             return await new QMError(error,
