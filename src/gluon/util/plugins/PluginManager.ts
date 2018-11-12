@@ -1,6 +1,7 @@
 import {logger} from "@atomist/automation-client";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
+import {BaseQMCommand} from "../shared/BaseQMCommand";
 import {PluginResourceStore} from "./PluginResourceStore";
 
 export class PluginManager {
@@ -47,22 +48,37 @@ export class PluginManager {
         }
     }
 
-    public async preHook(hookedObject: any, command: string) {
+    public async preHook(hookedObject: BaseQMCommand, command: string) {
         const pluginsToRun = this.getPluginsForHook(command);
+        const resourceStore: PluginResourceStore = new PluginResourceStore();
         for (const plugin of pluginsToRun) {
-            const pluginEntry = require(`${QMConfig.subatomic.plugins.directory}/${plugin}/entry`);
-            const entry = new pluginEntry.Entry();
-            await entry.runPreHook(hookedObject, new PluginResourceStore());
+            try {
+                const pluginEntry = require(`${QMConfig.subatomic.plugins.directory}/${plugin}/entry`);
+                const entry = new pluginEntry.Entry();
+                await entry.runPreHook(hookedObject, resourceStore);
+            } catch (error) {
+                logger.error(`Failed to run the preHook for plugin: ${plugin}\nError:\n${error}`);
+            }
         }
     }
 
-    public async postHook(hookedObject: any, command: string) {
+    public async postHook(hookedObject: BaseQMCommand, command: string) {
         const pluginsToRun = this.getPluginsForHook(command);
 
+        const commandResult = {
+            commandResult: hookedObject.commandResult,
+            resultMessage: hookedObject.resultMessage,
+        };
+
+        const resourceStore: PluginResourceStore = new PluginResourceStore();
         for (const plugin of pluginsToRun) {
-            const pluginEntry = require(`${QMConfig.subatomic.plugins.directory}/${plugin}/entry`);
-            const entry = new pluginEntry.Entry();
-            await entry.runPostHook(hookedObject, new PluginResourceStore());
+            try {
+                const pluginEntry = require(`${QMConfig.subatomic.plugins.directory}/${plugin}/entry`);
+                const entry = new pluginEntry.Entry();
+                await entry.runPostHook(hookedObject, resourceStore, commandResult);
+            } catch (error) {
+                logger.error(`Failed to run the postHook for plugin: ${plugin}\nError:\n${error}`);
+            }
         }
     }
 
