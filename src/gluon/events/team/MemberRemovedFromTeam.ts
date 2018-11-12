@@ -128,8 +128,9 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
                 memberRemovedFromTeam.memberRemoved.slackIdentity.userId,
                 memberRemovedFromTeam.memberRemoved.slackIdentity.screenName);
         } catch (error) {
-            return await new QMError(error,
-                `Failed to remove ${memberRemovedFromTeam.memberRemoved.slackIdentity.screenName} from ${memberRemovedFromTeam.team.slackIdentity.teamChannel}, please remove the user manually.`);
+            return await handleQMError(new ChannelMessageClient(ctx).addDestination(
+                memberRemovedFromTeam.team.slackIdentity.teamChannel),
+                error);
         }
     }
 }
