@@ -1,7 +1,7 @@
-export class BaseQMCommand {
+export class BaseQMHandler {
     get commandResult() {
         if (this.result === undefined) {
-            this.result = CommandResultStatus.unset;
+            this.result = HandlerResultStatus.unset;
         }
         return this.result;
     }
@@ -25,18 +25,18 @@ export class BaseQMCommand {
     private message: string;
 
     public succeedCommand(message?: string) {
-        this.commandResult = CommandResultStatus.success;
+        this.commandResult = HandlerResultStatus.success;
         this.resultMessage = message;
     }
 
     public failCommand(message?: string) {
-        this.commandResult = CommandResultStatus.failure;
+        this.commandResult = HandlerResultStatus.failure;
         this.resultMessage = message;
     }
 
 }
 
-export enum CommandResultStatus {
+export enum HandlerResultStatus {
     unset = "unset",
     success = "success",
     failure = "failure",

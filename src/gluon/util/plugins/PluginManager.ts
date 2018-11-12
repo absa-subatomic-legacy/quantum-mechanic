@@ -1,7 +1,7 @@
 import {logger} from "@atomist/automation-client";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
-import {BaseQMCommand} from "../shared/BaseQMCommand";
+import {BaseQMHandler} from "../shared/BaseQMHandler";
 import {PluginResourceStore} from "./PluginResourceStore";
 
 export class PluginManager {
@@ -48,7 +48,7 @@ export class PluginManager {
         }
     }
 
-    public async preHook(hookedObject: BaseQMCommand, command: string) {
+    public async preHook(hookedObject: BaseQMHandler, command: string) {
         const pluginsToRun = this.getPluginsForHook(command);
         const resourceStore: PluginResourceStore = new PluginResourceStore();
         for (const plugin of pluginsToRun) {
@@ -62,7 +62,7 @@ export class PluginManager {
         }
     }
 
-    public async postHook(hookedObject: BaseQMCommand, command: string) {
+    public async postHook(hookedObject: BaseQMHandler, command: string) {
         const pluginsToRun = this.getPluginsForHook(command);
 
         const commandResult = {

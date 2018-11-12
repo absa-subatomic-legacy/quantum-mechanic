@@ -11,12 +11,12 @@ import {
 } from "@atomist/automation-client/internal/metadata/decoratorSupport";
 import _ = require("lodash");
 import uuid = require("uuid");
-import {BaseQMCommand} from "../shared/BaseQMCommand";
+import {BaseQMHandler} from "../shared/BaseQMHandler";
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 import {ParameterStatusDisplay} from "./ParameterStatusDisplay";
 import {RecursiveSetterResult} from "./RecursiveSetterResult";
 
-export abstract class RecursiveParameterRequestCommand extends BaseQMCommand implements HandleCommand<HandlerResult> {
+export abstract class RecursiveParameterRequestCommand extends BaseQMHandler implements HandleCommand<HandlerResult> {
 
     @Parameter({
         required: false,
