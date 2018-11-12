@@ -65,8 +65,8 @@ export class PluginManager {
     public async postHook(hookedObject: BaseQMHandler, command: string) {
         const pluginsToRun = this.getPluginsForHook(command);
 
-        const commandResult = {
-            commandResult: hookedObject.commandResult,
+        const handlerResult = {
+            handlerResult: hookedObject.handlerResult,
             resultMessage: hookedObject.resultMessage,
         };
 
@@ -75,7 +75,7 @@ export class PluginManager {
             try {
                 const pluginEntry = require(`${QMConfig.subatomic.plugins.directory}/${plugin}/entry`);
                 const entry = new pluginEntry.Entry();
-                await entry.runPostHook(hookedObject, resourceStore, commandResult);
+                await entry.runPostHook(hookedObject, resourceStore, handlerResult);
             } catch (error) {
                 logger.error(`Failed to run the postHook for plugin: ${plugin}\nError:\n${error}`);
             }

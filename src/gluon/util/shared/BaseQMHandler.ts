@@ -1,12 +1,12 @@
 export class BaseQMHandler {
-    get commandResult() {
+    get handlerResult() {
         if (this.result === undefined) {
             this.result = HandlerResultStatus.unset;
         }
         return this.result;
     }
 
-    set commandResult(value) {
+    set handlerResult(value) {
         this.result = value;
     }
 
@@ -25,12 +25,12 @@ export class BaseQMHandler {
     private message: string;
 
     public succeedCommand(message?: string) {
-        this.commandResult = HandlerResultStatus.success;
+        this.handlerResult = HandlerResultStatus.success;
         this.resultMessage = message;
     }
 
     public failCommand(message?: string) {
-        this.commandResult = HandlerResultStatus.failure;
+        this.handlerResult = HandlerResultStatus.failure;
         this.resultMessage = message;
     }
 
