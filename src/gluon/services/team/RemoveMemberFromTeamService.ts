@@ -93,7 +93,8 @@ export class RemoveMemberFromTeamService {
             const message = `${slackName} has been removed from the Slack channel: ${channelName}`;
             return await ctx.messageClient.send(message, destination);
         } catch (error) {
-            throw new QMError(`Exception: ${error}`);
+            return await new QMError(error,
+                `Failed to remove ${screenName} from ${channelName}, please remove the user manually.`);
         }
     }
 }
