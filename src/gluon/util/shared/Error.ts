@@ -7,7 +7,6 @@ import {
 import {MessageOptions} from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import * as util from "util";
-import {GitCommandResult} from "../../../openshift/base/GitCommandResult";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 
 export function logErrorAndReturnSuccess(method, error): HandlerResult {
@@ -22,8 +21,8 @@ export async function handleQMError(messageClient: QMMessageClient, error) {
     if (error && "code" in error && error.code === "ECONNREFUSED") {
         logger.error(`Error code suggests and external service is down.\nError: ${util.inspect(error)}`);
         return await messageClient.send(`❗Unexpected failure. An external service dependency appears to be down.`);
-    } else if (error instanceof GITError) {
-        logger.error(`Error is of GITError type. Error: ${error.message}`);
+    } else if (error instanceof GitError) {
+        logger.error(`Error is of GitError type. Error: ${error.message}`);
         return await messageClient.send(error.getSlackMessage());
     } else if (error instanceof QMError) {
         logger.error(`Error is of QMError type. Error: ${error.message}`);
@@ -74,42 +73,25 @@ export class OCResultError extends QMError {
     }
 }
 
-export class GITError extends Error {
-    private StartOfFriendlyMessage: number;
-    private EndOfFriendlyMessage: number;
-    private ErrorFriendlyMessage: string;
-    constructor(private gitCommandResult: GitCommandResult,
-                public message: string = null,
-                private slackMessage: SlackMessage | string = null,
-                ) {
-        super(message = null);
-        this.ErrorFriendlyMessage = "Failed to interpret GIT exception. Please alert your system admin to check the logs and correct the issue accordingly.";
+export class GitError extends Error {
+    constructor(message: string) {
+        super(message);
     }
     public getSlackMessage() {
-        logger.debug(`Attempting to resolve slack message for GITError`);
-        // return the specified Slack message first else message otherwise default to calculate from error object
-        if (this.slackMessage != null) {
-            logger.debug(`Returning specified slack message for GITError`);
-            return this.slackMessage;
-        } else if (this.message != null) {
-            logger.debug(`Returning specified message for GITError`);
-            return {
-                text: `❗${this.message}`,
-            };
-        } else {
-            this.StartOfFriendlyMessage = this.gitCommandResult.message.indexOf("---        \nremote: ");
-            this.EndOfFriendlyMessage = this.gitCommandResult.message.indexOf("\nremote: ---", this.StartOfFriendlyMessage);
-            if ( this.StartOfFriendlyMessage > 0 && this.EndOfFriendlyMessage > 0 ) {
-                this.ErrorFriendlyMessage = this.gitCommandResult.message.slice(this.StartOfFriendlyMessage, this.EndOfFriendlyMessage);
-                this.ErrorFriendlyMessage = this.ErrorFriendlyMessage.replace("---        \nremote: ", "");
-                this.ErrorFriendlyMessage = this.ErrorFriendlyMessage.replace("remote: ", "");
-                logger.debug(`Derived error message from Error for GITError: ${this.ErrorFriendlyMessage}`);
-            }
-            return {
-                text: `❗${this.ErrorFriendlyMessage}`,
-            };
+        let errorFriendlyMessage = "Failed to interpret Git exception. Please alert your system admin to check the logs and correct the issue accordingly.";
+        logger.debug(`Attempting to resolve slack message for GitError`);
+
+        const regex: RegExp = /-{5,}\s{1,}remote:([\s\S]*?)remote:\s-{1,}/;
+        const match = regex.exec(this.message);
+        if (match !== null) {
+                errorFriendlyMessage = match[1];
+                errorFriendlyMessage = errorFriendlyMessage.replace("remote: ", "");
+                logger.debug(`Derived error message from Error for GitError: ${errorFriendlyMessage}`);
         }
-    }
+        return {
+                text: `❗${errorFriendlyMessage}`,
+                };
+        }
 }
 
 export interface QMMessageClient {
