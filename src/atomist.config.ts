@@ -102,6 +102,7 @@ import {
 } from "./gluon/ingesters/teamIngester";
 import {TeamMemberCreatedEvent} from "./gluon/ingesters/teamMemberIngester";
 import {Help} from "./gluon/util/help/Help";
+import * as  exp from "express";
 
 const token = QMConfig.token;
 const http = QMConfig.http;
@@ -205,7 +206,32 @@ export const configuration: any = {
         TeamsLinkedToProjectEvent,
     ],
     token,
-    http,
+    http:{
+        customizers:[
+
+            (exp) => {
+
+                const register = require('prom-client').register;
+
+                require('prom-client').collectDefaultMetrics();
+
+                const Counter = require('prom-client').Counter;
+                require('prom-client').collectDefaultMetrics();
+
+                const c = new Counter({
+                    name: 'test_counter',
+                    help: 'Example of a counter',
+                    labelNames: ['code']
+                });
+
+                exp.get("/prometrics", async (req, res) => {
+                    res.set('Content-Type', register.contentType);
+                    res.end(register.metrics());
+                });
+
+            },
+        ]
+    },
     logging: {
         level: "debug",
         file: false,
