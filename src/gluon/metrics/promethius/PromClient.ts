@@ -19,7 +19,7 @@ export class PromethiusClient  {
 
         logger.debug(`PromethiusClient.guid: ${PromethiusClient.guid}`); // output guid
 
-        // Creat a counter
+        // Create a counter wip
         const Counter = require("prom-client").Counter;
         const c = new Counter({
             name: "list_team_members_counter",
@@ -27,17 +27,17 @@ export class PromethiusClient  {
             labelNames: ["code"],
         });
 
-        // Add it to array
+        // Add it to array wip
         PromethiusClient.counters.push(c);
 
-        // Create another counter
+        // Create another counter wip
         const d = new Counter({
             name: "add_member_to_team_counter",
             help: "Tracks number of times the add_member_to_team ran",
             labelNames: ["code"],
         });
 
-        // Add it to array
+        // Add it to array wip
         PromethiusClient.counters.push(d);
 
         exp.get("/prometrics", async (req, res) => {
