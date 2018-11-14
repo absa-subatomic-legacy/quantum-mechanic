@@ -1,5 +1,5 @@
 import {logger} from "@atomist/automation-client";
-import {ListTeamMembers} from "../../commands/team/ListTeamMembers";
+
 export class PromethiusClient  {
 
     public static client: any;
