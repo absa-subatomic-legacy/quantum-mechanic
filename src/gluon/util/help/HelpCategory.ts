@@ -6,6 +6,7 @@ import {
 import {BitbucketProjectAccessCommand} from "../../commands/bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "../../commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
+import {JenkinsCredentialsRecreate} from "../../commands/jenkins/JenkinsCredentialsRecreate";
 import {AddSlackDetails} from "../../commands/member/AddSlackDetails";
 import {OnboardMember} from "../../commands/member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "../../commands/packages/ConfigureApplicationJenkinsProd";
@@ -38,6 +39,7 @@ import {LinkExistingTeamSlackChannel} from "../../commands/team/LinkExistingTeam
 import {ListTeamMembers} from "../../commands/team/ListTeamMembers";
 import {NewOrUseTeamSlackChannel} from "../../commands/team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "../../commands/team/NewSlackChannel";
+import {RemoveMemberFromTeam} from "../../commands/team/RemoveMemberFromTeam";
 import {TagAllLatestImages} from "../../commands/team/TagAllLatestImages";
 import {TagLatestImage} from "../../commands/team/TagLatestImage";
 import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
