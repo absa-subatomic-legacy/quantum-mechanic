@@ -1,12 +1,13 @@
 import {
     CommandHandler,
-    HandlerContext,
+    HandlerContext, logger,
     MappedParameter,
     MappedParameters,
     Tags,
 } from "@atomist/automation-client";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {PromethiusClient} from "../../metrics/promethius/PromClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {Extensible} from "../../util/plugins/Extensible";
 import {
@@ -48,6 +49,10 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
 
     @Extensible("Team.ListTeamMembers")
     protected async runCommand(ctx: HandlerContext) {
+
+        logger.debug(`PromethiusClient.guid from List team members: ${PromethiusClient.guid}`);
+        PromethiusClient.incrementCounter("list_team_members_counter");
+
         const result = await this.gluonService.teams.gluonTeamByName(this.teamName);
         const teamOwners = this.getTeamMemberNames(result.owners);
         const teamMembers = this.getTeamMemberNames(result.members);

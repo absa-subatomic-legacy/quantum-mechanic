@@ -1,7 +1,7 @@
 import {
     CommandHandler,
     HandlerContext,
-    HandlerResult,
+    HandlerResult, logger,
     MappedParameter,
     MappedParameters,
     Parameter,
@@ -22,6 +22,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {PromethiusClient} from "../../metrics/promethius/PromClient";
 
 @CommandHandler("Add a member to a team", QMConfig.subatomic.commandPrefix + " add team member")
 @Tags("subatomic", "member", "team")
@@ -63,6 +64,9 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
+        logger.debug(`PromethiusClient.guid from List team members: ${PromethiusClient.guid}`);
+        PromethiusClient.incrementCounter("add_member_to_team_counter");
+
         try {
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Adding member to team started:`,
                 new ResponderMessageClient(ctx));
