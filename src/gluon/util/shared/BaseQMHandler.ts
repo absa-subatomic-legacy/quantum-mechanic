@@ -36,7 +36,6 @@ export class BaseQMHandler {
     protected failHandler(message?: string) {
         this.handlerResult = HandlerResultStatus.failure;
         this.resultMessage = message;
-        PrometheusClient.incrementCounter(`${_.snakeCase(this.constructor.name)}_command`, "fail" );
     }
 
 }

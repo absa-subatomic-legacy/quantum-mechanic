@@ -22,6 +22,8 @@ export class NewOrUseTeamSlackChannel extends BaseQMComand implements HandleComm
         required: false,
     })
 
+    public teamChannel: string;
+
     public teamSlackChannelMessages = new TeamSlackChannelMessages();
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
