@@ -51,9 +51,6 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: ConfigureApplicationJenkinsProd.RecursiveKeys.teamName,
     })

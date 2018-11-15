@@ -39,9 +39,6 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
         openshiftProjectNames: "OPENSHIFT_PROJECT_NAMES",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: CreateOpenShiftPvc.RecursiveKeys.teamName,
         selectionMessage: `Please select a team associated with the project you wish to create a PVC for`,

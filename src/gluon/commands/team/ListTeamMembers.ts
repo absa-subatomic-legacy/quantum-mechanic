@@ -28,9 +28,6 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
 

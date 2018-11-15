@@ -1,6 +1,6 @@
 import {logger} from "@atomist/automation-client";
-import {configuration} from "../../../atomist.config";
 import * as _ from "lodash";
+import {configuration} from "../../../atomist.config";
 
 export class PrometheusClient  {
 
@@ -29,7 +29,7 @@ export class PrometheusClient  {
             const commandCounter = new Counter({
                 name: `${cName}_command`,
                 help: `Count the number of times the ${command.name} command fires`,
-                labelNames: ["status", "slackUsername"],
+                labelNames: ["status", "slackUsername", "team"],
             });
 
             PrometheusClient.counters.push(commandCounter);
@@ -55,6 +55,7 @@ export class PrometheusClient  {
     }
 
     public static incrementCounter(name: string, labels: any) {
+        logger.debug(`incrementCounter name: ${name} labels: ${labels}`);
         PrometheusClient.counters.find( counter => counter.name === name).inc(labels);
     }
 }

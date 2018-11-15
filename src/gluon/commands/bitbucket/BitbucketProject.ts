@@ -39,9 +39,6 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @Parameter({
         description: "bitbucket project key",
     })
@@ -119,9 +116,6 @@ export class ListExistingBitbucketProject
 
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @Parameter({
         description: "bitbucket project key",

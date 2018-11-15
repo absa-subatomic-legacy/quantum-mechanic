@@ -33,9 +33,6 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: CreateProjectProdEnvironments.RecursiveKeys.projectName,
         selectionMessage: "Please select the projects you wish to provision the production environments for",

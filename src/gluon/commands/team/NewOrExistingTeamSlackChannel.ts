@@ -20,7 +20,6 @@ export class NewOrUseTeamSlackChannel extends BaseQMComand implements HandleComm
         description: "team channel name",
         required: false,
     })
-    public teamChannel: string;
 
     public teamSlackChannelMessages = new TeamSlackChannelMessages();
 

@@ -39,9 +39,6 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: JenkinsCredentialsRecreate.RecursiveKeys.teamName,
         selectionMessage: "Please select the team which contains the owning project of the jenkins you would like to reconfigure",

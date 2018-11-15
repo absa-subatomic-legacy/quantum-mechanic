@@ -29,9 +29,6 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: NewDevOpsEnvironment.RecursiveKeys.teamName,
         selectionMessage: "Please select a team you would like to create a DevOps environment for",

@@ -38,9 +38,6 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: BitbucketProjectAccessCommand.RecursiveKeys.projectName,
         selectionMessage: "Please select the project you wish to configure the Bitbucket project for",

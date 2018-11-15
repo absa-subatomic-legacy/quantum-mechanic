@@ -45,9 +45,6 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: KickOffJenkinsBuild.RecursiveKeys.projectName,
         selectionMessage: "Please select a project which contains the application you would like to build",

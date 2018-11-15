@@ -33,9 +33,6 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: AssociateTeam.RecursiveKeys.teamName,
         selectionMessage: `Please select a team you would like to associate to the project`,

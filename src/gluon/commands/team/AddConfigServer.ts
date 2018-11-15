@@ -33,9 +33,6 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: AddConfigServer.RecursiveKeys.teamName,
     })

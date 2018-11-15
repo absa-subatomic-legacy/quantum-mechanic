@@ -35,13 +35,13 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
         recursiveKey: LinkExistingTeamSlackChannel.RecursiveKeys.teamName,
         selectionMessage: "Please select the team you would like to link the slack channel to",
     })
-    public teamName: string;
 
     @Parameter({
         description: "team channel name",
         required: true,
     })
-    public teamChannel: string;
+
+    public teamName: string;
 
     constructor(public gluonService = new GluonService(),
                 private teamSlackChannelService = new TeamSlackChannelService()) {

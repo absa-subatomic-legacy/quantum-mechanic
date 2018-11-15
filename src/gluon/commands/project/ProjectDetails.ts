@@ -35,9 +35,6 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: ListTeamProjects.RecursiveKeys.teamName,
         selectionMessage: "Please select a team you wish to list associated projects for",

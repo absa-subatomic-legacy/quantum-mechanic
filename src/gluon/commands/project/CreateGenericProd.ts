@@ -47,9 +47,6 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: CreateGenericProd.RecursiveKeys.teamName,
         selectionMessage: "Please select a team associated with the project you wish to configure the package for",

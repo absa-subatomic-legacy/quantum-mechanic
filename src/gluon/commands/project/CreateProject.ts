@@ -36,9 +36,6 @@ export class CreateProject extends RecursiveParameterRequestCommand
         tenantName: "TENANT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @Parameter({
         description: "project name",
     })

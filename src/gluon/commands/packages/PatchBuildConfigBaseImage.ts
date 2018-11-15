@@ -42,9 +42,6 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
         imageName: "IMAGE_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: PatchBuildConfigBaseImage.RecursiveKeys.applicationName,
         selectionMessage: "Please select the package you wish to configure",

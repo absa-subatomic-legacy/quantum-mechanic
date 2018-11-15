@@ -17,9 +17,6 @@ import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 @CommandHandler("Re-run a failed project production request")
 export class ReRunProjectProdRequest extends BaseQMComand {
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @Parameter({
         required: true,
         description: "correlation id of the message that invoked this command",

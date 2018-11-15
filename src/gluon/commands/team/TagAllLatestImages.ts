@@ -35,9 +35,6 @@ export class TagAllLatestImages extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: TagAllLatestImages.RecursiveKeys.teamName,
         selectionMessage: "Please select the team you would like to tag the latest images to",

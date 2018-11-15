@@ -40,9 +40,6 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand
         bitbucketRepositorySlug: "BITBUCKET_REPOSITORY_SLUG",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @Parameter({
         description: "application name",
     })

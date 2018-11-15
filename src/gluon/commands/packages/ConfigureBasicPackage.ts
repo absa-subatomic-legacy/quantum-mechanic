@@ -45,9 +45,6 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         packageDefinition: "PACKAGE_DEFINITION",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: ConfigureBasicPackage.RecursiveKeys.teamName,
         selectionMessage: "Please select a team associated with the project you wish to configure the package for",

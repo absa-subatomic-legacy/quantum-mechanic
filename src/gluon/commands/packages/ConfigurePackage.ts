@@ -55,9 +55,6 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
         baseS2IImage: "BASE_S2I_IMAGE",
     };
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: ConfigurePackage.RecursiveKeys.applicationName,
         selectionMessage: "Please select the package you wish to configure",

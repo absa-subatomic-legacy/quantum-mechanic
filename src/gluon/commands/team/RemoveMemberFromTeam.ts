@@ -37,9 +37,6 @@ export class RemoveMemberFromTeam extends RecursiveParameterRequestCommand imple
     @MappedParameter(MappedParameters.SlackChannel)
     public channelId: string;
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @Parameter({
         description: "slack name (@User.Name) of the member to remove from a team",
     })
