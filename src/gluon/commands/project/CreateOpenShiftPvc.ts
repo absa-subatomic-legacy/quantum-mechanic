@@ -96,8 +96,11 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
                 });
             }
 
-            return await this.sendPvcResultMessage(ctx, pvcAttachments);
+            const result =  await this.sendPvcResultMessage(ctx, pvcAttachments);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

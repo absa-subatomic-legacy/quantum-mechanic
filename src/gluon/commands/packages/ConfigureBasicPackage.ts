@@ -80,8 +80,11 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            return await this.callPackageConfiguration(ctx);
+            const result =  await this.callPackageConfiguration(ctx);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

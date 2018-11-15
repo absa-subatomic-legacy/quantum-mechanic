@@ -84,7 +84,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand
                 text: "🚀 Your new application is being created...",
             });
 
-            return await this.packageCommandService.linkBitbucketRepoToGluonPackage(
+            const result = await this.packageCommandService.linkBitbucketRepoToGluonPackage(
                 this.screenName,
                 this.name,
                 this.description,
@@ -92,7 +92,10 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand
                 this.projectName,
                 ApplicationType.DEPLOYABLE,
             );
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

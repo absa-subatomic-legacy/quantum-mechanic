@@ -86,8 +86,9 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
             await taskRunner.execute(ctx);
 
             await qmMessageClient.send("Patching BuildConfig completed successfully!");
-
+            this.succeedCommand();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(qmMessageClient, error);
         }
     }

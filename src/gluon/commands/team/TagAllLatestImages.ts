@@ -66,6 +66,7 @@ export class TagAllLatestImages extends RecursiveParameterRequestCommand
         await this.ocService.login();
         const project = this.ocService.findProject(devopsEnvironment);
         if (project === null) {
+            this.failCommand();
             throw new QMError(`No devops environment for team ${this.teamName} has been provisioned yet.`);
         }
         try {

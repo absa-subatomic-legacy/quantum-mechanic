@@ -46,8 +46,11 @@ export class ReRunProjectProdRequest extends BaseQMComand {
                 projectProdRequestId: this.projectProdRequestId,
             };
 
-            return await ctx.messageClient.send(projectProdRequestEvent, addressEvent("ProjectProductionEnvironmentsRequestClosedEvent"));
+            const result =  await ctx.messageClient.send(projectProdRequestEvent, addressEvent("ProjectProductionEnvironmentsRequestClosedEvent"));
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

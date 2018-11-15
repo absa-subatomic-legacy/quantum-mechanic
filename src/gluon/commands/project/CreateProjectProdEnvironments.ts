@@ -65,8 +65,11 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
 
             await this.gluonService.prod.project.createProjectProdRequest(member.memberId, project.projectId);
 
-            return success();
+            const result = success();
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

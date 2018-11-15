@@ -72,8 +72,11 @@ export class OnboardMember extends BaseQMComand {
                 });
             const message = this.onboardMessages.presentTeamCreationAndApplicationOptions(this.firstName);
             const destination = await addressSlackUsersFromContext(ctx, this.userId);
-            return await ctx.messageClient.send(message, destination);
+            const result = await ctx.messageClient.send(message, destination);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

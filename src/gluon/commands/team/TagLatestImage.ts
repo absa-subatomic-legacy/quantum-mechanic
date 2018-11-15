@@ -75,11 +75,13 @@ export class TagLatestImage extends RecursiveParameterRequestCommand
         await this.ocService.login();
         const project = this.ocService.findProject(devopsEnvironment);
         if (project === null) {
+            this.failCommand();
             throw new QMError(`No devops environment for team ${this.teamName} has been provisioned yet.`);
         }
         try {
             await this.ocService.tagSubatomicImageToNamespace(this.imageName, devopsEnvironment);
         } catch (error) {
+            this.failCommand();
             logger.error(`Failed to tag selected image to project ${devopsEnvironment}. Error: ${inspect(error)}`);
             throw new QMError("Image tagging failed. Please contact your system administrator for assistance.");
         }

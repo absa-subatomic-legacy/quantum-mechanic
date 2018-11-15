@@ -50,11 +50,16 @@ export class UpdateProjectProdRequest extends BaseQMComand {
             const isProdRequestOpen = await this.isProdRequestOpen();
             if (isProdRequestOpen) {
                 await this.updateProdRequest();
-                return await this.sendResponseMessage(ctx);
+                const result =  await this.sendResponseMessage(ctx);
+                this.succeedCommand();
+                return result;
             } else {
-                return await this.sendClosedMessage(ctx);
+                const result =  await this.sendClosedMessage(ctx);
+                this.succeedCommand();
+                return result;
             }
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

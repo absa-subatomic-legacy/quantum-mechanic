@@ -103,8 +103,9 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             );
 
             await taskRunner.execute(ctx);
-
+            this.succeedCommand();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

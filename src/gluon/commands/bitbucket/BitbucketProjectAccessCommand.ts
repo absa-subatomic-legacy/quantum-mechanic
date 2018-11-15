@@ -74,6 +74,7 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
             const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             if (!isUserAMemberOfTheTeam(member, requestingTeam)) {
+                this.failCommand();
                 return await messageClient.send(this.teamMembershipMessages.notAMemberOfTheTeam());
             }
 
@@ -88,8 +89,11 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
             }
             await taskRunner.execute(ctx);
 
-            return await success();
+            const result =  await success();
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(messageClient, error);
         }
     }

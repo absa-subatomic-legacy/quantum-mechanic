@@ -51,8 +51,11 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            return await this.linkProjectForTeam(ctx, this.teamName);
+            const result =  await this.linkProjectForTeam(ctx, this.teamName);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

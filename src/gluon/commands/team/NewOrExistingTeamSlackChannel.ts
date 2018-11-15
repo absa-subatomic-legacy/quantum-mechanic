@@ -7,6 +7,7 @@ import {
 } from "@atomist/automation-client";
 import {TeamSlackChannelMessages} from "../../messages/team/TeamSlackChannelMessages";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
+import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Check whether to create a new team channel or use an existing channel")
 export class NewOrUseTeamSlackChannel extends BaseQMComand implements HandleCommand {
@@ -24,6 +25,18 @@ export class NewOrUseTeamSlackChannel extends BaseQMComand implements HandleComm
     public teamSlackChannelMessages = new TeamSlackChannelMessages();
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
-        return await ctx.messageClient.respond(this.teamSlackChannelMessages.createNewOrUseExistingSlackChannel(this.teamChannel, this.teamName));
+        try {
+            const result =  await ctx.messageClient.respond(this.teamSlackChannelMessages.createNewOrUseExistingSlackChannel(this.teamChannel, this.teamName));
+            this.succeedCommand();
+            return result;
+        } catch (error) {
+            this.failCommand();
+            return await this.handleError(ctx, error);
+        }
+    }
+
+    private async handleError(ctx: HandlerContext, error) {
+        const messageClient = new ResponderMessageClient(ctx);
+        return await handleQMError(messageClient, error);
     }
 }

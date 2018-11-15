@@ -82,7 +82,7 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
                 text: "🚀 Your new library is being created...",
             }, destination);
 
-            return await this.packageCommandService.linkBitbucketRepoToGluonPackage(
+            const result = await this.packageCommandService.linkBitbucketRepoToGluonPackage(
                 this.screenName,
                 this.name,
                 this.description,
@@ -90,7 +90,10 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
                 this.projectName,
                 ApplicationType.LIBRARY,
             );
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

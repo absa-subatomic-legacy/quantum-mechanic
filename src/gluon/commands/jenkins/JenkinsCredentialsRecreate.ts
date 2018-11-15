@@ -54,8 +54,11 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext) {
         try {
             await this.ocService.login();
-            return await this.recreateBitbucketJenkinsCredential(ctx, this.teamName);
+            const result = await this.recreateBitbucketJenkinsCredential(ctx, this.teamName);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

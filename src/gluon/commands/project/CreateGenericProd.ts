@@ -90,17 +90,24 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
             if (this.approval === ApprovalEnum.CONFIRM) {
                 this.correlationId = uuid();
-                return await this.getRequestConfirmation(qmMessageClient);
+                const result =  await this.getRequestConfirmation(qmMessageClient);
+                this.succeedCommand();
+                return result;
             } else if (this.approval === ApprovalEnum.APPROVED) {
 
                 await this.createGenericProdRequest();
 
-                return await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+                const result = await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+                this.succeedCommand();
+                return result;
             } else if (this.approval === ApprovalEnum.REJECTED) {
-                return await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+                const result = await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+                this.succeedCommand();
+                return result;
             }
 
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

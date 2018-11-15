@@ -11,11 +11,12 @@ import {
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {getScreenName, loadScreenNameByUserId} from "../../util/member/Members";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {BaseQMHandler} from "../../util/shared/BaseQMHandler";
 import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Request membership to a team")
-export class CreateMembershipRequestToTeam extends BaseQMHandler implements HandleCommand<HandlerResult> {
+export class CreateMembershipRequestToTeam extends BaseQMComand implements HandleCommand<HandlerResult> {
 
     @Parameter({
         description: "Gluon team id to create a membership request to.",
@@ -45,8 +46,11 @@ export class CreateMembershipRequestToTeam extends BaseQMHandler implements Hand
 
             await this.createMembershipRequest(memberDetails);
 
-            return await ctx.messageClient.respond("Your request to join then team has been sent.");
+            const result =  await ctx.messageClient.respond("Your request to join then team has been sent.");
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

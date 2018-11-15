@@ -72,8 +72,11 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext) {
         try {
             await this.ocService.login();
-            return await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
+            const result =  await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

@@ -70,19 +70,24 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
     private async addConfigServer(ctx: HandlerContext,
                                   gluonTeamName: string,
                                   gitUri: string): Promise<any> {
-        const devOpsProjectId = `${_.kebabCase(gluonTeamName).toLowerCase()}-devops`;
-        await this.addConfigServerSecretToDevOpsEnvironment(devOpsProjectId);
+        try {
+            const devOpsProjectId = `${_.kebabCase(gluonTeamName).toLowerCase()}-devops`;
+            await this.addConfigServerSecretToDevOpsEnvironment(devOpsProjectId);
 
-        await this.createConfigServerConfigurationMap(devOpsProjectId);
+            await this.createConfigServerConfigurationMap(devOpsProjectId);
 
-        await this.tagConfigServerImageToDevOpsEnvironment(devOpsProjectId);
+            await this.tagConfigServerImageToDevOpsEnvironment(devOpsProjectId);
 
-        await this.addViewRoleToDevOpsEnvironmentDefaultServiceAccount(devOpsProjectId);
+            await this.addViewRoleToDevOpsEnvironmentDefaultServiceAccount(devOpsProjectId);
 
-        await this.createConfigServerDeploymentConfig(gitUri, devOpsProjectId);
+            await this.createConfigServerDeploymentConfig(gitUri, devOpsProjectId);
 
-        await this.sendSuccessResponse(ctx, devOpsProjectId);
-        this.succeedCommand();
+            await this.sendSuccessResponse(ctx, devOpsProjectId);
+            this.succeedCommand();
+        } catch (error) {
+            this.failCommand();
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     private async addConfigServerSecretToDevOpsEnvironment(devOpsProjectId: string) {

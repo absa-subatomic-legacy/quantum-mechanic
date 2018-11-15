@@ -73,6 +73,7 @@ export class BitbucketProjectRecommendedPracticesCommand extends RecursiveParame
             const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             if (!isUserAMemberOfTheTeam(member, requestingTeam)) {
+                this.failCommand();
                 return await messageClient.send(this.teamMembershipMessages.notAMemberOfTheTeam());
             }
 
@@ -87,8 +88,11 @@ export class BitbucketProjectRecommendedPracticesCommand extends RecursiveParame
             }
             await taskRunner.execute(ctx);
 
-            return await messageClient.send("Successfully applied recommended practices to Bitbucket project!");
+            const result = await messageClient.send("Successfully applied recommended practices to Bitbucket project!");
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(messageClient, error);
         }
     }

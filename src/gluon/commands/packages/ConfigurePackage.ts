@@ -104,8 +104,11 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
             await ctx.messageClient.send({
                 text: "Preparing to configure your package...",
             }, destination);
-            return await this.configurePackage(ctx);
+            const result = await this.configurePackage(ctx);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }
