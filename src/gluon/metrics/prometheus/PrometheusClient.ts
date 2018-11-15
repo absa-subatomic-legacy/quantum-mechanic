@@ -1,5 +1,6 @@
 import {logger} from "@atomist/automation-client";
 import {configuration} from "../../../atomist.config";
+import * as _ from "lodash";
 
 export class PrometheusClient  {
 
@@ -23,7 +24,7 @@ export class PrometheusClient  {
 
         // Loop through commands from atomist.config and add/register
         configuration.commands.forEach( command => {
-            const cName = PrometheusClient.convertToSnake(command.name);
+            const cName = _.snakeCase((command.name);
 
             const commandCounter = new Counter({
                 name: `${cName}_command`,
@@ -36,7 +37,7 @@ export class PrometheusClient  {
 
         // Loop through events from atomist.config and add/register
         configuration.events.forEach( event => {
-            const eName = PrometheusClient.convertToSnake(event.name);
+            const eName = _.snakeCase((event.name);
 
             const eventCounter = new Counter({
                 name: `${eName}_event`,
@@ -56,9 +57,4 @@ export class PrometheusClient  {
     public static incrementCounter(name: string, labels: any) {
         PrometheusClient.counters.find( counter => counter.name === name).inc(labels);
     }
-
-    private static convertToSnake( myStr ) {
-        return myStr.replace( /([a-z])([A-Z])/g, "$1_$2" ).toLowerCase();
-    }
-
 }
