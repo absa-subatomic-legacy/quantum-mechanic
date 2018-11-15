@@ -64,9 +64,6 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
-        logger.debug(`PromethiusClient.guid from List team members: ${PromethiusClient.guid}`);
-        PromethiusClient.incrementCounter("add_member_to_team_counter");
-
         try {
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Adding member to team started:`,
                 new ResponderMessageClient(ctx));
