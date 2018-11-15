@@ -24,7 +24,7 @@ export class PrometheusClient  {
 
         // Loop through commands from atomist.config and add/register
         configuration.commands.forEach( command => {
-            const cName = _.snakeCase((command.name);
+            const cName = _.snakeCase(command.name);
 
             const commandCounter = new Counter({
                 name: `${cName}_command`,
@@ -37,7 +37,7 @@ export class PrometheusClient  {
 
         // Loop through events from atomist.config and add/register
         configuration.events.forEach( event => {
-            const eName = _.snakeCase((event.name);
+            const eName = _.snakeCase(event.name);
 
             const eventCounter = new Counter({
                 name: `${eName}_event`,
