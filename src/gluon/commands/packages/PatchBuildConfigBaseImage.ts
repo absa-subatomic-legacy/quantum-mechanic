@@ -42,9 +42,6 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
         imageName: "IMAGE_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 

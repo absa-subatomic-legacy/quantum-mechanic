@@ -12,14 +12,11 @@ import {
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 
 @CommandHandler("Add Slack details to an existing team member", QMConfig.subatomic.commandPrefix + " add slack")
 @Tags("subatomic", "member")
-export class AddSlackDetails implements HandleCommand<HandlerResult> {
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
+export class AddSlackDetails extends BaseQMComand {
     @MappedParameter(MappedParameters.SlackUser)
     public userId: string;
 
@@ -30,6 +27,7 @@ export class AddSlackDetails implements HandleCommand<HandlerResult> {
     public email: string;
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {

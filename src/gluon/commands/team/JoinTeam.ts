@@ -12,11 +12,12 @@ import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {JoinTeamMessages} from "../../messages/team/JoinTeamMessages";
 import {GluonService} from "../../services/gluon/GluonService";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {BaseQMHandler} from "../../util/shared/BaseQMHandler";
+import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Apply to join an existing team", QMConfig.subatomic.commandPrefix + " apply to team")
 @Tags("subatomic", "team")
-export class JoinTeam implements HandleCommand<HandlerResult> {
+export class JoinTeam extends BaseQMHandler implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
@@ -24,6 +25,7 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
     public joinTeamMessages: JoinTeamMessages = new JoinTeamMessages();
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
@@ -31,7 +33,8 @@ export class JoinTeam implements HandleCommand<HandlerResult> {
             const teamsQueryResult = await this.gluonService.teams.getAllTeams();
 
             if (!isSuccessCode(teamsQueryResult.status)) {
-                return ctx.messageClient.respond(this.joinTeamMessages.alertUserThatNoTeamsExist());
+                throw new QMError("Team does not exist", this.joinTeamMessages.alertUserThatNoTeamsExist());
+                // return ctx.messageClient.respond(this.joinTeamMessages.alertUserThatNoTeamsExist());
             }
 
             const teams = teamsQueryResult.data._embedded.teamResources;

@@ -26,7 +26,6 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
-import {PromethiusClient} from "../../metrics/promethius/PromClient";
 
 @CommandHandler("Tag an individual subatomic image to a devops environment ", QMConfig.subatomic.commandPrefix + " tag image")
 @Tags("subatomic", "devops", "team", "openshiftNonProd", "images")
@@ -37,9 +36,6 @@ export class TagLatestImage extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
         imageName: "IMAGE_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
 
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
@@ -90,10 +86,7 @@ export class TagLatestImage extends RecursiveParameterRequestCommand
             logger.error(`Failed to tag selected image to project ${devopsEnvironment}. Error: ${inspect(error)}`);
             throw new QMError("Image tagging failed. Please contact your system administrator for assistance.");
         }
-
-        logger.debug(`PromethiusClient.guid from TagLatestImage: ${PromethiusClient.guid}`);
-        PromethiusClient.incrementCounter("tag_latest_image_command");
-
+        this.succeedCommand();
         return ctx.messageClient.respond(`Image successfully tagged to devops environment *${devopsEnvironment}*.`, {id: messageId});
     }
 }

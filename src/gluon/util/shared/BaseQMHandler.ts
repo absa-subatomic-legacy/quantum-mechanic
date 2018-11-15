@@ -1,3 +1,7 @@
+import {logger} from "@atomist/automation-client";
+import * as _ from "lodash";
+import {PrometheusClient} from "../../metrics/prometheus/PrometheusClient";
+
 export class BaseQMHandler {
     get handlerResult() {
         if (this.result === undefined) {
@@ -24,14 +28,15 @@ export class BaseQMHandler {
     private result;
     private message: string;
 
-    public succeedCommand(message?: string) {
+    protected succeedHandler(message?: string) {
         this.handlerResult = HandlerResultStatus.success;
         this.resultMessage = message;
     }
 
-    public failCommand(message?: string) {
+    protected failHandler(message?: string) {
         this.handlerResult = HandlerResultStatus.failure;
         this.resultMessage = message;
+        PrometheusClient.incrementCounter(`${_.snakeCase(this.constructor.name)}_command`, "fail" );
     }
 
 }

@@ -32,10 +32,6 @@ export class CreateApplication extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
         projectName: "PROJECT_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 

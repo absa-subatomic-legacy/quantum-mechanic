@@ -11,13 +11,11 @@ import {
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {getScreenName, loadScreenNameByUserId} from "../../util/member/Members";
+import {BaseQMHandler} from "../../util/shared/BaseQMHandler";
 import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Request membership to a team")
-export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResult> {
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
+export class CreateMembershipRequestToTeam extends BaseQMHandler implements HandleCommand<HandlerResult> {
 
     @Parameter({
         description: "Gluon team id to create a membership request to.",
@@ -32,6 +30,7 @@ export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResul
     public slackName: string;
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {

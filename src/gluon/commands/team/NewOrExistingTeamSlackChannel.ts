@@ -6,9 +6,10 @@ import {
     Parameter,
 } from "@atomist/automation-client";
 import {TeamSlackChannelMessages} from "../../messages/team/TeamSlackChannelMessages";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 
 @CommandHandler("Check whether to create a new team channel or use an existing channel")
-export class NewOrUseTeamSlackChannel implements HandleCommand {
+export class NewOrUseTeamSlackChannel extends BaseQMComand implements HandleCommand {
 
     @Parameter({
         description: "team name",

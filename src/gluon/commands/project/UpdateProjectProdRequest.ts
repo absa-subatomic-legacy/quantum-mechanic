@@ -1,6 +1,5 @@
 import {
     CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,10 +7,11 @@ import {
 } from "@atomist/automation-client";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ProjectProdRequestApprovalResponse} from "../../util/project/Project";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Ignore a project prod request")
-export class UpdateProjectProdRequest implements HandleCommand<HandlerResult> {
+export class UpdateProjectProdRequest extends BaseQMComand {
 
     @Parameter({
         description: "Project production request id",
@@ -38,6 +38,7 @@ export class UpdateProjectProdRequest implements HandleCommand<HandlerResult> {
     public approvalStatus: ProjectProdRequestApprovalResponse;
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {

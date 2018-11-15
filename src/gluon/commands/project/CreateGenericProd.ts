@@ -47,9 +47,6 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 

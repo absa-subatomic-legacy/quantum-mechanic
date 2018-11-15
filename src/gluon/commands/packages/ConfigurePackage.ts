@@ -55,9 +55,6 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
         baseS2IImage: "BASE_S2I_IMAGE",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 

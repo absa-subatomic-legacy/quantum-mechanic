@@ -31,9 +31,6 @@ export class RemoveMemberFromTeam extends RecursiveParameterRequestCommand imple
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
 
@@ -69,7 +66,9 @@ export class RemoveMemberFromTeam extends RecursiveParameterRequestCommand imple
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             taskRunner.addTask(new RemoveMemberFromTeamTask(this.slackName, this.screenName, this.teamName, MemberRole.member));
             await taskRunner.execute(ctx);
+            this.succeedCommand();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

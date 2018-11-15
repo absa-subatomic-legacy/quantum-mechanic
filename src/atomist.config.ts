@@ -89,7 +89,7 @@ import {
     TeamCreatedEvent,
 } from "./gluon/ingesters/teamIngester";
 import {TeamMemberCreatedEvent} from "./gluon/ingesters/teamMemberIngester";
-import {PromethiusClient} from "./gluon/metrics/promethius/PromClient";
+import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
 import {Help} from "./gluon/util/help/Help";
 
 const token = QMConfig.token;
@@ -196,7 +196,7 @@ export const configuration: any = {
     ],
     token,
     http: {
-        customizers: [PromethiusClient.initialize],
+        customizers: [PrometheusClient.initialize],
     },
     logging: {
         level: "debug",

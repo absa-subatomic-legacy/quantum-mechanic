@@ -19,13 +19,11 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 
 @CommandHandler("Create a new team", QMConfig.subatomic.commandPrefix + " create team")
 @Tags("subatomic", "team")
-export class CreateTeam implements HandleCommand<HandlerResult> {
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
+export class CreateTeam extends BaseQMComand implements HandleCommand<HandlerResult> {
 
     @Parameter({
         description: "team name",
@@ -38,6 +36,7 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
     private description: string;
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {

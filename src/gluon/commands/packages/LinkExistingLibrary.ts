@@ -40,9 +40,6 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
         bitbucketRepositorySlug: "BITBUCKET_REPOSITORY_SLUG",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 

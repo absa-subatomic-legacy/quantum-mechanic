@@ -45,9 +45,6 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 

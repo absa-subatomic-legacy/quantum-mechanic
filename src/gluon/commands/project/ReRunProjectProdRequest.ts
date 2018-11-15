@@ -11,13 +11,11 @@ import {
 import {addressEvent} from "@atomist/automation-client/spi/message/MessageClient";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Re-run a failed project production request")
-export class ReRunProjectProdRequest implements HandleCommand<HandlerResult> {
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
+export class ReRunProjectProdRequest extends BaseQMComand {
 
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
@@ -35,6 +33,7 @@ export class ReRunProjectProdRequest implements HandleCommand<HandlerResult> {
     public projectProdRequestId: string;
 
     constructor(public gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {

@@ -37,9 +37,6 @@ export class BitbucketProjectRecommendedPracticesCommand extends RecursiveParame
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 

@@ -14,6 +14,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OnboardMemberMessages} from "../../messages/member/OnboardMemberMessages";
 import {GluonService} from "../../services/gluon/GluonService";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
     QMError,
@@ -22,11 +23,7 @@ import {
 
 @CommandHandler("Onboard a new team member", QMConfig.subatomic.commandPrefix + " onboard me")
 @Tags("subatomic", "slack", "member")
-export class OnboardMember implements HandleCommand<HandlerResult> {
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
+export class OnboardMember extends BaseQMComand {
     @MappedParameter(MappedParameters.SlackUser)
     public userId: string;
 
@@ -56,6 +53,7 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
     public onboardMessages: OnboardMemberMessages = new OnboardMemberMessages();
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {

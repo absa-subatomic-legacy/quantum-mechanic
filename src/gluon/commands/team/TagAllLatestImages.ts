@@ -35,9 +35,6 @@ export class TagAllLatestImages extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
@@ -77,9 +74,11 @@ export class TagAllLatestImages extends RecursiveParameterRequestCommand
         try {
             await this.ocService.tagAllSubatomicImageStreamsToDevOpsEnvironment(devopsEnvironment);
         } catch (error) {
+            this.failCommand();
             logger.error(`Failed to tag images to project ${devopsEnvironment}. Error: ${inspect(error)}`);
             throw new QMError("Image tagging failed. Please contact your system administrator for assistance.");
         }
+        this.succeedCommand();
         return ctx.messageClient.respond(`All images successfully tagged to devops environment *${devopsEnvironment}*.`, {id: messageId});
     }
 }

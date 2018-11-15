@@ -39,9 +39,6 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
         openshiftProjectNames: "OPENSHIFT_PROJECT_NAMES",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 

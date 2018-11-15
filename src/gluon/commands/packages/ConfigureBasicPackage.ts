@@ -45,9 +45,6 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         packageDefinition: "PACKAGE_DEFINITION",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 

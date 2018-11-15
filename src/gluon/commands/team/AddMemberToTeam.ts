@@ -22,7 +22,6 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
-import {PromethiusClient} from "../../metrics/promethius/PromClient";
 
 @CommandHandler("Add a member to a team", QMConfig.subatomic.commandPrefix + " add team member")
 @Tags("subatomic", "member", "team")
@@ -31,9 +30,6 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
     private static RecursiveKeys = {
         teamName: "TEAM_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
 
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
@@ -73,7 +69,9 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
             taskRunner.addTask(new AddMemberToTeamTask(this.slackName, this.screenName, this.teamName, MemberRole.member));
 
             await taskRunner.execute(ctx);
+            this.succeedCommand();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

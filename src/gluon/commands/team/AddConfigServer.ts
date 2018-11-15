@@ -33,9 +33,6 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 
@@ -64,6 +61,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
                 this.gitUri,
             );
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }
@@ -87,6 +85,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
         await this.createConfigServerDeploymentConfig(gitUri, devOpsProjectId);
 
         await this.sendSuccessResponse(ctx, devOpsProjectId);
+        this.succeedCommand();
     }
 
     private async addConfigServerSecretToDevOpsEnvironment(devOpsProjectId: string) {

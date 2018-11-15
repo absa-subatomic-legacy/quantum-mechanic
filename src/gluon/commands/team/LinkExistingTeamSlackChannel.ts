@@ -17,6 +17,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Link existing team channel", QMConfig.subatomic.commandPrefix + " link team channel")
 @Tags("subatomic", "slack", "channel", "team")
@@ -26,9 +27,6 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
     private static RecursiveKeys = {
         teamName: "TEAM_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
 
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
@@ -51,7 +49,14 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
     }
 
     protected async runCommand(ctx: HandlerContext) {
-        return await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, "link-team-channel", false);
+        try {
+            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, "link-team-channel", false);
+            this.succeedCommand();
+            return result;
+        } catch (error) {
+            this.failCommand();
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     protected configureParameterSetters() {
