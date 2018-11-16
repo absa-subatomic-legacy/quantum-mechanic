@@ -182,9 +182,7 @@ export class Help implements HandleCommand<HandlerResult> {
         this.optionsAttachments = [];
         for (const commandClass of this.optionFolders) {
             if (commandClass.getHelpName() === this.selectedOption) {
-                logger.info(commandClass.getHelpTag());
                 this.commands = commandClass.findListOfCommands(commandClass.getHelpTag());
-                logger.info(this.commands);
                 for (const command of this.commands) {
                     this.commandOptions(this.getCommandHandlerMetadata(command.prototype), command);
                     this.colorCount++;
