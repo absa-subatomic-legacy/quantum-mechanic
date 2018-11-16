@@ -1,5 +1,4 @@
 import {logger} from "@atomist/automation-client";
-import {AxiosResponse} from "axios-https-proxy-fix";
 import {AwaitAxios} from "../../http/AwaitAxios";
 import {OpenShiftApiElement} from "./base/OpenShiftApiElement";
 import {OpenshiftApiResult} from "./base/OpenshiftApiResult";
@@ -14,7 +13,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
         const roleBindingResourceObject = await this.getRoleBindingResource(role, namespace);
         const openshiftRole = roleBindingResourceObject.roleBinding;
 
-        usernames.forEach( username => {
+        usernames.forEach(username => {
             if (username.startsWith("system:serviceaccount")) {
 
                 const usernameSplit = username.split(":");
@@ -45,7 +44,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
             }
         });
 
-        return await this.addRoleToAccount(openshiftRole, role, namespace, roleBindingResourceObject.aNewRole );
+        return await this.addRoleToAccount(openshiftRole, role, namespace, roleBindingResourceObject.aNewRole);
     }
 
     public async addRoleToAccount(openshiftRole: OpenshiftResource, role: string, namespace: string, newRole: boolean) {
@@ -71,7 +70,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
         } else {
             logger.debug("Role found OK");
         }
-        return { roleBinding: openshiftRole, aNewRole: newRole };
+        return {roleBinding: openshiftRole, aNewRole: newRole};
     }
 
     public removeRoleFromUser(username: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
@@ -93,7 +92,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
                 roleToEdit.userName = roleToEdit.userNames.filter(userName => userName !== username);
                 roleToEdit.userNames = roleToEdit.userNames.filter(userNames => userNames !== username);
 
-                const url  = `${ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace)}/${role}`;
+                const url = `${ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace)}/${role}`;
                 return instance.put(url, roleToEdit);
             }
         });

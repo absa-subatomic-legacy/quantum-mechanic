@@ -1,6 +1,4 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,10 +6,16 @@ import {
     MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {getScreenName, loadScreenNameByUserId} from "../../util/member/Members";
-import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
+import {
+    handleQMError,
+    QMError,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
 
 @CommandHandler("Request membership to a team")
 export class CreateMembershipRequestToTeam implements HandleCommand<HandlerResult> {

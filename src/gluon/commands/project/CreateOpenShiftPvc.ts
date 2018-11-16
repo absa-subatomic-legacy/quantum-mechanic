@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,8 +7,11 @@ import {
     Parameter,
     Tags,
 } from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
-import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {
+    addressSlackChannelsFromContext,
+    menuForCommand,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {Attachment} from "@atomist/slack-messages/SlackMessages";
 import * as _ from "lodash";
@@ -116,7 +118,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     }
 
     private async sendPvcResultMessage(ctx: HandlerContext, pvcAttachments: any[]): Promise<HandlerResult> {
-        const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+        const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
         const msg: SlackMessage = {
             text: `Your Persistent Volume Claims have been processed...`,
             attachments: pvcAttachments.concat({

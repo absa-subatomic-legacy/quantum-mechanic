@@ -1,15 +1,17 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
+} from "@atomist/automation-client";
+import {
+    CommandHandler,
     MappedParameter,
     MappedParameters,
     Parameter,
     Tags,
-} from "@atomist/automation-client";
-import {addressSlackUsersFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {addressSlackUsersFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OnboardMemberMessages} from "../../messages/member/OnboardMemberMessages";

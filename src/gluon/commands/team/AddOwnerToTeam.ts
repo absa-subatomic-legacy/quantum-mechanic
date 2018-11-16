@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     MappedParameter,
@@ -7,6 +6,7 @@ import {
     Parameter,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
@@ -21,10 +21,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {
-    handleQMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Add a member as an owner to a team", QMConfig.subatomic.commandPrefix + " add team owner")
 @Tags("subatomic", "member", "team")

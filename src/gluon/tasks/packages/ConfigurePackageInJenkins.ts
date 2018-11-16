@@ -5,9 +5,9 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
-import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
-import {GitProject} from "@atomist/automation-client/project/git/GitProject";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {GitCommandGitProject} from "@atomist/automation-client/lib/project/git/GitCommandGitProject";
+import {GitProject} from "@atomist/automation-client/lib/project/git/GitProject";
+import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
@@ -166,9 +166,9 @@ export class ConfigurePackageInJenkins extends Task {
             }
 
             const clean = await project.isClean();
-            logger.debug(`Jenkinsfile has been added: ${clean.success}`);
+            logger.debug(`Jenkinsfile has been added: ${clean}`);
 
-            if (!clean.success) {
+            if (!clean) {
                 await project.setUserConfig(
                     QMConfig.subatomic.bitbucket.auth.username,
                     QMConfig.subatomic.bitbucket.auth.email,

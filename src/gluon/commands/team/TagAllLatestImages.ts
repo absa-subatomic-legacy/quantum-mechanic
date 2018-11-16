@@ -1,11 +1,11 @@
 import {
-    CommandHandler,
     HandlerContext,
     logger,
     MappedParameter,
     MappedParameters,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {inspect} from "util";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";

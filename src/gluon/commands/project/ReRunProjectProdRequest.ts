@@ -1,6 +1,4 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,8 +6,12 @@ import {
     MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
-import {addressEvent} from "@atomist/automation-client/spi/message/MessageClient";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {
+    addressEvent,
+    addressSlackChannelsFromContext,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
@@ -41,7 +43,7 @@ export class ReRunProjectProdRequest implements HandleCommand<HandlerResult> {
         logger.info("ReRunning Project Prod Request");
 
         try {
-            const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+            const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
             await ctx.messageClient.send({
                 text: `Ru-running Project Prod Request`,
             }, destination, {id: this.correlationId});

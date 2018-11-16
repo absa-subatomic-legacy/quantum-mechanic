@@ -1,13 +1,15 @@
 import {
     EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {EventHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
+import {
+    addressSlackChannelsFromContext,
+    buttonForCommand,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
@@ -125,7 +127,7 @@ A package is either an application or a library, click the button below to creat
                 ],
             }],
         };
-        const destination =  await addressSlackChannelsFromContext(ctx, ...teams.map(team =>
+        const destination = await addressSlackChannelsFromContext(ctx, ...teams.map(team =>
             team.slackIdentity.teamChannel));
         return await ctx.messageClient.send(msg, destination);
     }

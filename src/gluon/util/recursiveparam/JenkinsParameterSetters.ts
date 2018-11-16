@@ -3,9 +3,9 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import {BitBucketServerRepoRef} from "@atomist/automation-client/operations/common/BitBucketServerRepoRef";
-import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
-import {GitProject} from "@atomist/automation-client/project/git/GitProject";
+import {BitBucketServerRepoRef} from "@atomist/automation-client/lib/operations/common/BitBucketServerRepoRef";
+import {GitCommandGitProject} from "@atomist/automation-client/lib/project/git/GitCommandGitProject";
+import {GitProject} from "@atomist/automation-client/lib/project/git/GitProject";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMError} from "../shared/Error";

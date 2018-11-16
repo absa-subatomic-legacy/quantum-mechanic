@@ -1,12 +1,14 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
+} from "@atomist/automation-client";
+import {
+    CommandHandler,
     MappedParameter,
     MappedParameters,
     Tags,
-} from "@atomist/automation-client";
+} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";

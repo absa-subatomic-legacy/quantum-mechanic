@@ -1,14 +1,14 @@
 import {
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
     Parameter,
 } from "@atomist/automation-client";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {
     BaseParameter,
     declareParameter,
-} from "@atomist/automation-client/internal/metadata/decoratorSupport";
+} from "@atomist/automation-client/lib/internal/metadata/decoratorSupport";
 import _ = require("lodash");
 import uuid = require("uuid");
 import {BaseQMHandler} from "../shared/BaseQMHandler";

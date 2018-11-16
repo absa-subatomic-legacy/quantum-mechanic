@@ -1,10 +1,10 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     Parameter,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {TeamSlackChannelMessages} from "../../messages/team/TeamSlackChannelMessages";
 
 @CommandHandler("Check whether to create a new team channel or use an existing channel")

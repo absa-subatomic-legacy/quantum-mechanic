@@ -1,4 +1,4 @@
-import { ingester } from "@atomist/automation-client/graph/graphQL";
+import { ingester } from "@atomist/automation-client/lib/graph/graphQL";
 import {QMConfig} from "./config/QMConfig";
 import {
     ListExistingBitbucketProject,
