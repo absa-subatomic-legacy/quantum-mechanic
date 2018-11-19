@@ -1,0 +1,5 @@
+type MemberRemovedFromTeamEvent @rootType {
+	team: GluonTeam
+	memberRemoved: Member
+	memberRequester: Owner
+}

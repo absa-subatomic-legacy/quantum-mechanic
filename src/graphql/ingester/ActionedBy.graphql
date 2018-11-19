@@ -1,0 +1,7 @@
+type ActionedBy @rootType {
+	firstName: String
+	lastName: String
+	email: String
+	domainUsername: String
+	slackIdentity: SlackIdentity
+}

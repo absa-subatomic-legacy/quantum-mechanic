@@ -1,5 +1,5 @@
 type MembershipRequestCreatedEvent @rootType {
-    membershopRequestId: String
-    team: GluonTeam
-    requestedBy: ActionedBy
+	membershipRequestId: String
+	team: GluonTeam
+	requestedBy: ActionedBy
 }

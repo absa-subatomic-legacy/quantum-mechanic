@@ -1,4 +1,4 @@
 type TeamCreatedEvent @rootType {
-    team: GluonTeam
-    createdBy: ActionedBy
+	team: GluonTeam
+	createdBy: ActionedBy
 }
