@@ -101,6 +101,10 @@ export class HelpCategory {
         return this.description;
     }
 
+    public getHelpTag() {
+        return this.tags;
+    }
+
     public findListOfCommands(commandTag: string): any[] {
         for (const command of this.allCommands) {
             const classTag = this.getCommandMetadata(command.prototype);
