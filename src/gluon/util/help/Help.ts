@@ -54,6 +54,7 @@ export class Help implements HandleCommand<HandlerResult> {
         new HelpCategory("Project", "Project commands provide management capabilities around individual Projects and their associated resources. This includes environment management, application and library creation, jenkins and bitbucket configuration.", "project"),
         new HelpCategory("Team", "Team commands allow you to manage your Subatomic team. These include team membership, team projects and DevOps environment configuration.", "team"),
         new HelpCategory("Other", "All other general commands", "other"),
+        new HelpCategory("All", "All subatomic commands", "subatomic"),
     ];
     public commands: any = [];
     public absaColors = [
@@ -90,7 +91,7 @@ export class Help implements HandleCommand<HandlerResult> {
         this.optionsAttachments.push({
             text: `*${optionDescription}*`,
             fallback: "",
-            color: this.absaColors[this.colorCount],
+            color: this.absaColors[this.colorCount % this.absaColors.length],
             mrkdwn_in: ["text"],
             actions: [
                 buttonForCommand(
@@ -107,7 +108,7 @@ export class Help implements HandleCommand<HandlerResult> {
         this.optionsAttachments.push({
             text: `\`${commandMetadata.intent}\` - ${commandMetadata.description}`,
             fallback: "",
-            color: this.absaColors[this.colorCount],
+            color: this.absaColors[this.colorCount % this.absaColors.length],
             mrkdwn_in: ["text"],
             actions: [
                 buttonForCommand(
@@ -130,7 +131,7 @@ export class Help implements HandleCommand<HandlerResult> {
         this.optionsAttachments.push({
             text: "",
             fallback: "",
-            color: this.absaColors[this.colorCount],
+            color: this.absaColors[this.colorCount % this.absaColors.length],
             mrkdwn_in: ["text"],
             actions: [
             buttonForCommand(
@@ -150,7 +151,7 @@ export class Help implements HandleCommand<HandlerResult> {
         this.optionsAttachments.push({
             text: "",
             fallback: "",
-            color: this.absaColors[this.colorCount],
+            color: this.absaColors[this.colorCount % this.absaColors.length],
             mrkdwn_in: ["text"],
             actions: [
                 buttonForCommand(
@@ -181,7 +182,7 @@ export class Help implements HandleCommand<HandlerResult> {
         this.optionsAttachments = [];
         for (const commandClass of this.optionFolders) {
             if (commandClass.getHelpName() === this.selectedOption) {
-                this.commands = commandClass.findListOfCommands(commandClass.getHelpName().toLowerCase());
+                this.commands = commandClass.findListOfCommands(commandClass.getHelpTag());
                 for (const command of this.commands) {
                     this.commandOptions(this.getCommandHandlerMetadata(command.prototype), command);
                     this.colorCount++;
