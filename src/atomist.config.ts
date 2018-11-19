@@ -1,4 +1,4 @@
-import { ingester } from "@atomist/automation-client/lib/graph/graphQL";
+import {ingester} from "@atomist/automation-client/lib/graph/graphQL";
 import {QMConfig} from "./config/QMConfig";
 import {
     ListExistingBitbucketProject,
@@ -67,7 +67,7 @@ const token = QMConfig.token;
 const http = QMConfig.http;
 
 export const configuration: any = {
-    teamIds: [QMConfig.teamId],
+    workspaceIds: [QMConfig.teamId],
     // running durable will store and forward events when the client is disconnected
     // this should only be used in production envs
     policy: process.env.NODE_ENV === "production" ? "durable" : "ephemeral",
@@ -134,26 +134,26 @@ export const configuration: any = {
         TeamsLinkedToProject,
     ],
     ingesters: [
-        ingester("Shared.graphql"),
-        ingester("ApplicationCreatedEvent.graphql"),
-        ingester("ApplicationProdRequestedEvent.graphql"),
-        ingester("BitbucketProjectAddedEvent.graphql"),
-        ingester("BitbucketProjectRequestedEvent.graphql"),
-        ingester("DevOpsEnvironmentProvisionedEvent.graphql"),
-        ingester("DevOpsEnvironmentRequestedEvent.graphql"),
-        ingester("GenericProdRequestedEvent.graphql"),
-        ingester("MembersAddedToTeamEvent.graphql"),
-        ingester("MembershipRequestCreatedEvent.graphql"),
-        ingester("PackageConfiguredEvent.graphql"),
-        ingester("ProjectCreatedEvent.graphql"),
-        ingester("ProjectEnvironmentsRequestedEvent.graphql"),
-        ingester("ProjectProductionEnvironmentsRequestClosedEvent.graphql"),
-        ingester("ProjectProductionEnvironmentsRequestedEvent.graphql"),
-        ingester("TeamCreatedEvent.graphql"),
-        ingester("TeamDevOpsDetails.graphql"),
-        ingester("TeamMemberCreatedEvent.graphql"),
+        ingester("SharedQuantumMechanic"),
+        ingester("ApplicationCreatedEvent"),
+        ingester("ApplicationProdRequestedEvent"),
+        ingester("BitbucketProjectAddedEvent"),
+        ingester("BitbucketProjectRequestedEvent"),
+        ingester("DevOpsEnvironmentProvisionedEvent"),
+        ingester("DevOpsEnvironmentRequestedEvent"),
+        ingester("GenericProdRequestedEvent"),
+        ingester("MembersAddedToTeamEvent"),
+        ingester("MembershipRequestCreatedEvent"),
+        ingester("PackageConfiguredEvent"),
+        ingester("ProjectCreatedEvent"),
+        ingester("ProjectEnvironmentsRequestedEvent"),
+        ingester("ProjectProductionEnvironmentsRequestClosedEvent"),
+        ingester("ProjectProductionEnvironmentsRequestedEvent"),
+        ingester("TeamCreatedEvent"),
+        ingester("TeamDevOpsDetails"),
+        ingester("TeamMemberCreatedEvent"),
     ],
-    token,
+    apiKey: token,
     http,
     logging: {
         level: "debug",

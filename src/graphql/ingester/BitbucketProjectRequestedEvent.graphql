@@ -6,7 +6,7 @@ type BitbucketProjectRequestedEvent @rootType {
 }
 
 type BitbucketProjectRequest {
-    key: string
-    name: string
-    description: string
+    key: String
+    name: String
+    description: String
 }

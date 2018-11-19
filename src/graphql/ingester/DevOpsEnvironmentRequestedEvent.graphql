@@ -5,6 +5,6 @@ type DevOpsEnvironmentRequestedEvent @rootType {
 }
 
 type DevOpsEnvironmentRequestedEventArgument {
-    name: [string]
+    name: [String]
 }
 

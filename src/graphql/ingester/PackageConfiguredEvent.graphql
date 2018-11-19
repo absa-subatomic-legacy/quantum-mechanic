@@ -8,10 +8,10 @@ type PackageConfiguredEvent @rootType {
 }
 
 type BuildDetails {
-    buildType: string
+    buildType: String
     jenkinsDetails: JenkinsDetails
 }
 
 type JenkinsDetails {
-    jenkinsFile: string
+    jenkinsFile: String
 }

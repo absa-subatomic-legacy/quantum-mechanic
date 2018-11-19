@@ -6,5 +6,5 @@ type ApplicationCreatedEvent @rootType {
     owningTeam: GluonTeam
     teams: [GluonTeam]
     requestedBy: ActionedBy
-    requestConfiguration: boolean
+    requestConfiguration: Boolean
 }

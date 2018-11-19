@@ -24,7 +24,7 @@ subscription TeamCreatedEvent {
       name
       description
     }
-    createdBy {Ø
+    createdBy {
       firstName
       slackIdentity {
         screenName

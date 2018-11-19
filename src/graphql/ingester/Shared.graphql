@@ -1,83 +1,83 @@
 type SharedQuantumMechanic @rootType {
-    dummy: string
+    dummy: String
 }
 
 type GluonTenantId {
-    tenantId: string
+    tenantId: String
 }
 
 type SlackIdentity {
-    screenName: string
-    userId: string
-    teamChannel: string
+    screenName: String
+    userId: String
+    teamChannel: String
 }
 
 type BitbucketProject {
-    id: string
-    key: string
-    name: string
-    description: string
-    url: string
+    id: String
+    key: String
+    name: String
+    description: String
+    url: String
 }
 
 type DevOpsEnvironmentDetails {
-    openshiftProjectId: string
-    name: string
-    description: string
+    openshiftProjectId: String
+    name: String
+    description: String
 }
 
 type BitbucketRepository {
-    bitbucketId: string
-    name: string
-    repoUrl: string
-    remoteUrl: string
+    bitbucketId: String
+    name: String
+    repoUrl: String
+    remoteUrl: String
 }
 
 type Owner {
-    firstName: string
-    domainUsername: string
-    slackIdentity: string
+    firstName: String
+    domainUsername: String
+    slackIdentity: String
 }
 
 type Member {
-    firstName: string
-    domainUsername: string
+    firstName: String
+    domainUsername: String
     slackIdentity: SlackIdentity
 }
 
 type ActionedBy {
-    firstName: string
-    lastName: string
-    email: string
-    domainUsername: string
+    firstName: String
+    lastName: String
+    email: String
+    domainUsername: String
     slackIdentity: SlackIdentity
 }
 
 type GluonTenant {
-    tenantId: string
-    name: string
-    description: string
+    tenantId: String
+    name: String
+    description: String
 }
 
 type GluonTeam {
-    teamId: string
-    name: string
-    description: string
+    teamId: String
+    name: String
+    description: String
     slackIdentity: SlackIdentity
     owners: [Owner]
     members: [Member]
 }
 
 type Project {
-    projectId: string
-    name: string
-    description: string
+    projectId: String
+    name: String
+    description: String
     tenant: GluonTenantId
 }
 
 type GluonApplication {
-    applicationId: string
-    name: string
-    description: string
-    applicationType: string
+    applicationId: String
+    name: String
+    description: String
+    applicationType: String
 }

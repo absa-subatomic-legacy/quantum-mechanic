@@ -1,13 +1,13 @@
 type TeamMemberCreatedEvent @rootType {
-    memberId: string
-    firstName: string
-    lastName: string
-    email: string
+    memberId: String
+    firstName: String
+    lastName: String
+    email: String
     domainCredentials: DomainCredentials
 }
 
 type DomainCredentials {
-    domain: string
-    username: string
-    password: string
+    domain: String
+    username: String
+    password: String
 }
