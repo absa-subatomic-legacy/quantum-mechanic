@@ -1,6 +1,6 @@
 import {
     CommandHandler,
-    HandlerContext, logger,
+    HandlerContext,
     MappedParameter,
     MappedParameters,
     Tags,
