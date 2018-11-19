@@ -1,5 +1,9 @@
 import {
-    HandleCommand, HandlerContext, HandlerResult, logger, MappedParameter,
+    HandleCommand,
+    HandlerContext,
+    HandlerResult,
+    logger,
+    MappedParameter,
     MappedParameters,
 } from "@atomist/automation-client";
 import * as _ from "lodash";
