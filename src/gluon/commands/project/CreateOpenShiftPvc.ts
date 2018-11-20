@@ -39,12 +39,6 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
         openshiftProjectNames: "OPENSHIFT_PROJECT_NAMES",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: CreateOpenShiftPvc.RecursiveKeys.teamName,
         selectionMessage: `Please select a team associated with the project you wish to create a PVC for`,
@@ -102,8 +96,11 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
                 });
             }
 
-            return await this.sendPvcResultMessage(ctx, pvcAttachments);
+            const result =  await this.sendPvcResultMessage(ctx, pvcAttachments);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

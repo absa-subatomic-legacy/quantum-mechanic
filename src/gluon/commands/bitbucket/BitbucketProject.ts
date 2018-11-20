@@ -39,12 +39,6 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @Parameter({
         description: "bitbucket project key",
     })
@@ -77,8 +71,10 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand
 
             await this.updateGluonWithBitbucketDetails(project.projectId, this.projectName, project.description, member.memberId);
 
+            this.succeedCommand();
             return await success();
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }
@@ -123,12 +119,6 @@ export class ListExistingBitbucketProject
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @Parameter({
         description: "bitbucket project key",
     })
@@ -166,23 +156,29 @@ export class ListExistingBitbucketProject
     }
 
     private async configBitbucket(ctx: HandlerContext): Promise<HandlerResult> {
-        logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
+        try {
+            logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
 
-        const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
-        const gluonProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+            const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const gluonProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-        const projectUiUrl = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.bitbucketProjectKey}`;
+            const projectUiUrl = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.bitbucketProjectKey}`;
 
-        const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
-        await ctx.messageClient.send({
-            text: `🚀 The Bitbucket project with key ${this.bitbucketProjectKey} is being configured...`,
-        }, destination);
+            const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
+            await ctx.messageClient.send({
+                text: `🚀 The Bitbucket project with key ${this.bitbucketProjectKey} is being configured...`,
+            }, destination);
 
-        const bitbucketProject = await this.getBitbucketProject(this.bitbucketProjectKey);
+            const bitbucketProject = await this.getBitbucketProject(this.bitbucketProjectKey);
 
-        await this.updateGluonProjectWithBitbucketDetails(projectUiUrl, member.memberId, gluonProject.projectId, bitbucketProject);
+            await this.updateGluonProjectWithBitbucketDetails(projectUiUrl, member.memberId, gluonProject.projectId, bitbucketProject);
 
-        return await success();
+            this.succeedCommand();
+            return await success();
+        } catch (error) {
+            this.failCommand();
+            return await this.handleError(ctx, error);
+        }
     }
 
     private async getBitbucketProject(bitbucketProjectKey: string) {

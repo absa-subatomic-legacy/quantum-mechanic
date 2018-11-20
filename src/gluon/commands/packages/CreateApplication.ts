@@ -33,12 +33,6 @@ export class CreateApplication extends RecursiveParameterRequestCommand
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @Parameter({
         description: "application name",
     })
@@ -88,10 +82,13 @@ export class CreateApplication extends RecursiveParameterRequestCommand
 
             await this.createApplicationInGluon(project, member);
 
-            return await ctx.messageClient.respond({
+            const result =  await ctx.messageClient.respond({
                 text: "🚀 Application created successfully.",
             });
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

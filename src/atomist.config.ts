@@ -1,8 +1,5 @@
 import {QMConfig} from "./config/QMConfig";
-import {
-    ListExistingBitbucketProject,
-    NewBitbucketProject,
-} from "./gluon/commands/bitbucket/BitbucketProject";
+import {ListExistingBitbucketProject, NewBitbucketProject} from "./gluon/commands/bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "./gluon/commands/bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "./gluon/commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {KickOffJenkinsBuild} from "./gluon/commands/jenkins/JenkinsBuild";
@@ -22,10 +19,7 @@ import {CreateOpenShiftPvc} from "./gluon/commands/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/commands/project/CreateProject";
 import {CreateProjectProdEnvironments} from "./gluon/commands/project/CreateProjectProdEnvironments";
 import {NewProjectEnvironments} from "./gluon/commands/project/NewProjectEnvironments";
-import {
-    ListProjectDetails,
-    ListTeamProjects,
-} from "./gluon/commands/project/ProjectDetails";
+import {ListProjectDetails, ListTeamProjects} from "./gluon/commands/project/ProjectDetails";
 import {ReRunProjectProdRequest} from "./gluon/commands/project/ReRunProjectProdRequest";
 import {UpdateProjectProdRequest} from "./gluon/commands/project/UpdateProjectProdRequest";
 import {AddConfigServer} from "./gluon/commands/team/AddConfigServer";
@@ -61,14 +55,8 @@ import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClos
 import {MembershipRequestCreated} from "./gluon/events/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/events/team/TeamCreated";
 import {ApplicationProdRequestedEvent} from "./gluon/ingesters/applicationProdRequested";
-import {
-    ApplicationCreatedEvent,
-    PackageConfiguredEvent,
-} from "./gluon/ingesters/applicationsIngester";
-import {
-    BitbucketProjectAddedEvent,
-    BitbucketProjectRequestedEvent,
-} from "./gluon/ingesters/bitbucketIngester";
+import {ApplicationCreatedEvent, PackageConfiguredEvent} from "./gluon/ingesters/applicationsIngester";
+import {BitbucketProjectAddedEvent, BitbucketProjectRequestedEvent} from "./gluon/ingesters/bitbucketIngester";
 import {GenericProdRequestedEvent} from "./gluon/ingesters/genericProdRequested";
 import {
     ProjectCreatedEvent,
@@ -101,12 +89,14 @@ import {
     TeamCreatedEvent,
 } from "./gluon/ingesters/teamIngester";
 import {TeamMemberCreatedEvent} from "./gluon/ingesters/teamMemberIngester";
+import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
 import {Help} from "./gluon/util/help/Help";
 
 const token = QMConfig.token;
 const http = QMConfig.http;
 
 export const configuration: any = {
+
     teamIds: [QMConfig.teamId],
     // running durable will store and forward events when the client is disconnected
     // this should only be used in production envs
@@ -205,7 +195,9 @@ export const configuration: any = {
         TeamsLinkedToProjectEvent,
     ],
     token,
-    http,
+    http: {
+        customizers: [PrometheusClient.initialize],
+    },
     logging: {
         level: "debug",
         file: false,

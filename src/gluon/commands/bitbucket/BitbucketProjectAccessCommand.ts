@@ -38,12 +38,6 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: BitbucketProjectAccessCommand.RecursiveKeys.projectName,
         selectionMessage: "Please select the project you wish to configure the Bitbucket project for",
@@ -80,6 +74,7 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
             const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             if (!isUserAMemberOfTheTeam(member, requestingTeam)) {
+                this.failCommand();
                 return await messageClient.send(this.teamMembershipMessages.notAMemberOfTheTeam());
             }
 
@@ -94,8 +89,10 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
             }
             await taskRunner.execute(ctx);
 
+            this.succeedCommand();
             return await success();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(messageClient, error);
         }
     }

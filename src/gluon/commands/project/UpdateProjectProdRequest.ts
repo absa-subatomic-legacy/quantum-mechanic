@@ -1,6 +1,5 @@
 import {
     CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,10 +7,11 @@ import {
 } from "@atomist/automation-client";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ProjectProdRequestApprovalResponse} from "../../util/project/Project";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Ignore a project prod request")
-export class UpdateProjectProdRequest implements HandleCommand<HandlerResult> {
+export class UpdateProjectProdRequest extends BaseQMComand {
 
     @Parameter({
         description: "Project production request id",
@@ -38,6 +38,7 @@ export class UpdateProjectProdRequest implements HandleCommand<HandlerResult> {
     public approvalStatus: ProjectProdRequestApprovalResponse;
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
@@ -49,11 +50,16 @@ export class UpdateProjectProdRequest implements HandleCommand<HandlerResult> {
             const isProdRequestOpen = await this.isProdRequestOpen();
             if (isProdRequestOpen) {
                 await this.updateProdRequest();
-                return await this.sendResponseMessage(ctx);
+                const result =  await this.sendResponseMessage(ctx);
+                this.succeedCommand();
+                return result;
             } else {
-                return await this.sendClosedMessage(ctx);
+                const result =  await this.sendClosedMessage(ctx);
+                this.succeedCommand();
+                return result;
             }
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

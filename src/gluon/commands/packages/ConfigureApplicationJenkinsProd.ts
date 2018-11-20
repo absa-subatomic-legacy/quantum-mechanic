@@ -51,12 +51,6 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: ConfigureApplicationJenkinsProd.RecursiveKeys.teamName,
     })
@@ -109,8 +103,9 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             );
 
             await taskRunner.execute(ctx);
-
+            this.succeedCommand();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

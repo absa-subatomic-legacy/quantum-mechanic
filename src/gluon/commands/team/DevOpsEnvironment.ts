@@ -29,12 +29,6 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: NewDevOpsEnvironment.RecursiveKeys.teamName,
         selectionMessage: "Please select a team you would like to create a DevOps environment for",
@@ -73,10 +67,12 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
         const teamUpdateResult = await this.requestDevOpsEnvironmentThroughGluon(team.teamId, member.memberId);
 
         if (!isSuccessCode(teamUpdateResult.status)) {
+            this.failCommand();
             logger.error(`Unable to request ${teamName} devops environment. Error: ${JSON.stringify(teamUpdateResult)}`);
             return await ctx.messageClient.respond(`❗Unable to request devops environment for ${teamName}.`);
         }
 
+        this.succeedCommand();
         return await success();
     }
 

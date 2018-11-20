@@ -45,12 +45,6 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         packageDefinition: "PACKAGE_DEFINITION",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: ConfigureBasicPackage.RecursiveKeys.teamName,
         selectionMessage: "Please select a team associated with the project you wish to configure the package for",
@@ -86,8 +80,11 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            return await this.callPackageConfiguration(ctx);
+            const result =  await this.callPackageConfiguration(ctx);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }
