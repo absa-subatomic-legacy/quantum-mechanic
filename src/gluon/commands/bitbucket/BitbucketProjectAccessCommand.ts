@@ -89,9 +89,8 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
             }
             await taskRunner.execute(ctx);
 
-            const result =  await success();
             this.succeedCommand();
-            return result;
+            return await success();
         } catch (error) {
             this.failCommand();
             return await handleQMError(messageClient, error);

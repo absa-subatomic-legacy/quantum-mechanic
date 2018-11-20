@@ -47,9 +47,8 @@ export class CreateTeam extends BaseQMComand implements HandleCommand<HandlerRes
 
             await this.createTeamInGluon(this.name, this.description, member.memberId);
 
-            const result =  await success();
             this.succeedCommand();
-            return result;
+            return await success();
         } catch (error) {
             this.failCommand();
             return await this.handleError(ctx, error);

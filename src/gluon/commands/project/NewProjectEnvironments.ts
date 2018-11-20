@@ -74,9 +74,8 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand
 
             await this.requestProjectEnvironment(project.projectId, member.memberId);
 
-            const result = await success();
             this.succeedCommand();
-            return result;
+            return await success();
         } catch (error) {
             this.failCommand();
             return await this.handleError(ctx, error);

@@ -17,7 +17,7 @@ export class PrometheusClient  {
 
         PrometheusClient.counters = [];
 
-        logger.debug(`Original PrometheusClient.guid: ${PrometheusClient.uuid}`); // output guid
+        logger.debug(`Original PrometheusClient.guid: ${PrometheusClient.uuid}`);
 
         const Counter = require("prom-client").Counter;
 

@@ -71,9 +71,8 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand
 
             await this.updateGluonWithBitbucketDetails(project.projectId, this.projectName, project.description, member.memberId);
 
-            const result = await success();
             this.succeedCommand();
-            return result;
+            return await success();
         } catch (error) {
             this.failCommand();
             return await this.handleError(ctx, error);
@@ -174,9 +173,8 @@ export class ListExistingBitbucketProject
 
             await this.updateGluonProjectWithBitbucketDetails(projectUiUrl, member.memberId, gluonProject.projectId, bitbucketProject);
 
-            const result =  await success();
             this.succeedCommand();
-            return result;
+            return await success();
         } catch (error) {
             this.failCommand();
             return await this.handleError(ctx, error);
