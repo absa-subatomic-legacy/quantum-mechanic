@@ -54,9 +54,6 @@ export class PrometheusClient {
 
     public static initializeMetricsServer(exp) {
         if (cluster.isMaster) {
-            for (let i = 0; i < configuration.cluster.workers; i++) {
-                cluster.fork();
-            }
 
             exp.get("/cluster_prometrics", (req, res) => {
                 PrometheusClient.aggregatorRegistry.registry.clusterMetrics((err, metrics) => {
@@ -68,12 +65,6 @@ export class PrometheusClient {
                 });
             });
         }
-        // else {
-        //     exp.get("/prometrics", async (req, res) => {
-        //         res.set("Content-Type", PrometheusClient.client.register.contentType);
-        //         res.end(PrometheusClient.client.register.metrics());
-        //     });
-        // }
     }
 
     public static incrementCounter(name: string, labels: any) {
