@@ -1,17 +1,21 @@
 import {logger} from "@atomist/automation-client";
 import * as _ from "lodash";
 import uuid = require("uuid");
+import * as cluster from "cluster";
+import {AggregatorRegistry} from "prom-client";
 import {configuration} from "../../../atomist.config";
 
-export class PrometheusClient  {
+export class PrometheusClient {
 
     public static client: any;
+    public static aggregatorRegistry: any;
     public static uuid: string;
     public static counters: any[];
 
-    public static initialize(exp) {
-
+    public static initializePromClient(atomistConfiguration: any) {
         PrometheusClient.client = require("prom-client");
+        PrometheusClient.aggregatorRegistry = require("prom-client").AggregatorRegistry;
+        PrometheusClient.aggregatorRegistry.registry = new AggregatorRegistry();
 
         PrometheusClient.uuid = uuid();
 
@@ -22,7 +26,7 @@ export class PrometheusClient  {
         const Counter = require("prom-client").Counter;
 
         // Loop through commands from atomist.config and add/register
-        configuration.commands.forEach( command => {
+        atomistConfiguration.commands.forEach(command => {
             const cName = _.snakeCase(command.name);
 
             const commandCounter = new Counter({
@@ -35,7 +39,7 @@ export class PrometheusClient  {
         });
 
         // Loop through events from atomist.config and add/register
-        configuration.events.forEach( event => {
+        atomistConfiguration.events.forEach(event => {
             const eName = _.snakeCase(event.name);
 
             const eventCounter = new Counter({
@@ -46,15 +50,36 @@ export class PrometheusClient  {
 
             PrometheusClient.counters.push(eventCounter);
         });
+    }
 
-        exp.get("/prometrics", async (req, res) => {
-            res.set("Content-Type", PrometheusClient.client.register.contentType);
-            res.end(PrometheusClient.client.register.metrics());
-        });
+    public static initializeMetricsServer(exp) {
+        if (cluster.isMaster) {
+            for (let i = 0; i < configuration.cluster.workers; i++) {
+                cluster.fork();
+            }
+
+            exp.get("/cluster_prometrics", (req, res) => {
+                PrometheusClient.aggregatorRegistry.registry.clusterMetrics((err, metrics) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                    res.set("Content-Type", PrometheusClient.aggregatorRegistry.registry.contentType);
+                    res.send(metrics);
+                });
+            });
+        }
+        // else {
+        //     exp.get("/prometrics", async (req, res) => {
+        //         res.set("Content-Type", PrometheusClient.client.register.contentType);
+        //         res.end(PrometheusClient.client.register.metrics());
+        //     });
+        // }
     }
 
     public static incrementCounter(name: string, labels: any) {
         logger.debug(`incrementCounter name: ${name} labels: ${labels}`);
-        // PrometheusClient.counters.find( counter => counter.name === name).inc(labels);
+        PrometheusClient.counters.find(counter => counter.name === name).inc(labels);
     }
 }
+
+// PrometheusClient.initializePromClient();

@@ -5,6 +5,7 @@ import stripJsonComments = require("strip-json-comments");
 import {Cluster} from "./Cluster";
 import {HttpAuth} from "./HttpAuth";
 import {SubatomicConfig} from "./SubatomicConfig";
+import {PrometheusClient} from "../gluon/metrics/prometheus/PrometheusClient";
 
 export class QMConfig {
 
@@ -29,6 +30,7 @@ export class QMConfig {
         QMConfig.teamId = config.teamId;
         QMConfig.token = config.token;
         QMConfig.http = config.http;
+        QMConfig.http.customizers = [PrometheusClient.initializeMetricsServer];
         QMConfig.cluster = config.cluster || {
             enabled: process.env.NODE_ENV === "production",
             workers: 10,

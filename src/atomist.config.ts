@@ -195,9 +195,7 @@ export const configuration: any = {
         TeamsLinkedToProjectEvent,
     ],
     token,
-    http: {
-        customizers: [PrometheusClient.initialize],
-    },
+    http,
     logging: {
         level: "debug",
         file: false,
@@ -208,3 +206,5 @@ export const configuration: any = {
         timeout: 20000,
     },
 };
+
+PrometheusClient.initializePromClient(configuration);
