@@ -55,6 +55,6 @@ export class PrometheusClient  {
 
     public static incrementCounter(name: string, labels: any) {
         logger.debug(`incrementCounter name: ${name} labels: ${labels}`);
-        PrometheusClient.counters.find( counter => counter.name === name).inc(labels);
+        // PrometheusClient.counters.find( counter => counter.name === name).inc(labels);
     }
 }
