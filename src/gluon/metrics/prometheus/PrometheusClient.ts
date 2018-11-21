@@ -55,11 +55,12 @@ export class PrometheusClient {
         }
     }
 
-    public static initializeMetricsServer(exp) {
+    public static initializeClusteredMetricsServer(exp) {
         try {
+            logger.info("Initialising Clustered Prometheus Metrics Server...");
             if (cluster.isMaster) {
                 // set up prometheus metrics endpoint
-                exp.get("/cluster_prometrics", (req, res) => {
+                exp.get("/prometrics", (req, res) => {
                     PrometheusClient.aggregatorRegistry.registry.clusterMetrics((err, metrics) => {
                         res.set("Content-Type", PrometheusClient.aggregatorRegistry.registry.contentType);
                         res.send(metrics);
@@ -68,9 +69,23 @@ export class PrometheusClient {
                         }
                     });
                 });
+            } else {
+                logger.error(`PrometheusClient.initializeMetricsServer exception: cluster.isMaster should be true but is false`);
             }
         } catch (error) {
             logger.error(`PrometheusClient.initializeMetricsServer exception: ${error}`);
+        }
+    }
+
+    public static initializeNonClusteredMetricsServer(exp) {
+        try {
+            logger.info("Initialising Non-Clustered Prometheus Metrics Server...");
+            exp.get("/prometrics", async (req, res) => {
+                res.set("Content-Type", PrometheusClient.client.register.contentType);
+                res.end(PrometheusClient.client.register.metrics());
+            });
+        } catch (error) {
+            logger.error(`PrometheusClient.initializeNonClusteredMetricsServer exception: ${error}`);
         }
     }
 

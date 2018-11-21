@@ -30,11 +30,17 @@ export class QMConfig {
         QMConfig.teamId = config.teamId;
         QMConfig.apiKey = config.apiKey;
         QMConfig.http = config.http;
-        QMConfig.http.customizers = [PrometheusClient.initializeMetricsServer];
+
         QMConfig.cluster = config.cluster || {
             enabled: process.env.NODE_ENV === "production",
             workers: 10,
         };
+
+        if (QMConfig.cluster.enabled) {
+            QMConfig.http.customizers = [PrometheusClient.initializeClusteredMetricsServer];
+        } else {
+            QMConfig.http.customizers = [PrometheusClient.initializeNonClusteredMetricsServer];
+        }
     }
 
     private static getConfigFile() {
