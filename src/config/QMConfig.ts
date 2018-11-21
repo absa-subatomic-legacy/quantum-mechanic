@@ -12,7 +12,7 @@ export class QMConfig {
 
     public static teamId: string;
 
-    public static token: string;
+    public static apiKey: string;
 
     public static http: HttpAuth;
 
@@ -27,7 +27,7 @@ export class QMConfig {
         const config = JSON.parse(configRaw);
         QMConfig.subatomic = config.subatomic;
         QMConfig.teamId = config.teamId;
-        QMConfig.token = config.token;
+        QMConfig.apiKey = config.token;
         QMConfig.http = config.http;
         QMConfig.cluster = config.cluster || {
             enabled: process.env.NODE_ENV === "production",
