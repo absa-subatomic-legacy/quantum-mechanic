@@ -21,6 +21,7 @@ import {OnboardMember} from "../../commands/member/OnboardMember";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {NewDevOpsEnvironment} from "../../commands/team/DevOpsEnvironment";
 import {GluonService} from "../../services/gluon/GluonService";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
     handleQMError,
@@ -66,12 +67,13 @@ import {
   }
 }`)
 @Tags("atomist", "channel")
-export class BotJoinedChannel implements HandleEvent<any> {
+export class BotJoinedChannel extends BaseQMEvent implements HandleEvent<any> {
 
     @MappedParameter(MappedParameters.SlackChannelName)
     public slackChannelName: string;
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -86,12 +88,13 @@ export class BotJoinedChannel implements HandleEvent<any> {
         try {
             if (botJoinedChannel.user.isAtomistBot === "true") {
                 const channelNameString = `the ${botJoinedChannel.channel.name}`;
-
+                this.succeedEvent();
                 return await this.sendBotTeamWelcomeMessage(ctx, channelNameString, botJoinedChannel.channel.channelId);
             } else {
                 return this.processUserJoinedChannelEvent(ctx, botJoinedChannel);
             }
         } catch (error) {
+            this.failEvent();
             return await handleQMError(new ChannelMessageClient(ctx).addDestination(botJoinedChannel.channel.channelId), error);
         }
     }

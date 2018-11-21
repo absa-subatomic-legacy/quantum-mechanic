@@ -14,6 +14,7 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
 import {getProjectId} from "../../util/project/Project";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
     handleQMError,
@@ -50,12 +51,13 @@ subscription MemberRemovedFromTeamEvent {
   }
 }
 `)
-export class MemberRemovedFromTeam implements HandleEvent<any> {
+export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<any> {
 
     constructor(private gluonService = new GluonService(),
                 private removeMemberTeamService = new RemoveMemberFromTeamService(),
                 private bitbucketService = new BitbucketService(),
                 private ocService = new OCService()) {
+        super();
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -73,10 +75,12 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
             await this.removePermissionsForUserFromTeams(
                 bitbucketConfiguration, team.name, projects, memberRemovedFromTeam);
 
+            this.succeedEvent();
             return await ctx.messageClient.addressChannels(
                 "User permissions successfully removed from associated projects.",
                 team.slackIdentity.teamChannel);
         } catch (error) {
+            this.failEvent();
             return await handleQMError(new ChannelMessageClient(ctx).addDestination(
                 memberRemovedFromTeam.team.slackIdentity.teamChannel),
                 error);

@@ -13,6 +13,7 @@ import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/me
 import {SlackMessage} from "@atomist/slack-messages";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     handleQMError,
     QMError,
@@ -20,7 +21,7 @@ import {
 } from "../../util/shared/Error";
 
 @CommandHandler("Close a membership request")
-export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
+export class MembershipRequestClosed extends BaseQMEvent implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
     public approverUserName: string;
@@ -71,6 +72,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     public correlationId: string;
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
@@ -86,9 +88,10 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
                 actioningMember.memberId,
                 this.approvalStatus,
             );
-
+            this.succeedEvent();
             return await this.handleMembershipRequestResult(ctx);
         } catch (error) {
+            this.failEvent();
             return await this.handleError(ctx, error);
         }
     }

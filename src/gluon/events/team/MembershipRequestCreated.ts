@@ -14,6 +14,7 @@ import {
 } from "@atomist/automation-client/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {MembershipRequestClosed} from "./MembershipRequestClosed";
 
 @EventHandler("Receive MembershipRequestCreated events", `
@@ -38,7 +39,7 @@ subscription MembershipRequestCreatedEvent {
   }
 }
 `)
-export class MembershipRequestCreated implements HandleEvent<any> {
+export class MembershipRequestCreated extends BaseQMEvent implements HandleEvent<any> {
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested MembershipRequestCreated event: ${JSON.stringify(event.data)}`);
@@ -86,9 +87,11 @@ export class MembershipRequestCreated implements HandleEvent<any> {
             };
             logger.info(membershipRequestCreatedEvent.team.slackIdentity.teamChannel);
             const destination =  await addressSlackChannelsFromContext(ctx, membershipRequestCreatedEvent.team.slackIdentity.teamChannel);
+            this.succeedEvent();
             return await ctx.messageClient.send(msg, destination, {id: correlationId});
         }
 
+        this.failEvent();
         return await this.tryAddressMember(ctx, "Please note, the team applied to has no associated slack channel. Approval needs to occur through other avenues.", membershipRequestCreatedEvent.requestedBy);
     }
 

@@ -12,6 +12,7 @@ import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToDevOpsEnvironment} from "../../tasks/team/AddJenkinsToDevOpsEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 
@@ -49,7 +50,7 @@ subscription DevOpsEnvironmentRequestedEvent {
   }
 }
 `)
-export class DevOpsEnvironmentRequested implements HandleEvent<any> {
+export class DevOpsEnvironmentRequested extends BaseQMEvent implements HandleEvent<any> {
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested DevOpsEnvironmentRequestedEvent event: ${JSON.stringify(event.data)}`);
@@ -73,10 +74,11 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
                 team: devOpsRequestedEvent.team,
                 devOpsEnvironment: getDevOpsEnvironmentDetails(devOpsRequestedEvent.team.name),
             };
-
+            this.succeedEvent();
             return await ctx.messageClient.send(devopsEnvironmentProvisionedEvent, addressEvent("DevOpsEnvironmentProvisionedEvent"));
 
         } catch (error) {
+            this.failEvent();
             return await this.handleError(ctx, error, devOpsRequestedEvent.team.slackIdentity.teamChannel);
         }
     }
