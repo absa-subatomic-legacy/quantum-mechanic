@@ -62,12 +62,18 @@ export class RemoveMemberFromTeamService {
 
     public verifyCanRemoveMemberRequest(newMember: { memberId: string, slack: { screenName: string } }, team: { owners: Array<{ memberId: string }>, members: Array<{ memberId: string }> }, memberRole: MemberRole) {
         if (memberRole !== MemberRole.owner) {
+            let found: boolean = false;
             for (const member of team.members) {
-                if (member.memberId !== newMember.memberId) {
-                    throw new QMError(`${newMember.slack.screenName} is not a member of this team.`);
-                } else {
-                    logger.info(`Verified user is not an owner and is a member of the team`);
+                if (member.memberId === newMember.memberId) {
+                    found = true;
+                    break;
                 }
+
+                // team.members.includes(newMember.memberId)
+            }
+
+            if (!found) {
+                throw new QMError(`${newMember.slack.screenName} is not a member of this team`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
             }
         } else {
             throw new QMError(`${newMember.slack.screenName} is an owner of this team and cannot be removed.`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
@@ -80,7 +86,7 @@ export class RemoveMemberFromTeamService {
                                             channelName: string,
                                             screenName: string,
                                             slackName: string) {
-        const destination =  await addressSlackChannelsFromContext(ctx, channelName);
+        const destination = await addressSlackChannelsFromContext(ctx, channelName);
         try {
             logger.info(`Removing user ${screenName} from channel ${channelName}...`);
             const channelId = await loadChannelIdByChannelName(ctx, channelName);
