@@ -1,5 +1,5 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {DevOpsMessages} from "../../messages/team/DevOpsMessages";

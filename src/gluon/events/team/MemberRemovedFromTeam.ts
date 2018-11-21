@@ -1,11 +1,11 @@
 import {
     EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
+import {EventHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
@@ -17,7 +17,7 @@ import {getProjectId} from "../../util/project/Project";
 import {
     ChannelMessageClient,
     handleQMError,
-    OCResultError, QMError,
+    OCResultError,
 } from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 

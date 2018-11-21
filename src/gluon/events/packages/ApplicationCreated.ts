@@ -1,14 +1,16 @@
 import {
     EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
     success,
 } from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {EventHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
+import {
+    addressSlackChannelsFromContext,
+    buttonForCommand,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {ConfigureBasicPackage} from "../../commands/packages/ConfigureBasicPackage";
@@ -83,7 +85,7 @@ export class ApplicationCreated implements HandleEvent<any> {
     private async sendConfigurationMessage(ctx: HandlerContext, applicationCreatedEvent) {
         const applicationType = applicationCreatedEvent.application.applicationType.toLowerCase();
         const attachmentText = `The ${applicationType} can now be configured. This determines what type of ${applicationType} it is and how it should be deployed/built within your environments.`;
-        const destination =  await addressSlackChannelsFromContext(ctx, applicationCreatedEvent.owningTeam.slackIdentity.teamChannel);
+        const destination = await addressSlackChannelsFromContext(ctx, applicationCreatedEvent.owningTeam.slackIdentity.teamChannel);
         return await ctx.messageClient.send({
             text: `The *${applicationCreatedEvent.application.name}* ${applicationType} in the project *${applicationCreatedEvent.project.name}* has been created successfully.`,
             attachments: [{

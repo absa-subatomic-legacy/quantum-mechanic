@@ -3,7 +3,7 @@ import {
     MessageClient,
     MessageOptions,
     SlackMessageClient,
-} from "@atomist/automation-client/spi/message/MessageClient";
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 
 export class TestMessageClient implements MessageClient, SlackMessageClient {
     public textMsg: any[] = [];

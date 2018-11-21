@@ -1,13 +1,15 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
+    success,
+} from "@atomist/automation-client";
+import {
+    CommandHandler,
     MappedParameter,
     MappedParameters,
-    success,
     Tags,
-} from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+} from "@atomist/automation-client/lib/decorators";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";

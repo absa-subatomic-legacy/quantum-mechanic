@@ -1,5 +1,4 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {handleError} from "@atomist/lifecycle-automation/handlers/command/github/gitHubApi";
 import {GluonService} from "../../services/gluon/GluonService";
 import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
 import {
@@ -7,7 +6,6 @@ import {
     loadScreenNameByUserId,
     MemberRole,
 } from "../../util/member/Members";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {getTeamSlackChannel} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";

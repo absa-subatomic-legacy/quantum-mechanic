@@ -60,7 +60,7 @@
     }
   },
   "teamId": "F7E6GGR63A",
-  "token": "88agdfgdf8afg7f7d88g9aeadga8sd89cj",
+  "apiKey": "88agdfgdf8afg7f7d88g9aeadga8sd89cj",
   "lifecycles": {
     "push": {
       "configuration": {

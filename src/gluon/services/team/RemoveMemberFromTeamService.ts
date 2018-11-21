@@ -1,6 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
@@ -68,8 +68,6 @@ export class RemoveMemberFromTeamService {
                     found = true;
                     break;
                 }
-
-                // team.members.includes(newMember.memberId)
             }
 
             if (!found) {

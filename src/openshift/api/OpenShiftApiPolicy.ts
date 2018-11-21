@@ -1,5 +1,4 @@
 import {logger} from "@atomist/automation-client";
-import {AxiosResponse} from "axios-https-proxy-fix";
 import {AwaitAxios} from "../../http/AwaitAxios";
 import {OpenShiftApiElement} from "./base/OpenShiftApiElement";
 import {OpenshiftApiResult} from "./base/OpenshiftApiResult";

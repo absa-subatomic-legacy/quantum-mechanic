@@ -1,4 +1,4 @@
-import {BasicAuthCredentials} from "@atomist/automation-client/operations/common/BasicAuthCredentials";
+import {BasicAuthCredentials} from "@atomist/automation-client/lib/operations/common/BasicAuthCredentials";
 
 export interface BitbucketConfig {
     baseUrl: string;

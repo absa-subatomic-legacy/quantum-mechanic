@@ -48,4 +48,4 @@ USER 1001
 
 ENTRYPOINT ["dumb-init", "node", "--trace-warnings", "--expose_gc", "--optimize_for_size", "--always_compact", "--max_old_space_size=128"]
 
-CMD ["node_modules/@atomist/automation-client/start.client.js"]
+CMD ["node_modules/@atomist/automation-client/bin/start.js"]
