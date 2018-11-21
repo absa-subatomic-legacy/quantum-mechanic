@@ -1,4 +1,4 @@
-import {GraphClient, MutationOptions, QueryOptions} from "@atomist/automation-client/spi/graph/GraphClient";
+import {GraphClient, MutationOptions, QueryOptions} from "@atomist/automation-client/lib/spi/graph/GraphClient";
 import _ = require("lodash");
 
 export class TestGraphClient implements GraphClient {

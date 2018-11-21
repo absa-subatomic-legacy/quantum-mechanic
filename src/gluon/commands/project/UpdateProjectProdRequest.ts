@@ -1,10 +1,11 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
     Parameter,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ProjectProdRequestApprovalResponse} from "../../util/project/Project";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";

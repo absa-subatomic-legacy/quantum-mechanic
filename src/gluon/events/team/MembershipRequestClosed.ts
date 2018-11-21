@@ -1,6 +1,4 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,8 +6,12 @@ import {
     MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
-import {addressSlackUsersFromContext} from "@atomist/automation-client/spi/message/MessageClient";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {
+    addressSlackChannelsFromContext,
+    addressSlackUsersFromContext,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -131,7 +133,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     }
 
     private async handleRejectedMembershipRequest(ctx: HandlerContext, teamName: string, rejectingUserScreenName: string, rejectedUserScreenName: string) {
-        const destination =  await addressSlackUsersFromContext(ctx, rejectedUserScreenName);
+        const destination = await addressSlackUsersFromContext(ctx, rejectedUserScreenName);
         return await ctx.messageClient.send(`Your membership request to team '${teamName}' has been rejected by @${rejectingUserScreenName}`,
             destination);
     }
@@ -151,7 +153,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
                 mrkdwn_in: ["text"],
             }],
         };
-        const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+        const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
 
         return await ctx.messageClient.send(msg, destination, {id: this.correlationId});
     }

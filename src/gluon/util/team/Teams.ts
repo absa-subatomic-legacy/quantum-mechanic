@@ -1,8 +1,5 @@
-import {
-    HandleCommand,
-    HandlerContext,
-    logger,
-} from "@atomist/automation-client";
+import {HandlerContext, logger} from "@atomist/automation-client";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import * as _ from "lodash";
 import * as graphql from "../../../typings/types";
 import {QMMemberBase} from "../member/Members";

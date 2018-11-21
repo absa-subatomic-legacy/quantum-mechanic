@@ -1,0 +1,18 @@
+type GluonTeam @rootType {
+	teamId: String
+	name: String
+	description: String
+	slackIdentity: SlackIdentity
+	owners: [Owner]
+	members: [Member]
+}
+type Owner {
+	firstName: String
+	domainUsername: String
+	slackIdentity: SlackIdentity
+}
+type Member {
+	firstName: String
+	domainUsername: String
+	slackIdentity: SlackIdentity
+}

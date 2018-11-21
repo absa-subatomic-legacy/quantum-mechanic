@@ -1,0 +1,6 @@
+type GluonApplication @rootType {
+	applicationId: String
+	name: String
+	description: String
+	applicationType: String
+}

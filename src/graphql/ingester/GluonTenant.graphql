@@ -1,0 +1,5 @@
+type GluonTenant @rootType {
+	tenantId: String
+	name: String
+	description: String
+}

@@ -1,6 +1,6 @@
 import {logger} from "@atomist/automation-client";
 import Axios from "axios";
-import {AxiosInstance} from "axios-https-proxy-fix";
+import {AxiosInstance} from "axios";
 import * as https from "https";
 import * as _ from "lodash";
 import * as qs from "query-string";

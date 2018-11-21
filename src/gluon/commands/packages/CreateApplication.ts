@@ -1,7 +1,6 @@
 import {
     HandlerContext,
-    HandlerResult,
-    logger,
+    HandlerResult, logger,
     MappedParameter,
     MappedParameters,
     Parameter,
