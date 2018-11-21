@@ -1,6 +1,4 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     MappedParameter,
@@ -8,6 +6,8 @@ import {
     Parameter,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {TeamSlackChannelService} from "../../services/team/TeamSlackChannelService";

@@ -1,4 +1,4 @@
-import {HandleCommand} from "@atomist/automation-client";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {createMenuAttachment} from "./GenericMenu";
 
 export function menuAttachmentForTenants(tenants: any[],

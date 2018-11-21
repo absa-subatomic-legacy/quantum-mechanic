@@ -1,12 +1,12 @@
 import {
     EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
     SuccessPromise,
 } from "@atomist/automation-client";
+import {EventHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 
 @EventHandler("Receive TeamMemberCreated events", `
 subscription TeamMemberCreatedEvent {

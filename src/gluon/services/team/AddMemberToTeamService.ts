@@ -2,9 +2,9 @@ import {HandlerContext, logger} from "@atomist/automation-client";
 import {
     addressSlackChannelsFromContext,
     addressSlackUsersFromContext,
-} from "@atomist/automation-client/spi/message/MessageClient";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
-import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/handlers/command/slack/AssociateRepo";
+    buttonForCommand,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/lib/handlers/command/slack/AssociateRepo";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
@@ -64,7 +64,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                                           channelName: string,
                                           screenName: string,
                                           slackName: string) {
-        const destination =  await addressSlackChannelsFromContext(ctx, channelName);
+        const destination = await addressSlackChannelsFromContext(ctx, channelName);
         try {
             logger.info(`Added team member! Inviting to channel [${channelName}] -> member [${screenName}]`);
             const channelId = await loadChannelIdByChannelName(ctx, channelName);
@@ -134,7 +134,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
     }
 
     private async onboardMessage(ctx, chatId: string, teamChannel: string) {
-        const destination =  await addressSlackUsersFromContext(ctx, chatId);
+        const destination = await addressSlackUsersFromContext(ctx, chatId);
         const msg: SlackMessage = {
             text: `Someone tried to add you to the team channel ${teamChannel}.`,
             attachments: [{

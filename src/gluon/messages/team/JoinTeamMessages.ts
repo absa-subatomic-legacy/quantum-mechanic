@@ -1,7 +1,7 @@
 import {
     buttonForCommand,
     menuForCommand,
-} from "@atomist/automation-client/spi/message/MessageClient";
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateTeam} from "../../commands/team/CreateTeam";

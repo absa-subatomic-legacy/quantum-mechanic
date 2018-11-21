@@ -1,5 +1,5 @@
 import {logger} from "@atomist/automation-client";
-import {AxiosInstance} from "axios-https-proxy-fix";
+import {AxiosInstance} from "axios";
 
 export function addAxiosLogger(instance: AxiosInstance, descriptor: string): AxiosInstance {
     instance.interceptors.request.use(request => {

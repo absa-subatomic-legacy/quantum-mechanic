@@ -1,4 +1,4 @@
-import Axios from "axios-https-proxy-fix";
+import Axios from "axios";
 import https = require("https");
 import _ = require("lodash");
 import {AwaitAxios} from "../../../http/AwaitAxios";

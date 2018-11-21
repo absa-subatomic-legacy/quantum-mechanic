@@ -1,4 +1,5 @@
-import {HandleCommand, HandlerContext} from "@atomist/automation-client";
+import {HandlerContext} from "@atomist/automation-client";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import * as _ from "lodash";
 import {createMenuAttachment} from "../shared/GenericMenu";
 

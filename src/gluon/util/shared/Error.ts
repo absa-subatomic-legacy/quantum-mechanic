@@ -4,7 +4,7 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
-import {MessageOptions} from "@atomist/automation-client/spi/message/MessageClient";
+import {MessageOptions} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import * as util from "util";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";

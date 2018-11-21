@@ -1,12 +1,12 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
     Parameter,
 } from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import uuid = require("uuid");
 import {QMConfig} from "../../../config/QMConfig";
 import {handleQMError, ResponderMessageClient} from "../shared/Error";
@@ -99,7 +99,10 @@ export class Help implements HandleCommand<HandlerResult> {
                         text: option,
                         style: "primary",
                     },
-                    new Help(), {selectedOption: option, correlationId: this.correlationId}),
+                    new Help(), {
+                        selectedOption: option,
+                        correlationId: this.correlationId,
+                    }),
             ],
         });
     }
