@@ -25,7 +25,7 @@ export class PrometheusClient {
 
             const Counter = require("prom-client").Counter;
 
-            // Loop through commands from atomist.config and add/register
+            // Loop through commands from atomist.config and register a counter for each
             atomistConfiguration.commands.forEach(command => {
                 const cName = _.snakeCase(command.name);
 
@@ -38,7 +38,7 @@ export class PrometheusClient {
                 PrometheusClient.counters.push(commandCounter);
             });
 
-            // Loop through events from atomist.config and add/register
+            // Loop through events from atomist.config and register a counter for each
             atomistConfiguration.events.forEach(event => {
                 const eName = _.snakeCase(event.name);
 
@@ -60,11 +60,7 @@ export class PrometheusClient {
             if (cluster.isMaster) {
                 // set up prometheus metrics endpoint
                 exp.get("/cluster_prometrics", (req, res) => {
-
-                    logger.debug(`req: ${req} res: ${res}`);
-
                     PrometheusClient.aggregatorRegistry.registry.clusterMetrics((err, metrics) => {
-
                         res.set("Content-Type", PrometheusClient.aggregatorRegistry.registry.contentType);
                         res.send(metrics);
                         if (err) {
