@@ -27,7 +27,7 @@ export class QMConfig {
         const config = JSON.parse(configRaw);
         QMConfig.subatomic = config.subatomic;
         QMConfig.teamId = config.teamId;
-        QMConfig.apiKey = config.token;
+        QMConfig.apiKey = config.apiKey;
         QMConfig.http = config.http;
         QMConfig.cluster = config.cluster || {
             enabled: process.env.NODE_ENV === "production",
