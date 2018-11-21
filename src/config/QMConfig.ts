@@ -2,6 +2,7 @@ import {logger} from "@atomist/automation-client";
 import fs = require("fs");
 import _ = require("lodash");
 import stripJsonComments = require("strip-json-comments");
+import {PrometheusClient} from "../gluon/metrics/prometheus/PrometheusClient";
 import {Cluster} from "./Cluster";
 import {HttpAuth} from "./HttpAuth";
 import {SubatomicConfig} from "./SubatomicConfig";
@@ -29,10 +30,17 @@ export class QMConfig {
         QMConfig.teamId = config.teamId;
         QMConfig.apiKey = config.apiKey;
         QMConfig.http = config.http;
+
         QMConfig.cluster = config.cluster || {
             enabled: process.env.NODE_ENV === "production",
             workers: 10,
         };
+
+        if (QMConfig.cluster.enabled) {
+            QMConfig.http.customizers = [PrometheusClient.initializeClusteredMetricsServer];
+        } else {
+            QMConfig.http.customizers = [PrometheusClient.initializeNonClusteredMetricsServer];
+        }
     }
 
     private static getConfigFile() {

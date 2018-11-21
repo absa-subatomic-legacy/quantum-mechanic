@@ -61,6 +61,7 @@ import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
 import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClosed";
 import {MembershipRequestCreated} from "./gluon/events/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/events/team/TeamCreated";
+import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
 import {Help} from "./gluon/util/help/Help";
 
 const apiKey = QMConfig.apiKey;
@@ -176,3 +177,5 @@ export const configuration: any = {
         timeout: 20000,
     },
 };
+
+PrometheusClient.initializePromClient(configuration);
