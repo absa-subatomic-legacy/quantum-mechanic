@@ -13,16 +13,11 @@ import {
     addressSlackChannelsFromContext,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Re-run a failed project production request")
-export class ReRunProjectProdRequest implements HandleCommand<HandlerResult> {
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
+export class ReRunProjectProdRequest extends BaseQMComand {
 
     @Parameter({
         required: true,
@@ -37,6 +32,7 @@ export class ReRunProjectProdRequest implements HandleCommand<HandlerResult> {
     public projectProdRequestId: string;
 
     constructor(public gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
@@ -52,8 +48,11 @@ export class ReRunProjectProdRequest implements HandleCommand<HandlerResult> {
                 projectProdRequestId: this.projectProdRequestId,
             };
 
-            return await ctx.messageClient.send(projectProdRequestEvent, addressEvent("ProjectProductionEnvironmentsRequestClosedEvent"));
+            const result =  await ctx.messageClient.send(projectProdRequestEvent, addressEvent("ProjectProductionEnvironmentsRequestClosedEvent"));
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

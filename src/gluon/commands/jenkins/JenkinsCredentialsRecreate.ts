@@ -40,12 +40,6 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: JenkinsCredentialsRecreate.RecursiveKeys.teamName,
         selectionMessage: "Please select the team which contains the owning project of the jenkins you would like to reconfigure",
@@ -61,8 +55,11 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext) {
         try {
             await this.ocService.login();
-            return await this.recreateBitbucketJenkinsCredential(ctx, this.teamName);
+            const result = await this.recreateBitbucketJenkinsCredential(ctx, this.teamName);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

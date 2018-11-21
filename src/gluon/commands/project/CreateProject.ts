@@ -36,12 +36,6 @@ export class CreateProject extends RecursiveParameterRequestCommand
         tenantName: "TENANT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @Parameter({
         description: "project name",
     })
@@ -71,8 +65,11 @@ export class CreateProject extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext) {
         try {
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantName(this.tenantName);
-            return await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
+            const result =  await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

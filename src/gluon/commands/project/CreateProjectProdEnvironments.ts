@@ -33,12 +33,6 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: CreateProjectProdEnvironments.RecursiveKeys.projectName,
         selectionMessage: "Please select the projects you wish to provision the production environments for",
@@ -71,8 +65,10 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
 
             await this.gluonService.prod.project.createProjectProdRequest(member.memberId, project.projectId);
 
-            return success();
+            this.succeedCommand();
+            return await success();
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

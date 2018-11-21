@@ -42,12 +42,6 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
         imageName: "IMAGE_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: PatchBuildConfigBaseImage.RecursiveKeys.applicationName,
         selectionMessage: "Please select the package you wish to configure",
@@ -92,8 +86,9 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
             await taskRunner.execute(ctx);
 
             await qmMessageClient.send("Patching BuildConfig completed successfully!");
-
+            this.succeedCommand();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(qmMessageClient, error);
         }
     }

@@ -40,12 +40,6 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: NewProjectEnvironments.RecursiveKeys.projectName,
         selectionMessage: "Please select the projects you wish to provision the environments for",
@@ -80,8 +74,10 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand
 
             await this.requestProjectEnvironment(project.projectId, member.memberId);
 
+            this.succeedCommand();
             return await success();
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

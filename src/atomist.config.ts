@@ -1,9 +1,6 @@
 import {ingester} from "@atomist/automation-client/lib/graph/graphQL";
 import {QMConfig} from "./config/QMConfig";
-import {
-    ListExistingBitbucketProject,
-    NewBitbucketProject,
-} from "./gluon/commands/bitbucket/BitbucketProject";
+import {ListExistingBitbucketProject, NewBitbucketProject} from "./gluon/commands/bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "./gluon/commands/bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "./gluon/commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {KickOffJenkinsBuild} from "./gluon/commands/jenkins/JenkinsBuild";
@@ -23,10 +20,7 @@ import {CreateOpenShiftPvc} from "./gluon/commands/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/commands/project/CreateProject";
 import {CreateProjectProdEnvironments} from "./gluon/commands/project/CreateProjectProdEnvironments";
 import {NewProjectEnvironments} from "./gluon/commands/project/NewProjectEnvironments";
-import {
-    ListProjectDetails,
-    ListTeamProjects,
-} from "./gluon/commands/project/ProjectDetails";
+import {ListProjectDetails, ListTeamProjects} from "./gluon/commands/project/ProjectDetails";
 import {ReRunProjectProdRequest} from "./gluon/commands/project/ReRunProjectProdRequest";
 import {UpdateProjectProdRequest} from "./gluon/commands/project/UpdateProjectProdRequest";
 import {AddConfigServer} from "./gluon/commands/team/AddConfigServer";
@@ -61,6 +55,47 @@ import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
 import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClosed";
 import {MembershipRequestCreated} from "./gluon/events/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/events/team/TeamCreated";
+import {ApplicationProdRequestedEvent} from "./gluon/ingesters/applicationProdRequested";
+import {
+    ApplicationCreatedEvent,
+    PackageConfiguredEvent,
+} from "./gluon/ingesters/applicationsIngester";
+import {
+    BitbucketProjectAddedEvent,
+    BitbucketProjectRequestedEvent,
+} from "./gluon/ingesters/bitbucketIngester";
+import {GenericProdRequestedEvent} from "./gluon/ingesters/genericProdRequested";
+import {
+    ProjectCreatedEvent,
+    ProjectEnvironmentsRequestedEvent,
+    TeamsLinkedToProjectEvent,
+} from "./gluon/ingesters/projectIngester";
+import {
+    ProjectProductionEnvironmentsRequestClosedEvent,
+    ProjectProductionEnvironmentsRequestedEvent,
+} from "./gluon/ingesters/projectProductionRequests";
+import {
+    ActionedBy,
+    BitbucketProject,
+    BitbucketRepository,
+    DevOpsEnvironmentDetails,
+    GluonApplication,
+    GluonTeam,
+    GluonTenant,
+    GluonTenantId,
+    Project,
+    SlackIdentity,
+} from "./gluon/ingesters/sharedIngester";
+import {TeamDevOpsDetails} from "./gluon/ingesters/teamDevOpsDetails";
+import {
+    DevOpsEnvironmentProvisionedEvent,
+    DevOpsEnvironmentRequestedEvent,
+    MemberRemovedFromTeamEvent,
+    MembersAddedToTeamEvent,
+    MembershipRequestCreatedEvent,
+    TeamCreatedEvent,
+} from "./gluon/ingesters/teamIngester";
+import {TeamMemberCreatedEvent} from "./gluon/ingesters/teamMemberIngester";
 import {Help} from "./gluon/util/help/Help";
 
 const token = QMConfig.token;

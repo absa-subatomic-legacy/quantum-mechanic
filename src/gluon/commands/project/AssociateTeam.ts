@@ -33,12 +33,6 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: AssociateTeam.RecursiveKeys.teamName,
         selectionMessage: `Please select a team you would like to associate to the project`,
@@ -57,8 +51,11 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            return await this.linkProjectForTeam(ctx, this.teamName);
+            const result =  await this.linkProjectForTeam(ctx, this.teamName);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

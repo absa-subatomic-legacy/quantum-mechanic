@@ -20,6 +20,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
@@ -34,12 +35,6 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand
     private static RecursiveKeys = {
         teamName: "TEAM_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @RecursiveParameter({
         recursiveKey: ListTeamProjects.RecursiveKeys.teamName,
@@ -64,52 +59,58 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand
     }
 
     private async listTeamProjects(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
-        const projects = await this.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(teamName);
 
-        const attachments = [];
+        try {
+            const projects = await this.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(teamName);
 
-        for (const project of projects) {
+            const attachments = [];
 
-            const parameters = {
-                projectId: project.projectId,
-                projectName: project.name,
-                projectDescription: project.description,
-                projectBitbucketKey: null,
-            };
+            for (const project of projects) {
 
-            if (project.bitbucketProject !== null) {
-                parameters.projectBitbucketKey = project.bitbucketProject.key;
+                const parameters = {
+                    projectId: project.projectId,
+                    projectName: project.name,
+                    projectDescription: project.description,
+                    projectBitbucketKey: null,
+                };
+
+                if (project.bitbucketProject !== null) {
+                    parameters.projectBitbucketKey = project.bitbucketProject.key;
+                }
+
+                attachments.push(
+                    {
+                        text: `*Project:* ${project.name}\n*Description:* ${project.description}`,
+                        color: "#45B254",
+                        actions: [
+                            buttonForCommand(
+                                {
+                                    text: "Show More",
+                                },
+                                new ListProjectDetails(),
+                                parameters,
+                            ),
+                        ],
+                    },
+                );
             }
 
-            attachments.push(
-                {
-                    text: `*Project:* ${project.name}\n*Description:* ${project.description}`,
-                    color: "#45B254",
-                    actions: [
-                        buttonForCommand(
-                            {
-                                text: "Show More",
-                            },
-                            new ListProjectDetails(),
-                            parameters,
-                        ),
-                    ],
-                },
-            );
+            const msg: SlackMessage = {
+                text: `The following projects are linked to the team *${teamName}*. Click on the "Show More" button to learn more about a particular project.`,
+                attachments,
+            };
+
+            const result =  await ctx.messageClient.respond(msg);
+            this.succeedCommand();
+            return result;
+        } catch (error) {
+            return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-
-        const msg: SlackMessage = {
-            text: `The following projects are linked to the team *${teamName}*. Click on the "Show More" button to learn more about a particular project.`,
-            attachments,
-        };
-
-        return await ctx.messageClient.respond(msg);
     }
-
 }
 
 @CommandHandler("List project details")
-export class ListProjectDetails implements HandleCommand<HandlerResult> {
+export class ListProjectDetails extends BaseQMComand implements HandleCommand<HandlerResult> {
 
     @Parameter({
         description: "project",
@@ -140,6 +141,7 @@ export class ListProjectDetails implements HandleCommand<HandlerResult> {
     public projectBitbucketKey: string;
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
@@ -181,8 +183,11 @@ export class ListProjectDetails implements HandleCommand<HandlerResult> {
                 text: headerMessage,
                 attachments,
             };
-            return await ctx.messageClient.respond(msg);
+            const result = await ctx.messageClient.respond(msg);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

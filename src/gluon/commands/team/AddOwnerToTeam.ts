@@ -31,17 +31,11 @@ export class AddOwnerToTeam extends RecursiveParameterRequestCommand implements 
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
 
     @MappedParameter(MappedParameters.SlackChannel)
     public channelId: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @Parameter({
         description: "slack name (@User.Name) of the member to make an owner",
@@ -72,7 +66,9 @@ export class AddOwnerToTeam extends RecursiveParameterRequestCommand implements 
             taskRunner.addTask(new AddMemberToTeamTask(this.slackName, this.screenName, this.teamName, MemberRole.owner));
 
             await taskRunner.execute(ctx);
+            this.succeedCommand();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }
