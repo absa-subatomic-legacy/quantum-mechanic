@@ -13,9 +13,9 @@
     "url": "https://github.com/absa-subatomic/quantum-mechanic/issues"
   },
   "dependencies": {
-    "@atomist/cli": "^1.0.2",
-    "@atomist/automation-client": "^1.0.1",
-    "@atomist/lifecycle-automation": "^0.11.10",
+    "@atomist/cli": "^1.0.3-master.20181113151328",
+    "@atomist/automation-client": "^1.1.0-master.20181121110216",
+    "@atomist/lifecycle-automation": "^0.11.12-master.20181120151401",
     "@atomist/slack-messages": "^0.12.1",
     "app-root-path": "^2.1.0",
     "axios": "^0.18.0",
@@ -40,7 +40,6 @@
     "codecov": "^3.1.0",
     "copyfiles": "^2.1.0",
     "espower-typescript": "^9.0.1",
-    "graphql-code-generator": "^0.8.21",
     "mocha": "^5.2.0",
     "mockttp": "^0.10.0",
     "nodemon": "^1.18.4",
