@@ -2,10 +2,10 @@ import {logger} from "@atomist/automation-client";
 import fs = require("fs");
 import _ = require("lodash");
 import stripJsonComments = require("strip-json-comments");
+import {PrometheusClient} from "../gluon/metrics/prometheus/PrometheusClient";
 import {Cluster} from "./Cluster";
 import {HttpAuth} from "./HttpAuth";
 import {SubatomicConfig} from "./SubatomicConfig";
-import {PrometheusClient} from "../gluon/metrics/prometheus/PrometheusClient";
 
 export class QMConfig {
 
