@@ -1,7 +1,7 @@
 import {logger} from "@atomist/automation-client";
-import {AxiosPromise} from "axios-https-proxy-fix";
+import {AxiosPromise} from "axios";
 import * as _ from "lodash";
-import {userFromDomainUser} from "../../../gluon/util/member/Members";
+import {userFromDomainUser} from "../../util/member/Members";
 import {QMError} from "../../util/shared/Error";
 import {BitbucketService} from "./BitbucketService";
 

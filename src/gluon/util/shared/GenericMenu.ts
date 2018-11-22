@@ -1,9 +1,6 @@
-import {
-    HandleCommand,
-    HandlerContext,
-    logger,
-} from "@atomist/automation-client";
-import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {HandlerContext, logger} from "@atomist/automation-client";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {menuForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 
 export function createAndSendMenu(ctx: HandlerContext, menuOptions: Array<{ value: string, text: string }>,
                                   command: HandleCommand, description: string, selectionMessage: string,

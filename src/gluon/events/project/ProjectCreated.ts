@@ -12,7 +12,6 @@ import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {ListExistingBitbucketProject} from "../../commands/bitbucket/BitbucketProject";
 import {AssociateTeam} from "../../commands/project/AssociateTeam";
-import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 
 @EventHandler("Receive ProjectCreated events", `
 subscription ProjectCreatedEvent {

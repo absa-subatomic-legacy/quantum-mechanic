@@ -1,13 +1,15 @@
 import {
     EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
-import {addressSlackUsersFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {EventHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
+import {
+    addressSlackUsersFromContext,
+    buttonForCommand,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
@@ -42,7 +44,7 @@ export class TeamCreated extends BaseQMEvent implements HandleEvent<any> {
 ${teamCreatedEvent.createdBy.firstName}, your ${teamCreatedEvent.team.name} team has been successfully created 👍.
 Next you should configure your team Slack channel and OpenShift DevOps environment
                             `;
-        const destination =  await addressSlackUsersFromContext(ctx, teamCreatedEvent.createdBy.slackIdentity.screenName);
+        const destination = await addressSlackUsersFromContext(ctx, teamCreatedEvent.createdBy.slackIdentity.screenName);
         const msg: SlackMessage = {
             text,
             attachments: [{

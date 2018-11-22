@@ -1,0 +1,11 @@
+type BitbucketProjectRequestedEvent @rootType {
+	project: Project
+	bitbucketProjectRequest: BitbucketProjectRequest
+	teams: [GluonTeam]
+	requestedBy: ActionedBy
+}
+type BitbucketProjectRequest {
+	key: String
+	name: String
+	description: String
+}

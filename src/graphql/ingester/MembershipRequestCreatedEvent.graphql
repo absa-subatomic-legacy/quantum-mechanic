@@ -1,0 +1,5 @@
+type MembershipRequestCreatedEvent @rootType {
+	membershipRequestId: String
+	team: GluonTeam
+	requestedBy: ActionedBy
+}

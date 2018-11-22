@@ -1,11 +1,12 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
     MappedParameter,
-    MappedParameters, Tags,
+    MappedParameters,
+    Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
