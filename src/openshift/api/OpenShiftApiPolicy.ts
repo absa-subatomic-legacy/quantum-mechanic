@@ -13,6 +13,9 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
         const roleBindingResourceObject = await this.getRoleBindingResource(role, namespace);
         const openshiftRole = roleBindingResourceObject.roleBinding;
 
+        openshiftRole.userNames == null ? openshiftRole.userNames = [] : openshiftRole.userNames = openshiftRole.userNames;
+        openshiftRole.subjects == null ? openshiftRole.subjects = [] : openshiftRole.subjects = openshiftRole.subjects;
+
         usernames.forEach(username => {
             if (username.startsWith("system:serviceaccount")) {
 
@@ -89,7 +92,6 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
             } else {
                 // Filter by all that are NOT the user to be removed
                 roleToEdit.subjects = roleToEdit.subjects.filter(subject => subject.name !== username);
-                roleToEdit.userName = roleToEdit.userNames.filter(userName => userName !== username);
                 roleToEdit.userNames = roleToEdit.userNames.filter(userNames => userNames !== username);
 
                 const url = `${ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace)}/${role}`;
