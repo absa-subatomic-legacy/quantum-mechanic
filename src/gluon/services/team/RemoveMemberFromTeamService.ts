@@ -71,7 +71,7 @@ export class RemoveMemberFromTeamService {
             }
 
             if (!found) {
-                throw new QMError(`${newMember.slack.screenName} is not a member of this team`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
+                throw new QMError(`${newMember.slack.screenName} is not a member of this team`);
             }
         } else {
             throw new QMError(`${newMember.slack.screenName} is an owner of this team and cannot be removed.`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
