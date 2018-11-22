@@ -16,10 +16,6 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
         openshiftRole.userNames == null ? openshiftRole.userNames = [] : openshiftRole.userNames = openshiftRole.userNames;
         openshiftRole.subjects == null ? openshiftRole.subjects = [] : openshiftRole.subjects = openshiftRole.subjects;
 
-        if (openshiftRole.userNames == null || openshiftRole.subjects == null ) {
-            logger.debug(`nulls openshiftRole = ${openshiftRole}`);
-        }
-
         usernames.forEach(username => {
             if (username.startsWith("system:serviceaccount")) {
 
