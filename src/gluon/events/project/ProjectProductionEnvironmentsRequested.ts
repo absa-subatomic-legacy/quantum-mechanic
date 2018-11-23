@@ -1,4 +1,5 @@
 import {
+    addressSlackUsersFromContext, buttonForCommand,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -7,16 +8,13 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {
-    addressSlackUsersFromContext,
-    buttonForCommand,
-} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {v4 as uuid} from "uuid";
 import {UpdateProjectProdRequest} from "../../commands/project/UpdateProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ProjectProdRequestApprovalResponse} from "../../util/project/Project";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 
 @EventHandler("Receive ProjectProductionEnvironmentsRequestedEvent events", `
@@ -27,9 +25,10 @@ subscription ProjectProductionEnvironmentsRequestedEvent {
   }
 }
 `)
-export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> {
+export class ProjectProductionEnvironmentsRequested extends BaseQMEvent implements HandleEvent<any> {
 
     constructor(public gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -69,9 +68,10 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
             }
 
             await qmMessageClient.send("Successfully created project production request. Approval requests have been sent out.");
-
+            this.succeedEvent();
             return await success();
         } catch (error) {
+            this.failEvent();
             return await handleQMError(qmMessageClient, error);
         }
     }

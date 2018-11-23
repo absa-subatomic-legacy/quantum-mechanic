@@ -17,6 +17,7 @@ import {ConfigureBitbucketProjectAccess} from "../../tasks/bitbucket/ConfigureBi
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {QMProjectBase} from "../../util/project/Project";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 
 @EventHandler("Receive BitbucketProjectAddedEvent events", `
@@ -65,9 +66,10 @@ subscription BitbucketProjectAddedEvent {
   }
 }
 `)
-export class BitbucketProjectAdded implements HandleEvent<any> {
+export class BitbucketProjectAdded extends BaseQMEvent implements HandleEvent<any> {
 
     constructor(private bitbucketService = new BitbucketService()) {
+        super();
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -105,6 +107,7 @@ export class BitbucketProjectAdded implements HandleEvent<any> {
             return await messageClient.send(this.getBitbucketAddedSuccessfullyMessage(bitbucketProjectAddedEvent));
 
         } catch (error) {
+            this.failEvent();
             return await handleQMError(messageClient, error);
         }
     }
@@ -114,6 +117,7 @@ export class BitbucketProjectAdded implements HandleEvent<any> {
         const associateTeamCommand: AssociateTeam = new AssociateTeam();
         associateTeamCommand.projectName = bitbucketAddedEvent.project.name;
 
+        this.succeedEvent();
         return {
             text: `
 The *${bitbucketAddedEvent.bitbucketProject.name}* Bitbucket project has been configured successfully and linked to the *${bitbucketAddedEvent.project.name}* Subatomic project.

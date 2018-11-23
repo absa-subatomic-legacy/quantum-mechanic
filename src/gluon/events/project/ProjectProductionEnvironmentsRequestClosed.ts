@@ -1,4 +1,5 @@
 import {
+    addressSlackChannelsFromContext, buttonForCommand,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -7,10 +8,6 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {
-    addressSlackChannelsFromContext,
-    buttonForCommand,
-} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
@@ -21,6 +18,7 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToProdEnvironment} from "../../tasks/team/AddJenkinsToProdEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
 import {OpenshiftProjectEnvironmentRequest} from "../../util/project/Project";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetailsProd} from "../../util/team/Teams";
 
@@ -32,9 +30,10 @@ subscription ProjectProductionEnvironmentsRequestClosedEvent {
   }
 }
 `)
-export class ProjectProductionEnvironmentsRequestClosed implements HandleEvent<any> {
+export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  implements HandleEvent<any> {
 
     constructor(public gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -80,7 +79,7 @@ export class ProjectProductionEnvironmentsRequestClosed implements HandleEvent<a
                 }
 
                 await taskRunner.execute(ctx);
-
+                this.succeedEvent();
                 await qmMessageClient.send("Successfully created requested project environments.");
             } else {
                 logger.info(`Closed prod request: ${JSON.stringify(projectProdRequest, null, 2)}`);
@@ -92,6 +91,7 @@ export class ProjectProductionEnvironmentsRequestClosed implements HandleEvent<a
             const project = await this.gluonService.projects.gluonProjectFromProjectName(projectProdRequest.project.name);
             const correlationId: string = uuid();
             const destination = await addressSlackChannelsFromContext(ctx, project.owningTeam.slack.teamChannel);
+            this.failEvent();
             return await ctx.messageClient.send(this.createRetryButton(projectProdRequest.projectProdRequestId, correlationId), destination, {id: correlationId});
         }
     }
