@@ -2,8 +2,6 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    MappedParameter,
-    MappedParameters,
     success,
     Tags,
 } from "@atomist/automation-client";
@@ -31,7 +29,7 @@ import {
 } from "../../util/shared/Error";
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
-@Tags("subatomic", "openshiftNonProd", "project", "other")
+@Tags("subatomic", "project", "other")
 export class NewProjectEnvironments extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 

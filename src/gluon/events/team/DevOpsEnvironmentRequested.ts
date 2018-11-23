@@ -8,6 +8,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {addressEvent} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {timeout, TimeoutError} from "promise-timeout";
+import {QMConfig} from "../../../config/QMConfig";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToDevOpsEnvironment} from "../../tasks/team/AddJenkinsToDevOpsEnvironment";
@@ -62,7 +63,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
             const taskRunner = new TaskRunner(taskListMessage);
 
             taskRunner.addTask(
-                new CreateTeamDevOpsEnvironment(devOpsRequestedEvent),
+                new CreateTeamDevOpsEnvironment(devOpsRequestedEvent, QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd),
             ).addTask(
                 new AddJenkinsToDevOpsEnvironment(devOpsRequestedEvent),
             );

@@ -2,8 +2,6 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    MappedParameter,
-    MappedParameters,
     Parameter,
     Tags,
 } from "@atomist/automation-client";
@@ -90,7 +88,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
             if (this.approval === ApprovalEnum.CONFIRM) {
                 this.correlationId = uuid();
-                const result =  await this.getRequestConfirmation(qmMessageClient);
+                const result = await this.getRequestConfirmation(qmMessageClient);
                 this.succeedCommand();
                 return result;
             } else if (this.approval === ApprovalEnum.APPROVED) {
@@ -158,7 +156,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
-        await this.ocService.login(QMConfig.subatomic.openshiftNonProd);
+        await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd);
 
         const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, getHighestPreProdEnvironment().id));
 

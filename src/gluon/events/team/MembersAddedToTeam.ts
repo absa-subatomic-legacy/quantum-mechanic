@@ -132,7 +132,7 @@ export class MembersAddedToTeam implements HandleEvent<any> {
                     membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername)),
                 );
                 // Add to openshift environments
-                for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
+                for (const environment of QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd.defaultEnvironments) {
                     const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
                     const projectId = getProjectId(tenant.name, project.name, environment.id);
                     await this.ocService.addTeamMembershipPermissionsToProject(projectId, membersAddedToTeamEvent);

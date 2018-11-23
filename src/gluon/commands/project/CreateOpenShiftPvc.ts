@@ -90,7 +90,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
                     text: `
 *${pvcName}* PVC successfully created in *${environment}*`,
                     mrkdwn_in: ["text"],
-                    title_link: `${QMConfig.subatomic.openshiftNonProd.masterUrl}/console/project/${environment}/browse/persistentvolumeclaims/${pvcName}`,
+                    title_link: `${QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd.masterUrl}/console/project/${environment}/browse/persistentvolumeclaims/${pvcName}`,
                     title: `${environment}`,
                     color: "#45B254",
                 });

@@ -1,10 +1,4 @@
-import {
-    HandlerContext,
-    HandlerResult,
-    MappedParameter,
-    MappedParameters,
-    Tags,
-} from "@atomist/automation-client";
+import {HandlerContext, HandlerResult, Tags} from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -80,7 +74,7 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
                 qmMessageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             taskRunner.addTask(
-                new PatchPackageBuildConfigImage(this.imageName, this.applicationName, this.projectName, this.teamName),
+                new PatchPackageBuildConfigImage(this.imageName, this.applicationName, this.projectName, this.teamName, QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd),
             );
 
             await taskRunner.execute(ctx);

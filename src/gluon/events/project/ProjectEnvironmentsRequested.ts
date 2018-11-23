@@ -80,9 +80,9 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
                 this.qmMessageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             taskRunner.addTask(
-                new CreateOpenshiftEnvironments(environmentsRequestedEvent),
+                new CreateOpenshiftEnvironments(environmentsRequestedEvent, QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd),
             ).addTask(
-                new ConfigureJenkinsForProject(environmentsRequestedEvent),
+                new ConfigureJenkinsForProject(environmentsRequestedEvent, QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd),
             );
 
             await taskRunner.execute(ctx);

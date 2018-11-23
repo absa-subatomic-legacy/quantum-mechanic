@@ -1,8 +1,6 @@
 import {
     HandlerContext,
     logger,
-    MappedParameter,
-    MappedParameters,
     success,
     Tags,
 } from "@atomist/automation-client";
@@ -21,7 +19,7 @@ import {
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 
 @CommandHandler("Check whether to create a new OpenShift DevOps environment or use an existing one", QMConfig.subatomic.commandPrefix + " request devops environment")
-@Tags("subatomic", "slack", "team", "openshiftNonProd", "devops")
+@Tags("subatomic", "slack", "team", "devops")
 export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
