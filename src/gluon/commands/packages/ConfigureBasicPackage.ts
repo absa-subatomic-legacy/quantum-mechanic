@@ -2,8 +2,6 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    MappedParameter,
-    MappedParameters,
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
@@ -12,12 +10,12 @@ import {QMTemplate} from "../../../template/QMTemplate";
 import {GluonService} from "../../services/gluon/GluonService";
 import {PackageDefinition} from "../../util/packages/PackageDefinition";
 import {
+    GluonApplicationNameParam,
     GluonApplicationNameSetter,
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonApplicationName,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
     ParameterDisplayType,
@@ -37,40 +35,34 @@ const PACKAGE_DEFINITION_FOLDER = "resources/package-definitions/";
 export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        applicationName: "APPLICATION_NAME",
-        projectName: "PROJECT_NAME",
-        packageType: "PACKAGE_TYPE",
-        packageDefinition: "PACKAGE_DEFINITION",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: ConfigureBasicPackage.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to configure the package for",
     })
     public teamName: string;
 
-    @RecursiveParameter({
-        recursiveKey: ConfigureBasicPackage.RecursiveKeys.applicationName,
+    @GluonProjectNameParam({
+        callOrder: 1,
+        selectionMessage: "Please select the owning project of the package you wish to configure",
+    })
+    public projectName: string;
+
+    @GluonApplicationNameParam({
+        callOrder: 2,
         selectionMessage: "Please select the package you wish to configure",
     })
     public applicationName: string;
 
     @RecursiveParameter({
-        recursiveKey: ConfigureBasicPackage.RecursiveKeys.projectName,
-        selectionMessage: "Please select the owning project of the package you wish to configure",
-    })
-    public projectName: string;
-
-    @RecursiveParameter({
-        recursiveKey: ConfigureBasicPackage.RecursiveKeys.packageType,
+        callOrder: 3,
+        setter: setPackageType,
     })
     public packageType: string;
 
     @RecursiveParameter({
-        recursiveKey: ConfigureBasicPackage.RecursiveKeys.packageDefinition,
+        callOrder: 4,
         selectionMessage: "Please select a package definition to use for your project",
+        setter: setPackageDefinitionFile,
     })
     public packageDefinition: string;
 
@@ -80,21 +72,13 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const result =  await this.callPackageConfiguration(ctx);
+            const result = await this.callPackageConfiguration(ctx);
             this.succeedCommand();
             return result;
         } catch (error) {
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(ConfigureBasicPackage.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(ConfigureBasicPackage.RecursiveKeys.projectName, setGluonProjectName);
-        this.addRecursiveSetter(ConfigureBasicPackage.RecursiveKeys.applicationName, setGluonApplicationName);
-        this.addRecursiveSetter(ConfigureBasicPackage.RecursiveKeys.packageType, setPackageType);
-        this.addRecursiveSetter(ConfigureBasicPackage.RecursiveKeys.packageDefinition, setPackageDefinitionFile);
     }
 
     private async callPackageConfiguration(ctx: HandlerContext): Promise<HandlerResult> {

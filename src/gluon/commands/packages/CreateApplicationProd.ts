@@ -18,17 +18,14 @@ import {
 } from "../../util/openshift/Helpers";
 import {getProjectId} from "../../util/project/Project";
 import {
+    GluonApplicationNameParam,
     GluonApplicationNameSetter,
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonApplicationName,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {
     ChannelMessageClient,
@@ -42,29 +39,23 @@ import {
 export class CreateApplicationProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        applicationName: "APPLICATION_NAME",
-        projectName: "PROJECT_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: CreateApplicationProd.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to configure the package for",
     })
     public teamName: string;
 
-    @RecursiveParameter({
-        recursiveKey: CreateApplicationProd.RecursiveKeys.applicationName,
-        selectionMessage: "Please select the package you wish to configure",
-    })
-    public applicationName: string;
-
-    @RecursiveParameter({
-        recursiveKey: CreateApplicationProd.RecursiveKeys.projectName,
+    @GluonProjectNameParam({
+        callOrder: 1,
         selectionMessage: "Please select the owning project of the package you wish to configure",
     })
     public projectName: string;
+
+    @GluonApplicationNameParam({
+        callOrder: 2,
+        selectionMessage: "Please select the package you wish to configure",
+    })
+    public applicationName: string;
 
     @Parameter({
         required: false,
@@ -116,12 +107,6 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(CreateApplicationProd.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(CreateApplicationProd.RecursiveKeys.projectName, setGluonProjectName);
-        this.addRecursiveSetter(CreateApplicationProd.RecursiveKeys.applicationName, setGluonApplicationName);
     }
 
     private getConfirmationResultMesssage(result: ApprovalEnum) {

@@ -17,10 +17,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
@@ -33,27 +33,22 @@ import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        projectName: "PROJECT_NAME",
-        openshiftProjectNames: "OPENSHIFT_PROJECT_NAMES",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: CreateOpenShiftPvc.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: `Please select a team associated with the project you wish to create a PVC for`,
     })
     public teamName: string;
 
-    @RecursiveParameter({
-        recursiveKey: CreateOpenShiftPvc.RecursiveKeys.projectName,
+    @GluonProjectNameParam({
+        callOrder: 1,
         selectionMessage: `Please select the project, whose OpenShift environments the PVCs will be created in`,
     })
     public projectName: string;
 
     @RecursiveParameter({
-        recursiveKey: CreateOpenShiftPvc.RecursiveKeys.openshiftProjectNames,
+        callOrder: 2,
         selectionMessage: "Please select the project environment(s) to create the PVCs in",
+        setter: setProjectForPvc,
     })
     public openShiftProjectNames: string;
 
@@ -103,13 +98,6 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(CreateOpenShiftPvc.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(CreateOpenShiftPvc.RecursiveKeys.projectName, setGluonProjectName);
-        this.addRecursiveSetter(CreateOpenShiftPvc.RecursiveKeys.openshiftProjectNames, setProjectForPvc);
-
     }
 
     private async sendPvcResultMessage(ctx: HandlerContext, pvcAttachments: any[]): Promise<HandlerResult> {

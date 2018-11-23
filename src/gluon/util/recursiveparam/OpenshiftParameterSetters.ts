@@ -9,6 +9,10 @@ import {OCService} from "../../services/openshift/OCService";
 import {QMError} from "../shared/Error";
 import {createMenuAttachment} from "../shared/GenericMenu";
 import {getDevOpsEnvironmentDetails} from "../team/Teams";
+import {
+    RecursiveParameter,
+    RecursiveParameterDetails,
+} from "./RecursiveParameterRequestCommand";
 import {RecursiveSetterResult} from "./RecursiveSetterResult";
 
 export async function setOpenshiftTemplate(
@@ -54,6 +58,11 @@ export interface OpenshiftTemplateSetter {
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
 
+export function OpenShiftTemplateParam(details: RecursiveParameterDetails) {
+    details.setter = setOpenshiftTemplate;
+    return RecursiveParameter(details);
+}
+
 export async function setImageName(
     ctx: HandlerContext,
     commandHandler: ImageNameSetter,
@@ -72,6 +81,11 @@ export async function setImageName(
         setterSuccess: false,
         messagePrompt: presentImageMenu(ctx, commandHandler, selectionMessage, images),
     };
+}
+
+export function ImageNameParam(details: RecursiveParameterDetails) {
+    details.setter = setImageName;
+    return RecursiveParameter(details);
 }
 
 export async function setImageNameFromDevOps(
@@ -98,6 +112,11 @@ export async function setImageNameFromDevOps(
         setterSuccess: false,
         messagePrompt: presentImageMenu(ctx, commandHandler, selectionMessage, images),
     };
+}
+
+export function ImageNameFromDevOpsParam(details: RecursiveParameterDetails) {
+    details.setter = setImageNameFromDevOps;
+    return RecursiveParameter(details);
 }
 
 function presentImageMenu(ctx: HandlerContext,

@@ -4,7 +4,6 @@ import {
     logger,
     Parameter,
 } from "@atomist/automation-client";
-import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {
     BaseParameter,
     declareParameter,
@@ -12,7 +11,6 @@ import {
 import _ = require("lodash");
 import uuid = require("uuid");
 import {BaseQMComand} from "../shared/BaseQMCommand";
-import {BaseQMHandler} from "../shared/BaseQMHandler";
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 import {ParameterStatusDisplay} from "./ParameterStatusDisplay";
 import {RecursiveSetterResult} from "./RecursiveSetterResult";
@@ -31,11 +29,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
     })
     public displayResultMenu: ParameterDisplayType;
 
-    private recursiveParameterOrder: string[] = [];
-
-    private recursiveParameterList: string[];
-
-    private recursiveParameterMap: { [key: string]: RecursiveParameterMapping };
+    private recursiveParameterListNew: RecursiveParameterMapping[];
 
     private parameterStatusDisplay: ParameterStatusDisplay;
 
@@ -48,8 +42,6 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
             this.displayResultMenu = ParameterDisplayType.show;
         }
 
-        this.recursiveParameterOrder = [];
-        this.configureParameterSetters();
         this.updateParameterStatusDisplayMessage();
         if (!this.recursiveParametersAreSet()) {
             try {
@@ -67,18 +59,18 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
     }
 
     public addRecursiveParameterProperty(parameterDetails: RecursiveParameterDetails, propertyKey: string) {
-        this.recursiveParameterMap = this.recursiveParameterMap !== undefined ? this.recursiveParameterMap : {};
-        this.recursiveParameterList = this.recursiveParameterList !== undefined ? this.recursiveParameterList : [];
-        if (this.recursiveParameterMap[parameterDetails.recursiveKey] === undefined) {
-            this.recursiveParameterMap[parameterDetails.recursiveKey] = {
-                propertyName: propertyKey,
-                parameterSetter: undefined,
-                selectionMessage: parameterDetails.selectionMessage,
-                forceSet: parameterDetails.forceSet,
-            };
-            this.recursiveParameterList.push(parameterDetails.recursiveKey);
-        } else {
-            throw new QMError(`Duplicate recursive key ${parameterDetails.recursiveKey} defined. Recursive keys must be unique.`);
+        this.recursiveParameterListNew = this.recursiveParameterListNew !== undefined ? this.recursiveParameterListNew : [];
+        for (let i = 0; i < this.recursiveParameterListNew.length; i++) {
+            if (parameterDetails.callOrder < this.recursiveParameterListNew[i].callOrder) {
+                this.recursiveParameterListNew.splice(i, 0, {
+                    propertyName: propertyKey,
+                    parameterSetter: parameterDetails.setter,
+                    selectionMessage: parameterDetails.selectionMessage,
+                    forceSet: parameterDetails.forceSet,
+                    callOrder: parameterDetails.callOrder,
+                });
+                break;
+            }
         }
     }
 
@@ -93,23 +85,16 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
         throw new QMError("Recursive parameters could not be set correctly. This is an implementation fault. Please raise an issue.");
     }
 
-    protected addRecursiveSetter(recursiveKey: string, setter: (ctx: HandlerContext, commandHandler: any, selectionMessage: string) => Promise<any>) {
-        this.recursiveParameterMap[recursiveKey].parameterSetter = setter;
-        this.recursiveParameterOrder.push(recursiveKey);
-    }
-
-    protected abstract configureParameterSetters();
-
     protected abstract runCommand(ctx: HandlerContext): Promise<HandlerResult>;
 
     private async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         const dynamicClassInstance: any = this;
-        for (const recursiveKey of this.recursiveParameterOrder) {
-            const propertyKey = this.recursiveParameterMap[recursiveKey].propertyName;
+        for (const parameter of this.recursiveParameterListNew) {
+            const propertyKey = parameter.propertyName;
             const propertyValue = dynamicClassInstance[propertyKey];
             if (_.isEmpty(propertyValue)) {
                 logger.info(`Setting parameter ${propertyKey}.`);
-                const result = await this.recursiveParameterMap[recursiveKey].parameterSetter(ctx, this, this.recursiveParameterMap[recursiveKey].selectionMessage);
+                const result = await parameter.parameterSetter(ctx, this, parameter.selectionMessage);
                 if (result.setterSuccess) {
                     return await this.handle(ctx);
                 } else {
@@ -125,19 +110,14 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
     private recursiveParametersAreSet(): boolean {
         let parametersAreSet = true;
         const dynamicClassInstance: any = this;
-        for (const recursiveKey of this.recursiveParameterList) {
+        for (const parameter of this.recursiveParameterListNew) {
 
-            const propertyKey = this.recursiveParameterMap[recursiveKey].propertyName;
+            const propertyKey = parameter.propertyName;
             const propertyValue = dynamicClassInstance[propertyKey];
 
-            if (this.recursiveParameterMap[recursiveKey].parameterSetter === undefined) {
-                logger.error(`Setter for recursive parameter ${propertyKey} is not set.`);
-                throw new Error(`Setter for recursive parameter ${propertyKey} is not set.`);
-            }
+            logger.debug(`Recursive Param details:\nProperty: ${propertyKey}\nForceSet: ${parameter.forceSet}\nValue: ${dynamicClassInstance[propertyKey]}`);
 
-            logger.debug(`Recursive Param with recursive key ${recursiveKey} details:\nProperty: ${propertyKey}\nForceSet: ${this.recursiveParameterMap[recursiveKey].forceSet}\nValue: ${dynamicClassInstance[propertyKey]}`);
-
-            if (this.recursiveParameterMap[recursiveKey].forceSet &&
+            if (parameter.forceSet &&
                 _.isEmpty(propertyValue)) {
                 logger.info(`Recursive parameter ${propertyKey} not set.`);
                 parametersAreSet = false;
@@ -150,9 +130,9 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
     private updateParameterStatusDisplayMessage() {
         this.parameterStatusDisplay = new ParameterStatusDisplay();
         const dynamicClassInstance: any = this;
-        for (const recursiveKey of this.recursiveParameterOrder) {
+        for (const parameter of this.recursiveParameterListNew) {
 
-            const propertyKey = this.recursiveParameterMap[recursiveKey].propertyName;
+            const propertyKey = parameter.propertyName;
             const propertyValue = dynamicClassInstance[propertyKey];
 
             if (!(_.isEmpty(propertyValue))) {
@@ -193,15 +173,17 @@ export function RecursiveParameter(details: RecursiveParameterDetails) {
 }
 
 export interface RecursiveParameterDetails extends BaseParameter {
+    setter?: (ctx: HandlerContext, commandHandler, selectionMessage: string) => Promise<RecursiveSetterResult>;
     forceSet?: boolean;
-    recursiveKey: string;
     selectionMessage?: string;
+    callOrder: number;
 }
 
 interface RecursiveParameterMapping {
     propertyName: string;
-    parameterSetter: (ctx: HandlerContext, commandHandler: HandleCommand, selectionMessage: string) => Promise<RecursiveSetterResult>;
+    parameterSetter: (ctx: HandlerContext, commandHandler, selectionMessage: string) => Promise<RecursiveSetterResult>;
     selectionMessage: string;
+    callOrder: number;
     forceSet: boolean;
 }
 

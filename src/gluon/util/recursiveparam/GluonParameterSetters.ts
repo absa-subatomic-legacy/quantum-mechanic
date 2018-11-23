@@ -11,6 +11,10 @@ import {QMError} from "../shared/Error";
 import {createMenuAttachment} from "../shared/GenericMenu";
 import {menuAttachmentForTenants} from "../shared/Tenants";
 import {menuAttachmentForTeams} from "../team/Teams";
+import {
+    RecursiveParameter,
+    RecursiveParameterDetails,
+} from "./RecursiveParameterRequestCommand";
 import {RecursiveSetterResult} from "./RecursiveSetterResult";
 
 export async function setGluonTeamName(
@@ -46,6 +50,11 @@ export async function setGluonTeamName(
             commandHandler,
             selectionMessage),
     };
+}
+
+export function GluonTeamNameParam(details: RecursiveParameterDetails) {
+    details.setter = setGluonTeamName;
+    return RecursiveParameter(details);
 }
 
 export interface GluonTeamNameSetter {
@@ -97,6 +106,11 @@ export async function setGluonTeamOpenShiftCloud(
     }
 }
 
+export function GluonTeamOpenShiftCloudParam(details: RecursiveParameterDetails) {
+    details.setter = setGluonTeamOpenShiftCloud;
+    return RecursiveParameter(details);
+}
+
 export interface GluonTeamOpenShiftCloudSetter {
     gluonService: GluonService;
     teamName: string;
@@ -136,6 +150,11 @@ export interface GluonProjectNameSetter {
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
 
+export function GluonProjectNameParam(details: RecursiveParameterDetails) {
+    details.setter = setGluonProjectName;
+    return RecursiveParameter(details);
+}
+
 export async function setGluonTenantName(
     ctx: HandlerContext,
     commandHandler: GluonTenantNameSetter,
@@ -162,6 +181,11 @@ export interface GluonTenantNameSetter {
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
 
+export function GluonTenantNameParam(details: RecursiveParameterDetails) {
+    details.setter = setGluonTenantName;
+    return RecursiveParameter(details);
+}
+
 export async function setGluonApplicationName(
     ctx: HandlerContext,
     commandHandler: GluonApplicationNameSetter,
@@ -183,6 +207,11 @@ export async function setGluonApplicationName(
             commandHandler,
             selectionMessage),
     };
+}
+
+export function GluonApplicationNameParam(details: RecursiveParameterDetails) {
+    details.setter = setGluonApplicationName;
+    return RecursiveParameter(details);
 }
 
 export interface GluonApplicationNameSetter {

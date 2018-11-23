@@ -2,8 +2,6 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    MappedParameter,
-    MappedParameters,
     Parameter,
     success,
     Tags,

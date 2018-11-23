@@ -3,12 +3,7 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import {
-    CommandHandler,
-    MappedParameter,
-    MappedParameters,
-    Tags,
-} from "@atomist/automation-client/lib/decorators";
+import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
@@ -22,17 +17,13 @@ import {ProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTempla
 import {QMMemberBase} from "../../util/member/Members";
 import {QMProject, QMProjectBase} from "../../util/project/Project";
 import {
+    GluonApplicationNameParam,
     GluonApplicationNameSetter,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonApplicationName,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
@@ -47,25 +38,19 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
 
     private static PROD_JENKINSFILE = "jenkinsfile.prod";
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        applicationName: "APPLICATION_NAME",
-        projectName: "PROJECT_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: ConfigureApplicationJenkinsProd.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
     })
     public teamName: string;
 
-    @RecursiveParameter({
-        recursiveKey: ConfigureApplicationJenkinsProd.RecursiveKeys.applicationName,
+    @GluonApplicationNameParam({
+        callOrder: 2,
         selectionMessage: "Please select the application you wish to deploy to prod",
     })
     public applicationName: string;
 
-    @RecursiveParameter({
-        recursiveKey: ConfigureApplicationJenkinsProd.RecursiveKeys.projectName,
+    @GluonApplicationNameParam({
+        callOrder: 1,
         selectionMessage: "Please select the owning project of the application you wish to deploy to prod",
     })
     public projectName: string;
@@ -110,12 +95,6 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(ConfigureApplicationJenkinsProd.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(ConfigureApplicationJenkinsProd.RecursiveKeys.projectName, setGluonProjectName);
-        this.addRecursiveSetter(ConfigureApplicationJenkinsProd.RecursiveKeys.applicationName, setGluonApplicationName);
     }
 
     private async assertProjectProdIsApproved(project: QMProjectBase) {

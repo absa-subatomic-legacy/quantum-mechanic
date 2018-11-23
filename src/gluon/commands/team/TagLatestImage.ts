@@ -7,14 +7,11 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {getProjectDevOpsId} from "../../util/project/Project";
 import {
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {setImageName} from "../../util/recursiveparam/OpenshiftParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {ImageNameParam} from "../../util/recursiveparam/OpenshiftParameterSetters";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
@@ -26,19 +23,14 @@ import {
 export class TagLatestImage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        imageName: "IMAGE_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: TagLatestImage.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select the team you would like to tag the image to",
     })
     public teamName: string;
 
-    @RecursiveParameter({
-        recursiveKey: TagLatestImage.RecursiveKeys.imageName,
+    @ImageNameParam({
+        callOrder: 1,
         selectionMessage: "Please select the image you would like tagged to your DevOps environment",
     })
     public imageName: string;
@@ -55,11 +47,6 @@ export class TagLatestImage extends RecursiveParameterRequestCommand
         } catch (error) {
             return handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(TagLatestImage.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(TagLatestImage.RecursiveKeys.imageName, setImageName);
     }
 
     private async tagImage(ctx: HandlerContext) {

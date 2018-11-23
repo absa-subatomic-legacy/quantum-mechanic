@@ -7,21 +7,18 @@ import {PatchPackageBuildConfigImage} from "../../tasks/packages/PatchPackageBui
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {
+    GluonApplicationNameParam,
     GluonApplicationNameSetter,
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonApplicationName,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
+    ImageNameFromDevOpsParam,
     ImageNameSetter,
-    setImageNameFromDevOps,
 } from "../../util/recursiveparam/OpenshiftParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Patch the s2i image used to build a package", QMConfig.subatomic.commandPrefix + " patch package s2i image")
@@ -29,33 +26,26 @@ import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, ImageNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        projectName: "PROJECT_NAME",
-        applicationName: "APPLICATION_NAME",
-        imageName: "IMAGE_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: PatchBuildConfigBaseImage.RecursiveKeys.applicationName,
+    @GluonApplicationNameParam({
+        callOrder: 2,
         selectionMessage: "Please select the package you wish to configure",
     })
     public applicationName: string;
 
-    @RecursiveParameter({
-        recursiveKey: PatchBuildConfigBaseImage.RecursiveKeys.projectName,
+    @GluonProjectNameParam({
+        callOrder: 1,
         selectionMessage: "Please select the owning project of the package you wish to configure",
     })
     public projectName: string;
 
-    @RecursiveParameter({
-        recursiveKey: PatchBuildConfigBaseImage.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to configure the package for",
     })
     public teamName: string;
 
-    @RecursiveParameter({
-        recursiveKey: PatchBuildConfigBaseImage.RecursiveKeys.imageName,
+    @ImageNameFromDevOpsParam({
+        callOrder: 3,
         description: "Base image for s2i build",
     })
     public imageName: string;
@@ -85,13 +75,6 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(qmMessageClient, error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(PatchBuildConfigBaseImage.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(PatchBuildConfigBaseImage.RecursiveKeys.projectName, setGluonProjectName);
-        this.addRecursiveSetter(PatchBuildConfigBaseImage.RecursiveKeys.applicationName, setGluonApplicationName);
-        this.addRecursiveSetter(PatchBuildConfigBaseImage.RecursiveKeys.imageName, setImageNameFromDevOps);
     }
 
 }

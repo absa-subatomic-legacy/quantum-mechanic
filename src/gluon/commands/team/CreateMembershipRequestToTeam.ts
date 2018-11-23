@@ -2,8 +2,6 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    MappedParameter,
-    MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
@@ -12,8 +10,11 @@ import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {getScreenName, loadScreenNameByUserId} from "../../util/member/Members";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
-import {BaseQMHandler} from "../../util/shared/BaseQMHandler";
-import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
+import {
+    handleQMError,
+    QMError,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
 
 @CommandHandler("Request membership to a team")
 export class CreateMembershipRequestToTeam extends BaseQMComand implements HandleCommand<HandlerResult> {
@@ -21,7 +22,6 @@ export class CreateMembershipRequestToTeam extends BaseQMComand implements Handl
     @Parameter({
         description: "Gluon team id to create a membership request to.",
         displayable: false,
-
     })
     public teamId: string;
 
@@ -46,7 +46,7 @@ export class CreateMembershipRequestToTeam extends BaseQMComand implements Handl
 
             await this.createMembershipRequest(memberDetails);
 
-            const result =  await ctx.messageClient.respond("Your request to join then team has been sent.");
+            const result = await ctx.messageClient.respond("Your request to join then team has been sent.");
             this.succeedCommand();
             return result;
         } catch (error) {

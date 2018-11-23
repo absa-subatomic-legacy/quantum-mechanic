@@ -10,13 +10,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {Extensible} from "../../util/plugins/Extensible";
 import {
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("List members of a team", QMConfig.subatomic.commandPrefix + " list team members")
@@ -24,15 +21,11 @@ import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 export class ListTeamMembers extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-    };
-
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
 
-    @RecursiveParameter({
-        recursiveKey: ListTeamMembers.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0.,
         selectionMessage: "Please select the team you would like to list the members of",
     })
     public teamName: string;
@@ -71,10 +64,6 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(ListTeamMembers.RecursiveKeys.teamName, setGluonTeamName);
     }
 
     private getTeamMemberNames(teamDetails: any): string[] {

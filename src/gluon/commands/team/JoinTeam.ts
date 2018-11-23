@@ -13,8 +13,11 @@ import {isSuccessCode} from "../../../http/Http";
 import {JoinTeamMessages} from "../../messages/team/JoinTeamMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
-import {BaseQMHandler} from "../../util/shared/BaseQMHandler";
-import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
+import {
+    handleQMError,
+    QMError,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
 
 @CommandHandler("Apply to join an existing team", QMConfig.subatomic.commandPrefix + " apply to team")
 @Tags("subatomic", "team")
@@ -31,14 +34,7 @@ export class JoinTeam extends BaseQMComand implements HandleCommand<HandlerResul
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const teamsQueryResult = await this.gluonService.teams.getAllTeams();
-
-            if (!isSuccessCode(teamsQueryResult.status)) {
-                this.failCommand();
-                throw new QMError("Team does not exist", this.joinTeamMessages.alertUserThatNoTeamsExist());
-            }
-
-            const teams = teamsQueryResult.data._embedded.teamResources;
+            const teams = await this.getAllTeams();
             logger.info(`Found teams data: ${JSON.stringify(teams)}`);
 
             // remove teams that he is already a member of - TODO in future
@@ -50,5 +46,16 @@ export class JoinTeam extends BaseQMComand implements HandleCommand<HandlerResul
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
+    }
+
+    public async getAllTeams() {
+        const teamsQueryResult = await this.gluonService.teams.getAllTeams();
+
+        if (!isSuccessCode(teamsQueryResult.status)) {
+            this.failCommand();
+            throw new QMError("Team does not exist", this.joinTeamMessages.alertUserThatNoTeamsExist());
+        }
+
+        return teamsQueryResult.data._embedded.teamResources;
     }
 }

@@ -7,13 +7,10 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {getProjectDevOpsId} from "../../util/project/Project";
 import {
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
@@ -25,12 +22,8 @@ import {
 export class TagAllLatestImages extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: TagAllLatestImages.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select the team you would like to tag the latest images to",
     })
     public teamName: string;
@@ -47,10 +40,6 @@ export class TagAllLatestImages extends RecursiveParameterRequestCommand
         } catch (error) {
             return handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(TagAllLatestImages.RecursiveKeys.teamName, setGluonTeamName);
     }
 
     private async tagAllImages(ctx: HandlerContext) {

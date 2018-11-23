@@ -13,15 +13,12 @@ import {isSuccessCode} from "../../../http/Http";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
@@ -33,19 +30,14 @@ import {
 export class NewProjectEnvironments extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        projectName: "PROJECT_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: NewProjectEnvironments.RecursiveKeys.projectName,
+    @GluonProjectNameParam({
+        callOrder: 1,
         selectionMessage: "Please select the projects you wish to provision the environments for",
     })
     public projectName: string = null;
 
-    @RecursiveParameter({
-        recursiveKey: NewProjectEnvironments.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to provision the environments for",
         forceSet: false,
     })
@@ -78,11 +70,6 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand
             this.failCommand();
             return await this.handleError(ctx, error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(NewProjectEnvironments.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(NewProjectEnvironments.RecursiveKeys.projectName, setGluonProjectName);
     }
 
     private async requestProjectEnvironment(projectId: string, memberId: string) {

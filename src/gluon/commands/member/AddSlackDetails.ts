@@ -10,7 +10,6 @@ import {
     Parameter,
     Tags,
 } from "@atomist/automation-client/lib/decorators";
-import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -55,7 +54,7 @@ export class AddSlackDetails extends BaseQMComand {
                 return await ctx.messageClient.respond(`❗Unable to update slack details for the member specified`);
             }
 
-            const result =  ctx.messageClient.respond({
+            const result = ctx.messageClient.respond({
                 text: `Thanks *${member.firstName}*, your Slack details have been added to your Subatomic profile. 👍`,
             });
             this.succeedCommand();

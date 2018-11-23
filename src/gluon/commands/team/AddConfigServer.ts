@@ -13,13 +13,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Add a new Subatomic Config Server", QMConfig.subatomic.commandPrefix + " add config server")
@@ -27,12 +24,8 @@ import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 export class AddConfigServer extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: AddConfigServer.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
     })
     public teamName: string;
 
@@ -59,10 +52,6 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(AddConfigServer.RecursiveKeys.teamName, setGluonTeamName);
     }
 
     private async addConfigServer(ctx: HandlerContext,

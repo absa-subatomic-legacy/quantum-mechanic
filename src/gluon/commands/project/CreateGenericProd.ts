@@ -18,15 +18,12 @@ import {
 } from "../../util/openshift/Helpers";
 import {getProjectId} from "../../util/project/Project";
 import {
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {
     ChannelMessageClient,
@@ -40,19 +37,14 @@ import {
 export class CreateGenericProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        projectName: "PROJECT_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: CreateGenericProd.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to configure the package for",
     })
     public teamName: string;
 
-    @RecursiveParameter({
-        recursiveKey: CreateGenericProd.RecursiveKeys.projectName,
+    @GluonProjectNameParam({
+        callOrder: 1,
         selectionMessage: "Please select the owning project of the package you wish to configure",
     })
     public projectName: string;
@@ -108,11 +100,6 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(CreateGenericProd.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(CreateGenericProd.RecursiveKeys.projectName, setGluonProjectName);
     }
 
     private getConfirmationResultMesssage(result: ApprovalEnum) {

@@ -14,13 +14,10 @@ import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getJenkinsBitbucketAccessCredentialXML} from "../../util/jenkins/JenkinsCredentials";
 import {
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
@@ -33,15 +30,11 @@ import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-    };
-
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
 
-    @RecursiveParameter({
-        recursiveKey: JenkinsCredentialsRecreate.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select the team which contains the owning project of the jenkins you would like to reconfigure",
     })
     public teamName: string;
@@ -62,10 +55,6 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(JenkinsCredentialsRecreate.RecursiveKeys.teamName, setGluonTeamName);
     }
 
     private async recreateBitbucketJenkinsCredential(ctx: HandlerContext,
