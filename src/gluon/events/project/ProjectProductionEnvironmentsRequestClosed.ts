@@ -67,7 +67,7 @@ export class ProjectProductionEnvironmentsRequestClosed implements HandleEvent<a
 
                 const request: OpenshiftProjectEnvironmentRequest = await this.createEnvironmentRequest(project, associatedTeams, owningTenant);
 
-                for (const prodOpenshift of QMConfig.subatomic.openshiftProd) {
+                for (const prodOpenshift of QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftProd) {
 
                     const devopsEnvironmentDetails = getDevOpsEnvironmentDetailsProd(owningTeam.name);
 

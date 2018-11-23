@@ -53,7 +53,7 @@ export class GenericProdRequested implements HandleEvent<any> {
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            for (const openshiftProd of QMConfig.subatomic.openshiftProd) {
+            for (const openshiftProd of QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftProd) {
                 taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
             }
 
