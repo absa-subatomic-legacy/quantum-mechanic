@@ -7,12 +7,14 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
-import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
-import {BaseQMComand} from "../../util/shared/BaseQMCommand";
+import {
+    GluonTeamOpenShiftCloudParam,
+    GluonTeamOpenShiftCloudSetter,
+} from "../../util/recursiveparam/GluonParameterSetters";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
@@ -21,29 +23,35 @@ import {
 
 @CommandHandler("Create a new team", QMConfig.subatomic.commandPrefix + " create team")
 @Tags("subatomic", "team")
-export class CreateTeam extends BaseQMComand implements HandleCommand<HandlerResult> {
+export class CreateTeam extends RecursiveParameterRequestCommand implements GluonTeamOpenShiftCloudSetter {
+
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 1,
+        selectionMessage: "",
+    })
+    public openShiftCloud: string;
 
     @Parameter({
         description: "team name",
     })
-    private name: string;
+    public teamName: string;
 
     @Parameter({
         description: "team description",
     })
     private description: string;
 
-    constructor(private gluonService = new GluonService()) {
+    constructor(public gluonService = new GluonService()) {
         super();
     }
 
-    public async handle(ctx: HandlerContext): Promise<HandlerResult> {
+    public async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Creating team for member: ${this.screenName}`);
 
         try {
             const member = await this.getGluonMemberFromScreenName(this.screenName);
 
-            await this.createTeamInGluon(this.name, this.description, member.memberId);
+            await this.createTeamInGluon(this.teamName, this.description, this.openShiftCloud, member.memberId);
 
             this.succeedCommand();
             return await success();
@@ -57,8 +65,8 @@ export class CreateTeam extends BaseQMComand implements HandleCommand<HandlerRes
         return await this.gluonService.members.gluonMemberFromScreenName(screenName);
     }
 
-    private async createTeamInGluon(teamName: string, teamDescription: string, createdBy: string) {
-        const teamCreationResult = await this.gluonService.teams.createGluonTeam(teamName, teamDescription, createdBy);
+    private async createTeamInGluon(teamName: string, teamDescription: string, openShiftCloud: string, createdBy: string) {
+        const teamCreationResult = await this.gluonService.teams.createGluonTeam(teamName, teamDescription, openShiftCloud, createdBy);
 
         if (teamCreationResult.status === 409) {
             logger.error(`Failed to create team since the team name is already in use.`);
@@ -73,8 +81,4 @@ export class CreateTeam extends BaseQMComand implements HandleCommand<HandlerRes
         return await handleQMError(new ResponderMessageClient(ctx), error);
     }
 
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#onboard-me`,
-            "documentation")}`;
-    }
 }
