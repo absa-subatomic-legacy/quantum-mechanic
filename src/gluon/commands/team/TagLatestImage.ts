@@ -1,10 +1,4 @@
-import {
-    HandlerContext,
-    logger,
-    MappedParameter,
-    MappedParameters,
-    Tags,
-} from "@atomist/automation-client";
+import {HandlerContext, logger, Tags} from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {inspect} from "util";
 import {v4 as uuid} from "uuid";
@@ -72,7 +66,7 @@ export class TagLatestImage extends RecursiveParameterRequestCommand
         const messageId = uuid();
         const devopsEnvironment = getProjectDevOpsId(this.teamName);
         await ctx.messageClient.respond(`Tagging selected image to devops environment *${devopsEnvironment}*...`, {id: messageId});
-        await this.ocService.login();
+        await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd);
         const project = this.ocService.findProject(devopsEnvironment);
         if (project === null) {
             this.failCommand();

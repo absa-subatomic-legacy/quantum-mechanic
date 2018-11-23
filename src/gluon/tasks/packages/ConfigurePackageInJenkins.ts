@@ -54,7 +54,7 @@ export class ConfigurePackageInJenkins extends Task {
     }
 
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
-        await this.ocService.login();
+        await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd);
 
         await this.addJenkinsFile(
             this.jenkinsFile,

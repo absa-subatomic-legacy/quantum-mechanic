@@ -2,8 +2,6 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    MappedParameter,
-    MappedParameters,
     Parameter,
     Tags,
 } from "@atomist/automation-client";
@@ -51,7 +49,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            await this.ocService.login();
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd);
             return await this.addConfigServer(
                 ctx,
                 this.teamName,

@@ -118,7 +118,7 @@ export class MembersAddedToTeam implements HandleEvent<any> {
     private async addPermissionsForUserToTeams(teamName: string, projects, membersAddedToTeamEvent) {
         try {
             const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
-            await this.ocService.login();
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd);
             const devopsProject = getDevOpsEnvironmentDetails(teamName).openshiftProjectId;
             await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
             for (const project of projects) {

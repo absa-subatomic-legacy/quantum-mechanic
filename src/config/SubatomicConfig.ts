@@ -3,7 +3,7 @@ import {DocsConfig} from "./DocsConfig";
 import {GluonConfig} from "./GluonConfig";
 import {MavenConfig} from "./MavenConfig";
 import {NexusConfig} from "./NexusConfig";
-import {OpenShiftConfig} from "./OpenShiftConfig";
+import {OpenShiftCloud, OpenShiftConfig} from "./OpenShiftConfig";
 import {PluginConfig} from "./PluginConfig";
 
 export interface SubatomicConfig {
@@ -11,6 +11,7 @@ export interface SubatomicConfig {
     commandPrefix: string;
     docs: DocsConfig;
     gluon: GluonConfig;
+    openshiftClouds: { [k: string]: OpenShiftCloud };
     openshiftNonProd: OpenShiftConfig;
     openshiftProd: OpenShiftConfig[];
     nexus: NexusConfig;

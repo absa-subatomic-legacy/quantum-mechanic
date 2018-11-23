@@ -14,3 +14,8 @@ export interface OpenshiftProjectEnvironment {
     id: string;
     description: string;
 }
+
+export interface OpenShiftCloud {
+    openshiftNonProd: OpenShiftConfig;
+    openshiftProd: OpenShiftConfig[];
+}

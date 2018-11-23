@@ -4,7 +4,6 @@ import _ = require("lodash");
 import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
-import {userFromDomainUser} from "../../../gluon/util/member/Members";
 import {isSuccessCode} from "../../../http/Http";
 import {OpenshiftApiResult} from "../../../openshift/api/base/OpenshiftApiResult";
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
@@ -17,6 +16,7 @@ import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
 import {StandardOption} from "../../../openshift/base/options/StandardOption";
 import {OCClient} from "../../../openshift/OCClient";
 import {OCCommon} from "../../../openshift/OCCommon";
+import {userFromDomainUser} from "../../util/member/Members";
 import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
 import {getProjectDisplayName} from "../../util/project/Project";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
@@ -57,7 +57,7 @@ export class OCService {
     constructor(private ocImageService = new OCImageService()) {
     }
 
-    public async login(openshiftDetails: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd, softLogin = false) {
+    public async login(openshiftDetails: OpenShiftConfig, softLogin = false) {
         this.openShiftApi = new OpenShiftApi(openshiftDetails);
         this.ocImageService.openShiftApi = this.openShiftApi;
         this.loggedIn = true;
@@ -468,13 +468,13 @@ export class OCService {
     }
 
     public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {
-        const teamOwners = team.owners.map( owner => userFromDomainUser(owner.domainUsername) );
+        const teamOwners = team.owners.map(owner => userFromDomainUser(owner.domainUsername));
         if (teamOwners.length > 0) {
             logger.debug(`Trying to add team membership permission to project for role admin.`);
             await this.openShiftApi.policy.addRoleToUsers(teamOwners, "admin", projectId);
         }
 
-        const teamMembers = team.members.map( member => userFromDomainUser(member.domainUsername) );
+        const teamMembers = team.members.map(member => userFromDomainUser(member.domainUsername));
         if (teamMembers.length > 0) {
             logger.debug(`Trying to add team membership permission to project for role edit.`);
             await this.openShiftApi.policy.addRoleToUsers(teamMembers, "edit", projectId);

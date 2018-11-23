@@ -52,7 +52,7 @@ export class ConfigurePackageInOpenshift extends Task {
         logger.debug(`Using owning team DevOps project: ${teamDevOpsProjectId}`);
 
         if (this.packageDetails.packageType === ApplicationType.DEPLOYABLE.toString()) {
-            await this.ocService.login();
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd);
             const appBuildName = getBuildConfigName(this.packageDetails.projectName, this.packageDetails.packageName);
             await this.createApplicationImageStream(appBuildName, teamDevOpsProjectId);
 
