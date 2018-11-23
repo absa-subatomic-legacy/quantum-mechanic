@@ -14,8 +14,6 @@ import {GluonService} from "../gluon/GluonService";
 
 export class RemoveMemberFromTeamService {
 
-    public addMemberToTeamMessages: AddMemberToTeamMessages = new AddMemberToTeamMessages();
-
     constructor(private gluonService = new GluonService()) {
     }
 

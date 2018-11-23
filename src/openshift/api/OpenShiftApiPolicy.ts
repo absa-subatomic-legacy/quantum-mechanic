@@ -9,7 +9,6 @@ import {ResourceUrl} from "./resources/ResourceUrl";
 export class OpenShiftApiPolicy extends OpenShiftApiElement {
 
     public async addRoleToUsers(usernames: string[], role: string, namespace: string) {
-
         const roleBindingResourceObject = await this.getRoleBindingResource(role, namespace);
         const openshiftRole = roleBindingResourceObject.roleBinding;
 
@@ -64,6 +63,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
     }
 
     public async getRoleBindingResource(role: string, destinationNamespace) {
+
         let newRole = false;
         let openshiftRole = await this.findExistingRole(this.getAxiosInstanceOApi(), role, destinationNamespace);
         if (openshiftRole === null) {
@@ -76,43 +76,40 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
         return {roleBinding: openshiftRole, aNewRole: newRole};
     }
 
-    public removeRoleFromUser(username: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
+    public async removeRoleFromUser(username: string, role: string, namespace: string) {
         if (!username.startsWith("system:serviceaccount")) {
-            return this.removeRoleFromUserAccount(username, role, namespace);
+            return await this.removeRoleFromUserAccount(username, role, namespace);
         }
     }
 
-    public removeRoleFromUserAccount(username: string, role: string, namespace: string): Promise<OpenshiftApiResult> {
-
+    public async removeRoleFromUserAccount(username: string, role: string, namespace: string) {
         const instance = this.getAxiosInstanceOApi();
+        const roleToEdit = await this.findExistingRole(instance, role, namespace);
+        if (roleToEdit === null) {
+            logger.info("removeRoleFromUserAccount: Role not found. Nothing to do");
+        } else {
+            // Filter by all that are NOT the user to be removed
+            roleToEdit.subjects = roleToEdit.subjects.filter(subject => subject.name !== username);
+            roleToEdit.userNames = roleToEdit.userNames.filter(userNames => userNames !== username);
 
-        return this.findExistingRole(instance, role, namespace).then(roleToEdit => {
-            if (roleToEdit === null) {
-                logger.info("Role not found. Nothing to do");
-            } else {
-                // Filter by all that are NOT the user to be removed
-                roleToEdit.subjects = roleToEdit.subjects.filter(subject => subject.name !== username);
-                roleToEdit.userNames = roleToEdit.userNames.filter(userNames => userNames !== username);
-
-                const url = `${ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace)}/${role}`;
-                return instance.put(url, roleToEdit);
-            }
-        });
+            const url = `${ResourceUrl.getResourceKindUrl(ResourceFactory.baseResource("RoleBinding"), namespace)}/${role}`;
+            return await instance.put(url, roleToEdit);
+        }
     }
 
-    private findExistingRole(axios: AwaitAxios, role: string, namespace: string): Promise<OpenshiftResource> {
-        return axios.get(`namespaces/${namespace}/rolebindings`).then(response => {
-            logger.debug(JSON.stringify(response.status));
-            logger.debug(JSON.stringify(response.data));
-            let openshiftResource: OpenshiftResource = null;
-            for (const item of response.data.items) {
-                if (item.metadata.name === role.toLowerCase() && item.metadata.namespace === namespace.toLowerCase()) {
-                    openshiftResource = ResourceFactory.convertToOpenshiftResource(item, "RoleBinding");
-                    break;
-                }
-            }
-            return openshiftResource;
-        });
+    private async findExistingRole(axios: AwaitAxios, role: string, namespace: string): Promise<OpenshiftResource> {
+        const response = await axios.get(`namespaces/${namespace}/rolebindings`);
 
+        logger.debug(`findExistingRole response.status: ${JSON.stringify(response.status)}`);
+        logger.debug(`findExistingRole response.data: ${JSON.stringify(response.data)}`);
+
+        let openshiftResource: OpenshiftResource = null;
+        for (const item of response.data.items) {
+            if (item.metadata.name === role.toLowerCase() && item.metadata.namespace === namespace.toLowerCase()) {
+                openshiftResource = ResourceFactory.convertToOpenshiftResource(item, "RoleBinding");
+                break;
+            }
+        }
+        return openshiftResource;
     }
 }
