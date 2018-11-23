@@ -2,7 +2,7 @@
   "subatomic": {
     "commandPrefix": "sub",
     "openshiftClouds": {
-      "ab-cluster": {
+      "ab-cloud": {
         "openshiftNonProd": {
           "name": "nonprod",
           "dockerRepoUrl": "123.123.0.0:5000",

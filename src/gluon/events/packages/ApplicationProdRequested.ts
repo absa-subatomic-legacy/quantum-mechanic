@@ -85,7 +85,7 @@ export class ApplicationProdRequested implements HandleEvent<any> {
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            for (const openshiftProd of QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftProd) {
+            for (const openshiftProd of QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftProd) {
                 taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
             }
 

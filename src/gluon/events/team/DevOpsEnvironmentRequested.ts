@@ -63,7 +63,7 @@ export class DevOpsEnvironmentRequested implements HandleEvent<any> {
             const taskRunner = new TaskRunner(taskListMessage);
 
             taskRunner.addTask(
-                new CreateTeamDevOpsEnvironment(devOpsRequestedEvent, QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd),
+                new CreateTeamDevOpsEnvironment(devOpsRequestedEvent, QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd),
             ).addTask(
                 new AddJenkinsToDevOpsEnvironment(devOpsRequestedEvent),
             );

@@ -118,7 +118,7 @@ export class MembersAddedToTeam implements HandleEvent<any> {
     private async addPermissionsForUserToTeams(teamName: string, projects, membersAddedToTeamEvent) {
         try {
             const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd);
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
             const devopsProject = getDevOpsEnvironmentDetails(teamName).openshiftProjectId;
             await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
             for (const project of projects) {
@@ -132,7 +132,7 @@ export class MembersAddedToTeam implements HandleEvent<any> {
                     membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername)),
                 );
                 // Add to openshift environments
-                for (const environment of QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd.defaultEnvironments) {
+                for (const environment of QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.defaultEnvironments) {
                     const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
                     const projectId = getProjectId(tenant.name, project.name, environment.id);
                     await this.ocService.addTeamMembershipPermissionsToProject(projectId, membersAddedToTeamEvent);

@@ -52,7 +52,7 @@ export class ConfigurePackageInOpenshift extends Task {
         logger.debug(`Using owning team DevOps project: ${teamDevOpsProjectId}`);
 
         if (this.packageDetails.packageType === ApplicationType.DEPLOYABLE.toString()) {
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd);
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
             const appBuildName = getBuildConfigName(this.packageDetails.projectName, this.packageDetails.packageName);
             await this.createApplicationImageStream(appBuildName, teamDevOpsProjectId);
 
@@ -151,7 +151,7 @@ export class ConfigurePackageInOpenshift extends Task {
 
     private async createApplicationOpenshiftResources(tenantName: string, projectName: string, applicationName: string): Promise<HandlerResult> {
 
-        for (const environment of QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd.defaultEnvironments) {
+        for (const environment of QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.defaultEnvironments) {
             const projectId = getProjectId(tenantName, projectName, environment.id);
             const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);

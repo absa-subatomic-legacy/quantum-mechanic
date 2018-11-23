@@ -74,7 +74,7 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
                 qmMessageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             taskRunner.addTask(
-                new PatchPackageBuildConfigImage(this.imageName, this.applicationName, this.projectName, this.teamName, QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd),
+                new PatchPackageBuildConfigImage(this.imageName, this.applicationName, this.projectName, this.teamName, QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd),
             );
 
             await taskRunner.execute(ctx);

@@ -86,7 +86,7 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
     private async removePermissionsForUserFromTeams(
         bitbucketConfiguration: BitbucketConfigurationService, teamName: string, projects, memberRemovedFromTeam) {
         try {
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd, true);
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd, true);
             const devopsProject = getDevOpsEnvironmentDetails(teamName).openshiftProjectId;
             await this.ocService.removeTeamMembershipPermissionsFromProject(
                 devopsProject, memberRemovedFromTeam.memberRemoved.domainUsername);
@@ -100,7 +100,7 @@ export class MemberRemovedFromTeam implements HandleEvent<any> {
                     [memberRemovedFromTeam.memberRemoved.domainUsername]);
 
                 // Remove from OpenShift environments
-                for (const environment of QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd.defaultEnvironments) {
+                for (const environment of QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.defaultEnvironments) {
                     const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
                     const projectId = getProjectId(tenant.name, project.name, environment.id);
                     await this.ocService.removeTeamMembershipPermissionsFromProject(

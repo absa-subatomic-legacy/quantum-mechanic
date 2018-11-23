@@ -313,7 +313,7 @@ export class OCService {
             "JENKINS_ADMIN_EMAIL=subatomic@local",
             // TODO the registry Cluster IP we will have to get by introspecting the registry Service
             // If no team email then the address of the createdBy member
-            `DEVOPS_URL=${QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
+            `DEVOPS_URL=${QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
         ];
         return await this.processOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
     }
@@ -515,7 +515,7 @@ export class OCService {
             const fileName = Date.now() + ".json";
             fs.writeFileSync(`/tmp/${fileName}`, JSON.stringify(template));
             // log client into non prod to process template - hacky! Need to fix.
-            await OCClient.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd.auth.token);
+            await OCClient.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.auth.token);
             const processedTemplateResult = await OCCommon.commonCommand("process", `-f /tmp/${fileName}`);
             const result = await this.applyResourceFromDataInNamespace(JSON.parse(processedTemplateResult.output), projectId, apply);
             if (!isSuccessCode(result.status)) {

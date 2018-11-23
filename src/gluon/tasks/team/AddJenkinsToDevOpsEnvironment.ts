@@ -48,7 +48,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         const projectId = `${_.kebabCase(this.devOpsRequestedEvent.team.name).toLowerCase()}-devops`;
         logger.info(`Working with OpenShift project Id: ${projectId}`);
 
-        await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd);
+        await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
 
         await this.copyJenkinsTemplateToDevOpsEnvironment(projectId);
 

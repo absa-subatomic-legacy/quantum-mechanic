@@ -2,8 +2,8 @@ import {OpenshiftProjectEnvironment} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 
 export function getHighestPreProdEnvironment(): OpenshiftProjectEnvironment {
-    const nEnvironments = QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd.defaultEnvironments.length;
-    return QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd.defaultEnvironments[nEnvironments - 1];
+    const nEnvironments = QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.defaultEnvironments.length;
+    return QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.defaultEnvironments[nEnvironments - 1];
 }
 
 export function getResourceDisplayMessage(allResources) {

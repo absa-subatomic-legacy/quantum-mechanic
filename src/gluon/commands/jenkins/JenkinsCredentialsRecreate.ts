@@ -54,7 +54,7 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cluster"].openshiftNonProd);
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
             const result = await this.recreateBitbucketJenkinsCredential(ctx, this.teamName);
             this.succeedCommand();
             return result;
