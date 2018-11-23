@@ -98,7 +98,7 @@ export class OpenShiftApiPolicy extends OpenShiftApiElement {
     }
 
     private async findExistingRole(axios: AwaitAxios, role: string, namespace: string): Promise<OpenshiftResource> {
-        const response = await axios.get(`namespaces/${namespace}/rolebindings`)
+        const response = await axios.get(`namespaces/${namespace}/rolebindings`);
 
         logger.debug(`findExistingRole response.status: ${JSON.stringify(response.status)}`);
         logger.debug(`findExistingRole response.data: ${JSON.stringify(response.data)}`);
