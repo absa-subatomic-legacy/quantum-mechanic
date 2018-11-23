@@ -5,7 +5,6 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {url} from "@atomist/slack-messages";
@@ -41,7 +40,7 @@ export class TeamsLinkedToProject extends BaseQMEvent implements HandleEvent<any
         try {
             const teamsLinkedToProjectEvent = event.data.TeamsLinkedToProjectEvent[0];
 
-            const destination =  await addressSlackChannelsFromContext(ctx, teamsLinkedToProjectEvent.team[0].slackIdentity.teamChannel);
+            const destination = await addressSlackChannelsFromContext(ctx, teamsLinkedToProjectEvent.team[0].slackIdentity.teamChannel);
             this.succeedEvent();
             return ctx.messageClient.send(`Your team has been successfully associated with ${teamsLinkedToProjectEvent.id}`,
                 destination);

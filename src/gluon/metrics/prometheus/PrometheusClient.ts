@@ -43,10 +43,10 @@ export class PrometheusClient {
                 const eName = _.snakeCase(event.name);
 
                 const eventCounter = new Counter({
-                name: `${eName}_event`,
-                help: `Count the number of times the ${event.name} event fires`,
-                labelNames: ["classname", "status"],
-            });
+                    name: `${eName}_event`,
+                    help: `Count the number of times the ${event.name} event fires`,
+                    labelNames: ["classname", "status"],
+                });
 
                 PrometheusClient.counters.push(eventCounter);
             });

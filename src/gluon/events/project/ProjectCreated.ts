@@ -6,7 +6,6 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {url} from "@atomist/slack-messages";
@@ -56,7 +55,7 @@ export class ProjectCreated extends BaseQMEvent implements HandleEvent<any> {
             const associateTeamCommand = new AssociateTeam();
             associateTeamCommand.projectName = projectCreatedEvent.project.name;
 
-            const destination =  await addressSlackChannelsFromContext(ctx, projectCreatedEvent.team.slackIdentity.teamChannel);
+            const destination = await addressSlackChannelsFromContext(ctx, projectCreatedEvent.team.slackIdentity.teamChannel);
             this.succeedEvent();
             return await ctx.messageClient.send({
                 text: `The *${projectCreatedEvent.project.name}* project has been created successfully.`,

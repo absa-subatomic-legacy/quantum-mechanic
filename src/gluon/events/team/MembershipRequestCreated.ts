@@ -86,7 +86,7 @@ export class MembershipRequestCreated extends BaseQMEvent implements HandleEvent
                 }],
             };
             logger.info(membershipRequestCreatedEvent.team.slackIdentity.teamChannel);
-            const destination =  await addressSlackChannelsFromContext(ctx, membershipRequestCreatedEvent.team.slackIdentity.teamChannel);
+            const destination = await addressSlackChannelsFromContext(ctx, membershipRequestCreatedEvent.team.slackIdentity.teamChannel);
             this.succeedEvent();
             return await ctx.messageClient.send(msg, destination, {id: correlationId});
         }

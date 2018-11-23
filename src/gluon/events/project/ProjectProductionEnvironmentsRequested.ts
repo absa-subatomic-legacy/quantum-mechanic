@@ -55,7 +55,7 @@ export class ProjectProductionEnvironmentsRequested extends BaseQMEvent implemen
 
             for (const teamMember of membersToMessage) {
                 const requestCorrelationId: string = uuid();
-                const destination =  await addressSlackUsersFromContext(ctx, teamMember.slack.screenName);
+                const destination = await addressSlackUsersFromContext(ctx, teamMember.slack.screenName);
                 await ctx.messageClient.send({
                     text: `The project *${projectName}* owned by team *${project.owningTeam.name}* has been requested to move into prod. As a member of the team you have please select an option below indicating whether you approve of this request.`,
                 }, destination);

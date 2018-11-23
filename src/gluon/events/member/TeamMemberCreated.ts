@@ -34,7 +34,7 @@ export class TeamMemberCreated extends BaseQMEvent implements HandleEvent<any> {
             return await SuccessPromise;
         } catch (error) {
             this.failEvent();
-            throw new Error(error);
+            throw error;
         }
     }
 }

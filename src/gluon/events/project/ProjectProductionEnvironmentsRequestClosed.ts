@@ -90,7 +90,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
             await handleQMError(qmMessageClient, error);
             const project = await this.gluonService.projects.gluonProjectFromProjectName(projectProdRequest.project.name);
             const correlationId: string = uuid();
-            const destination =  await addressSlackChannelsFromContext(ctx, project.owningTeam.slack.teamChannel);
+            const destination = await addressSlackChannelsFromContext(ctx, project.owningTeam.slack.teamChannel);
             this.failEvent();
             return await ctx.messageClient.send(this.createRetryButton(projectProdRequest.projectProdRequestId, correlationId), destination, {id: correlationId});
         }
