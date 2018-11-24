@@ -7,6 +7,7 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMColours} from "../../../QMColour";
 import {GluonService} from "../../services/gluon/GluonService";
 import {Extensible} from "../../util/plugins/Extensible";
 import {
@@ -54,13 +55,13 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
                     {
                         fallback: `Team: *${this.teamName}*`,
                         text: `Team Owners:${teamOwners}`,
-                        color: "#00ddff",
+                        color: QMColours.stdTurquoiseSurprise.hex,
                         mrkdwn_in: ["text"],
                     },
                     {
                         fallback: `Team: *${this.teamName}*`,
                         text: `Team Members:${teamMembers}`,
-                        color: "#c000ff",
+                        color: QMColours.stdPurplePeopleEater.hex,
                         mrkdwn_in: ["text"],
                     }],
             };
