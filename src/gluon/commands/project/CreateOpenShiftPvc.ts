@@ -16,6 +16,7 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import {Attachment} from "@atomist/slack-messages/SlackMessages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMColours} from "../../../QMColour";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -94,7 +95,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
                     mrkdwn_in: ["text"],
                     title_link: `${QMConfig.subatomic.openshiftNonProd.masterUrl}/console/project/${environment}/browse/persistentvolumeclaims/${pvcName}`,
                     title: `${environment}`,
-                    color: "#45B254",
+                    color:  QMColours.stdGreenyMcAppleStroodle.hex,
                 });
             }
 
@@ -122,7 +123,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
                 fallback: `Using PVCs`,
                 text: `
 Now that your PVCs have been created, you can add this PVC as storage to an application. Follow the Subatomic documentation for more details on how to add storage.`,
-                color: "#00a5ff",
+                color:  QMColours.stdShySkyBlue.hex,
                 mrkdwn_in: ["text"],
                 thumb_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/OpenShift-LogoType.svg/959px-OpenShift-LogoType.svg.png",
                 footer: `For more information, please read the ${this.docs()}`,

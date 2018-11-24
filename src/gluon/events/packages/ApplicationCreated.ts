@@ -13,6 +13,7 @@ import {
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMColours} from "../../../QMColour";
 import {ConfigureBasicPackage} from "../../commands/packages/ConfigureBasicPackage";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 
@@ -97,7 +98,7 @@ export class ApplicationCreated extends BaseQMEvent implements HandleEvent<any> 
                 text: attachmentText,
                 fallback: attachmentText,
                 footer: `For more information, please read the ${this.docs("configure-component")}`,
-                color: "#45B254",
+                color:  QMColours.stdGreenyMcAppleStroodle.hex,
                 actions: [
                     buttonForCommand(
                         {text: "Configure Component"},

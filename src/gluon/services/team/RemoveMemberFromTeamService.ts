@@ -1,10 +1,11 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
+import {QMColours} from "../../../QMColour";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {MemberRole} from "../../util/member/Members";
@@ -36,7 +37,7 @@ export class RemoveMemberFromTeamService {
                     fallback: "Failed to get member details.",
                     footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                         "documentation")}`,
-                    color: "#ffcc00",
+                    color:  QMColours.stdMuddyYellow.hex,
                     mrkdwn_in: ["text"],
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                     actions: [

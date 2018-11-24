@@ -10,6 +10,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMColours} from "../../../QMColour";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
@@ -119,7 +120,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
             attachments: [{
                 text: "Please check with your system admin and retry when the reason of failure has been determined.",
                 fallback: "Please check with your system admin and retry when the reason of failure has been determined.",
-                color: "#D94649",
+                color:  QMColours.stdReddyMcRedFace.hex,
                 actions: [
                     buttonForCommand(
                         {

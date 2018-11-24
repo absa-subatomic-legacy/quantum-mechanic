@@ -1,6 +1,7 @@
 import {HandlerResult, logger} from "@atomist/automation-client";
 import {Attachment, SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
+import {QMColours} from "../../QMColour";
 import {QMMessageClient} from "../util/shared/Error";
 
 export class TaskListMessage {
@@ -19,15 +20,15 @@ export class TaskListMessage {
         this.tasks = {};
         this.taskOrder = [];
         this.statusCosmetics.set(TaskStatus.Pending, {
-            color: "#ffcc00",
+            color:  QMColours.stdMuddyYellow.hex,
             symbol: "●",
         });
         this.statusCosmetics.set(TaskStatus.Failed, {
-            color: "#D94649",
+            color:  QMColours.stdReddyMcRedFace.hex,
             symbol: "✗",
         });
         this.statusCosmetics.set(TaskStatus.Successful, {
-            color: "#45B254",
+            color:  QMColours.stdGreenyMcAppleStroodle.hex,
             symbol: "✓",
         });
     }

@@ -10,6 +10,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMColours} from "../../../QMColour";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
 import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
 import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsForProject";
@@ -109,7 +110,7 @@ A package is either an application or a library, click the button below to creat
             attachments: [{
                 fallback: "Create or link existing package",
                 footer: `For more information, please read the ${this.docs()}`,
-                color: "#45B254",
+                color:  QMColours.stdGreenyMcAppleStroodle.hex,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(

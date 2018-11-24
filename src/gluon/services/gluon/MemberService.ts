@@ -6,6 +6,7 @@ import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
+import {QMColours} from "../../../QMColour";
 import {OnboardMember} from "../../commands/member/OnboardMember";
 import {QMError} from "../../util/shared/Error";
 
@@ -38,7 +39,7 @@ To create a team you must first onboard yourself. Click the button below to do t
                         fallback: "You are not onboarded to Subatomic",
                         footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                             "documentation")}`,
-                        color: "#ffcc00",
+                        color:  QMColours.stdMuddyYellow.hex,
                         mrkdwn_in: ["text"],
                         thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                         actions: [

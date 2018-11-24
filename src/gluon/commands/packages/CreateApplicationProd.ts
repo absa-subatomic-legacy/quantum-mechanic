@@ -10,6 +10,7 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMColours} from "../../../QMColour";
 import {ApplicationProdRequestMessages} from "../../messages/package/ApplicationProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -136,13 +137,13 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
             message.attachments.push({
                 text: `*Confirmed*`,
                 fallback: "*Confirmed*",
-                color: "#45B254",
+                color:  QMColours.stdGreenyMcAppleStroodle.hex,
             });
         } else if (result === ApprovalEnum.REJECTED) {
             message.attachments.push({
                 text: `*Cancelled*`,
                 fallback: "*Cancelled*",
-                color: "#D94649",
+                color:  QMColours.stdReddyMcRedFace.hex,
             });
         }
 
