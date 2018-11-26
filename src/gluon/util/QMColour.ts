@@ -12,7 +12,7 @@ export class QMColours {
     public static absaPassion: QMColour = { name: "absaPassion", hex: "#dc0032", description: "absa Passion" };
     public static absaPrepared: QMColour = { name: "absaPrepared", hex: "#fa551e", description: "absa Prepared" };
     public static absaSmile: QMColour = { name: "absaSmile", hex: "#f0325a", description: "absa Smile" };
-    public static absaSurprise: QMColour = { name: "absaSurprise", hex: "#af144b", description: "absaS urprise" };
+    public static absaSurprise: QMColour = { name: "absaSurprise", hex: "#af144b", description: "absa Surprise" };
     public static absaWarmth: QMColour = { name: "absaWarmth", hex: "#be0028", description: "absa Warmth" };
 
     public static stdGreenyMcAppleStroodle: QMColour = { name: "stdGreenyMcAppleStroodle", hex: "#45B254", description: "Success or default option" };
