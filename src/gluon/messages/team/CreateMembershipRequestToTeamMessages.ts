@@ -1,6 +1,6 @@
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../../util/QMColour";
 
 export class CreateMembershipRequestToTeamMessages {
     public alertGluonMemberForSlackMentionDoesNotExist(slackName: string): SlackMessage {

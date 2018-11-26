@@ -1,7 +1,7 @@
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../../util/QMColour";
 import {CreateTeam} from "../../commands/team/CreateTeam";
 import {LinkExistingTeamSlackChannel} from "../../commands/team/LinkExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "../../commands/team/NewSlackChannel";

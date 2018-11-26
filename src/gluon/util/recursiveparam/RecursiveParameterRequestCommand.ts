@@ -11,7 +11,7 @@ import {
 } from "@atomist/automation-client/lib/internal/metadata/decoratorSupport";
 import _ = require("lodash");
 import uuid = require("uuid");
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../QMColour";
 import {BaseQMComand} from "../shared/BaseQMCommand";
 import {BaseQMHandler} from "../shared/BaseQMHandler";
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";

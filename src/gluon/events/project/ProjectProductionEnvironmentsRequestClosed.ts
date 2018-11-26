@@ -10,7 +10,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../../util/QMColour";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";

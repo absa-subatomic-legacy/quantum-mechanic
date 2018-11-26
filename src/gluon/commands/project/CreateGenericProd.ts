@@ -10,7 +10,7 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../../util/QMColour";
 import {GenericProdRequestMessages} from "../../messages/project/GenericProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";

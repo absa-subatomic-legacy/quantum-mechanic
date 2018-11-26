@@ -13,7 +13,7 @@ import {
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../../util/QMColour";
 import {ConfigureBasicPackage} from "../../commands/packages/ConfigureBasicPackage";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 

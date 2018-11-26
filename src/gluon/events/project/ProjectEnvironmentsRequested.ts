@@ -10,7 +10,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../../util/QMColour";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
 import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
 import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsForProject";

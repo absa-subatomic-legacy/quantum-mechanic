@@ -9,7 +9,7 @@ import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../../util/QMColour";
 import {BitbucketProjectRecommendedPracticesCommand} from "../../commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {AssociateTeam} from "../../commands/project/AssociateTeam";
 import {NewProjectEnvironments} from "../../commands/project/NewProjectEnvironments";

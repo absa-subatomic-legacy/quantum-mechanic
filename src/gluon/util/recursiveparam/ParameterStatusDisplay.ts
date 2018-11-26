@@ -1,5 +1,5 @@
 import {SlackMessage} from "@atomist/slack-messages";
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../QMColour";
 import {ParameterDisplayType} from "./RecursiveParameterRequestCommand";
 
 export class ParameterStatusDisplay {

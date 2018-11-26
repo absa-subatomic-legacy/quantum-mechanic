@@ -5,7 +5,7 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../../util/QMColour";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {MemberRole} from "../../util/member/Members";

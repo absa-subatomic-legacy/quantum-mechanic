@@ -6,7 +6,7 @@ import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
-import {QMColours} from "../../../QMColour";
+import {QMColours} from "../../util/QMColour";
 import {OnboardMember} from "../../commands/member/OnboardMember";
 import {QMError} from "../../util/shared/Error";
 
