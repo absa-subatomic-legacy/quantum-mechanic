@@ -44,7 +44,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                     fallback: "Failed to get member details.",
                     footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                         "documentation")}`,
-                    color:  QMColours.stdMuddyYellow.hex,
+                    color: QMColours.stdMuddyYellow.hex,
                     mrkdwn_in: ["text"],
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                     actions: [
@@ -113,8 +113,12 @@ They have been sent a request to onboard, once they've successfully onboarded yo
             memberDetails);
 
         if (!isSuccessCode(updateTeamResult.status)) {
-            logger.error(`Failed to add member to team: ${inspect(updateTeamResult)}`);
-            throw new QMError(`Failed to add member to the team. Server side failure.`);
+            let message = `Failed to add member to the team. ${updateTeamResult.data}`;
+            logger.error(message);
+            if (updateTeamResult.status === 403) {
+                message = `Unauthorized: Sorry only a team owner can add members to a team.`;
+            }
+            throw new QMError(message);
         }
     }
 
@@ -146,7 +150,7 @@ Click the button below to do that now.
                 fallback: "You are not onboarded to Subatomic",
                 footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                     "documentation")}`,
-                color:  QMColours.stdMuddyYellow.hex,
+                color: QMColours.stdMuddyYellow.hex,
                 mrkdwn_in: ["text"],
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [

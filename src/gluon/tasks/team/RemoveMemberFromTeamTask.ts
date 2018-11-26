@@ -30,7 +30,7 @@ export class RemoveMemberFromTeamTask extends Task {
     }
 
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
-        try {
+        // try {
             const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
             const teamChannel = getTeamSlackChannel(team);
             const screenName = getScreenName(this.slackName);
@@ -44,10 +44,10 @@ export class RemoveMemberFromTeamTask extends Task {
 
             await this.taskListMessage.succeedTask(this.TASK_REMOVE_USER_FROM_TEAM);
             return true;
-        } catch (error) {
-            logger.error(`error: ${error.message}`);
-            return false;
-        }
+        // } catch (error) {
+        //     logger.error(`error: ${error.message}`);
+        //     return false;
+        // }
     }
 
 }
