@@ -7,9 +7,9 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../util/QMColour";
 import {GluonService} from "../../services/gluon/GluonService";
 import {Extensible} from "../../util/plugins/Extensible";
+import {QMColours} from "../../util/QMColour";
 import {
     GluonTeamNameSetter,
     setGluonTeamName,

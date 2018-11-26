@@ -1,14 +1,14 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
-import {QMColours} from "../../util/QMColour";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {MemberRole} from "../../util/member/Members";
+import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 import {kickUserFromSlackChannel, loadChannelIdByChannelName} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";

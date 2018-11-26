@@ -10,7 +10,6 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../util/QMColour";
 import {GenericProdRequestMessages} from "../../messages/project/GenericProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -20,6 +19,7 @@ import {
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
 import {getProjectId} from "../../util/project/Project";
+import {QMColours} from "../../util/QMColour";
 import {
     GluonProjectNameSetter,
     GluonTeamNameSetter,

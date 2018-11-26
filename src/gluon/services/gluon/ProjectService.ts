@@ -5,8 +5,8 @@ import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
-import {QMColours} from "../../util/QMColour";
 import {CreateProject} from "../../commands/project/CreateProject";
+import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 
 export class ProjectService {

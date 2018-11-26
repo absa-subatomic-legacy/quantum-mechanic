@@ -16,9 +16,9 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import {Attachment} from "@atomist/slack-messages/SlackMessages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../util/QMColour";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
+import {QMColours} from "../../util/QMColour";
 import {
     GluonProjectNameSetter,
     GluonTeamNameSetter,

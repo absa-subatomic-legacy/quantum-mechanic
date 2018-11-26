@@ -13,8 +13,8 @@ import {
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../util/QMColour";
 import {ConfigureBasicPackage} from "../../commands/packages/ConfigureBasicPackage";
+import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 
 @EventHandler("Receive ApplicationCreatedEvent events", `

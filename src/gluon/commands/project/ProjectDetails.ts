@@ -11,8 +11,8 @@ import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../util/QMColour";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMColours} from "../../util/QMColour";
 import {
     GluonTeamNameSetter,
     setGluonTeamName,

@@ -10,9 +10,9 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../../util/QMColour";
 import {ListExistingBitbucketProject} from "../../commands/bitbucket/BitbucketProject";
 import {AssociateTeam} from "../../commands/project/AssociateTeam";
+import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 
 @EventHandler("Receive ProjectCreated events", `

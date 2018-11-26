@@ -14,8 +14,8 @@ import {
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import {isSuccessCode} from "../../../http/Http";
-import {QMColours} from "../../util/QMColour";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     handleQMError,
