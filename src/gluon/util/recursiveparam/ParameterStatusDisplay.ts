@@ -1,4 +1,5 @@
 import {SlackMessage} from "@atomist/slack-messages";
+import {QMColours} from "../QMColour";
 import {ParameterDisplayType} from "./RecursiveParameterRequestCommand";
 
 export class ParameterStatusDisplay {
@@ -27,7 +28,7 @@ export class ParameterStatusDisplay {
             attachments.push(
                 {
                     text: textDisplay,
-                    color: "#45B254",
+                    color:  QMColours.stdGreenyMcAppleStroodle.hex,
                     fallback: "",
                     mrkdwn_in: ["text"],
                 },

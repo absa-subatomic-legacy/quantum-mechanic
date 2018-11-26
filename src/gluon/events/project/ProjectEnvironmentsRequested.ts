@@ -16,6 +16,7 @@ import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsFo
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 
@@ -109,7 +110,7 @@ A package is either an application or a library, click the button below to creat
             attachments: [{
                 fallback: "Create or link existing package",
                 footer: `For more information, please read the ${this.docs()}`,
-                color: "#45B254",
+                color:  QMColours.stdGreenyMcAppleStroodle.hex,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(

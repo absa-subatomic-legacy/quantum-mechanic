@@ -6,6 +6,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
+import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 
 export class ApplicationService {
@@ -69,7 +70,7 @@ Consider linking an existing application called ${applicationName}. Click the bu
                         fallback: "Application not managed by Subatomic",
                         footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-bitbucket-project`,
                             "documentation")}`,
-                        color: "#ffcc00",
+                        color:  QMColours.stdMuddyYellow.hex,
                         mrkdwn_in: ["text"],
                         actions: [
                             buttonForCommand(

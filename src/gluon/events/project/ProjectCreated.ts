@@ -12,6 +12,7 @@ import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {ListExistingBitbucketProject} from "../../commands/bitbucket/BitbucketProject";
 import {AssociateTeam} from "../../commands/project/AssociateTeam";
+import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 
 @EventHandler("Receive ProjectCreated events", `
@@ -65,7 +66,7 @@ A Subatomic project is linked to a Bitbucket project. \
 This can be a new Bitbucket project that will be created and configured according to best practice or you can choose to link an existing project. The existing project will also be configured accordingly.`,
                     fallback: "Create or link Bitbucket project",
                     footer: `For more information, please read the ${this.docs("create-bitbucket-project")}`,
-                    color: "#45B254",
+                    color:  QMColours.stdGreenyMcAppleStroodle.hex,
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
                     actions: [
                         buttonForCommand(
@@ -80,7 +81,7 @@ Projects can be associated with multiple teams. \
 If you would like to associate more teams to the *${projectCreatedEvent.project.name}* project, please use the \`@atomist sub associate team\` command`,
                     fallback: "Associate multiple teams to this project",
                     footer: `For more information, please read the ${this.docs("associate-team")}`,
-                    color: "#00a5ff",
+                    color:  QMColours.stdShySkyBlue.hex,
                     actions: [
                         buttonForCommand(
                             {

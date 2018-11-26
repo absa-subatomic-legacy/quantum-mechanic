@@ -19,6 +19,7 @@ import {
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
 import {getProjectId} from "../../util/project/Project";
+import {QMColours} from "../../util/QMColour";
 import {
     GluonProjectNameSetter,
     GluonTeamNameSetter,
@@ -127,13 +128,13 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
             message.attachments.push({
                 text: `*Confirmed*`,
                 fallback: "*Confirmed*",
-                color: "#45B254",
+                color:  QMColours.stdGreenyMcAppleStroodle.hex,
             });
         } else if (result === ApprovalEnum.REJECTED) {
             message.attachments.push({
                 text: `*Cancelled*`,
                 fallback: "*Cancelled*",
-                color: "#D94649",
+                color:  QMColours.stdReddyMcRedFace.hex,
             });
         }
 

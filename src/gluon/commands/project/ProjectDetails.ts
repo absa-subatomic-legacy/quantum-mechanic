@@ -12,6 +12,7 @@ import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/Messa
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMColours} from "../../util/QMColour";
 import {
     GluonTeamNameSetter,
     setGluonTeamName,
@@ -81,7 +82,7 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand
                 attachments.push(
                     {
                         text: `*Project:* ${project.name}\n*Description:* ${project.description}`,
-                        color: "#45B254",
+                        color:  QMColours.stdGreenyMcAppleStroodle.hex,
                         actions: [
                             buttonForCommand(
                                 {
@@ -166,7 +167,7 @@ export class ListProjectDetails extends BaseQMComand implements HandleCommand<Ha
                 attachments.push(
                     {
                         text: `*Application:* ${application.name}\n*Description:* ${application.description}\n*Bitbucket URL:* ${applicationBitbucketUrl}`,
-                        color: "#45B254",
+                        color:  QMColours.stdGreenyMcAppleStroodle.hex,
                     },
                 );
             }

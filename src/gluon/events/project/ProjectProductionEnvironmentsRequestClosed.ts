@@ -18,6 +18,7 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToProdEnvironment} from "../../tasks/team/AddJenkinsToProdEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
 import {OpenshiftProjectEnvironmentRequest} from "../../util/project/Project";
+import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetailsProd} from "../../util/team/Teams";
@@ -119,7 +120,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
             attachments: [{
                 text: "Please check with your system admin and retry when the reason of failure has been determined.",
                 fallback: "Please check with your system admin and retry when the reason of failure has been determined.",
-                color: "#D94649",
+                color:  QMColours.stdReddyMcRedFace.hex,
                 actions: [
                     buttonForCommand(
                         {

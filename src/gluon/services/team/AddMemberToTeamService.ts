@@ -13,6 +13,7 @@ import {OnboardMember} from "../../commands/member/OnboardMember";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {MemberRole} from "../../util/member/Members";
+import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 import {loadChannelIdByChannelName} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";
@@ -43,7 +44,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                     fallback: "Failed to get member details.",
                     footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                         "documentation")}`,
-                    color: "#ffcc00",
+                    color:  QMColours.stdMuddyYellow.hex,
                     mrkdwn_in: ["text"],
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                     actions: [
@@ -145,7 +146,7 @@ Click the button below to do that now.
                 fallback: "You are not onboarded to Subatomic",
                 footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                     "documentation")}`,
-                color: "#ffcc00",
+                color:  QMColours.stdMuddyYellow.hex,
                 mrkdwn_in: ["text"],
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [

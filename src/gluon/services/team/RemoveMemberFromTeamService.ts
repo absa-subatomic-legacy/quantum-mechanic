@@ -8,6 +8,7 @@ import {isSuccessCode} from "../../../http/Http";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {MemberRole} from "../../util/member/Members";
+import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 import {kickUserFromSlackChannel, loadChannelIdByChannelName} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";
@@ -36,7 +37,7 @@ export class RemoveMemberFromTeamService {
                     fallback: "Failed to get member details.",
                     footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                         "documentation")}`,
-                    color: "#ffcc00",
+                    color:  QMColours.stdMuddyYellow.hex,
                     mrkdwn_in: ["text"],
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                     actions: [

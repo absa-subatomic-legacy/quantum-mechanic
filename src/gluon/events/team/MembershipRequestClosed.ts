@@ -15,6 +15,7 @@ import {
 import {SlackMessage} from "@atomist/slack-messages";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     handleQMError,
@@ -128,9 +129,9 @@ export class MembershipRequestClosed extends BaseQMEvent implements HandleComman
 
     private async handleMembershipRequestResult(ctx: HandlerContext) {
         if (this.approvalStatus === "APPROVED") {
-            await this.editRequestMessage(ctx, "APPROVED", "#45B254");
+            await this.editRequestMessage(ctx, "APPROVED",  QMColours.stdGreenyMcAppleStroodle.hex);
         } else {
-            await this.editRequestMessage(ctx, "REJECTED", "#D94649");
+            await this.editRequestMessage(ctx, "REJECTED",  QMColours.stdReddyMcRedFace.hex);
             return await this.handleRejectedMembershipRequest(ctx, this.teamName, this.approverUserName, this.userScreenName);
         }
     }
