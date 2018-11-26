@@ -210,7 +210,7 @@ export class ListExistingBitbucketProject
             let message = `Failed to link Bitbucket project. ${updateGluonProjectResult.data}`;
             logger.error(message);
             if (updateGluonProjectResult.status === 403) {
-                message = `Unauthorized: Sorry only a team owner can link a Bitbucket project`;
+                message = `Unauthorized: Sorry only a team member can link a Bitbucket project`;
             }
             throw new QMError(message);
         }
