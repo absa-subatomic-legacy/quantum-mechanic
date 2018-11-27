@@ -14,6 +14,8 @@ import {
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {ConfigureBasicPackage} from "../../commands/packages/ConfigureBasicPackage";
+import {QMColours} from "../../util/QMColour";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 
 @EventHandler("Receive ApplicationCreatedEvent events", `
 subscription ApplicationCreatedEvent {
@@ -67,19 +69,23 @@ subscription ApplicationCreatedEvent {
   }
 }
 `)
-export class ApplicationCreated implements HandleEvent<any> {
+export class ApplicationCreated extends BaseQMEvent implements HandleEvent<any> {
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested ApplicationCreated event: ${JSON.stringify(event.data)}`);
 
-        const applicationCreatedEvent = event.data.ApplicationCreatedEvent[0];
-        if (applicationCreatedEvent.requestConfiguration === true) {
-            return await this.sendConfigurationMessage(ctx, applicationCreatedEvent);
+        try {
+            const applicationCreatedEvent = event.data.ApplicationCreatedEvent[0];
+            if (applicationCreatedEvent.requestConfiguration === true) {
+                return await this.sendConfigurationMessage(ctx, applicationCreatedEvent);
+            }
+
+            logger.info(`ApplicationCreated event will not request configuration`);
+            this.succeedEvent();
+            return await success();
+        } catch {
+            this.failEvent();
         }
-
-        logger.info(`ApplicationCreated event will not request configuration`);
-
-        return await success();
     }
 
     private async sendConfigurationMessage(ctx: HandlerContext, applicationCreatedEvent) {
@@ -92,7 +98,7 @@ export class ApplicationCreated implements HandleEvent<any> {
                 text: attachmentText,
                 fallback: attachmentText,
                 footer: `For more information, please read the ${this.docs("configure-component")}`,
-                color: "#45B254",
+                color:  QMColours.stdGreenyMcAppleStroodle.hex,
                 actions: [
                     buttonForCommand(
                         {text: "Configure Component"},

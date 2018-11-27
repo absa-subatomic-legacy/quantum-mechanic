@@ -12,6 +12,7 @@ import {OCService} from "../../services/openshift/OCService";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 
 @EventHandler("Receive GenericProdRequestedEvent events", `
@@ -22,10 +23,11 @@ subscription GenericProdRequestedEvent {
   }
 }
 `)
-export class GenericProdRequested implements HandleEvent<any> {
+export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any> {
 
     constructor(public ocService = new OCService(),
                 public gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -59,8 +61,10 @@ export class GenericProdRequested implements HandleEvent<any> {
 
             await taskRunner.execute(ctx);
 
+            this.succeedEvent();
             return await qmMessageClient.send("Resources successfully created in production environments.");
         } catch (error) {
+            this.failEvent();
             return await handleQMError(qmMessageClient, error);
         }
     }

@@ -184,7 +184,12 @@ export class ListExistingBitbucketProject
             });
 
         if (!isSuccessCode(updateGluonProjectResult.status)) {
-            throw new QMError(`Failed to update the Subatomic project with the specified Bitbucket details.`);
+            let message = `Failed to link Bitbucket project. ${updateGluonProjectResult.data}`;
+            logger.error(message);
+            if (updateGluonProjectResult.status === 403) {
+                message = `Unauthorized: Sorry only a team member can link a Bitbucket project`;
+            }
+            throw new QMError(message);
         }
     }
 

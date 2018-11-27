@@ -9,6 +9,7 @@ import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import uuid = require("uuid");
 import {QMConfig} from "../../../config/QMConfig";
+import {QMColours} from "../QMColour";
 import {handleQMError, ResponderMessageClient} from "../shared/Error";
 import {HelpCategory} from "./HelpCategory";
 
@@ -58,14 +59,15 @@ export class Help implements HandleCommand<HandlerResult> {
     ];
     public commands: any = [];
     public absaColors = [
-        "#ff780f", "#fa551e",
-        "#f52d28", "#dc0032",
-        "#be0028", "#aa052d",
-        "#960528", "#f05a7d",
-        "#f0325a", "#af144b",
-        "#870a3c", "#640032",
-        "#500a28", "#000000",
+        QMColours.absaEnergy.hex, QMColours.absaPrepared.hex,
+        QMColours.absaAgile.hex, QMColours.absaPassion.hex,
+        QMColours.absaWarmth.hex, QMColours.absaHuman.hex,
+        QMColours.absaGrounded.hex, QMColours.absaCare.hex,
+        QMColours.absaSmile.hex, QMColours.absaSurprise.hex,
+        QMColours.absaCalm.hex, QMColours.absaLuxury.hex,
+        QMColours.absaDepth.hex, QMColours.absaBlack.hex,
     ];
+
     public colorCount = 0;
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {

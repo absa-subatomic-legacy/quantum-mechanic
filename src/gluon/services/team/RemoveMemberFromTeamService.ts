@@ -8,6 +8,7 @@ import {isSuccessCode} from "../../../http/Http";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {MemberRole} from "../../util/member/Members";
+import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 import {kickUserFromSlackChannel, loadChannelIdByChannelName} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";
@@ -36,7 +37,7 @@ export class RemoveMemberFromTeamService {
                     fallback: "Failed to get member details.",
                     footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                         "documentation")}`,
-                    color: "#ffcc00",
+                    color:  QMColours.stdMuddyYellow.hex,
                     mrkdwn_in: ["text"],
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                     actions: [
@@ -53,8 +54,12 @@ export class RemoveMemberFromTeamService {
     public async removeUserFromGluonTeam(memberId: string, actioningMemberId: string, gluonTeamId: string, memberRole: MemberRole = MemberRole.member) {
         const updateTeamResult = await this.gluonService.teams.removeMemberFromTeam(gluonTeamId, memberId, actioningMemberId);
         if (!isSuccessCode(updateTeamResult.status)) {
-            logger.error(`Failed to remove member from team: ${inspect(updateTeamResult)}`);
-            throw new QMError(`Failed to remove member from the team. Server side failure.`);
+            let message = `Failed to remove member to the team. ${updateTeamResult.data}`;
+            logger.error(message);
+            if (updateTeamResult.status === 403) {
+                message = `Unauthorized: Sorry only a team owner can remove members from a team.`;
+            }
+            throw new QMError(message);
         }
     }
 

@@ -10,6 +10,7 @@ import {
 } from "@atomist/automation-client/lib/internal/metadata/decoratorSupport";
 import _ = require("lodash");
 import uuid = require("uuid");
+import {QMColours} from "../QMColour";
 import {BaseQMComand} from "../shared/BaseQMCommand";
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 import {ParameterStatusDisplay} from "./ParameterStatusDisplay";
@@ -99,7 +100,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
                     return await this.handle(ctx);
                 } else {
                     const displayMessage = this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
-                    result.messagePrompt.color = "#00a5ff";
+                    result.messagePrompt.color =  QMColours.stdShySkyBlue.hex;
                     displayMessage.attachments.push(result.messagePrompt);
                     return await ctx.messageClient.respond(displayMessage, {id: this.messagePresentationCorrelationId});
                 }
