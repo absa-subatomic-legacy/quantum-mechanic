@@ -20,6 +20,7 @@ import {
     GluonProjectNameSetter,
     GluonTeamNameParam,
     GluonTeamNameSetter,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
@@ -31,7 +32,7 @@ import {
 @CommandHandler("Kick off a Jenkins build", QMConfig.subatomic.commandPrefix + " jenkins build")
 @Tags("subatomic", "jenkins", "package")
 export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
-    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
+    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, GluonTeamNameSetter {
 
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
@@ -54,6 +55,11 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
     })
     public applicationName: string;
 
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 3,
+    })
+    public openShiftCloud: string;
+
     constructor(public gluonService = new GluonService(),
                 private jenkinsService = new JenkinsService(),
                 private ocService = new OCService()) {
@@ -62,7 +68,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
             const result = await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
             this.succeedCommand();
             return result;
