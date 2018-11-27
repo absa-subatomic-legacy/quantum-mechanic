@@ -1,4 +1,5 @@
 import * as _ from "lodash";
+import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
 import {
     ListExistingBitbucketProject,
     NewBitbucketProject,
@@ -42,7 +43,6 @@ import {NewTeamSlackChannel} from "../team/NewSlackChannel";
 import {RemoveMemberFromTeam} from "../team/RemoveMemberFromTeam";
 import {TagAllLatestImages} from "../team/TagAllLatestImages";
 import {TagLatestImage} from "../team/TagLatestImage";
-import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
 
 export class HelpCategory {
 

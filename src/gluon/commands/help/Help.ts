@@ -10,9 +10,9 @@ import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/Messa
 import uuid = require("uuid");
 import {QMConfig} from "../../../config/QMConfig";
 import {QMColours} from "../../util/QMColour";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {HelpCategory} from "./HelpCategory";
-import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 
 @CommandHandler("Help regarding subatomic commands", QMConfig.subatomic.commandPrefix + " help")
 export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {

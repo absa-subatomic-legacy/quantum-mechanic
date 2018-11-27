@@ -1,7 +1,7 @@
 import * as _ from "lodash";
+import {QMConfig} from "../../../config/QMConfig";
 import {PrometheusClient} from "../../metrics/prometheus/PrometheusClient";
 import {BaseQMHandler} from "./BaseQMHandler";
-import {QMConfig} from "../../../config/QMConfig";
 
 export abstract class BaseQMEvent extends BaseQMHandler {
 

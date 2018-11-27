@@ -7,9 +7,9 @@ import {
 } from "@atomist/automation-client";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import * as _ from "lodash";
+import {QMConfig} from "../../../config/QMConfig";
 import {PrometheusClient} from "../../metrics/prometheus/PrometheusClient";
 import {BaseQMHandler} from "./BaseQMHandler";
-import {QMConfig} from "../../../config/QMConfig";
 
 export abstract class BaseQMComand extends BaseQMHandler implements HandleCommand<HandlerResult> {
 

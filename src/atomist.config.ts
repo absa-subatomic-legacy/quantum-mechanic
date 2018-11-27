@@ -6,6 +6,7 @@ import {
 } from "./gluon/commands/bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "./gluon/commands/bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "./gluon/commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
+import {Help} from "./gluon/commands/help/Help";
 import {KickOffJenkinsBuild} from "./gluon/commands/jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsCredentialsRecreate";
 import {AddSlackDetails} from "./gluon/commands/member/AddSlackDetails";
@@ -62,7 +63,6 @@ import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClos
 import {MembershipRequestCreated} from "./gluon/events/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/events/team/TeamCreated";
 import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
-import {Help} from "./gluon/commands/help/Help";
 
 const apiKey = QMConfig.apiKey;
 const http = QMConfig.http;
