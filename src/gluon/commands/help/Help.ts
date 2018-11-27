@@ -83,7 +83,7 @@ export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {
                 this.succeedCommand();
                 return this.displayCommandToBeRun(ctx);
             } else {
-                this.failCommand();
+                this.succeedCommand();
                 return await this.displayCommands(ctx);
             }
 
