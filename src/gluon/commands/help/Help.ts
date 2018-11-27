@@ -9,12 +9,13 @@ import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import uuid = require("uuid");
 import {QMConfig} from "../../../config/QMConfig";
-import {QMColours} from "../QMColour";
-import {handleQMError, ResponderMessageClient} from "../shared/Error";
+import {QMColours} from "../../util/QMColour";
+import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {HelpCategory} from "./HelpCategory";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 
 @CommandHandler("Help regarding subatomic commands", QMConfig.subatomic.commandPrefix + " help")
-export class Help implements HandleCommand<HandlerResult> {
+export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {
 
     @Parameter({
         description: "Option selected",
@@ -79,12 +80,15 @@ export class Help implements HandleCommand<HandlerResult> {
             if (this.selectedOption === undefined) {
                 return await this.displayCategories(ctx);
             } else if (this.selectedOption.startsWith(QMConfig.subatomic.commandPrefix)) {
+                this.succeedCommand();
                 return this.displayCommandToBeRun(ctx);
             } else {
+                this.failCommand();
                 return await this.displayCommands(ctx);
             }
 
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

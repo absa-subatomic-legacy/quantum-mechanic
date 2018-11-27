@@ -62,7 +62,7 @@ import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClos
 import {MembershipRequestCreated} from "./gluon/events/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/events/team/TeamCreated";
 import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
-import {Help} from "./gluon/util/help/Help";
+import {Help} from "./gluon/commands/help/Help";
 
 const apiKey = QMConfig.apiKey;
 const http = QMConfig.http;
@@ -178,4 +178,6 @@ export const configuration: any = {
     },
 };
 
-PrometheusClient.initializePromClient(configuration);
+if (QMConfig.proMetrics.enabled) {
+    PrometheusClient.initializePromClient(configuration);
+}

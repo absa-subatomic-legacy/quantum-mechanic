@@ -2,46 +2,46 @@ import * as _ from "lodash";
 import {
     ListExistingBitbucketProject,
     NewBitbucketProject,
-} from "../../commands/bitbucket/BitbucketProject";
-import {BitbucketProjectAccessCommand} from "../../commands/bitbucket/BitbucketProjectAccessCommand";
-import {BitbucketProjectRecommendedPracticesCommand} from "../../commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
-import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
-import {JenkinsCredentialsRecreate} from "../../commands/jenkins/JenkinsCredentialsRecreate";
-import {AddSlackDetails} from "../../commands/member/AddSlackDetails";
-import {OnboardMember} from "../../commands/member/OnboardMember";
-import {ConfigureApplicationJenkinsProd} from "../../commands/packages/ConfigureApplicationJenkinsProd";
-import {ConfigureBasicPackage} from "../../commands/packages/ConfigureBasicPackage";
-import {ConfigurePackage} from "../../commands/packages/ConfigurePackage";
-import {CreateApplicationProd} from "../../commands/packages/CreateApplicationProd";
-import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
-import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
-import {PatchBuildConfigBaseImage} from "../../commands/packages/PatchBuildConfigBaseImage";
-import {AssociateTeam} from "../../commands/project/AssociateTeam";
-import {CreateGenericProd} from "../../commands/project/CreateGenericProd";
-import {CreateOpenShiftPvc} from "../../commands/project/CreateOpenShiftPvc";
-import {CreateProject} from "../../commands/project/CreateProject";
-import {CreateProjectProdEnvironments} from "../../commands/project/CreateProjectProdEnvironments";
-import {NewProjectEnvironments} from "../../commands/project/NewProjectEnvironments";
+} from "../bitbucket/BitbucketProject";
+import {BitbucketProjectAccessCommand} from "../bitbucket/BitbucketProjectAccessCommand";
+import {BitbucketProjectRecommendedPracticesCommand} from "../bitbucket/BitbucketProjectRecommendedPracticesCommand";
+import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
+import {JenkinsCredentialsRecreate} from "../jenkins/JenkinsCredentialsRecreate";
+import {AddSlackDetails} from "../member/AddSlackDetails";
+import {OnboardMember} from "../member/OnboardMember";
+import {ConfigureApplicationJenkinsProd} from "../packages/ConfigureApplicationJenkinsProd";
+import {ConfigureBasicPackage} from "../packages/ConfigureBasicPackage";
+import {ConfigurePackage} from "../packages/ConfigurePackage";
+import {CreateApplicationProd} from "../packages/CreateApplicationProd";
+import {LinkExistingApplication} from "../packages/LinkExistingApplication";
+import {LinkExistingLibrary} from "../packages/LinkExistingLibrary";
+import {PatchBuildConfigBaseImage} from "../packages/PatchBuildConfigBaseImage";
+import {AssociateTeam} from "../project/AssociateTeam";
+import {CreateGenericProd} from "../project/CreateGenericProd";
+import {CreateOpenShiftPvc} from "../project/CreateOpenShiftPvc";
+import {CreateProject} from "../project/CreateProject";
+import {CreateProjectProdEnvironments} from "../project/CreateProjectProdEnvironments";
+import {NewProjectEnvironments} from "../project/NewProjectEnvironments";
 import {
     ListProjectDetails,
     ListTeamProjects,
-} from "../../commands/project/ProjectDetails";
-import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
-import {UpdateProjectProdRequest} from "../../commands/project/UpdateProjectProdRequest";
-import {AddConfigServer} from "../../commands/team/AddConfigServer";
-import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
-import {AddOwnerToTeam} from "../../commands/team/AddOwnerToTeam";
-import {CreateMembershipRequestToTeam} from "../../commands/team/CreateMembershipRequestToTeam";
-import {CreateTeam} from "../../commands/team/CreateTeam";
-import {NewDevOpsEnvironment} from "../../commands/team/DevOpsEnvironment";
-import {JoinTeam} from "../../commands/team/JoinTeam";
-import {LinkExistingTeamSlackChannel} from "../../commands/team/LinkExistingTeamSlackChannel";
-import {ListTeamMembers} from "../../commands/team/ListTeamMembers";
-import {NewOrUseTeamSlackChannel} from "../../commands/team/NewOrExistingTeamSlackChannel";
-import {NewTeamSlackChannel} from "../../commands/team/NewSlackChannel";
-import {RemoveMemberFromTeam} from "../../commands/team/RemoveMemberFromTeam";
-import {TagAllLatestImages} from "../../commands/team/TagAllLatestImages";
-import {TagLatestImage} from "../../commands/team/TagLatestImage";
+} from "../project/ProjectDetails";
+import {ReRunProjectProdRequest} from "../project/ReRunProjectProdRequest";
+import {UpdateProjectProdRequest} from "../project/UpdateProjectProdRequest";
+import {AddConfigServer} from "../team/AddConfigServer";
+import {AddMemberToTeam} from "../team/AddMemberToTeam";
+import {AddOwnerToTeam} from "../team/AddOwnerToTeam";
+import {CreateMembershipRequestToTeam} from "../team/CreateMembershipRequestToTeam";
+import {CreateTeam} from "../team/CreateTeam";
+import {NewDevOpsEnvironment} from "../team/DevOpsEnvironment";
+import {JoinTeam} from "../team/JoinTeam";
+import {LinkExistingTeamSlackChannel} from "../team/LinkExistingTeamSlackChannel";
+import {ListTeamMembers} from "../team/ListTeamMembers";
+import {NewOrUseTeamSlackChannel} from "../team/NewOrExistingTeamSlackChannel";
+import {NewTeamSlackChannel} from "../team/NewSlackChannel";
+import {RemoveMemberFromTeam} from "../team/RemoveMemberFromTeam";
+import {TagAllLatestImages} from "../team/TagAllLatestImages";
+import {TagLatestImage} from "../team/TagLatestImage";
 import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
 
 export class HelpCategory {
