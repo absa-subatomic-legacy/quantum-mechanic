@@ -14,6 +14,7 @@ import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive ApplicationProdRequestedEvent events", `
 subscription ApplicationProdRequestedEvent {
@@ -46,6 +47,7 @@ subscription ApplicationProdRequestedEvent {
     teams {
       teamId
       name
+      openShiftCloud
       slackIdentity {
         teamChannel
       }
@@ -86,8 +88,8 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
                 qmMessageClient);
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
-
-            for (const openshiftProd of QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftProd) {
+            const osCloud = EventToGluon.gluonTeam(applicationProdRequestedEvent.teams[0]).openShiftCloud;
+            for (const openshiftProd of QMConfig.subatomic.openshiftClouds[osCloud].openshiftProd) {
                 taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
             }
 
