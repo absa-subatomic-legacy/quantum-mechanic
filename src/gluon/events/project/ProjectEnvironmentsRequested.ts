@@ -19,6 +19,7 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
 subscription ProjectEnvironmentsRequestedEvent {
@@ -35,6 +36,7 @@ subscription ProjectEnvironmentsRequestedEvent {
       slackIdentity {
         teamChannel
       }
+      openShiftCloud
       owners {
         firstName
         domainUsername
@@ -79,10 +81,11 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Provisioning of environment's for project *${environmentsRequestedEvent.project.name}* started:`,
                 this.qmMessageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
+            const osNP = QMConfig.subatomic.openshiftClouds[EventToGluon.gluonTeam(environmentsRequestedEvent.teams[0]).openShiftCloud].openshiftNonProd;
             taskRunner.addTask(
-                new CreateOpenshiftEnvironments(environmentsRequestedEvent, QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd),
+                new CreateOpenshiftEnvironments(environmentsRequestedEvent, osNP),
             ).addTask(
-                new ConfigureJenkinsForProject(environmentsRequestedEvent, QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd),
+                new ConfigureJenkinsForProject(environmentsRequestedEvent, osNP),
             );
 
             await taskRunner.execute(ctx);
