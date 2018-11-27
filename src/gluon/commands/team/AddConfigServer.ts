@@ -14,7 +14,7 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
     GluonTeamNameParam,
-    GluonTeamNameSetter,
+    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
@@ -29,6 +29,11 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
     })
     public teamName: string;
 
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 2,
+    })
+    public openShiftCloud: string;
+
     @Parameter({
         description: "Remote Git repository SSH",
         pattern: /^ssh:\/\/.*$/,
@@ -42,7 +47,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
             return await this.addConfigServer(
                 ctx,
                 this.teamName,

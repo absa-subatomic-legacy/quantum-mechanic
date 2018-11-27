@@ -24,7 +24,7 @@ import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter,
+    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
@@ -57,6 +57,11 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
         selectionMessage: "Please select the package you wish to configure",
     })
     public applicationName: string;
+
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 3,
+    })
+    public openShiftCloud: string;
 
     @Parameter({
         required: false,
@@ -151,7 +156,7 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
 
         const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
-        await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
+        await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
         const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, getHighestPreProdEnvironment().id));
 
