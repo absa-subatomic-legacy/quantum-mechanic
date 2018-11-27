@@ -16,6 +16,7 @@ import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvi
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive DevOpsEnvironmentRequestedEvent events", `
 subscription DevOpsEnvironmentRequestedEvent {
@@ -27,6 +28,7 @@ subscription DevOpsEnvironmentRequestedEvent {
       slackIdentity {
         teamChannel
       }
+      openShiftCloud
       owners {
         firstName
         domainUsername
@@ -62,9 +64,8 @@ export class DevOpsEnvironmentRequested extends BaseQMEvent implements HandleEve
             const teamChannel = devOpsRequestedEvent.team.slackIdentity.teamChannel;
             const taskListMessage = new TaskListMessage(`🚀 Provisioning of DevOps environment for team *${devOpsRequestedEvent.team.name}* started:`, new ChannelMessageClient(ctx).addDestination(teamChannel));
             const taskRunner = new TaskRunner(taskListMessage);
-
             taskRunner.addTask(
-                new CreateTeamDevOpsEnvironment(devOpsRequestedEvent, QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd),
+                new CreateTeamDevOpsEnvironment(devOpsRequestedEvent, QMConfig.subatomic.openshiftClouds[EventToGluon.gluonTeam(devOpsRequestedEvent.team).openShiftCloud].openshiftNonProd),
             ).addTask(
                 new AddJenkinsToDevOpsEnvironment(devOpsRequestedEvent),
             );
