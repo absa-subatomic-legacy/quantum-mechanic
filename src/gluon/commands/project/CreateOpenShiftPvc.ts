@@ -21,7 +21,7 @@ import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter,
+    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
@@ -53,6 +53,11 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     })
     public openShiftProjectNames: string;
 
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 3,
+    })
+    public openShiftCloud: string;
+
     @Parameter({
         description: "a name for your Persistent Volume Claim",
         required: true,
@@ -67,7 +72,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
 
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
             const projectId = _.kebabCase(this.projectName);
 
@@ -86,7 +91,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
                     text: `
 *${pvcName}* PVC successfully created in *${environment}*`,
                     mrkdwn_in: ["text"],
-                    title_link: `${QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.masterUrl}/console/project/${environment}/browse/persistentvolumeclaims/${pvcName}`,
+                    title_link: `${QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd.masterUrl}/console/project/${environment}/browse/persistentvolumeclaims/${pvcName}`,
                     title: `${environment}`,
                     color:  QMColours.stdGreenyMcAppleStroodle.hex,
                 });

@@ -61,17 +61,24 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
 
     public addRecursiveParameterProperty(parameterDetails: RecursiveParameterDetails, propertyKey: string) {
         this.recursiveParameterListNew = this.recursiveParameterListNew !== undefined ? this.recursiveParameterListNew : [];
+        let insertedParameter = false;
+        const newRecursiveParameter = {
+            propertyName: propertyKey,
+            parameterSetter: parameterDetails.setter,
+            selectionMessage: parameterDetails.selectionMessage,
+            forceSet: parameterDetails.forceSet,
+            callOrder: parameterDetails.callOrder,
+        };
         for (let i = 0; i < this.recursiveParameterListNew.length; i++) {
             if (parameterDetails.callOrder < this.recursiveParameterListNew[i].callOrder) {
-                this.recursiveParameterListNew.splice(i, 0, {
-                    propertyName: propertyKey,
-                    parameterSetter: parameterDetails.setter,
-                    selectionMessage: parameterDetails.selectionMessage,
-                    forceSet: parameterDetails.forceSet,
-                    callOrder: parameterDetails.callOrder,
-                });
+                this.recursiveParameterListNew.splice(i, 0, newRecursiveParameter);
+                insertedParameter = true;
                 break;
             }
+        }
+
+        if (!insertedParameter) {
+            this.recursiveParameterListNew.push(newRecursiveParameter);
         }
     }
 
@@ -100,7 +107,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
                     return await this.handle(ctx);
                 } else {
                     const displayMessage = this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
-                    result.messagePrompt.color =  QMColours.stdShySkyBlue.hex;
+                    result.messagePrompt.color = QMColours.stdShySkyBlue.hex;
                     displayMessage.attachments.push(result.messagePrompt);
                     return await ctx.messageClient.respond(displayMessage, {id: this.messagePresentationCorrelationId});
                 }

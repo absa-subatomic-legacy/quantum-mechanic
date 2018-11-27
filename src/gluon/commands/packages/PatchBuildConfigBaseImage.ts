@@ -12,7 +12,7 @@ import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter,
+    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
     ImageNameFromDevOpsParam,
@@ -50,6 +50,11 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
     })
     public imageName: string;
 
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 4,
+    })
+    public openShiftCloud: string;
+
     public buildEnvironmentVariables: { [key: string]: string } = {};
 
     constructor(public gluonService = new GluonService(),
@@ -64,7 +69,7 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
                 qmMessageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             taskRunner.addTask(
-                new PatchPackageBuildConfigImage(this.imageName, this.applicationName, this.projectName, this.teamName, QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd),
+                new PatchPackageBuildConfigImage(this.imageName, this.applicationName, this.projectName, this.teamName, QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd),
             );
 
             await taskRunner.execute(ctx);

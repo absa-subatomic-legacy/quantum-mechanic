@@ -8,7 +8,7 @@ import {OCService} from "../../services/openshift/OCService";
 import {getProjectDevOpsId} from "../../util/project/Project";
 import {
     GluonTeamNameParam,
-    GluonTeamNameSetter,
+    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {ImageNameParam} from "../../util/recursiveparam/OpenshiftParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
@@ -35,6 +35,11 @@ export class TagLatestImage extends RecursiveParameterRequestCommand
     })
     public imageName: string;
 
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 2,
+    })
+    public openShiftCloud: string;
+
     constructor(public gluonService = new GluonService(), private ocService = new OCService()) {
         super();
     }
@@ -53,7 +58,7 @@ export class TagLatestImage extends RecursiveParameterRequestCommand
         const messageId = uuid();
         const devopsEnvironment = getProjectDevOpsId(this.teamName);
         await ctx.messageClient.respond(`Tagging selected image to devops environment *${devopsEnvironment}*...`, {id: messageId});
-        await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
+        await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
         const project = this.ocService.findProject(devopsEnvironment);
         if (project === null) {
             this.failCommand();

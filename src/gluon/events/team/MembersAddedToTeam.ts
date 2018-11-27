@@ -23,7 +23,8 @@ import {
     OCResultError,
     QMError,
 } from "../../util/shared/Error";
-import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails, QMTeam, QMTeamBase} from "../../util/team/Teams";
+import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive MembersAddedToTeamEvent events", `
 subscription MembersAddedToTeamEvent {
@@ -34,6 +35,7 @@ subscription MembersAddedToTeamEvent {
       slackIdentity {
         teamChannel
       }
+      openShiftCloud
     }
     owners{
       firstName
@@ -75,7 +77,7 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
 
             const projects = await this.getListOfTeamProjects(team.name);
 
-            await this.addPermissionsForUserToTeams(team.name, projects, membersAddedToTeamEvent);
+            await this.addPermissionsForUserToTeams(EventToGluon.gluonTeam(team), projects, membersAddedToTeamEvent);
 
             const destination = await addressSlackChannelsFromContext(ctx, team.slackIdentity.teamChannel);
             this.succeedEvent();
@@ -119,11 +121,13 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
         }
     }
 
-    private async addPermissionsForUserToTeams(teamName: string, projects, membersAddedToTeamEvent) {
+    private async addPermissionsForUserToTeams(team: QMTeam, projects, membersAddedToTeamEvent) {
         try {
             const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
-            const devopsProject = getDevOpsEnvironmentDetails(teamName).openshiftProjectId;
+            const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
+            await this.ocService.login(osEnv);
+
+            const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
             await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
             for (const project of projects) {
                 logger.info(`Configuring permissions for project: ${project}`);
@@ -136,7 +140,7 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
                     membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername)),
                 );
                 // Add to openshift environments
-                for (const environment of QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.defaultEnvironments) {
+                for (const environment of osEnv.defaultEnvironments) {
                     const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
                     const projectId = getProjectId(tenant.name, project.name, environment.id);
                     await this.ocService.addTeamMembershipPermissionsToProject(projectId, membersAddedToTeamEvent);

@@ -15,7 +15,7 @@ import {OCService} from "../../services/openshift/OCService";
 import {getJenkinsBitbucketAccessCredentialXML} from "../../util/jenkins/JenkinsCredentials";
 import {
     GluonTeamNameParam,
-    GluonTeamNameSetter,
+    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
@@ -39,6 +39,11 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
     })
     public teamName: string;
 
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 1,
+    })
+    public openShiftCloud: string;
+
     constructor(public gluonService = new GluonService(),
                 private jenkinsService = new JenkinsService(),
                 private ocService = new OCService()) {
@@ -47,7 +52,7 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
             const result = await this.recreateBitbucketJenkinsCredential(ctx, this.teamName);
             this.succeedCommand();
             return result;
