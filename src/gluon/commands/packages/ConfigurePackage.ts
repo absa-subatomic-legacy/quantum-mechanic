@@ -20,7 +20,7 @@ import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter,
+    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
     JenkinsfileNameSetter,
@@ -40,11 +40,11 @@ import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 export class ConfigurePackage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, JenkinsfileNameSetter, OpenshiftTemplateSetter, ImageNameSetter {
 
-    @GluonApplicationNameParam({
-        callOrder: 2,
-        selectionMessage: "Please select the package you wish to configure",
+    @GluonTeamNameParam({
+        callOrder: 0,
+        selectionMessage: "Please select a team associated with the project you wish to configure the package for",
     })
-    public applicationName: string;
+    public teamName: string;
 
     @GluonProjectNameParam({
         callOrder: 1,
@@ -52,26 +52,32 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
     })
     public projectName: string;
 
-    @GluonTeamNameParam({
-        callOrder: 0,
-        selectionMessage: "Please select a team associated with the project you wish to configure the package for",
+    @GluonApplicationNameParam({
+        callOrder: 2,
+        selectionMessage: "Please select the package you wish to configure",
     })
-    public teamName: string;
+    public applicationName: string;
+
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 3,
+        selectionMessage: "",
+    })
+    public openShiftCloud: string;
 
     @ImageNameFromDevOpsParam({
-        callOrder: 3,
+        callOrder: 4,
         description: "Please select the base image for the s2i build",
     })
     public imageName: string;
 
     @OpenShiftTemplateParam({
-        callOrder: 4,
+        callOrder: 5,
         selectionMessage: "Please select the correct openshift template for your package",
     })
     public openshiftTemplate: string;
 
     @JenkinsFileParam({
-        callOrder: 5,
+        callOrder: 6,
         selectionMessage: "Please select the correct jenkinsfile for your package",
     })
     public jenkinsfileName: string;
@@ -123,6 +129,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
                     }),
             );
         }
+
         taskRunner.addTask(
             new ConfigurePackageInJenkins(
                 application,
@@ -133,7 +140,5 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
         await taskRunner.execute(ctx);
 
         return success();
-
     }
-
 }

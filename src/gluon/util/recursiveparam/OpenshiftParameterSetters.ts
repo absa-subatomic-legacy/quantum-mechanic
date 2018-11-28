@@ -30,7 +30,7 @@ export async function setOpenshiftTemplate(
     }
 
     if (!commandHandler.ocService.loggedIn) {
-        await commandHandler.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd, true);
+        await commandHandler.ocService.login(QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].openshiftNonProd, true);
     }
 
     const namespace = getDevOpsEnvironmentDetails(commandHandler.teamName).openshiftProjectId;
@@ -55,6 +55,7 @@ export interface OpenshiftTemplateSetter {
     ocService: OCService;
     teamName: string;
     openshiftTemplate: string;
+    openShiftCloud: string;
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
 
@@ -72,7 +73,7 @@ export async function setImageName(
     }
 
     if (!commandHandler.ocService.loggedIn) {
-        await commandHandler.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd, true);
+        await commandHandler.ocService.login(QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].openshiftNonProd, true);
     }
 
     const images = await commandHandler.ocService.getSubatomicImageStreamTags();
@@ -101,7 +102,7 @@ export async function setImageNameFromDevOps(
     }
 
     if (!commandHandler.ocService.loggedIn) {
-        await commandHandler.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd, true);
+        await commandHandler.ocService.login(QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].openshiftNonProd, true);
     }
 
     const devOpsEnvironment = getDevOpsEnvironmentDetails(commandHandler.teamName);
@@ -142,5 +143,6 @@ export interface ImageNameSetter {
     ocService: OCService;
     imageName: string;
     teamName?: string;
+    openShiftCloud: string;
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
