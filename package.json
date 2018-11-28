@@ -15,7 +15,7 @@
   "dependencies": {
     "@atomist/cli": "^1.0.2",
     "@atomist/automation-client": "1.1.0-master.20181121142425",
-    "@atomist/lifecycle-automation": "^0.11.12",
+    "@atomist/lifecycle-automation": "^0.11.15",
     "@atomist/slack-messages": "^0.12.1",
     "app-root-path": "^2.1.0",
     "axios": "^0.18.0",
