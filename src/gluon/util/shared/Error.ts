@@ -54,6 +54,10 @@ export class QMError extends Error {
             return {
                 text: `❗${this.message}`,
             };
+        } else if (typeof this.slackMessage === "string") {
+            return {
+                text: `❗${this.slackMessage}`,
+            };
         }
         return this.slackMessage;
     }
@@ -77,6 +81,7 @@ export class GitError extends Error {
     constructor(message: string) {
         super(message);
     }
+
     public getSlackMessage() {
         let errorFriendlyMessage = "Failed to interpret Git exception. Please alert your system admin to check the logs and correct the issue accordingly.";
         logger.debug(`Attempting to resolve slack message for GitError`);
@@ -84,14 +89,14 @@ export class GitError extends Error {
         const regex: RegExp = /-{5,}\s{1,}remote:([\s\S]*?)remote:\s-{1,}/;
         const match = regex.exec(this.message);
         if (match !== null) {
-                errorFriendlyMessage = match[1];
-                errorFriendlyMessage = errorFriendlyMessage.replace("remote: ", "");
-                logger.debug(`Derived error message from Error for GitError: ${errorFriendlyMessage}`);
+            errorFriendlyMessage = match[1];
+            errorFriendlyMessage = errorFriendlyMessage.replace("remote: ", "");
+            logger.debug(`Derived error message from Error for GitError: ${errorFriendlyMessage}`);
         }
         return {
-                text: `❗${errorFriendlyMessage}`,
-                };
-        }
+            text: `❗${errorFriendlyMessage}`,
+        };
+    }
 }
 
 export interface QMMessageClient {
