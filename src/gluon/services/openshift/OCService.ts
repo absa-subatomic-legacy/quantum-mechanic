@@ -25,6 +25,7 @@ import {QMError, QMErrorType} from "../../util/shared/Error";
 import {retryFunction} from "../../util/shared/RetryFunction";
 import {QMTeam} from "../../util/team/Teams";
 import {OCImageService} from "./OCImageService";
+import {GluonService} from "../gluon/GluonService";
 
 export class OCService {
     get loggedIn(): boolean {
@@ -54,7 +55,7 @@ export class OCService {
     private quotaLoader: QuotaLoader = new QuotaLoader();
     private baseProjectTemplateLoader: BaseProjectTemplateLoader = new BaseProjectTemplateLoader();
 
-    constructor(private ocImageService = new OCImageService()) {
+    constructor(private ocImageService = new OCImageService(), private gluonService = new GluonService()) {
     }
 
     public async login(openshiftDetails: OpenShiftConfig, softLogin = false) {
@@ -508,16 +509,23 @@ export class OCService {
         return await OCClient.createPvc(pvcName, namespace);
     }
 
-    public async initilizeProjectWithDefaultProjectTemplate(projectId: string, apply = true) {
+    public async initilizeProjectWithDefaultProjectTemplate(projectId: string, projectName: string, apply = true) {
+
+        const project = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
+        const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+
         const template = this.baseProjectTemplateLoader.getTemplate();
         if (!_.isEmpty(template.objects)) {
             logger.info(`Applying base project template to ${projectId}`);
+
             const fileName = Date.now() + ".json";
             fs.writeFileSync(`/tmp/${fileName}`, JSON.stringify(template));
+
             // log client into non prod to process template - hacky! Need to fix.
-            await OCClient.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.auth.token);
+            await OCClient.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.auth.token);
             const processedTemplateResult = await OCCommon.commonCommand("process", `-f /tmp/${fileName}`);
             const result = await this.applyResourceFromDataInNamespace(JSON.parse(processedTemplateResult.output), projectId, apply);
+
             if (!isSuccessCode(result.status)) {
                 logger.error(`Template failed to create properly: ${inspect(result)}`);
                 throw new QMError("Failed to create all items in base project template.");
