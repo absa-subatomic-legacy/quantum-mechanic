@@ -57,13 +57,13 @@ export function getJenkinsNexusCredential() {
     };
 }
 
-export function getJenkinsDockerCredential() {
+export function getJenkinsDockerCredential(openShiftCloud: string) {
     return {
         "": "0",
         "credentials": {
             scope: "GLOBAL",
             id: "docker-registry-ip",
-            secret: `${QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.dockerRepoUrl}`,
+            secret: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}`,
             description: "IP For internal docker registry",
             $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
         },
