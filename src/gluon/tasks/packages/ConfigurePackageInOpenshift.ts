@@ -15,7 +15,7 @@ import {
 } from "../../util/packages/Applications";
 import {getProjectDevOpsId, getProjectId} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
-import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -52,7 +52,11 @@ export class ConfigurePackageInOpenshift extends Task {
         logger.debug(`Using owning team DevOps project: ${teamDevOpsProjectId}`);
 
         if (this.packageDetails.packageType === ApplicationType.DEPLOYABLE.toString()) {
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd);
+
+            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.packageDetails.projectName);
+            const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
             const appBuildName = getBuildConfigName(this.packageDetails.projectName, this.packageDetails.packageName);
             await this.createApplicationImageStream(appBuildName, teamDevOpsProjectId);
 
@@ -62,11 +66,10 @@ export class ConfigurePackageInOpenshift extends Task {
 
             await this.taskListMessage.succeedTask(this.TASK_CREATE_BUILD_CONFIG);
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.packageDetails.projectName);
             logger.info(`Trying to find tenant: ${project.owningTenant}`);
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
             logger.info(`Found tenant: ${tenant}`);
-            await this.createApplicationOpenshiftResources(tenant.name, project.name, this.packageDetails.packageName);
+            await this.createApplicationOpenshiftResources(tenant.name, project.name, this.packageDetails.packageName, owningTeam.openShiftCloud);
 
             await this.taskListMessage.succeedTask(this.TASK_ADD_RESOURCES_TO_ENVIRONMENTS);
         }
@@ -149,9 +152,9 @@ export class ConfigurePackageInOpenshift extends Task {
             true);  // TODO clean up this hack - cannot be a boolean (magic)
     }
 
-    private async createApplicationOpenshiftResources(tenantName: string, projectName: string, applicationName: string): Promise<HandlerResult> {
+    private async createApplicationOpenshiftResources(tenantName: string, projectName: string, applicationName: string, openShiftCloud: string): Promise<HandlerResult> {
 
-        for (const environment of QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftNonProd.defaultEnvironments) {
+        for (const environment of QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.defaultEnvironments) {
             const projectId = getProjectId(tenantName, projectName, environment.id);
             const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);
