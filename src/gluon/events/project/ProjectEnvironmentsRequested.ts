@@ -20,6 +20,10 @@ import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {EventToGluon} from "../../util/transform/EventToGluon";
+import {QMTeam} from "../../util/team/Teams";
+import {OCService} from "../../services/openshift/OCService";
+import {GluonService} from "../../services/gluon/GluonService";
+import {QMProject} from "../../util/project/Project";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
 subscription ProjectEnvironmentsRequestedEvent {
@@ -70,6 +74,10 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
 
     private qmMessageClient: ChannelMessageClient;
 
+    constructor( public gluonService = new GluonService()) {
+        super();
+    }
+
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested ProjectEnvironmentsRequestedEvent event: ${JSON.stringify(event.data)}`);
 
@@ -78,10 +86,13 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
         this.qmMessageClient = this.createMessageClient(ctx, environmentsRequestedEvent.teams);
 
         try {
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(environmentsRequestedEvent.project.name);
+            const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Provisioning of environment's for project *${environmentsRequestedEvent.project.name}* started:`,
                 this.qmMessageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
-            const osNP = QMConfig.subatomic.openshiftClouds[EventToGluon.gluonTeam(environmentsRequestedEvent.teams[0]).openShiftCloud].openshiftNonProd;
+            const osNP = QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd;
             taskRunner.addTask(
                 new CreateOpenshiftEnvironments(environmentsRequestedEvent, osNP),
             ).addTask(

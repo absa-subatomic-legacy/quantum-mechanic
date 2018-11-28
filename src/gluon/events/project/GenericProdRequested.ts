@@ -14,6 +14,8 @@ import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {QMTeam} from "../../util/team/Teams";
+import {QMProject} from "../../util/project/Project";
 
 @EventHandler("Receive GenericProdRequestedEvent events", `
 subscription GenericProdRequestedEvent {
@@ -45,6 +47,8 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
 
         try {
             const project = genericProdRequest.project;
+            const qmProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(project.name);
+            const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(qmProject.owningTeam.teamId);
 
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
@@ -55,7 +59,7 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            for (const openshiftProd of QMConfig.subatomic.openshiftClouds["ab-cloud"].openshiftProd) {
+            for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
                 taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
             }
 

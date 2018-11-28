@@ -15,6 +15,7 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {EventToGluon} from "../../util/transform/EventToGluon";
+import {QMTeam} from "../../util/team/Teams";
 
 @EventHandler("Receive ApplicationProdRequestedEvent events", `
 subscription ApplicationProdRequestedEvent {
@@ -78,6 +79,8 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
         try {
             const project = applicationProdRequestedEvent.project;
 
+            const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.tenant.tenantId);
 
             const applicationProdRequest = await this.gluonService.prod.application.getApplicationProdRequestById(applicationProdRequestedEvent.applicationProdRequest.applicationProdRequestId);
@@ -88,8 +91,7 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
                 qmMessageClient);
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
-            const osCloud = EventToGluon.gluonTeam(applicationProdRequestedEvent.teams[0]).openShiftCloud;
-            for (const openshiftProd of QMConfig.subatomic.openshiftClouds[osCloud].openshiftProd) {
+            for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
                 taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
             }
 
