@@ -56,7 +56,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         await this.taskListMessage.succeedTask(this.TASK_TAG_TEMPLATE);
 
-        await this.createJenkinsDeploymentConfig(projectId);
+        await this.createJenkinsDeploymentConfig(projectId, openShiftCloud);
 
         await this.createJenkinsServiceAccount(projectId);
 
@@ -93,9 +93,9 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         await this.ocService.applyResourceFromDataInNamespace(jenkinsTemplate, projectId);
     }
 
-    private async createJenkinsDeploymentConfig(projectId: string) {
+    private async createJenkinsDeploymentConfig(projectId: string, openShiftCloud: string) {
         logger.info("Processing Jenkins QMTemplate...");
-        const jenkinsTemplateResultJSON = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId);
+        const jenkinsTemplateResultJSON = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId, openShiftCloud);
         logger.debug(`Processed Jenkins Template: ${jenkinsTemplateResultJSON.output}`);
 
         try {
