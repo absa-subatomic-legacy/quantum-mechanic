@@ -18,7 +18,7 @@ import {QMMemberBase} from "../../util/member/Members";
 import {QMProject, QMProjectBase} from "../../util/project/Project";
 import {
     GluonApplicationNameParam,
-    GluonApplicationNameSetter,
+    GluonApplicationNameSetter, GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
     GluonTeamNameSetter,
@@ -43,17 +43,17 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
     })
     public teamName: string;
 
+    @GluonProjectNameParam({
+        callOrder: 1,
+        selectionMessage: "Please select the owning project of the application you wish to deploy to prod",
+    })
+    public projectName: string;
+
     @GluonApplicationNameParam({
         callOrder: 2,
         selectionMessage: "Please select the application you wish to deploy to prod",
     })
     public applicationName: string;
-
-    @GluonApplicationNameParam({
-        callOrder: 1,
-        selectionMessage: "Please select the owning project of the application you wish to deploy to prod",
-    })
-    public projectName: string;
 
     private teamMembershipMessages: TeamMembershipMessages = new TeamMembershipMessages();
 
