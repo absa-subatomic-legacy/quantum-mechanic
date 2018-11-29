@@ -46,7 +46,7 @@ describe("Create Team test", () => {
             messageClient: new TestMessageClient(),
         };
 
-        await subject.handle(fakeContext);
+        await subject.runCommand(fakeContext);
 
         assert.equal(fakeContext.messageClient.textMsg.length, 0);
     });
@@ -88,7 +88,7 @@ describe("Create Team test", () => {
             messageClient: new TestMessageClient(),
         };
 
-        await subject.handle(fakeContext);
+        await subject.runCommand(fakeContext);
         assert(fakeContext.messageClient.textMsg[0].text === "❗Failed to create team since the team name is already in use. Please retry using a different team name.");
     });
 });
