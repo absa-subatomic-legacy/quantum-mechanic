@@ -29,9 +29,9 @@ Here is an example `local.json`:
         "openshiftNonProd": {
           "name": "nonprod",
           "dockerRepoUrl": "172.30.1.1:5000",
-          "masterUrl": "https://192.168.64.11:8443",
+          "masterUrl": "<minishift ip>",
           "auth": {
-            "token": "xxxIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2yyyWljLXRva2VuLTZmNGdyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InN1YmF0b21pYyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImIwZjkzODM4LWRkMGQtMTFlOC1hZmVjLTJlNzY5ZTE4MTcyYSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpzdWJhdG9taWM6c3ViYXRvbWljIn0.kIVtEaFoN0GL-X-vN1XzvFmJ7JzR9YSTdL77e1jQiGesHsKSAYoSM2G_mBro800vZiriDbpBVBtGXZBD0J68JqpDelHuHqbyIHrveDKSikknLbqDhtnrfLZRCrcG07DjxQ19RyTGFu8tZzRSNXZEBiq5Ip7YIf9HSHLoyQ4avqh3LbOzCpqWilMaV6mLFo4pNdejiwGncf12eQrCEqbHG5dZq54jPv77nfBggcjPrtGxWdCFkyFxlH6R09PEFADMawfDc6_380wg317rfPcUhyJ5tmPpYF8wIGeHcygeDLLa-EnYoUkTuDOvi9aDkuVPhfYgcYTl7fsfdMj3eZJbwQ"
+            "token": "<subatomic service account token>"
           },
           "defaultEnvironments": [
             {
@@ -52,9 +52,9 @@ Here is an example `local.json`:
           {
             "name": "prod-a",
             "dockerRepoUrl": "172.30.1.1:5000",
-            "masterUrl": "https://192.168.64.11:8443",
+            "masterUrl": "<minishift ip>",
             "auth": {
-              "token": "xxxiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5yyyaWMiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoic3ViYXRvbWljLXRva2VuLTZmNGdyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InN1YmF0b21pYyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImIwZjkzODM4LWRkMGQtMTFlOC1hZmVjLTJlNzY5ZTE4MTcyYSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpzdWJhdG9taWM6c3ViYXRvbWljIn0.kIVtEaFoN0GL-X-vN1XzvFmJ7JzR9YSTdL77e1jQiGesHsKSAYoSM2G_mBro800vZiriDbpBVBtGXZBD0J68JqpDelHuHqbyIHrveDKSikknLbqDhtnrfLZRCrcG07DjxQ19RyTGFu8tZzRSNXZEBiq5Ip7YIf9HSHLoyQ4avqh3LbOzCpqWilMaV6mLFo4pNdejiwGncf12eQrCEqbHG5dZq54jPv77nfBggcjPrtGxWdCFkyFxlH6R09PEFADMawfDc6_380wg317rfPcUhyJ5tmPpYF8wIGeHcygeDLLa-EnYoUkTuDOvi9aDkuVPhfYgcYTl7fsfdMj3eZJbwQ"
+              "token": "<subatomic service account token>"
             },
             "defaultEnvironments": [
               {
@@ -69,29 +69,32 @@ Here is an example `local.json`:
     "bitbucket": {
       "baseUrl": "https://bitbucket.subatomic.local",
       "restUrl": "https://bitbucket.subatomic.local/rest",
-      "caPath": "/Users/andre/Projects/Subatomic/local-hadron-collider/minishift-addons/subatomic/certs/subatomic.ca.crt",
+      "caPath": "<local-hadron-collider>/minishift-addons/subatomic/certs/subatomic-ca-chain.pem",
       "auth": {
         "username": "subatomic",
         "password": "subatomic",
         "email": "subatomic@local"
       },
-      "sshPort": 30999,
-      "cicdPrivateKeyPath": "/Users/andre/Projects/Subatomic/laboratory/jenkins/cicd.key",
-      "cicdKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCzuPsKSdUwMVw7qQsNY0DQ0jCD3nAJSYyyyiEfk1G7PDRyptXspWRSvkhk8ovijVa7IeoYGLGxfGjF+gwO0dpyr/p8bX7t2+N0X0FZbkU7zjKJ5TrSgJuheVi7r1MO16Zr3k0uyRNDSDKPRt2IDmjRT9y6/ofhvFMn7JrMXkHpRYIJJQ/H2py63qYQatCpi38znBfke5fFoBK4L4/vALbH/Gjqj1J5Uadn8inGyrL0WxohWuhwk/K/bwOSw0LNO8bQ5lAmPgPgJYyA4Plm0onPLp1MZcO/Zj5UjEbmf3w+p2/Th0z6LxA0ytIedTYk8lz35h1yuINd1sp2VmiYS10pqJ1HW/3Mx7McwA8tLsuxKjYmOw4sIsunS+GQPPJbVQrB8ekx2CkD/nwf6fyH+RqtIQ6UBo+9013KwJKOd4qEGkKEN3kBzNoamOvfHvJROX7DQJKRux2/qJXggxJ8F7u0Hj5bSrhYbRNV9T9IfJPGWrJm56V+CbqA0mm7FmSuz2+EeUd3h5R8fxju75gbqFsCLnpuDhhUKxE2PMyRqAAaJ7AZYdXXl8NeNbWEPg/GgyEx4not76ibBDggkEjfYxYSU3689uVMhCv+VN2h6ew== Subatomic CI/CD"
+      "sshPort": "<bitbucket ssh port>",
+      "cicdPrivateKeyPath": "<laboratory>/jenkins/cicd.key",
+      "cicdKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCzuPsKSdUwMVw7qQsNY0DQ0jCD3nAJSYoU7yHTgE2MLsRznNpec2dhjkzrgkWULXZlzFqf7MIJheYoIxHeoJzxrV+3nKT99FyFHSWJiEfk1G7PDRyptXspWRSvkhk8ovijVa7IeoYGLGxfGjF+gwO0dpyr/p8bX7t2+N0X0FZbkU7zjKJ5TrSgJuheVi7r1MO16Zr3k0uyRNDSDKPRt2IDmjRT9y6/ofhvFMn7JrMXkHpRYIJJQ/H2py63qYQatCpi38znBfke5fFoBK4L4/vALbH/Gjqj1J5Uadn8inGyrL0WxohWuhwk/K/bwOSw0LNO8bQ5lAmPgPgJYyA4Plm0onPLp1MZcO/Zj5UjEbmf3w+p2/Th0z6LxA0ytIedTYk8lz35h1yuINd1sp2VmiYS10pqJ1HW/3Mx7McwA8tLsuxKjYmOw4sIsunS+GQPPJbVQrB8ekx2CkD/nwf6fyH+RqtIQ6UBo+9013KwJKOd4qEGkKEN3kBzNoamOvfHvJROX7DQJKRux2/qJXggxJ8F7u0Hj5bSrhYbRNV9T9IfJPGWrJm56V+CbqA0mm7FmSuz2+EeUd3h5R8fxju75gbqFsCLnpuDhhUKxE2PMyRqAAaJ7AZYdXXl8NeNbWEPg/GgyEx4not76ibBDggkEjfYxYSU3689uVMhCv+VN2h6ew== Subatomic CI/CD"
     },
     "nexus": {
       "baseUrl": "https://nexus.subatomic.local"
     },
     "maven": {
-      "settingsPath": "/Users/andre/Projects/Subatomic/quantum-mechanic/config/settings.xml"
+      "settingsPath": "<maven settings>/settings.xml"
     },
     "docs": {
       "baseUrl": "http://subatomic.bison.ninja"
+    },
+    "plugins": {
+      "directory": "<plugins directory>"
     }
   },
-  "teamId": "TCZLW7AT0",
-  "apiKey": "XXX637B9E211EC3B77yyy3F4C98520XXXX",
-  // lifecycle configuration
+  "teamId": "<team Id>",
+  "apiKey": "<Atomist workspace apiKey>",
+  //lifecycyle configuration
   "lifecycles": {
     "push": {
       "configuration": {
@@ -114,14 +117,13 @@ Here is an example `local.json`:
     }
   },
   "fingerprints": {
-    "data": {
-    }
+    "data": {}
   },
   "http": {
     "enabled": true,
     "auth": {
       "basic": {
-        "enabled": false,
+        "enabled": true,
         "username": "user",
         "password": "password"
       },
@@ -130,13 +132,7 @@ Here is an example `local.json`:
       }
     }
   }
-,
-  "cluster": {
-    "enabled": false,
-    "workers": 1
-  }
 }
-
 ```
 
 Replace the relevant values above:
