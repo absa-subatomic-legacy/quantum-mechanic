@@ -26,34 +26,34 @@ import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, ImageNameSetter {
 
-    @GluonApplicationNameParam({
-        callOrder: 2,
-        selectionMessage: "Please select the package you wish to configure",
-    })
-    public applicationName: string;
-
-    @GluonProjectNameParam({
-        callOrder: 1,
-        selectionMessage: "Please select the owning project of the package you wish to configure",
-    })
-    public projectName: string;
-
     @GluonTeamNameParam({
         callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to configure the package for",
     })
     public teamName: string;
 
-    @ImageNameFromDevOpsParam({
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 1,
+    })
+    public openShiftCloud: string;
+
+    @GluonProjectNameParam({
+        callOrder: 2,
+        selectionMessage: "Please select the owning project of the package you wish to configure",
+    })
+    public projectName: string;
+
+    @GluonApplicationNameParam({
         callOrder: 3,
+        selectionMessage: "Please select the package you wish to configure",
+    })
+    public applicationName: string;
+
+    @ImageNameFromDevOpsParam({
+        callOrder: 4,
         description: "Base image for s2i build",
     })
     public imageName: string;
-
-    @GluonTeamOpenShiftCloudParam({
-        callOrder: 4,
-    })
-    public openShiftCloud: string;
 
     public buildEnvironmentVariables: { [key: string]: string } = {};
 
