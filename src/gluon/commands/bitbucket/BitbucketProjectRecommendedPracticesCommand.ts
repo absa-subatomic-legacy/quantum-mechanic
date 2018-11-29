@@ -27,17 +27,17 @@ import {isUserAMemberOfTheTeam} from "../../util/team/Teams";
 export class BitbucketProjectRecommendedPracticesCommand extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
-    @GluonProjectNameParam({
-        callOrder: 1,
-        selectionMessage: "Please select the project you wish to configure the Bitbucket project for",
-    })
-    public projectName: string;
-
     @GluonTeamNameParam({
         callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to configure the Bitbucket project for",
     })
     public teamName: string;
+
+    @GluonProjectNameParam({
+        callOrder: 1,
+        selectionMessage: "Please select the project you wish to configure the Bitbucket project for",
+    })
+    public projectName: string;
 
     private teamMembershipMessages: TeamMembershipMessages = new TeamMembershipMessages();
 
