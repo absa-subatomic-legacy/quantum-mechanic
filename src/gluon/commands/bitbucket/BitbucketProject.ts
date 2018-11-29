@@ -106,17 +106,18 @@ export class ListExistingBitbucketProject
     })
     public bitbucketProjectKey: string;
 
+    @GluonTeamNameParam({
+        callOrder: 0,
+        selectionMessage: "Please select a team associated with the project you wish to create a Bitbucket project for",
+        forceSet: false,
+    })
+
     @GluonProjectNameParam({
         callOrder: 1,
         selectionMessage: "Please select the project you wish to link a Bitbucket project to",
     })
     public projectName: string;
 
-    @GluonTeamNameParam({
-        callOrder: 0,
-        selectionMessage: "Please select a team associated with the project you wish to create a Bitbucket project for",
-        forceSet: false,
-    })
     public teamName: string;
 
     constructor(public gluonService = new GluonService(),
