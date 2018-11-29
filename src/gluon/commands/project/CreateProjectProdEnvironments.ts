@@ -23,18 +23,18 @@ import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 export class CreateProjectProdEnvironments extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
-    @GluonProjectNameParam({
-        callOrder: 1,
-        selectionMessage: "Please select the projects you wish to provision the production environments for",
-    })
-    public projectName: string = null;
-
     @GluonTeamNameParam({
         callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to provision the production environments for",
         forceSet: false,
     })
     public teamName: string = null;
+
+    @GluonProjectNameParam({
+        callOrder: 1,
+        selectionMessage: "Please select the projects you wish to provision the production environments for",
+    })
+    public projectName: string = null;
 
     constructor(public gluonService = new GluonService()) {
         super();
