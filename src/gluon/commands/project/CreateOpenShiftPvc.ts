@@ -28,6 +28,8 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {getProjectId, QMProject} from "../../util/project/Project";
+import {QMTenant} from "../../util/shared/Tenants";
 
 @CommandHandler("Create a new OpenShift Persistent Volume Claim", QMConfig.subatomic.commandPrefix + " create openshift pvc")
 @Tags("subatomic", "project", "other")
@@ -40,23 +42,24 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     })
     public teamName: string;
 
-    @GluonProjectNameParam({
+    @GluonTeamOpenShiftCloudParam({
         callOrder: 1,
+    })
+    public openShiftCloud: string;
+
+    @GluonProjectNameParam({
+        callOrder: 2,
         selectionMessage: `Please select the project, whose OpenShift environments the PVCs will be created in`,
     })
     public projectName: string;
 
     @RecursiveParameter({
-        callOrder: 2,
+        callOrder: 3,
         selectionMessage: "Please select the project environment(s) to create the PVCs in",
         setter: setProjectForPvc,
     })
     public openShiftProjectNames: string;
 
-    @GluonTeamOpenShiftCloudParam({
-        callOrder: 3,
-    })
-    public openShiftCloud: string;
 
     @Parameter({
         description: "a name for your Persistent Volume Claim",
@@ -74,10 +77,16 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
 
             await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
-            const projectId = _.kebabCase(this.projectName);
+            const qmProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+
+            const qmTenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(qmProject.owningTenant);
 
             if (this.openShiftProjectNames === "all") {
-                this.openShiftProjectNames = `${projectId}-dev,${projectId}-sit,${projectId}-uat`;
+                this.openShiftProjectNames = "";
+                for (const environment of QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd.defaultEnvironments) {
+                    this.openShiftProjectNames += getProjectId(qmTenant.name, qmProject.name, environment.id) + ",";
+                }
+                this.openShiftProjectNames.substr(0, this.openShiftProjectNames.length - 1);
             }
 
             const pvcName = _.kebabCase(this.pvcName).toLowerCase();
@@ -93,7 +102,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
                     mrkdwn_in: ["text"],
                     title_link: `${QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd.masterUrl}/console/project/${environment}/browse/persistentvolumeclaims/${pvcName}`,
                     title: `${environment}`,
-                    color:  QMColours.stdGreenyMcAppleStroodle.hex,
+                    color: QMColours.stdGreenyMcAppleStroodle.hex,
                 });
             }
 
@@ -114,7 +123,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
                 fallback: `Using PVCs`,
                 text: `
 Now that your PVCs have been created, you can add this PVC as storage to an application. Follow the Subatomic documentation for more details on how to add storage.`,
-                color:  QMColours.stdShySkyBlue.hex,
+                color: QMColours.stdShySkyBlue.hex,
                 mrkdwn_in: ["text"],
                 thumb_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/OpenShift-LogoType.svg/959px-OpenShift-LogoType.svg.png",
                 footer: `For more information, please read the ${this.docs()}`,
@@ -132,30 +141,33 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
 }
 
 async function setProjectForPvc(ctx: HandlerContext, commandHandler: CreateOpenShiftPvc, selectionMessage: string) {
-    const projectId = _.kebabCase(commandHandler.projectName);
 
-    const msg: SlackMessage = {
-        text: selectionMessage,
-        attachments: [{
+    const qmProject: QMProject = await commandHandler.gluonService.projects.gluonProjectFromProjectName(commandHandler.projectName);
+
+    const qmTenant: QMTenant = await commandHandler.gluonService.tenants.gluonTenantFromTenantId(qmProject.owningTenant);
+
+    const options = [{value: "all", text: "All environments"}];
+
+    for (const environment of QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].openshiftNonProd.defaultEnvironments) {
+        const envId = getProjectId(qmTenant.name, qmProject.name, environment.id);
+        options.push(
+            {
+                value: envId,
+                text: envId,
+            },
+        );
+    }
+
+    return {
+        setterSuccess: false,
+        messagePrompt: {
+            text: selectionMessage,
             fallback: "Please select a project",
             actions: [
-                menuForCommand({
-                        text: "Select environment(s)", options:
-                            [
-                                {value: "all", text: "All environments"},
-                                {
-                                    value: `${projectId}-dev`,
-                                    text: `${projectId}-dev`,
-                                },
-                                {
-                                    value: `${projectId}-sit`,
-                                    text: `${projectId}-sit`,
-                                },
-                                {
-                                    value: `${projectId}-uat`,
-                                    text: `${projectId}-uat`,
-                                },
-                            ],
+                menuForCommand(
+                    {
+                        text: "Select environment(s)",
+                        options,
                     },
                     commandHandler, "openShiftProjectNames",
                     {
@@ -164,8 +176,6 @@ async function setProjectForPvc(ctx: HandlerContext, commandHandler: CreateOpenS
                         pvcName: commandHandler.pvcName,
                     }),
             ],
-        }],
+        },
     };
-
-    return await ctx.messageClient.respond(msg);
 }
