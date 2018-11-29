@@ -151,7 +151,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
-        const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, getHighestPreProdEnvironment().id));
+        const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(this.openShiftCloud).id));
 
         const resources = await this.genericOpenshiftResourceService.getAllPromotableResources(
             allResources,

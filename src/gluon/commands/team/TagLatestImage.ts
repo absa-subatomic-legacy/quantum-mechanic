@@ -29,16 +29,16 @@ export class TagLatestImage extends RecursiveParameterRequestCommand
     })
     public teamName: string;
 
-    @ImageNameParam({
+    @GluonTeamOpenShiftCloudParam({
         callOrder: 1,
+    })
+    public openShiftCloud: string;
+
+    @ImageNameParam({
+        callOrder: 2,
         selectionMessage: "Please select the image you would like tagged to your DevOps environment",
     })
     public imageName: string;
-
-    @GluonTeamOpenShiftCloudParam({
-        callOrder: 2,
-    })
-    public openShiftCloud: string;
 
     constructor(public gluonService = new GluonService(), private ocService = new OCService()) {
         super();

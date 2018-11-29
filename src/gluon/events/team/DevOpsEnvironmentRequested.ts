@@ -64,8 +64,9 @@ export class DevOpsEnvironmentRequested extends BaseQMEvent implements HandleEve
             const teamChannel = devOpsRequestedEvent.team.slackIdentity.teamChannel;
             const taskListMessage = new TaskListMessage(`🚀 Provisioning of DevOps environment for team *${devOpsRequestedEvent.team.name}* started:`, new ChannelMessageClient(ctx).addDestination(teamChannel));
             const taskRunner = new TaskRunner(taskListMessage);
+            const openShiftCloud = EventToGluon.gluonTeam(devOpsRequestedEvent.team).openShiftCloud;
             taskRunner.addTask(
-                new CreateTeamDevOpsEnvironment(devOpsRequestedEvent, QMConfig.subatomic.openshiftClouds[EventToGluon.gluonTeam(devOpsRequestedEvent.team).openShiftCloud].openshiftNonProd),
+                new CreateTeamDevOpsEnvironment(devOpsRequestedEvent, QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd),
             ).addTask(
                 new AddJenkinsToDevOpsEnvironment(devOpsRequestedEvent),
             );
