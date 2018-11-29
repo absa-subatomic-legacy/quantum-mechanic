@@ -12,10 +12,10 @@ import {OCService} from "../../services/openshift/OCService";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {QMProject} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
-import {QMProject} from "../../util/project/Project";
 
 @EventHandler("Receive GenericProdRequestedEvent events", `
 subscription GenericProdRequestedEvent {

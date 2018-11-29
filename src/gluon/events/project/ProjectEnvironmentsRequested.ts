@@ -12,18 +12,18 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
 import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
+import {GluonService} from "../../services/gluon/GluonService";
+import {OCService} from "../../services/openshift/OCService";
 import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsForProject";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {QMProject} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
-import {EventToGluon} from "../../util/transform/EventToGluon";
 import {QMTeam} from "../../util/team/Teams";
-import {OCService} from "../../services/openshift/OCService";
-import {GluonService} from "../../services/gluon/GluonService";
-import {QMProject} from "../../util/project/Project";
+import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
 subscription ProjectEnvironmentsRequestedEvent {

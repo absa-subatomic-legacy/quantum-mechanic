@@ -14,8 +14,8 @@ import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
-import {EventToGluon} from "../../util/transform/EventToGluon";
 import {QMTeam} from "../../util/team/Teams";
+import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive ApplicationProdRequestedEvent events", `
 subscription ApplicationProdRequestedEvent {

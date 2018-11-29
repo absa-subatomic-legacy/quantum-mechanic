@@ -15,6 +15,7 @@ import {isSuccessCode} from "../../../http/Http";
 import {QMTemplate} from "../../../template/QMTemplate";
 import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
 import {QMApplication} from "../../services/gluon/ApplicationService";
+import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -28,7 +29,6 @@ import {GitError, QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam, QMTeamBase} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
-import {GluonService} from "../../services/gluon/GluonService";
 
 export class ConfigurePackageInJenkins extends Task {
 

@@ -16,6 +16,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
+import {getProjectId, QMProject} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     GluonProjectNameParam,
@@ -28,7 +29,6 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
-import {getProjectId, QMProject} from "../../util/project/Project";
 import {QMTenant} from "../../util/shared/Tenants";
 
 @CommandHandler("Create a new OpenShift Persistent Volume Claim", QMConfig.subatomic.commandPrefix + " create openshift pvc")
@@ -59,7 +59,6 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
         setter: setProjectForPvc,
     })
     public openShiftProjectNames: string;
-
 
     @Parameter({
         description: "a name for your Persistent Volume Claim",

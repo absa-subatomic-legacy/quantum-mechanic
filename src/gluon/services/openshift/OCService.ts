@@ -24,8 +24,8 @@ import {QuotaLoader} from "../../util/resources/QuotaLoader";
 import {QMError, QMErrorType} from "../../util/shared/Error";
 import {retryFunction} from "../../util/shared/RetryFunction";
 import {QMTeam} from "../../util/team/Teams";
-import {OCImageService} from "./OCImageService";
 import {GluonService} from "../gluon/GluonService";
+import {OCImageService} from "./OCImageService";
 
 export class OCService {
     get loggedIn(): boolean {
