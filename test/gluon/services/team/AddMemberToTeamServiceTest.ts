@@ -57,7 +57,7 @@ describe("AddMemberToTeamService addUserToGluonTeam", () => {
             errorThrown = error;
         }
 
-        assert.equal(errorThrown.message, `Failed to add member to the team. Server side failure.`);
+        assert.equal(errorThrown.getSlackMessage().text, `❗Failed to add member to the team. Server side failure.`);
 
     });
 

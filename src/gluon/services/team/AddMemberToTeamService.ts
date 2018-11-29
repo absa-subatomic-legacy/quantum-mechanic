@@ -113,12 +113,13 @@ They have been sent a request to onboard, once they've successfully onboarded yo
             memberDetails);
 
         if (!isSuccessCode(updateTeamResult.status)) {
-            let message = `Failed to add member to the team. ${updateTeamResult.data}`;
+            let message = `Failed to add member to the team. Server side failure.`;
+            const errorMessage = `Failed to add member to the team. ${inspect(updateTeamResult)}`;
             logger.error(message);
             if (updateTeamResult.status === 403) {
                 message = `Unauthorized: Sorry only a team owner can add members to a team.`;
             }
-            throw new QMError(message);
+            throw new QMError(errorMessage, message);
         }
     }
 
