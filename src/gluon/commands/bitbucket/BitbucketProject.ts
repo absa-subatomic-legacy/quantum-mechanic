@@ -36,18 +36,18 @@ export class NewBitbucketProject extends RecursiveParameterRequestCommand
     })
     public bitbucketProjectKey: string;
 
-    @GluonProjectNameParam({
-        callOrder: 1,
-        selectionMessage: "Please select the project you wish to create a Bitbucket project for",
-    })
-    public projectName: string;
-
     @GluonTeamNameParam({
         callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to create a Bitbucket project for",
         forceSet: false,
     })
     public teamName: string;
+
+    @GluonProjectNameParam({
+        callOrder: 1,
+        selectionMessage: "Please select the project you wish to create a Bitbucket project for",
+    })
+    public projectName: string;
 
     constructor(public gluonService = new GluonService()) {
         super();
