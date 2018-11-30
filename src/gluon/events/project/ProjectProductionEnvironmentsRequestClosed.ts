@@ -17,7 +17,7 @@ import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToProdEnvironment} from "../../tasks/team/AddJenkinsToProdEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
-import {OpenshiftProjectEnvironmentRequest} from "../../util/project/Project";
+import {OpenshiftProjectEnvironmentRequest, QMProject} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
@@ -54,7 +54,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
             if (projectProdRequest.approvalStatus === "APPROVED") {
                 await qmMessageClient.send(`Prod request for project ${projectProdRequest.project.name} was approved.`);
 
-                const project = await this.gluonService.projects.gluonProjectFromProjectName(projectProdRequest.project.name);
+                const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectProdRequest.project.name);
 
                 const owningTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
 
@@ -89,7 +89,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
             return await success();
         } catch (error) {
             await handleQMError(qmMessageClient, error);
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(projectProdRequest.project.name);
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectProdRequest.project.name);
             const correlationId: string = uuid();
             const destination = await addressSlackChannelsFromContext(ctx, project.owningTeam.slack.teamChannel);
             this.failEvent();

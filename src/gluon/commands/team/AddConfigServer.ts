@@ -30,7 +30,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
     public teamName: string;
 
     @GluonTeamOpenShiftCloudParam({
-        callOrder: 2,
+        callOrder: 1,
     })
     public openShiftCloud: string;
 

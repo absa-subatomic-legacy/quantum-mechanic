@@ -13,7 +13,7 @@ import {
     ApplicationType,
     getBuildConfigName,
 } from "../../util/packages/Applications";
-import {getProjectDevOpsId, getProjectId} from "../../util/project/Project";
+import {getProjectDevOpsId, getProjectId, QMProject} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -53,7 +53,7 @@ export class ConfigurePackageInOpenshift extends Task {
 
         if (this.packageDetails.packageType === ApplicationType.DEPLOYABLE.toString()) {
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.packageDetails.projectName);
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.packageDetails.projectName);
             const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
 
             await this.ocService.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);

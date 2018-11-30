@@ -16,7 +16,7 @@ import {
     getHighestPreProdEnvironment,
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
-import {getProjectId} from "../../util/project/Project";
+import {getProjectId, QMProject} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     GluonProjectNameParam,
@@ -145,13 +145,14 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
     private async findAndListResources(qmMessageClient: QMMessageClient) {
 
-        const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+        const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
         const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
         await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
-        const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(this.openShiftCloud).id));
+        const projectId = getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(this.openShiftCloud).id);
+        const allResources = await this.ocService.exportAllResources(projectId);
 
         const resources = await this.genericOpenshiftResourceService.getAllPromotableResources(
             allResources,
@@ -175,7 +176,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
     }
 
     private async createGenericProdRequest() {
-        const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+        const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
         const actionedBy = await this.gluonService.members.gluonMemberFromScreenName(this.screenName, false);
 

@@ -12,6 +12,7 @@ import {OCService} from "../../services/openshift/OCService";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {QMProject} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
@@ -79,7 +80,7 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
         try {
             const project = applicationProdRequestedEvent.project;
 
-            const qmProject = await this.gluonService.projects.gluonProjectFromProjectName(project.name);
+            const qmProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(project.name);
             const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(qmProject.owningTeam.teamId);
 
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.tenant.tenantId);

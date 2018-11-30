@@ -12,6 +12,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMProject} from "../../util/project/Project";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
@@ -60,7 +61,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand
 
             const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             await this.requestProjectEnvironment(project.projectId, member.memberId);
 

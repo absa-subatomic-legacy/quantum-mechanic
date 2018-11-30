@@ -9,6 +9,7 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMProject} from "../../util/project/Project";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
@@ -49,7 +50,7 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
                 text: `Requesting production environments's for project *${this.projectName}*`,
             }, destination);
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 

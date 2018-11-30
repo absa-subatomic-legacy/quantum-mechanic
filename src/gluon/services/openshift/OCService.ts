@@ -18,7 +18,7 @@ import {OCClient} from "../../../openshift/OCClient";
 import {OCCommon} from "../../../openshift/OCCommon";
 import {userFromDomainUser} from "../../util/member/Members";
 import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
-import {getProjectDisplayName} from "../../util/project/Project";
+import {getProjectDisplayName, QMProject} from "../../util/project/Project";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
 import {QuotaLoader} from "../../util/resources/QuotaLoader";
 import {QMError, QMErrorType} from "../../util/shared/Error";
@@ -511,7 +511,7 @@ export class OCService {
 
     public async initilizeProjectWithDefaultProjectTemplate(projectId: string, projectName: string, apply = true) {
 
-        const project = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
+        const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
         const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
 
         const template = this.baseProjectTemplateLoader.getTemplate();

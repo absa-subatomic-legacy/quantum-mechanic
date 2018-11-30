@@ -12,6 +12,7 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigureBitbucketProjectRecommendedPractices} from "../../tasks/bitbucket/ConfigureBitbucketProjectRecommendedPractices";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {QMProject} from "../../util/project/Project";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
@@ -55,7 +56,7 @@ export class BitbucketProjectRecommendedPracticesCommand extends RecursiveParame
 
             const requestingTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             if (!isUserAMemberOfTheTeam(member, requestingTeam)) {
                 this.failCommand();

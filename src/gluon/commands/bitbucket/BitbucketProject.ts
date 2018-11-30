@@ -14,6 +14,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMProject} from "../../util/project/Project";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
@@ -111,14 +112,13 @@ export class ListExistingBitbucketProject
         selectionMessage: "Please select a team associated with the project you wish to create a Bitbucket project for",
         forceSet: false,
     })
+    public teamName: string;
 
     @GluonProjectNameParam({
         callOrder: 1,
         selectionMessage: "Please select the project you wish to link a Bitbucket project to",
     })
     public projectName: string;
-
-    public teamName: string;
 
     constructor(public gluonService = new GluonService(),
                 private bitbucketService = new BitbucketService()) {
@@ -138,7 +138,7 @@ export class ListExistingBitbucketProject
             logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
 
             const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
-            const gluonProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+            const gluonProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             const projectUiUrl = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.bitbucketProjectKey}`;
 

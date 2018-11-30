@@ -26,7 +26,7 @@ import {
 export class CreateTeam extends RecursiveParameterRequestCommand implements GluonTeamOpenShiftCloudSetter {
 
     @GluonTeamOpenShiftCloudParam({
-        callOrder: 1,
+        callOrder: 0,
         selectionMessage: "",
     })
     public openShiftCloud: string;

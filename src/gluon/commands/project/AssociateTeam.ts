@@ -9,7 +9,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
-import {menuAttachmentForProjects} from "../../util/project/Project";
+import {menuAttachmentForProjects, QMProject} from "../../util/project/Project";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -57,7 +57,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     private async linkProjectForTeam(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
         const team = await this.gluonService.teams.gluonTeamByName(teamName);
-        const gluonProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+        const gluonProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
         let updateGluonWithProjectDetails;
         try {
             updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.teamId, team.name);

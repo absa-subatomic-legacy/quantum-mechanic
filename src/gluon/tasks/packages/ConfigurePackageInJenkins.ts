@@ -57,7 +57,7 @@ export class ConfigurePackageInJenkins extends Task {
 
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
 
-        const project = await this.gluonService.projects.gluonProjectFromProjectName(this.project.name);
+        const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.project.name);
         const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
         await this.ocService.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
 

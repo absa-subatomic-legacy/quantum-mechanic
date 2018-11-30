@@ -7,6 +7,7 @@ import {
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ApplicationType} from "../../util/packages/Applications";
+import {QMProject} from "../../util/project/Project";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
@@ -68,7 +69,7 @@ export class CreateApplication extends RecursiveParameterRequestCommand
 
             const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             await this.createApplicationInGluon(project, member);
 
