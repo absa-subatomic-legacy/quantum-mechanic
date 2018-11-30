@@ -30,7 +30,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
     })
     public displayResultMenu: ParameterDisplayType;
 
-    private recursiveParameterListNew: RecursiveParameterMapping[];
+    private recursiveParameterList: RecursiveParameterMapping[];
 
     private parameterStatusDisplay: ParameterStatusDisplay;
 
@@ -60,7 +60,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
     }
 
     public addRecursiveParameterProperty(parameterDetails: RecursiveParameterDetails, propertyKey: string) {
-        this.recursiveParameterListNew = this.recursiveParameterListNew !== undefined ? this.recursiveParameterListNew : [];
+        this.recursiveParameterList = this.recursiveParameterList !== undefined ? this.recursiveParameterList : [];
         let insertedParameter = false;
         const newRecursiveParameter = {
             propertyName: propertyKey,
@@ -69,16 +69,16 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
             forceSet: parameterDetails.forceSet,
             callOrder: parameterDetails.callOrder,
         };
-        for (let i = 0; i < this.recursiveParameterListNew.length; i++) {
-            if (parameterDetails.callOrder < this.recursiveParameterListNew[i].callOrder) {
-                this.recursiveParameterListNew.splice(i, 0, newRecursiveParameter);
+        for (let i = 0; i < this.recursiveParameterList.length; i++) {
+            if (parameterDetails.callOrder < this.recursiveParameterList[i].callOrder) {
+                this.recursiveParameterList.splice(i, 0, newRecursiveParameter);
                 insertedParameter = true;
                 break;
             }
         }
 
         if (!insertedParameter) {
-            this.recursiveParameterListNew.push(newRecursiveParameter);
+            this.recursiveParameterList.push(newRecursiveParameter);
         }
     }
 
@@ -97,7 +97,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
 
     private async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         const dynamicClassInstance: any = this;
-        for (const parameter of this.recursiveParameterListNew) {
+        for (const parameter of this.recursiveParameterList) {
             const propertyKey = parameter.propertyName;
             const propertyValue = dynamicClassInstance[propertyKey];
             if (_.isEmpty(propertyValue)) {
@@ -118,7 +118,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
     private recursiveParametersAreSet(): boolean {
         let parametersAreSet = true;
         const dynamicClassInstance: any = this;
-        for (const parameter of this.recursiveParameterListNew) {
+        for (const parameter of this.recursiveParameterList) {
 
             const propertyKey = parameter.propertyName;
             const propertyValue = dynamicClassInstance[propertyKey];
@@ -138,7 +138,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
     private updateParameterStatusDisplayMessage() {
         this.parameterStatusDisplay = new ParameterStatusDisplay();
         const dynamicClassInstance: any = this;
-        for (const parameter of this.recursiveParameterListNew) {
+        for (const parameter of this.recursiveParameterList) {
 
             const propertyKey = parameter.propertyName;
             const propertyValue = dynamicClassInstance[propertyKey];
