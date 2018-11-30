@@ -1,6 +1,5 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
-import {QMConfig} from "../../../config/QMConfig";
 import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory";
 import {OCService} from "../../services/openshift/OCService";
 import {QMError, QMErrorType} from "../../util/shared/Error";
@@ -21,8 +20,8 @@ export class CreateTeamDevOpsEnvironment extends Task {
     private readonly TASK_SECRETS = TaskListMessage.createUniqueTaskName("ConfigSecrets");
 
     constructor(private devOpsRequestedEvent: { team: QMTeam },
+                private openshiftEnvironment: OpenShiftConfig,
                 private devopsEnvironmentDetails: DevOpsEnvironmentDetails = getDevOpsEnvironmentDetails(devOpsRequestedEvent.team.name),
-                private openshiftEnvironment: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd,
                 private ocService = new OCService()) {
         super();
     }

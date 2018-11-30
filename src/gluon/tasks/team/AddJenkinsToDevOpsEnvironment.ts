@@ -48,13 +48,15 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         const projectId = `${_.kebabCase(this.devOpsRequestedEvent.team.name).toLowerCase()}-devops`;
         logger.info(`Working with OpenShift project Id: ${projectId}`);
 
-        await this.ocService.login();
+        const openShiftCloud = this.devOpsRequestedEvent.team.openShiftCloud;
+
+        await this.ocService.login(QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd);
 
         await this.copyJenkinsTemplateToDevOpsEnvironment(projectId);
 
         await this.taskListMessage.succeedTask(this.TASK_TAG_TEMPLATE);
 
-        await this.createJenkinsDeploymentConfig(projectId);
+        await this.createJenkinsDeploymentConfig(projectId, openShiftCloud);
 
         await this.createJenkinsServiceAccount(projectId);
 
@@ -68,7 +70,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         logger.info(`Using Service Account token: ${token}`);
 
-        await this.addJenkinsCredentials(projectId, jenkinsHost, token);
+        await this.addJenkinsCredentials(projectId, jenkinsHost, token, openShiftCloud);
 
         await this.taskListMessage.succeedTask(this.TASK_CONFIG_JENKINS);
 
@@ -91,9 +93,9 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         await this.ocService.applyResourceFromDataInNamespace(jenkinsTemplate, projectId);
     }
 
-    private async createJenkinsDeploymentConfig(projectId: string) {
+    private async createJenkinsDeploymentConfig(projectId: string, openShiftCloud: string) {
         logger.info("Processing Jenkins QMTemplate...");
-        const jenkinsTemplateResultJSON = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId);
+        const jenkinsTemplateResultJSON = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId, openShiftCloud);
         logger.debug(`Processed Jenkins Template: ${jenkinsTemplateResultJSON.output}`);
 
         try {
@@ -138,7 +140,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         return jenkinsHost.output;
     }
 
-    private async addJenkinsCredentials(projectId: string, jenkinsHost: string, token: string) {
+    private async addJenkinsCredentials(projectId: string, jenkinsHost: string, token: string, openShiftCloud: string) {
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
         const bitbucketCredentials = getJenkinsBitbucketProjectCredential(projectId);
 
@@ -148,7 +150,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         await this.createGlobalCredentialsFor("Nexus", jenkinsHost, token, projectId, nexusCredentials);
 
-        const dockerRegistryCredentials = getJenkinsDockerCredential();
+        const dockerRegistryCredentials = getJenkinsDockerCredential(openShiftCloud);
 
         await this.createGlobalCredentialsFor("Docker", jenkinsHost, token, projectId, dockerRegistryCredentials);
 

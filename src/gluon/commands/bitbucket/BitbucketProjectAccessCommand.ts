@@ -2,8 +2,6 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    MappedParameter,
-    MappedParameters,
     success,
     Tags,
 } from "@atomist/automation-client";
@@ -15,16 +13,14 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigureBitbucketProjectAccess} from "../../tasks/bitbucket/ConfigureBitbucketProjectAccess";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {QMProject} from "../../util/project/Project";
 import {
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam} from "../../util/team/Teams";
 
@@ -33,32 +29,22 @@ import {isUserAMemberOfTheTeam} from "../../util/team/Teams";
 export class BitbucketProjectAccessCommand extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        projectName: "PROJECT_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: BitbucketProjectAccessCommand.RecursiveKeys.projectName,
-        selectionMessage: "Please select the project you wish to configure the Bitbucket project for",
-    })
-    public projectName: string;
-
-    @RecursiveParameter({
-        recursiveKey: BitbucketProjectAccessCommand.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to configure the Bitbucket project for",
     })
     public teamName: string;
+
+    @GluonProjectNameParam({
+        callOrder: 1,
+        selectionMessage: "Please select the project you wish to configure the Bitbucket project for",
+    })
+    public projectName: string;
 
     private teamMembershipMessages: TeamMembershipMessages = new TeamMembershipMessages();
 
     constructor(public gluonService = new GluonService(), public bitbucketService = new BitbucketService()) {
         super();
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(BitbucketProjectAccessCommand.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(BitbucketProjectAccessCommand.RecursiveKeys.projectName, setGluonProjectName);
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
@@ -71,7 +57,7 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
 
             const requestingTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             if (!isUserAMemberOfTheTeam(member, requestingTeam)) {
                 this.failCommand();

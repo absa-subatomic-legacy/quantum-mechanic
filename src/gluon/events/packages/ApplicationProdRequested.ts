@@ -12,8 +12,11 @@ import {OCService} from "../../services/openshift/OCService";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {QMProject} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {QMTeam} from "../../util/team/Teams";
+import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive ApplicationProdRequestedEvent events", `
 subscription ApplicationProdRequestedEvent {
@@ -46,6 +49,7 @@ subscription ApplicationProdRequestedEvent {
     teams {
       teamId
       name
+      openShiftCloud
       slackIdentity {
         teamChannel
       }
@@ -76,6 +80,9 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
         try {
             const project = applicationProdRequestedEvent.project;
 
+            const qmProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(project.name);
+            const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(qmProject.owningTeam.teamId);
+
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.tenant.tenantId);
 
             const applicationProdRequest = await this.gluonService.prod.application.getApplicationProdRequestById(applicationProdRequestedEvent.applicationProdRequest.applicationProdRequestId);
@@ -86,8 +93,7 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
                 qmMessageClient);
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
-
-            for (const openshiftProd of QMConfig.subatomic.openshiftProd) {
+            for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
                 taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
             }
 

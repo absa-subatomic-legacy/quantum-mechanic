@@ -93,6 +93,7 @@ export class BitbucketProjectRequested extends BaseQMEvent implements HandleEven
                 projectId: project.projectId,
                 name: project.name,
                 bitbucketProject: bitbucketProjectRequestedEvent.bitbucketProjectRequest,
+                owningTenant: project.owningTenant,
             };
 
             await this.createBitbucketProject(qmProject.bitbucketProject.key, qmProject.bitbucketProject.name, qmProject.bitbucketProject.description);

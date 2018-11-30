@@ -2,8 +2,6 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    MappedParameter,
-    MappedParameters,
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
@@ -11,7 +9,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
-import {menuAttachmentForProjects} from "../../util/project/Project";
+import {menuAttachmentForProjects, QMProject} from "../../util/project/Project";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -28,20 +26,17 @@ import {menuAttachmentForTeams} from "../../util/team/Teams";
 @Tags("subatomic", "team", "project")
 export class AssociateTeam extends RecursiveParameterRequestCommand {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        projectName: "PROJECT_NAME",
-    };
-
     @RecursiveParameter({
-        recursiveKey: AssociateTeam.RecursiveKeys.teamName,
+        callOrder: 0,
         selectionMessage: `Please select a team you would like to associate to the project`,
+        setter: setGluonTeamFromUnassociatedTeams,
     })
     public teamName: string;
 
     @RecursiveParameter({
-        recursiveKey: AssociateTeam.RecursiveKeys.projectName,
+        callOrder: 1,
         selectionMessage: `Please select a project you would like to associate this team to.`,
+        setter: setGluonProjectNameFromList,
     })
     public projectName: string;
 
@@ -51,18 +46,13 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            const result =  await this.linkProjectForTeam(ctx, this.teamName);
+            const result = await this.linkProjectForTeam(ctx, this.teamName);
             this.succeedCommand();
             return result;
         } catch (error) {
             this.failCommand();
             return await this.handleError(ctx, error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(AssociateTeam.RecursiveKeys.projectName, setGluonProjectNameFromList);
-        this.addRecursiveSetter(AssociateTeam.RecursiveKeys.teamName, setGluonTeamFromUnassociatedTeams);
     }
 
     private async linkProjectForTeam(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {

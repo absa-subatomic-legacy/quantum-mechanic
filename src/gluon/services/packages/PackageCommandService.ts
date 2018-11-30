@@ -3,6 +3,7 @@ import * as _ from "lodash";
 import {inspect} from "util";
 import {isSuccessCode} from "../../../http/Http";
 import {ApplicationType} from "../../util/packages/Applications";
+import {QMProject} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {BitbucketService} from "../bitbucket/BitbucketService";
 import {GluonService} from "../gluon/GluonService";
@@ -19,7 +20,7 @@ export class PackageCommandService {
                                                  bitbucketRepositorySlug: string,
                                                  gluonProjectName: string,
                                                  applicationType: ApplicationType): Promise<HandlerResult> {
-        const project = await this.gluonService.projects.gluonProjectFromProjectName(gluonProjectName);
+        const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(gluonProjectName);
         logger.debug(`Linking Bitbucket repository: ${bitbucketRepositorySlug}`);
 
         const repo = await this.getBitbucketRepo(project.bitbucketProject.key, bitbucketRepositorySlug);

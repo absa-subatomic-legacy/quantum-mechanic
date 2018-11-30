@@ -4,7 +4,6 @@ import _ = require("lodash");
 import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
-import {userFromDomainUser} from "../../../gluon/util/member/Members";
 import {isSuccessCode} from "../../../http/Http";
 import {OpenshiftApiResult} from "../../../openshift/api/base/OpenshiftApiResult";
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
@@ -17,13 +16,15 @@ import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
 import {StandardOption} from "../../../openshift/base/options/StandardOption";
 import {OCClient} from "../../../openshift/OCClient";
 import {OCCommon} from "../../../openshift/OCCommon";
+import {userFromDomainUser} from "../../util/member/Members";
 import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
-import {getProjectDisplayName} from "../../util/project/Project";
+import {getProjectDisplayName, QMProject} from "../../util/project/Project";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
 import {QuotaLoader} from "../../util/resources/QuotaLoader";
 import {QMError, QMErrorType} from "../../util/shared/Error";
 import {retryFunction} from "../../util/shared/RetryFunction";
 import {QMTeam} from "../../util/team/Teams";
+import {GluonService} from "../gluon/GluonService";
 import {OCImageService} from "./OCImageService";
 
 export class OCService {
@@ -54,10 +55,10 @@ export class OCService {
     private quotaLoader: QuotaLoader = new QuotaLoader();
     private baseProjectTemplateLoader: BaseProjectTemplateLoader = new BaseProjectTemplateLoader();
 
-    constructor(private ocImageService = new OCImageService()) {
+    constructor(private ocImageService = new OCImageService(), private gluonService = new GluonService()) {
     }
 
-    public async login(openshiftDetails: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd, softLogin = false) {
+    public async login(openshiftDetails: OpenShiftConfig, softLogin = false) {
         this.openShiftApi = new OpenShiftApi(openshiftDetails);
         this.ocImageService.openShiftApi = this.openShiftApi;
         this.loggedIn = true;
@@ -302,7 +303,7 @@ export class OCService {
         }
     }
 
-    public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string): Promise<OCCommandResult> {
+    public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, openShiftCloud: string): Promise<OCCommandResult> {
         logger.debug(`Trying to process jenkins template for devops project template. devopsNamespace: ${devopsNamespace}`);
         const parameters = [
             `NAMESPACE=${devopsNamespace}`,
@@ -313,7 +314,7 @@ export class OCService {
             "JENKINS_ADMIN_EMAIL=subatomic@local",
             // TODO the registry Cluster IP we will have to get by introspecting the registry Service
             // If no team email then the address of the createdBy member
-            `DEVOPS_URL=${QMConfig.subatomic.openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
+            `DEVOPS_URL=${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
         ];
         return await this.processOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
     }
@@ -468,13 +469,13 @@ export class OCService {
     }
 
     public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {
-        const teamOwners = team.owners.map( owner => userFromDomainUser(owner.domainUsername) );
+        const teamOwners = team.owners.map(owner => userFromDomainUser(owner.domainUsername));
         if (teamOwners.length > 0) {
             logger.debug(`Trying to add team membership permission to project for role admin.`);
             await this.openShiftApi.policy.addRoleToUsers(teamOwners, "admin", projectId);
         }
 
-        const teamMembers = team.members.map( member => userFromDomainUser(member.domainUsername) );
+        const teamMembers = team.members.map(member => userFromDomainUser(member.domainUsername));
         if (teamMembers.length > 0) {
             logger.debug(`Trying to add team membership permission to project for role edit.`);
             await this.openShiftApi.policy.addRoleToUsers(teamMembers, "edit", projectId);
@@ -508,16 +509,23 @@ export class OCService {
         return await OCClient.createPvc(pvcName, namespace);
     }
 
-    public async initilizeProjectWithDefaultProjectTemplate(projectId: string, apply = true) {
+    public async initilizeProjectWithDefaultProjectTemplate(projectId: string, projectName: string, apply = true) {
+
+        const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
+        const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+
         const template = this.baseProjectTemplateLoader.getTemplate();
         if (!_.isEmpty(template.objects)) {
             logger.info(`Applying base project template to ${projectId}`);
+
             const fileName = Date.now() + ".json";
             fs.writeFileSync(`/tmp/${fileName}`, JSON.stringify(template));
+
             // log client into non prod to process template - hacky! Need to fix.
-            await OCClient.login(QMConfig.subatomic.openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftNonProd.auth.token);
+            await OCClient.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.auth.token);
             const processedTemplateResult = await OCCommon.commonCommand("process", `-f /tmp/${fileName}`);
             const result = await this.applyResourceFromDataInNamespace(JSON.parse(processedTemplateResult.output), projectId, apply);
+
             if (!isSuccessCode(result.status)) {
                 logger.error(`Template failed to create properly: ${inspect(result)}`);
                 throw new QMError("Failed to create all items in base project template.");

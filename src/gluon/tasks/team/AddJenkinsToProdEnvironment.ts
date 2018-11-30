@@ -54,7 +54,7 @@ export class AddJenkinsToProdEnvironment extends Task {
         }
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_SA_RIGHTS);
 
-        await this.ocService.login();
+        await this.ocService.login(this.openshiftEnvironment);
 
         const jenkinsToken = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsNonProd);
 

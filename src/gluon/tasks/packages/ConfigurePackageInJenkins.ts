@@ -15,6 +15,7 @@ import {isSuccessCode} from "../../../http/Http";
 import {QMTemplate} from "../../../template/QMTemplate";
 import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
 import {QMApplication} from "../../services/gluon/ApplicationService";
+import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -25,7 +26,7 @@ import {ApplicationType} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
 import {ParameterDisplayType} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {GitError, QMError} from "../../util/shared/Error";
-import {getDevOpsEnvironmentDetails, QMTeamBase} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails, QMTeam, QMTeamBase} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -44,6 +45,7 @@ export class ConfigurePackageInJenkins extends Task {
                 private jenkinsJobTemplate: JenkinsJobTemplate = NonProdDefaultJenkinsJobTemplate,
                 private successMessage?: SlackMessage,
                 private ocService = new OCService(),
+                private gluonService = new GluonService(),
                 private jenkinsService = new JenkinsService()) {
         super();
     }
@@ -54,7 +56,10 @@ export class ConfigurePackageInJenkins extends Task {
     }
 
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
-        await this.ocService.login();
+
+        const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.project.name);
+        const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+        await this.ocService.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
 
         await this.addJenkinsFile(
             this.jenkinsFile,

@@ -86,7 +86,6 @@ export class PublicQMConfig {
         this.subatomic.bitbucket.cicdKey = "";
         this.subatomic.bitbucket.cicdPrivateKeyPath = "";
         this.subatomic.bitbucket.caPath = "";
-        this.subatomic.openshiftNonProd.auth.token = "";
     }
 }
 

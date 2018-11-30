@@ -3,12 +3,18 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
+import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {menuAttachmentForApplications} from "../packages/Applications";
 import {menuAttachmentForProjects} from "../project/Project";
 import {QMError} from "../shared/Error";
+import {createMenuAttachment} from "../shared/GenericMenu";
 import {menuAttachmentForTenants} from "../shared/Tenants";
 import {menuAttachmentForTeams} from "../team/Teams";
+import {
+    RecursiveParameter,
+    RecursiveParameterDetails,
+} from "./RecursiveParameterRequestCommand";
 import {RecursiveSetterResult} from "./RecursiveSetterResult";
 
 export async function setGluonTeamName(
@@ -46,11 +52,69 @@ export async function setGluonTeamName(
     };
 }
 
+export function GluonTeamNameParam(details: RecursiveParameterDetails) {
+    details.setter = setGluonTeamName;
+    return RecursiveParameter(details);
+}
+
 export interface GluonTeamNameSetter {
     gluonService: GluonService;
     teamChannel?: string;
     screenName: string;
     teamName: string;
+    handle: (ctx: HandlerContext) => Promise<HandlerResult>;
+}
+
+export async function setGluonTeamOpenShiftCloud(
+    ctx: HandlerContext,
+    commandHandler: GluonTeamOpenShiftCloudSetter,
+    selectionMessage: string = "Please select an OpenShift cloud"): Promise<RecursiveSetterResult> {
+    if (commandHandler.gluonService === undefined) {
+        throw new QMError(`setGluonTeamName commandHandler requires gluonService parameter to be defined`);
+    }
+
+    let team;
+
+    if (commandHandler.teamName !== undefined) {
+        try {
+            team = await commandHandler.gluonService.teams.gluonTeamByName(commandHandler.teamName);
+        } catch (error) {
+            team = undefined;
+        }
+    }
+
+    if (team !== undefined) {
+        commandHandler.openShiftCloud = team.openShiftCloud;
+        return {setterSuccess: true};
+    } else {
+        return {
+            setterSuccess: false,
+            messagePrompt: createMenuAttachment(
+                Object.keys(QMConfig.subatomic.openshiftClouds).map(cloudName => {
+                    return {
+                        value: cloudName,
+                        text: cloudName,
+                    };
+                }),
+                commandHandler,
+                selectionMessage,
+                selectionMessage,
+                "Select OpenShift Cloud",
+                "openShiftCloud",
+            ),
+        };
+    }
+}
+
+export function GluonTeamOpenShiftCloudParam(details: RecursiveParameterDetails) {
+    details.setter = setGluonTeamOpenShiftCloud;
+    return RecursiveParameter(details);
+}
+
+export interface GluonTeamOpenShiftCloudSetter {
+    gluonService: GluonService;
+    teamName: string;
+    openShiftCloud: string;
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
 
@@ -86,6 +150,11 @@ export interface GluonProjectNameSetter {
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
 
+export function GluonProjectNameParam(details: RecursiveParameterDetails) {
+    details.setter = setGluonProjectName;
+    return RecursiveParameter(details);
+}
+
 export async function setGluonTenantName(
     ctx: HandlerContext,
     commandHandler: GluonTenantNameSetter,
@@ -112,6 +181,11 @@ export interface GluonTenantNameSetter {
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
 
+export function GluonTenantNameParam(details: RecursiveParameterDetails) {
+    details.setter = setGluonTenantName;
+    return RecursiveParameter(details);
+}
+
 export async function setGluonApplicationName(
     ctx: HandlerContext,
     commandHandler: GluonApplicationNameSetter,
@@ -133,6 +207,11 @@ export async function setGluonApplicationName(
             commandHandler,
             selectionMessage),
     };
+}
+
+export function GluonApplicationNameParam(details: RecursiveParameterDetails) {
+    details.setter = setGluonApplicationName;
+    return RecursiveParameter(details);
 }
 
 export interface GluonApplicationNameSetter {

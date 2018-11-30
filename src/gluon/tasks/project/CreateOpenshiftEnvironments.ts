@@ -1,7 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
-import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -23,8 +22,8 @@ export class CreateOpenshiftEnvironments extends Task {
     private dynamicTaskNameStore: { [k: string]: string } = {};
 
     constructor(private environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest,
+                private openshiftEnvironment: OpenShiftConfig,
                 private devopsEnvironmentDetails: DevOpsEnvironmentDetails = getDevOpsEnvironmentDetails(environmentsRequestedEvent.teams[0].name),
-                private openshiftEnvironment: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd,
                 private ocService = new OCService()) {
         super();
     }
@@ -84,7 +83,7 @@ export class CreateOpenshiftEnvironments extends Task {
             }
         }
 
-        await this.ocService.initilizeProjectWithDefaultProjectTemplate(projectId);
+        await this.ocService.initilizeProjectWithDefaultProjectTemplate(projectId, environmentsRequestedEvent.project.name);
         await environmentsRequestedEvent.teams.map(async team => {
             await this.ocService.addTeamMembershipPermissionsToProject(projectId, team);
         });

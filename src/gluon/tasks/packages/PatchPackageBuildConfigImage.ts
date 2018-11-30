@@ -1,6 +1,5 @@
 import {HandlerContext} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
-import {QMConfig} from "../../../config/QMConfig";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {OCService} from "../../services/openshift/OCService";
 import {getBuildConfigName} from "../../util/packages/Applications";
@@ -17,7 +16,7 @@ export class PatchPackageBuildConfigImage extends Task {
                 private packageName: string,
                 private projectName: string,
                 private teamName: string,
-                private openshiftEnvironment: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd,
+                private openshiftEnvironment: OpenShiftConfig,
                 private ocService = new OCService()) {
         super();
     }

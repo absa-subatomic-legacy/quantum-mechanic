@@ -92,6 +92,7 @@ export class BitbucketProjectAdded extends BaseQMEvent implements HandleEvent<an
                 projectId: project.projectId,
                 name: project.name,
                 bitbucketProject: bitbucketProjectAddedEvent.bitbucketProject,
+                owningTenant: project.owningTenant,
             };
 
             const taskListMessage: TaskListMessage = new TaskListMessage(":rocket: Configuring Bitbucket Project Access...", messageClient);
@@ -131,7 +132,7 @@ The platform consists of two clusters, a Non Prod and a Prod cluster. The projec
 These environments are realised as OpenShift projects and need to be created or linked to existing projects. If you haven't done either, please do that now.`,
                     fallback: "Create or link existing OpenShift environments",
                     footer: `For more information, please read the ${this.docs("request-project-environments")}`,
-                    color:  QMColours.stdGreenyMcAppleStroodle.hex,
+                    color: QMColours.stdGreenyMcAppleStroodle.hex,
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/openshift-logo.png",
                     actions: [
                         buttonForCommand(
@@ -150,7 +151,7 @@ These can be manually changed if you wish to change the settings after applying 
 If you would like to configure the Bitbucket Project associated to the *${bitbucketAddedEvent.project.name}* project, please click the button below.`,
                     fallback: "Associate multiple teams to this project",
                     footer: `For more information, please read the ${this.docs("associate-team")}`,
-                    color:  QMColours.stdShySkyBlue.hex,
+                    color: QMColours.stdShySkyBlue.hex,
                     actions: [
                         buttonForCommand(
                             {
@@ -168,7 +169,7 @@ Projects can be associated with multiple teams. \
 If you would like to associate more teams to the *${bitbucketAddedEvent.project.name}* project, please click the button below`,
                     fallback: "Associate multiple teams to this project",
                     footer: `For more information, please read the ${this.docs("associate-team")}`,
-                    color:  QMColours.stdShySkyBlue.hex,
+                    color: QMColours.stdShySkyBlue.hex,
                     actions: [
                         buttonForCommand(
                             {

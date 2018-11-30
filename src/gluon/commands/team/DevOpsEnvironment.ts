@@ -1,8 +1,6 @@
 import {
     HandlerContext,
     logger,
-    MappedParameter,
-    MappedParameters,
     success,
     Tags,
 } from "@atomist/automation-client";
@@ -12,25 +10,18 @@ import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 
 @CommandHandler("Check whether to create a new OpenShift DevOps environment or use an existing one", QMConfig.subatomic.commandPrefix + " request devops environment")
-@Tags("subatomic", "slack", "team", "openshiftNonProd", "devops")
+@Tags("subatomic", "slack", "team", "devops")
 export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: NewDevOpsEnvironment.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team you would like to create a DevOps environment for",
     })
     public teamName: string;
@@ -46,10 +37,6 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
             this.teamName,
             this.teamChannel,
         );
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(NewDevOpsEnvironment.RecursiveKeys.teamName, setGluonTeamName);
     }
 
     private async requestDevOpsEnvironment(ctx: HandlerContext, screenName: string,

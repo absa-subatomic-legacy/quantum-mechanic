@@ -2,12 +2,9 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    MappedParameter,
-    MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {
     addressEvent,
     addressSlackChannelsFromContext,
@@ -48,7 +45,7 @@ export class ReRunProjectProdRequest extends BaseQMComand {
                 projectProdRequestId: this.projectProdRequestId,
             };
 
-            const result =  await ctx.messageClient.send(projectProdRequestEvent, addressEvent("ProjectProductionEnvironmentsRequestClosedEvent"));
+            const result = await ctx.messageClient.send(projectProdRequestEvent, addressEvent("ProjectProductionEnvironmentsRequestClosedEvent"));
             this.succeedCommand();
             return result;
         } catch (error) {

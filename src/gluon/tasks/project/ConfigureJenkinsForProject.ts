@@ -20,7 +20,7 @@ export class ConfigureJenkinsForProject extends Task {
     private readonly TASK_ADD_JENKINS_CREDENTIALS = TaskListMessage.createUniqueTaskName("JenkinsCredentials");
 
     constructor(private environmentsRequestedEvent,
-                private openshiftEnvironment: OpenShiftConfig = QMConfig.subatomic.openshiftNonProd,
+                private openshiftEnvironment: OpenShiftConfig,
                 private ocService = new OCService(),
                 private jenkinsService = new JenkinsService()) {
         super();
