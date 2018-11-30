@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     MappedParameter,
@@ -7,7 +6,8 @@ import {
     Parameter,
     Tags,
 } from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -39,12 +39,6 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
         projectName: "PROJECT_NAME",
         bitbucketRepositorySlug: "BITBUCKET_REPOSITORY_SLUG",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @Parameter({
         description: "library name",
@@ -83,12 +77,12 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+            const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
             await ctx.messageClient.send({
                 text: "🚀 Your new library is being created...",
             }, destination);
 
-            return await this.packageCommandService.linkBitbucketRepoToGluonPackage(
+            const result = await this.packageCommandService.linkBitbucketRepoToGluonPackage(
                 this.screenName,
                 this.name,
                 this.description,
@@ -96,7 +90,10 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
                 this.projectName,
                 ApplicationType.LIBRARY,
             );
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

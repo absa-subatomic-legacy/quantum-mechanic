@@ -1,0 +1,5 @@
+type DevOpsEnvironmentDetails @rootType {
+	openshiftProjectId: String
+	name: String
+	description: String
+}

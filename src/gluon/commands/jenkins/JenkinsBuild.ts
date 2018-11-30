@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
@@ -7,6 +6,7 @@ import {
     MappedParameters,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
@@ -45,12 +45,6 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: KickOffJenkinsBuild.RecursiveKeys.projectName,
         selectionMessage: "Please select a project which contains the application you would like to build",
@@ -78,8 +72,11 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext) {
         try {
             await this.ocService.login();
-            return await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
+            const result =  await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

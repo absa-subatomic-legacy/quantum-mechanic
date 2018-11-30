@@ -1,0 +1,5 @@
+type SlackIdentity @rootType {
+	screenName: String
+	userId: String
+	teamChannel: String
+}

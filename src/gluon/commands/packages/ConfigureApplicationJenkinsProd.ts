@@ -1,12 +1,14 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
+} from "@atomist/automation-client";
+import {
+    CommandHandler,
     MappedParameter,
     MappedParameters,
     Tags,
-} from "@atomist/automation-client";
+} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
@@ -50,12 +52,6 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
         applicationName: "APPLICATION_NAME",
         projectName: "PROJECT_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @RecursiveParameter({
         recursiveKey: ConfigureApplicationJenkinsProd.RecursiveKeys.teamName,
@@ -109,8 +105,9 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             );
 
             await taskRunner.execute(ctx);
-
+            this.succeedCommand();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

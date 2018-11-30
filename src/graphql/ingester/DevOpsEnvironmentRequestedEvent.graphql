@@ -1,0 +1,9 @@
+type DevOpsEnvironmentRequestedEvent @rootType {
+	team: GluonTeam
+	requestedBy: ActionedBy
+	args: [DevOpsEnvironmentRequestedEventArgument]
+}
+
+type DevOpsEnvironmentRequestedEventArgument {
+    name: [String]
+}

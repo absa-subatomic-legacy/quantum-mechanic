@@ -1,17 +1,21 @@
 import {
     EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
     success,
 } from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {EventHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
+import {
+    addressSlackChannelsFromContext,
+    buttonForCommand,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {ConfigureBasicPackage} from "../../commands/packages/ConfigureBasicPackage";
+import {QMColours} from "../../util/QMColour";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 
 @EventHandler("Receive ApplicationCreatedEvent events", `
 subscription ApplicationCreatedEvent {
@@ -65,32 +69,36 @@ subscription ApplicationCreatedEvent {
   }
 }
 `)
-export class ApplicationCreated implements HandleEvent<any> {
+export class ApplicationCreated extends BaseQMEvent implements HandleEvent<any> {
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested ApplicationCreated event: ${JSON.stringify(event.data)}`);
 
-        const applicationCreatedEvent = event.data.ApplicationCreatedEvent[0];
-        if (applicationCreatedEvent.requestConfiguration === true) {
-            return await this.sendConfigurationMessage(ctx, applicationCreatedEvent);
+        try {
+            const applicationCreatedEvent = event.data.ApplicationCreatedEvent[0];
+            if (applicationCreatedEvent.requestConfiguration === true) {
+                return await this.sendConfigurationMessage(ctx, applicationCreatedEvent);
+            }
+
+            logger.info(`ApplicationCreated event will not request configuration`);
+            this.succeedEvent();
+            return await success();
+        } catch {
+            this.failEvent();
         }
-
-        logger.info(`ApplicationCreated event will not request configuration`);
-
-        return await success();
     }
 
     private async sendConfigurationMessage(ctx: HandlerContext, applicationCreatedEvent) {
         const applicationType = applicationCreatedEvent.application.applicationType.toLowerCase();
         const attachmentText = `The ${applicationType} can now be configured. This determines what type of ${applicationType} it is and how it should be deployed/built within your environments.`;
-        const destination =  await addressSlackChannelsFromContext(ctx, applicationCreatedEvent.owningTeam.slackIdentity.teamChannel);
+        const destination = await addressSlackChannelsFromContext(ctx, applicationCreatedEvent.owningTeam.slackIdentity.teamChannel);
         return await ctx.messageClient.send({
             text: `The *${applicationCreatedEvent.application.name}* ${applicationType} in the project *${applicationCreatedEvent.project.name}* has been created successfully.`,
             attachments: [{
                 text: attachmentText,
                 fallback: attachmentText,
                 footer: `For more information, please read the ${this.docs("configure-component")}`,
-                color: "#45B254",
+                color:  QMColours.stdGreenyMcAppleStroodle.hex,
                 actions: [
                     buttonForCommand(
                         {text: "Configure Component"},

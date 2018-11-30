@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,6 +7,7 @@ import {
     Parameter,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -39,12 +39,6 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand
         projectName: "PROJECT_NAME",
         bitbucketRepositorySlug: "BITBUCKET_REPOSITORY_SLUG",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @Parameter({
         description: "application name",
@@ -90,7 +84,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand
                 text: "🚀 Your new application is being created...",
             });
 
-            return await this.packageCommandService.linkBitbucketRepoToGluonPackage(
+            const result = await this.packageCommandService.linkBitbucketRepoToGluonPackage(
                 this.screenName,
                 this.name,
                 this.description,
@@ -98,7 +92,10 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand
                 this.projectName,
                 ApplicationType.DEPLOYABLE,
             );
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

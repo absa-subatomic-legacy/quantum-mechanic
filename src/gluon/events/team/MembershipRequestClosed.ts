@@ -1,6 +1,4 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,11 +6,17 @@ import {
     MappedParameters,
     Parameter,
 } from "@atomist/automation-client";
-import {addressSlackUsersFromContext} from "@atomist/automation-client/spi/message/MessageClient";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {
+    addressSlackChannelsFromContext,
+    addressSlackUsersFromContext,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMColours} from "../../util/QMColour";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     handleQMError,
     QMError,
@@ -20,7 +24,7 @@ import {
 } from "../../util/shared/Error";
 
 @CommandHandler("Close a membership request")
-export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
+export class MembershipRequestClosed extends BaseQMEvent implements HandleCommand<HandlerResult> {
 
     @MappedParameter(MappedParameters.SlackUserName)
     public approverUserName: string;
@@ -71,6 +75,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
     public correlationId: string;
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
@@ -86,9 +91,10 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
                 actioningMember.memberId,
                 this.approvalStatus,
             );
-
+            this.succeedEvent();
             return await this.handleMembershipRequestResult(ctx);
         } catch (error) {
+            this.failEvent();
             return await this.handleError(ctx, error);
         }
     }
@@ -123,15 +129,15 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
 
     private async handleMembershipRequestResult(ctx: HandlerContext) {
         if (this.approvalStatus === "APPROVED") {
-            await this.editRequestMessage(ctx, "APPROVED", "#45B254");
+            await this.editRequestMessage(ctx, "APPROVED",  QMColours.stdGreenyMcAppleStroodle.hex);
         } else {
-            await this.editRequestMessage(ctx, "REJECTED", "#D94649");
+            await this.editRequestMessage(ctx, "REJECTED",  QMColours.stdReddyMcRedFace.hex);
             return await this.handleRejectedMembershipRequest(ctx, this.teamName, this.approverUserName, this.userScreenName);
         }
     }
 
     private async handleRejectedMembershipRequest(ctx: HandlerContext, teamName: string, rejectingUserScreenName: string, rejectedUserScreenName: string) {
-        const destination =  await addressSlackUsersFromContext(ctx, rejectedUserScreenName);
+        const destination = await addressSlackUsersFromContext(ctx, rejectedUserScreenName);
         return await ctx.messageClient.send(`Your membership request to team '${teamName}' has been rejected by @${rejectingUserScreenName}`,
             destination);
     }
@@ -151,7 +157,7 @@ export class MembershipRequestClosed implements HandleCommand<HandlerResult> {
                 mrkdwn_in: ["text"],
             }],
         };
-        const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+        const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
 
         return await ctx.messageClient.send(msg, destination, {id: this.correlationId});
     }

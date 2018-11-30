@@ -1,13 +1,13 @@
 import {
+    addressSlackChannelsFromContext,
+    buttonForCommand,
     EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {EventHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
@@ -16,6 +16,8 @@ import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsFo
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {QMColours} from "../../util/QMColour";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
@@ -62,7 +64,7 @@ subscription ProjectEnvironmentsRequestedEvent {
   }
 }
 `)
-export class ProjectEnvironmentsRequested implements HandleEvent<any> {
+export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleEvent<any> {
 
     private qmMessageClient: ChannelMessageClient;
 
@@ -84,9 +86,10 @@ export class ProjectEnvironmentsRequested implements HandleEvent<any> {
             );
 
             await taskRunner.execute(ctx);
-
+            this.succeedEvent();
             return await this.sendPackageUsageMessage(ctx, environmentsRequestedEvent.project.name, environmentsRequestedEvent.teams);
         } catch (error) {
+            this.failEvent();
             return await handleQMError(this.qmMessageClient, error);
         }
     }
@@ -107,7 +110,7 @@ A package is either an application or a library, click the button below to creat
             attachments: [{
                 fallback: "Create or link existing package",
                 footer: `For more information, please read the ${this.docs()}`,
-                color: "#45B254",
+                color:  QMColours.stdGreenyMcAppleStroodle.hex,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(
@@ -125,7 +128,7 @@ A package is either an application or a library, click the button below to creat
                 ],
             }],
         };
-        const destination =  await addressSlackChannelsFromContext(ctx, ...teams.map(team =>
+        const destination = await addressSlackChannelsFromContext(ctx, ...teams.map(team =>
             team.slackIdentity.teamChannel));
         return await ctx.messageClient.send(msg, destination);
     }

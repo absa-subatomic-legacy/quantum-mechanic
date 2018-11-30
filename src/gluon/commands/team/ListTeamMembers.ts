@@ -1,13 +1,15 @@
 import {
-    CommandHandler,
     HandlerContext,
     MappedParameter,
     MappedParameters,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
+import {Extensible} from "../../util/plugins/Extensible";
+import {QMColours} from "../../util/QMColour";
 import {
     GluonTeamNameSetter,
     setGluonTeamName,
@@ -16,6 +18,7 @@ import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("List members of a team", QMConfig.subatomic.commandPrefix + " list team members")
 @Tags("subatomic", "slack", "channel", "member", "team")
@@ -25,12 +28,6 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
     private static RecursiveKeys = {
         teamName: "TEAM_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
 
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
@@ -45,30 +42,38 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
         super();
     }
 
+    @Extensible("Team.ListTeamMembers")
     protected async runCommand(ctx: HandlerContext) {
-        const result = await this.gluonService.teams.gluonTeamByName(this.teamName);
-        const teamOwners = this.getTeamMemberNames(result.owners);
-        const teamMembers = this.getTeamMemberNames(result.members);
+        try {
+            const result = await this.gluonService.teams.gluonTeamByName(this.teamName);
+            const teamOwners = this.getTeamMemberNames(result.owners);
+            const teamMembers = this.getTeamMemberNames(result.members);
 
-        const msg: SlackMessage = {
-            text: `Team: *${this.teamName}*`,
-            attachments: [
-                {
-                    fallback: `Team: *${this.teamName}*`,
-                    text: `Team Owners:${teamOwners}`,
-                    color: "#00ddff",
-                    mrkdwn_in: ["text"],
-                },
-                {
-                    fallback: `Team: *${this.teamName}*`,
-                    text: `Team Members:${teamMembers}`,
-                    color: "#c000ff",
-                    mrkdwn_in: ["text"],
-                }],
-        };
+            const msg: SlackMessage = {
+                text: `Team: *${this.teamName}*`,
+                attachments: [
+                    {
+                        fallback: `Team: *${this.teamName}*`,
+                        text: `Team Owners:${teamOwners}`,
+                        color: QMColours.stdTurquoiseSurprise.hex,
+                        mrkdwn_in: ["text"],
+                    },
+                    {
+                        fallback: `Team: *${this.teamName}*`,
+                        text: `Team Members:${teamMembers}`,
+                        color: QMColours.stdPurplePeopleEater.hex,
+                        mrkdwn_in: ["text"],
+                    }],
+            };
 
-        return await ctx.messageClient.respond(msg);
+            this.succeedCommand();
+            return await ctx.messageClient.respond(msg);
+        } catch (error) {
+            this.failCommand();
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
+
     protected configureParameterSetters() {
         this.addRecursiveSetter(ListTeamMembers.RecursiveKeys.teamName, setGluonTeamName);
     }

@@ -1,0 +1,7 @@
+type BitbucketProject @rootType {
+	id: String
+	key: String
+	name: String
+	description: String
+	url: String
+}

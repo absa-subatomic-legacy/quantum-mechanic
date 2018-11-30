@@ -1,19 +1,22 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
+} from "@atomist/automation-client";
+import {
+    CommandHandler,
     MappedParameter,
     MappedParameters,
     Parameter,
     Tags,
-} from "@atomist/automation-client";
-import {addressSlackUsersFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {addressSlackUsersFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OnboardMemberMessages} from "../../messages/member/OnboardMemberMessages";
 import {GluonService} from "../../services/gluon/GluonService";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
     QMError,
@@ -22,11 +25,7 @@ import {
 
 @CommandHandler("Onboard a new team member", QMConfig.subatomic.commandPrefix + " onboard me")
 @Tags("subatomic", "slack", "member")
-export class OnboardMember implements HandleCommand<HandlerResult> {
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
+export class OnboardMember extends BaseQMComand {
     @MappedParameter(MappedParameters.SlackUser)
     public userId: string;
 
@@ -56,11 +55,12 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
     public onboardMessages: OnboardMemberMessages = new OnboardMemberMessages();
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            logger.info("Creating");
+            logger.info("Requesting new Gluon user");
             await this.createGluonTeamMember(
                 {
                     firstName: this.firstName,
@@ -73,9 +73,12 @@ export class OnboardMember implements HandleCommand<HandlerResult> {
                     },
                 });
             const message = this.onboardMessages.presentTeamCreationAndApplicationOptions(this.firstName);
-            const destination =  await addressSlackUsersFromContext(ctx, this.userId);
-            return await ctx.messageClient.send(message, destination);
+            const destination = await addressSlackUsersFromContext(ctx, this.userId);
+            const result = await ctx.messageClient.send(message, destination);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

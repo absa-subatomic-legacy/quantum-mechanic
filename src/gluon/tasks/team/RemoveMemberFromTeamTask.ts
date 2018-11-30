@@ -1,5 +1,4 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {handleError} from "@atomist/lifecycle-automation/handlers/command/github/gitHubApi";
 import {GluonService} from "../../services/gluon/GluonService";
 import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
 import {
@@ -7,7 +6,6 @@ import {
     loadScreenNameByUserId,
     MemberRole,
 } from "../../util/member/Members";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {getTeamSlackChannel} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -32,7 +30,6 @@ export class RemoveMemberFromTeamTask extends Task {
     }
 
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
-        try {
             const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
             const teamChannel = getTeamSlackChannel(team);
             const screenName = getScreenName(this.slackName);
@@ -46,10 +43,6 @@ export class RemoveMemberFromTeamTask extends Task {
 
             await this.taskListMessage.succeedTask(this.TASK_REMOVE_USER_FROM_TEAM);
             return true;
-        } catch (error) {
-            logger.error(`error: ${error.message}`);
-            return false;
-        }
     }
 
 }

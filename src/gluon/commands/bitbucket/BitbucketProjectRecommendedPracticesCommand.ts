@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
@@ -7,6 +6,7 @@ import {
     MappedParameters,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
@@ -36,12 +36,6 @@ export class BitbucketProjectRecommendedPracticesCommand extends RecursiveParame
         teamName: "TEAM_NAME",
         projectName: "PROJECT_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @RecursiveParameter({
         recursiveKey: BitbucketProjectRecommendedPracticesCommand.RecursiveKeys.projectName,
@@ -79,6 +73,7 @@ export class BitbucketProjectRecommendedPracticesCommand extends RecursiveParame
             const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             if (!isUserAMemberOfTheTeam(member, requestingTeam)) {
+                this.failCommand();
                 return await messageClient.send(this.teamMembershipMessages.notAMemberOfTheTeam());
             }
 
@@ -93,8 +88,11 @@ export class BitbucketProjectRecommendedPracticesCommand extends RecursiveParame
             }
             await taskRunner.execute(ctx);
 
-            return await messageClient.send("Successfully applied recommended practices to Bitbucket project!");
+            const result = await messageClient.send("Successfully applied recommended practices to Bitbucket project!");
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(messageClient, error);
         }
     }

@@ -83,10 +83,13 @@ Here is an example `local.json`:
     },
     "docs": {
       "baseUrl": "http://subatomic.bison.ninja"
+    },
+    "plugins":{
+      "directory": "<plugins directory>"
     }
   },
   "teamId": "<team Id>",
-  "token": "<GitHub token>",
+  "apiKey": "<Atomist workspace apiKey>",
   // lifecycle configuration
   "lifecycles": {
     "push": {
@@ -140,8 +143,9 @@ Replace the relevant values above:
 | `<laboratory>` | The directory where [laboratory](https://github.com/absa-subatomic/laboratory) has been cloned locally | `git clone https://github.com/absa-subatomic/laboratory.git` |
 | `<maven settings>` | Directory containing a Maven `settings.xml` to use for Jenkins builds | Example `settings.xml` included [below](#maven-settings) |
 | `<team Id>` | Slack team Id where the Atomist will respond to commands | See [Atomist documentation](https://docs.atomist.com/user/#slack-team-id) |
-| `<GitHub token>` | GitHub token | See [Atomist documentation](https://docs.atomist.com/developer/prerequisites/#github-token) |
+| `<Atomist workspace ApiKey>` | Atomist ApiKey | See [Atomist documentation](https://docs.atomist.com/developer/prerequisites) |
 | `<bitbucket ssh port>` | Bitbucket SSH Port | Set this to the port used for ssh git commands on your Bitbucket instance. The default for Local Hadron Collider should be `30999` |
+| `<plugins directory>` | Pluging Directory | Set this to the directory which all available plugin modules will be dropped into |
 
 Note that the settings should be change appropriately if using different environments for prod or multiple prod environments in the relative parts of the settings file.
 

@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,7 +7,8 @@ import {
     success,
     Tags,
 } from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
@@ -33,12 +33,6 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: CreateProjectProdEnvironments.RecursiveKeys.projectName,
         selectionMessage: "Please select the projects you wish to provision the production environments for",
@@ -60,7 +54,7 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
         logger.info("Creating project OpenShift production environments...");
 
         try {
-            const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+            const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
             await ctx.messageClient.send({
                 text: `Requesting production environments's for project *${this.projectName}*`,
             }, destination);
@@ -71,8 +65,10 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
 
             await this.gluonService.prod.project.createProjectProdRequest(member.memberId, project.projectId);
 
-            return success();
+            this.succeedCommand();
+            return await success();
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

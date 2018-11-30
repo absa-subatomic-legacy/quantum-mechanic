@@ -1,11 +1,11 @@
 import {
-    CommandHandler,
     HandlerContext,
     logger,
     MappedParameter,
     MappedParameters,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {inspect} from "util";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
@@ -34,12 +34,6 @@ export class TagAllLatestImages extends RecursiveParameterRequestCommand
     private static RecursiveKeys = {
         teamName: "TEAM_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @RecursiveParameter({
         recursiveKey: TagAllLatestImages.RecursiveKeys.teamName,
@@ -72,14 +66,17 @@ export class TagAllLatestImages extends RecursiveParameterRequestCommand
         await this.ocService.login();
         const project = this.ocService.findProject(devopsEnvironment);
         if (project === null) {
+            this.failCommand();
             throw new QMError(`No devops environment for team ${this.teamName} has been provisioned yet.`);
         }
         try {
             await this.ocService.tagAllSubatomicImageStreamsToDevOpsEnvironment(devopsEnvironment);
         } catch (error) {
+            this.failCommand();
             logger.error(`Failed to tag images to project ${devopsEnvironment}. Error: ${inspect(error)}`);
             throw new QMError("Image tagging failed. Please contact your system administrator for assistance.");
         }
+        this.succeedCommand();
         return ctx.messageClient.respond(`All images successfully tagged to devops environment *${devopsEnvironment}*.`, {id: messageId});
     }
 }

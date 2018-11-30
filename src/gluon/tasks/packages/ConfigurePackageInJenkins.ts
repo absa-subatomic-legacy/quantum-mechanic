@@ -5,9 +5,9 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
-import {GitCommandGitProject} from "@atomist/automation-client/project/git/GitCommandGitProject";
-import {GitProject} from "@atomist/automation-client/project/git/GitProject";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {GitCommandGitProject} from "@atomist/automation-client/lib/project/git/GitCommandGitProject";
+import {GitProject} from "@atomist/automation-client/lib/project/git/GitProject";
+import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
@@ -24,7 +24,7 @@ import {
 import {ApplicationType} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
 import {ParameterDisplayType} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {QMError} from "../../util/shared/Error";
+import {GitError, QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeamBase} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -166,15 +166,20 @@ export class ConfigurePackageInJenkins extends Task {
             }
 
             const clean = await project.isClean();
-            logger.debug(`Jenkinsfile has been added: ${clean.success}`);
+            logger.debug(`Jenkinsfile has been added: ${clean}`);
 
-            if (!clean.success) {
+            if (!clean) {
                 await project.setUserConfig(
                     QMConfig.subatomic.bitbucket.auth.username,
                     QMConfig.subatomic.bitbucket.auth.email,
                 );
                 await project.commit(`Added Jenkinsfile`);
-                await project.push();
+                try {
+                    await project.push();
+                } catch (error) {
+                    logger.debug(`Error pushing Jenkins file to repository`);
+                    throw new GitError(error.message);
+                }
             } else {
                 logger.debug("Jenkinsfile already exists");
             }

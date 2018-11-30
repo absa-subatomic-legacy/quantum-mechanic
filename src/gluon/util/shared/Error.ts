@@ -4,7 +4,7 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
-import {MessageOptions} from "@atomist/automation-client/spi/message/MessageClient";
+import {MessageOptions} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import * as util from "util";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
@@ -17,9 +17,13 @@ export function logErrorAndReturnSuccess(method, error): HandlerResult {
 
 export async function handleQMError(messageClient: QMMessageClient, error) {
     logger.error("Trying to handle QM error.");
+
     if (error && "code" in error && error.code === "ECONNREFUSED") {
         logger.error(`Error code suggests and external service is down.\nError: ${util.inspect(error)}`);
         return await messageClient.send(`❗Unexpected failure. An external service dependency appears to be down.`);
+    } else if (error instanceof GitError) {
+        logger.error(`Error is of GitError type. Error: ${error.message}`);
+        return await messageClient.send(error.getSlackMessage());
     } else if (error instanceof QMError) {
         logger.error(`Error is of QMError type. Error: ${error.message}`);
         return await messageClient.send(error.getSlackMessage());
@@ -50,6 +54,10 @@ export class QMError extends Error {
             return {
                 text: `❗${this.message}`,
             };
+        } else if (typeof this.slackMessage === "string") {
+            return {
+                text: `❗${this.slackMessage}`,
+            };
         }
         return this.slackMessage;
     }
@@ -66,6 +74,28 @@ export class OCResultError extends QMError {
         this.message = `${message}
         Command: ${ocCommandResult.command}
         Error: ${ocCommandResult.error}`;
+    }
+}
+
+export class GitError extends Error {
+    constructor(message: string) {
+        super(message);
+    }
+
+    public getSlackMessage() {
+        let errorFriendlyMessage = "Failed to interpret Git exception. Please alert your system admin to check the logs and correct the issue accordingly.";
+        logger.debug(`Attempting to resolve slack message for GitError`);
+
+        const regex: RegExp = /-{5,}\s{1,}remote:([\s\S]*?)remote:\s-{1,}/;
+        const match = regex.exec(this.message);
+        if (match !== null) {
+            errorFriendlyMessage = match[1];
+            errorFriendlyMessage = errorFriendlyMessage.replace("remote: ", "");
+            logger.debug(`Derived error message from Error for GitError: ${errorFriendlyMessage}`);
+        }
+        return {
+            text: `❗${errorFriendlyMessage}`,
+        };
     }
 }
 

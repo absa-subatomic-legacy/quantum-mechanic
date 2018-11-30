@@ -1,12 +1,12 @@
 import {
     EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
     success,
 } from "@atomist/automation-client";
+import {EventHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {isSuccessCode} from "../../../http/Http";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -14,6 +14,7 @@ import {ConfigureBitbucketProjectRecommendedPractices} from "../../tasks/bitbuck
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {QMProjectBase} from "../../util/project/Project";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
     handleQMError,
@@ -64,13 +65,14 @@ subscription BitbucketProjectRequestedEvent {
   }
 }
 `)
-export class BitbucketProjectRequested implements HandleEvent<any> {
+export class BitbucketProjectRequested extends BaseQMEvent implements HandleEvent<any> {
 
     private bitbucketProjectId: string;
 
     private bitbucketProjectUrl: string;
 
     constructor(private bitbucketService = new BitbucketService(), private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -85,7 +87,6 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
             .forEach(team => messageClient.addDestination(team.slackIdentity.teamChannel));
 
         try {
-
             const project = bitbucketProjectRequestedEvent.project;
 
             const qmProject: QMProjectBase = {
@@ -106,9 +107,9 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
             }
 
             await taskRunner.execute(ctx);
-
             return await this.confirmBitbucketProjectCreatedWithGluon(bitbucketProjectRequestedEvent.project.projectId, bitbucketProjectRequestedEvent.project.name);
         } catch (error) {
+            this.failEvent();
             return await handleQMError(messageClient, error);
         }
     }
@@ -165,6 +166,7 @@ export class BitbucketProjectRequested implements HandleEvent<any> {
             logger.error(`Could not confirm Bitbucket project: [${confirmBitbucketProjectCreatedResult.status}-${confirmBitbucketProjectCreatedResult.data}]`);
             throw new QMError(`There was an error confirming the ${projectName} Bitbucket project details`);
         }
+        this.succeedEvent();
         return success();
     }
 }

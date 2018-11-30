@@ -1,12 +1,12 @@
 import {
     EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {EventHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
@@ -16,6 +16,7 @@ import {OCService} from "../../services/openshift/OCService";
 import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService";
 import {userFromDomainUser} from "../../util/member/Members";
 import {getProjectId} from "../../util/project/Project";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
     handleQMError,
@@ -53,12 +54,13 @@ subscription MembersAddedToTeamEvent {
   }
 }
 `)
-export class MembersAddedToTeam implements HandleEvent<any> {
+export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> {
 
     constructor(private gluonService = new GluonService(),
                 private addMemberToTeamService = new AddMemberToTeamService(),
                 private bitbucketService = new BitbucketService(),
                 private ocService = new OCService()) {
+        super();
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -76,8 +78,10 @@ export class MembersAddedToTeam implements HandleEvent<any> {
             await this.addPermissionsForUserToTeams(team.name, projects, membersAddedToTeamEvent);
 
             const destination = await addressSlackChannelsFromContext(ctx, team.slackIdentity.teamChannel);
+            this.succeedEvent();
             return await ctx.messageClient.send("New user permissions successfully added to associated projects.", destination);
         } catch (error) {
+            this.failEvent();
             return await this.handleError(ctx, error, membersAddedToTeamEvent.team.slackIdentity.teamChannel);
         }
     }

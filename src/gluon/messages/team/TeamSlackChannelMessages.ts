@@ -1,9 +1,10 @@
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {CreateTeam} from "../../commands/team/CreateTeam";
 import {LinkExistingTeamSlackChannel} from "../../commands/team/LinkExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "../../commands/team/NewSlackChannel";
+import {QMColours} from "../../util/QMColour";
 
 export class TeamSlackChannelMessages {
     public requestNonExistentTeamsCreation(gluonTeamName: string, commandReferenceDocsExtension: string): SlackMessage {
@@ -16,7 +17,7 @@ To create a team channel you must first create a team. Click the button below to
                                                   `,
                 fallback: "Team does not exist on Subatomic",
                 footer: `For more information, please read the ${this.docs(commandReferenceDocsExtension)}`,
-                color: "#D94649",
+                color:  QMColours.stdReddyMcRedFace.hex,
                 mrkdwn_in: ["text"],
                 actions: [
                     buttonForCommand(

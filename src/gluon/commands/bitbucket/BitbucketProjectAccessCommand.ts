@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,6 +7,7 @@ import {
     success,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
@@ -37,12 +37,6 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
         teamName: "TEAM_NAME",
         projectName: "PROJECT_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @RecursiveParameter({
         recursiveKey: BitbucketProjectAccessCommand.RecursiveKeys.projectName,
@@ -80,6 +74,7 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
             const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             if (!isUserAMemberOfTheTeam(member, requestingTeam)) {
+                this.failCommand();
                 return await messageClient.send(this.teamMembershipMessages.notAMemberOfTheTeam());
             }
 
@@ -94,8 +89,10 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
             }
             await taskRunner.execute(ctx);
 
+            this.succeedCommand();
             return await success();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(messageClient, error);
         }
     }

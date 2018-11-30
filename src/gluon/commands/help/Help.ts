@@ -1,19 +1,21 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
     Parameter,
 } from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import uuid = require("uuid");
 import {QMConfig} from "../../../config/QMConfig";
-import {handleQMError, ResponderMessageClient} from "../shared/Error";
+import {QMColours} from "../../util/QMColour";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
+import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {HelpCategory} from "./HelpCategory";
 
 @CommandHandler("Help regarding subatomic commands", QMConfig.subatomic.commandPrefix + " help")
-export class Help implements HandleCommand<HandlerResult> {
+export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {
 
     @Parameter({
         description: "Option selected",
@@ -58,14 +60,15 @@ export class Help implements HandleCommand<HandlerResult> {
     ];
     public commands: any = [];
     public absaColors = [
-        "#ff780f", "#fa551e",
-        "#f52d28", "#dc0032",
-        "#be0028", "#aa052d",
-        "#960528", "#f05a7d",
-        "#f0325a", "#af144b",
-        "#870a3c", "#640032",
-        "#500a28", "#000000",
+        QMColours.absaEnergy.hex, QMColours.absaPrepared.hex,
+        QMColours.absaAgile.hex, QMColours.absaPassion.hex,
+        QMColours.absaWarmth.hex, QMColours.absaHuman.hex,
+        QMColours.absaGrounded.hex, QMColours.absaCare.hex,
+        QMColours.absaSmile.hex, QMColours.absaSurprise.hex,
+        QMColours.absaCalm.hex, QMColours.absaLuxury.hex,
+        QMColours.absaDepth.hex, QMColours.absaBlack.hex,
     ];
+
     public colorCount = 0;
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
@@ -77,12 +80,15 @@ export class Help implements HandleCommand<HandlerResult> {
             if (this.selectedOption === undefined) {
                 return await this.displayCategories(ctx);
             } else if (this.selectedOption.startsWith(QMConfig.subatomic.commandPrefix)) {
+                this.succeedCommand();
                 return this.displayCommandToBeRun(ctx);
             } else {
+                this.succeedCommand();
                 return await this.displayCommands(ctx);
             }
 
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }
@@ -99,7 +105,10 @@ export class Help implements HandleCommand<HandlerResult> {
                         text: option,
                         style: "primary",
                     },
-                    new Help(), {selectedOption: option, correlationId: this.correlationId}),
+                    new Help(), {
+                        selectedOption: option,
+                        correlationId: this.correlationId,
+                    }),
             ],
         });
     }
@@ -182,9 +191,7 @@ export class Help implements HandleCommand<HandlerResult> {
         this.optionsAttachments = [];
         for (const commandClass of this.optionFolders) {
             if (commandClass.getHelpName() === this.selectedOption) {
-                logger.info(commandClass.getHelpTag());
                 this.commands = commandClass.findListOfCommands(commandClass.getHelpTag());
-                logger.info(this.commands);
                 for (const command of this.commands) {
                     this.commandOptions(this.getCommandHandlerMetadata(command.prototype), command);
                     this.colorCount++;

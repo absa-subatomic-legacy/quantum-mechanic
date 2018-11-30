@@ -1,5 +1,5 @@
 import {logger} from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {inspect} from "util";
@@ -7,6 +7,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
 import {OnboardMember} from "../../commands/member/OnboardMember";
+import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 
 export class MemberService {
@@ -38,7 +39,7 @@ To create a team you must first onboard yourself. Click the button below to do t
                         fallback: "You are not onboarded to Subatomic",
                         footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                             "documentation")}`,
-                        color: "#ffcc00",
+                        color:  QMColours.stdMuddyYellow.hex,
                         mrkdwn_in: ["text"],
                         thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                         actions: [

@@ -1,6 +1,4 @@
 import {
-    CommandHandler,
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
@@ -10,10 +8,13 @@ import {
     success,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
+import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
     QMError,
@@ -22,10 +23,7 @@ import {
 
 @CommandHandler("Create a new team", QMConfig.subatomic.commandPrefix + " create team")
 @Tags("subatomic", "team")
-export class CreateTeam implements HandleCommand<HandlerResult> {
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
+export class CreateTeam extends BaseQMComand implements HandleCommand<HandlerResult> {
 
     @Parameter({
         description: "team name",
@@ -38,6 +36,7 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
     private description: string;
 
     constructor(private gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
@@ -48,8 +47,10 @@ export class CreateTeam implements HandleCommand<HandlerResult> {
 
             await this.createTeamInGluon(this.name, this.description, member.memberId);
 
+            this.succeedCommand();
             return await success();
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

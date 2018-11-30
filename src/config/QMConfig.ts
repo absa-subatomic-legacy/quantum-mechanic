@@ -2,8 +2,10 @@ import {logger} from "@atomist/automation-client";
 import fs = require("fs");
 import _ = require("lodash");
 import stripJsonComments = require("strip-json-comments");
+import {PrometheusClient} from "../gluon/metrics/prometheus/PrometheusClient";
 import {Cluster} from "./Cluster";
 import {HttpAuth} from "./HttpAuth";
+import {ProMetrics} from "./ProMetrics";
 import {SubatomicConfig} from "./SubatomicConfig";
 
 export class QMConfig {
@@ -12,11 +14,13 @@ export class QMConfig {
 
     public static teamId: string;
 
-    public static token: string;
+    public static apiKey: string;
 
     public static http: HttpAuth;
 
     public static cluster: Cluster;
+
+    public static proMetrics: ProMetrics;
 
     public static publicConfig() {
         return new PublicQMConfig();
@@ -27,12 +31,23 @@ export class QMConfig {
         const config = JSON.parse(configRaw);
         QMConfig.subatomic = config.subatomic;
         QMConfig.teamId = config.teamId;
-        QMConfig.token = config.token;
+        QMConfig.apiKey = config.apiKey;
         QMConfig.http = config.http;
+        QMConfig.proMetrics = config.proMetrics || {
+            enabled: true,
+        };
+
         QMConfig.cluster = config.cluster || {
             enabled: process.env.NODE_ENV === "production",
             workers: 10,
         };
+        if (QMConfig.proMetrics.enabled) {
+            if (QMConfig.cluster.enabled) {
+                QMConfig.http.customizers = [PrometheusClient.initializeClusteredMetricsServer];
+            } else {
+                QMConfig.http.customizers = [PrometheusClient.initializeNonClusteredMetricsServer];
+            }
+        }
     }
 
     private static getConfigFile() {

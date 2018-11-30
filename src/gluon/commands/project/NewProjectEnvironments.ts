@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,7 +7,8 @@ import {
     success,
     Tags,
 } from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
@@ -40,12 +40,6 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand
         projectName: "PROJECT_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
     @RecursiveParameter({
         recursiveKey: NewProjectEnvironments.RecursiveKeys.projectName,
         selectionMessage: "Please select the projects you wish to provision the environments for",
@@ -69,7 +63,7 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand
         logger.info("Creating new OpenShift environments...");
 
         try {
-            const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+            const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
             await ctx.messageClient.send({
                 text: `Requesting project environment's for project *${this.projectName}*`,
             }, destination);
@@ -80,8 +74,10 @@ export class NewProjectEnvironments extends RecursiveParameterRequestCommand
 
             await this.requestProjectEnvironment(project.projectId, member.memberId);
 
+            this.succeedCommand();
             return await success();
         } catch (error) {
+            this.failCommand();
             return await this.handleError(ctx, error);
         }
     }

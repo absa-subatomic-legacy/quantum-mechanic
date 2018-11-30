@@ -1,11 +1,12 @@
 import {logger} from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
 import {CreateProject} from "../../commands/project/CreateProject";
+import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 
 export class ProjectService {
@@ -34,7 +35,7 @@ Consider creating a new project called ${projectName}. Click the button below to
                         fallback: "Project not managed by Subatomic",
                         footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-project`,
                             "documentation")}`,
-                        color: "#ffcc00",
+                        color:  QMColours.stdMuddyYellow.hex,
                         mrkdwn_in: ["text"],
                         actions: [
                             buttonForCommand(

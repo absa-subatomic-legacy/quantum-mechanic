@@ -57,7 +57,7 @@ describe("AddMemberToTeamService addUserToGluonTeam", () => {
             errorThrown = error;
         }
 
-        assert.equal(errorThrown.message, `Failed to add member to the team. Server side failure.`);
+        assert.equal(errorThrown.getSlackMessage().text, `❗Failed to add member to the team. Server side failure.`);
 
     });
 
@@ -106,7 +106,7 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
             "jude",
         );
 
-        assert.equal(fakeContext.messageClient.textMsg[0], "User jude successfully added to your gluon team." +
+        assert.equal(fakeContext.messageClient.textMsg[0], "User jude successfully added to your team." +
             " Private channels do not currently support automatic user invitation." +
             " Please invite the user to this slack channel manually.");
 

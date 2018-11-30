@@ -1,0 +1,15 @@
+type PackageConfiguredEvent @rootType {
+	application: GluonApplication
+	project: Project
+	bitbucketProject: BitbucketProject
+	bitbucketRepository: BitbucketRepository
+	owningTeam: GluonTeam
+	buildDetails: BuildDetails
+}
+type BuildDetails {
+	buildType: String
+	jenkinsDetails: JenkinsDetails
+}
+type JenkinsDetails {
+	jenkinsFile: String
+}

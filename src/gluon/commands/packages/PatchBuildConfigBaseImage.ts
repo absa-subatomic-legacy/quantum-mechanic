@@ -1,11 +1,11 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     MappedParameter,
     MappedParameters,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -41,12 +41,6 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
         applicationName: "APPLICATION_NAME",
         imageName: "IMAGE_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @RecursiveParameter({
         recursiveKey: PatchBuildConfigBaseImage.RecursiveKeys.applicationName,
@@ -92,8 +86,9 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
             await taskRunner.execute(ctx);
 
             await qmMessageClient.send("Patching BuildConfig completed successfully!");
-
+            this.succeedCommand();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(qmMessageClient, error);
         }
     }

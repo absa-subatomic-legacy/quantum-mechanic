@@ -2,9 +2,9 @@ import {HandlerContext, logger} from "@atomist/automation-client";
 import {
     addressSlackChannelsFromContext,
     addressSlackUsersFromContext,
-} from "@atomist/automation-client/spi/message/MessageClient";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
-import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/handlers/command/slack/AssociateRepo";
+    buttonForCommand,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/lib/handlers/command/slack/AssociateRepo";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
@@ -13,6 +13,7 @@ import {OnboardMember} from "../../commands/member/OnboardMember";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
 import {MemberRole} from "../../util/member/Members";
+import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 import {loadChannelIdByChannelName} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";
@@ -43,7 +44,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                     fallback: "Failed to get member details.",
                     footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                         "documentation")}`,
-                    color: "#ffcc00",
+                    color: QMColours.stdMuddyYellow.hex,
                     mrkdwn_in: ["text"],
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                     actions: [
@@ -64,7 +65,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                                           channelName: string,
                                           screenName: string,
                                           slackName: string) {
-        const destination =  await addressSlackChannelsFromContext(ctx, channelName);
+        const destination = await addressSlackChannelsFromContext(ctx, channelName);
         try {
             logger.info(`Added team member! Inviting to channel [${channelName}] -> member [${screenName}]`);
             const channelId = await loadChannelIdByChannelName(ctx, channelName);
@@ -79,8 +80,9 @@ They have been sent a request to onboard, once they've successfully onboarded yo
             return await ctx.messageClient.send(message, destination);
         } catch (error) {
             logger.warn(error);
-            return await ctx.messageClient.send(`User ${slackName} successfully added to your gluon team. Private channels do not currently support automatic user invitation.` +
-                " Please invite the user to this slack channel manually.", destination);
+            return await ctx.messageClient.send(`User ${slackName} successfully added to your team.` +
+                ` Private channels do not currently support automatic user invitation.` +
+                ` Please invite the user to this slack channel manually.`, destination);
         }
     }
 
@@ -111,8 +113,13 @@ They have been sent a request to onboard, once they've successfully onboarded yo
             memberDetails);
 
         if (!isSuccessCode(updateTeamResult.status)) {
-            logger.error(`Failed to add member to team: ${inspect(updateTeamResult)}`);
-            throw new QMError(`Failed to add member to the team. Server side failure.`);
+            let message = `Failed to add member to the team. Server side failure.`;
+            const errorMessage = `Failed to add member to the team. ${inspect(updateTeamResult)}`;
+            logger.error(message);
+            if (updateTeamResult.status === 403) {
+                message = `Unauthorized: Sorry only a team owner can add members to a team.`;
+            }
+            throw new QMError(errorMessage, message);
         }
     }
 
@@ -133,7 +140,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
     }
 
     private async onboardMessage(ctx, chatId: string, teamChannel: string) {
-        const destination =  await addressSlackUsersFromContext(ctx, chatId);
+        const destination = await addressSlackUsersFromContext(ctx, chatId);
         const msg: SlackMessage = {
             text: `Someone tried to add you to the team channel ${teamChannel}.`,
             attachments: [{
@@ -144,7 +151,7 @@ Click the button below to do that now.
                 fallback: "You are not onboarded to Subatomic",
                 footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
                     "documentation")}`,
-                color: "#ffcc00",
+                color: QMColours.stdMuddyYellow.hex,
                 mrkdwn_in: ["text"],
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [

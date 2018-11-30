@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,7 +7,8 @@ import {
     Parameter,
     Tags,
 } from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
@@ -32,12 +32,6 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
     private static RecursiveKeys = {
         teamName: "TEAM_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @RecursiveParameter({
         recursiveKey: AddConfigServer.RecursiveKeys.teamName,
@@ -64,6 +58,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
                 this.gitUri,
             );
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }
@@ -75,18 +70,24 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
     private async addConfigServer(ctx: HandlerContext,
                                   gluonTeamName: string,
                                   gitUri: string): Promise<any> {
-        const devOpsProjectId = `${_.kebabCase(gluonTeamName).toLowerCase()}-devops`;
-        await this.addConfigServerSecretToDevOpsEnvironment(devOpsProjectId);
+        try {
+            const devOpsProjectId = `${_.kebabCase(gluonTeamName).toLowerCase()}-devops`;
+            await this.addConfigServerSecretToDevOpsEnvironment(devOpsProjectId);
 
-        await this.createConfigServerConfigurationMap(devOpsProjectId);
+            await this.createConfigServerConfigurationMap(devOpsProjectId);
 
-        await this.tagConfigServerImageToDevOpsEnvironment(devOpsProjectId);
+            await this.tagConfigServerImageToDevOpsEnvironment(devOpsProjectId);
 
-        await this.addViewRoleToDevOpsEnvironmentDefaultServiceAccount(devOpsProjectId);
+            await this.addViewRoleToDevOpsEnvironmentDefaultServiceAccount(devOpsProjectId);
 
-        await this.createConfigServerDeploymentConfig(gitUri, devOpsProjectId);
+            await this.createConfigServerDeploymentConfig(gitUri, devOpsProjectId);
 
-        await this.sendSuccessResponse(ctx, devOpsProjectId);
+            await this.sendSuccessResponse(ctx, devOpsProjectId);
+            this.succeedCommand();
+        } catch (error) {
+            this.failCommand();
+            return await handleQMError(new ResponderMessageClient(ctx), error);
+        }
     }
 
     private async addConfigServerSecretToDevOpsEnvironment(devOpsProjectId: string) {
@@ -158,7 +159,7 @@ spring:
     }
 
     private async sendSuccessResponse(ctx: HandlerContext, devOpsProjectId: string) {
-        const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+        const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
         const slackMessage: SlackMessage = {
             text: `Your Subatomic Config Server has been added to your *${devOpsProjectId}* OpenShift project successfully`,
             attachments: [{

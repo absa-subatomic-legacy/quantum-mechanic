@@ -1,21 +1,24 @@
 import {
-    HandleCommand,
     HandlerContext,
     HandlerResult,
     logger,
     Parameter,
 } from "@atomist/automation-client";
+import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {
     BaseParameter,
     declareParameter,
-} from "@atomist/automation-client/internal/metadata/decoratorSupport";
+} from "@atomist/automation-client/lib/internal/metadata/decoratorSupport";
 import _ = require("lodash");
 import uuid = require("uuid");
+import {QMColours} from "../QMColour";
+import {BaseQMComand} from "../shared/BaseQMCommand";
+import {BaseQMHandler} from "../shared/BaseQMHandler";
 import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
 import {ParameterStatusDisplay} from "./ParameterStatusDisplay";
 import {RecursiveSetterResult} from "./RecursiveSetterResult";
 
-export abstract class RecursiveParameterRequestCommand implements HandleCommand<HandlerResult> {
+export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
 
     @Parameter({
         required: false,
@@ -74,7 +77,6 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
                 selectionMessage: parameterDetails.selectionMessage,
                 forceSet: parameterDetails.forceSet,
             };
-            logger.info(JSON.stringify(this.recursiveParameterMap[parameterDetails.recursiveKey]));
             this.recursiveParameterList.push(parameterDetails.recursiveKey);
         } else {
             throw new QMError(`Duplicate recursive key ${parameterDetails.recursiveKey} defined. Recursive keys must be unique.`);
@@ -113,7 +115,7 @@ export abstract class RecursiveParameterRequestCommand implements HandleCommand<
                     return await this.handle(ctx);
                 } else {
                     const displayMessage = this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
-                    result.messagePrompt.color = "#00a5ff";
+                    result.messagePrompt.color =  QMColours.stdShySkyBlue.hex;
                     displayMessage.attachments.push(result.messagePrompt);
                     return await ctx.messageClient.respond(displayMessage, {id: this.messagePresentationCorrelationId});
                 }

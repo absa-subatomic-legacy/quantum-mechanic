@@ -1,12 +1,12 @@
 import {
-    CommandHandler,
     HandlerContext,
-    HandlerResult,
+    HandlerResult, logger,
     MappedParameter,
     MappedParameters,
     Parameter,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
@@ -31,19 +31,13 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
         teamName: "TEAM_NAME",
     };
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
 
     @MappedParameter(MappedParameters.SlackChannel)
     public channelId: string;
 
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
-
-    @Parameter({
+        @Parameter({
         description: "slack name (@User.Name) of the member to make a member",
     })
     public slackName: string;
@@ -72,7 +66,9 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
             taskRunner.addTask(new AddMemberToTeamTask(this.slackName, this.screenName, this.teamName, MemberRole.member));
 
             await taskRunner.execute(ctx);
+            this.succeedCommand();
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

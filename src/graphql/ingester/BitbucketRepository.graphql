@@ -1,0 +1,6 @@
+type BitbucketRepository @rootType {
+	bitbucketId: String
+	name: String
+	repoUrl: String
+	remoteUrl: String
+}

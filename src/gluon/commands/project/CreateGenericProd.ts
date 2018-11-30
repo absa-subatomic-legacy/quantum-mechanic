@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,6 +7,7 @@ import {
     Parameter,
     Tags,
 } from "@atomist/automation-client";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
 import {GenericProdRequestMessages} from "../../messages/project/GenericProdRequestMessages";
@@ -19,6 +19,7 @@ import {
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
 import {getProjectId} from "../../util/project/Project";
+import {QMColours} from "../../util/QMColour";
 import {
     GluonProjectNameSetter,
     GluonTeamNameSetter,
@@ -46,12 +47,6 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         teamName: "TEAM_NAME",
         projectName: "PROJECT_NAME",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @RecursiveParameter({
         recursiveKey: CreateGenericProd.RecursiveKeys.teamName,
@@ -96,17 +91,24 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
             if (this.approval === ApprovalEnum.CONFIRM) {
                 this.correlationId = uuid();
-                return await this.getRequestConfirmation(qmMessageClient);
+                const result =  await this.getRequestConfirmation(qmMessageClient);
+                this.succeedCommand();
+                return result;
             } else if (this.approval === ApprovalEnum.APPROVED) {
 
                 await this.createGenericProdRequest();
 
-                return await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+                const result = await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+                this.succeedCommand();
+                return result;
             } else if (this.approval === ApprovalEnum.REJECTED) {
-                return await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+                const result = await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+                this.succeedCommand();
+                return result;
             }
 
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }
@@ -126,13 +128,13 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
             message.attachments.push({
                 text: `*Confirmed*`,
                 fallback: "*Confirmed*",
-                color: "#45B254",
+                color:  QMColours.stdGreenyMcAppleStroodle.hex,
             });
         } else if (result === ApprovalEnum.REJECTED) {
             message.attachments.push({
                 text: `*Cancelled*`,
                 fallback: "*Cancelled*",
-                color: "#D94649",
+                color:  QMColours.stdReddyMcRedFace.hex,
             });
         }
 

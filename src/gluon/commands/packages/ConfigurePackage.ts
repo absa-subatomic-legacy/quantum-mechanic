@@ -1,13 +1,15 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
+    success,
+} from "@atomist/automation-client";
+import {
+    CommandHandler,
     MappedParameter,
     MappedParameters,
-    success,
     Tags,
-} from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+} from "@atomist/automation-client/lib/decorators";
+import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -54,12 +56,6 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
         jenkinsfileName: "JENKINSFILE_NAME",
         baseS2IImage: "BASE_S2I_IMAGE",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @RecursiveParameter({
         recursiveKey: ConfigurePackage.RecursiveKeys.applicationName,
@@ -110,8 +106,11 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
             await ctx.messageClient.send({
                 text: "Preparing to configure your package...",
             }, destination);
-            return await this.configurePackage(ctx);
+            const result = await this.configurePackage(ctx);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }

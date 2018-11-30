@@ -1,3 +1,4 @@
+import {ingester} from "@atomist/automation-client/lib/graph/graphQL";
 import {QMConfig} from "./config/QMConfig";
 import {
     ListExistingBitbucketProject,
@@ -5,6 +6,7 @@ import {
 } from "./gluon/commands/bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "./gluon/commands/bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "./gluon/commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
+import {Help} from "./gluon/commands/help/Help";
 import {KickOffJenkinsBuild} from "./gluon/commands/jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsCredentialsRecreate";
 import {AddSlackDetails} from "./gluon/commands/member/AddSlackDetails";
@@ -60,54 +62,13 @@ import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
 import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClosed";
 import {MembershipRequestCreated} from "./gluon/events/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/events/team/TeamCreated";
-import {ApplicationProdRequestedEvent} from "./gluon/ingesters/applicationProdRequested";
-import {
-    ApplicationCreatedEvent,
-    PackageConfiguredEvent,
-} from "./gluon/ingesters/applicationsIngester";
-import {
-    BitbucketProjectAddedEvent,
-    BitbucketProjectRequestedEvent,
-} from "./gluon/ingesters/bitbucketIngester";
-import {GenericProdRequestedEvent} from "./gluon/ingesters/genericProdRequested";
-import {
-    ProjectCreatedEvent,
-    ProjectEnvironmentsRequestedEvent,
-    TeamsLinkedToProjectEvent,
-} from "./gluon/ingesters/projectIngester";
-import {
-    ProjectProductionEnvironmentsRequestClosedEvent,
-    ProjectProductionEnvironmentsRequestedEvent,
-} from "./gluon/ingesters/projectProductionRequests";
-import {
-    ActionedBy,
-    BitbucketProject,
-    BitbucketRepository,
-    DevOpsEnvironmentDetails,
-    GluonApplication,
-    GluonTeam,
-    GluonTenant,
-    GluonTenantId,
-    Project,
-    SlackIdentity,
-} from "./gluon/ingesters/sharedIngester";
-import {TeamDevOpsDetails} from "./gluon/ingesters/teamDevOpsDetails";
-import {
-    DevOpsEnvironmentProvisionedEvent,
-    DevOpsEnvironmentRequestedEvent,
-    MemberRemovedFromTeamEvent,
-    MembersAddedToTeamEvent,
-    MembershipRequestCreatedEvent,
-    TeamCreatedEvent,
-} from "./gluon/ingesters/teamIngester";
-import {TeamMemberCreatedEvent} from "./gluon/ingesters/teamMemberIngester";
-import {Help} from "./gluon/util/help/Help";
+import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
 
-const token = QMConfig.token;
+const apiKey = QMConfig.apiKey;
 const http = QMConfig.http;
 
 export const configuration: any = {
-    teamIds: [QMConfig.teamId],
+    workspaceIds: [QMConfig.teamId],
     // running durable will store and forward events when the client is disconnected
     // this should only be used in production envs
     policy: process.env.NODE_ENV === "production" ? "durable" : "ephemeral",
@@ -174,37 +135,37 @@ export const configuration: any = {
         TeamsLinkedToProject,
     ],
     ingesters: [
-        ActionedBy,
-        ApplicationCreatedEvent,
-        ApplicationProdRequestedEvent,
-        BitbucketProject,
-        BitbucketProjectAddedEvent,
-        BitbucketProjectRequestedEvent,
-        BitbucketRepository,
-        DevOpsEnvironmentDetails,
-        DevOpsEnvironmentProvisionedEvent,
-        DevOpsEnvironmentRequestedEvent,
-        GenericProdRequestedEvent,
-        GluonApplication,
-        GluonTeam,
-        GluonTenant,
-        GluonTenantId,
-        MemberRemovedFromTeamEvent,
-        MembersAddedToTeamEvent,
-        MembershipRequestCreatedEvent,
-        PackageConfiguredEvent,
-        Project,
-        ProjectCreatedEvent,
-        ProjectEnvironmentsRequestedEvent,
-        ProjectProductionEnvironmentsRequestClosedEvent,
-        ProjectProductionEnvironmentsRequestedEvent,
-        SlackIdentity,
-        TeamCreatedEvent,
-        TeamDevOpsDetails,
-        TeamMemberCreatedEvent,
-        TeamsLinkedToProjectEvent,
+        ingester("TeamDevOpsDetails"),
+        ingester("ProjectCreatedEvent"),
+        ingester("ProjectEnvironmentsRequestedEvent"),
+        ingester("TeamsLinkedToProjectEvent"),
+        ingester("SlackIdentity"),
+        ingester("Project"),
+        ingester("BitbucketProject"),
+        ingester("GluonTeam"),
+        ingester("ActionedBy"),
+        ingester("GluonTenant"),
+        ingester("GluonTenantId"),
+        ingester("BitbucketRepository"),
+        ingester("DevOpsEnvironmentDetails"),
+        ingester("GluonApplication"),
+        ingester("ApplicationProdRequestedEvent"),
+        ingester("TeamMemberCreatedEvent"),
+        ingester("ApplicationCreatedEvent"),
+        ingester("PackageConfiguredEvent"),
+        ingester("GenericProdRequestedEvent"),
+        ingester("TeamCreatedEvent"),
+        ingester("DevOpsEnvironmentRequestedEvent"),
+        ingester("DevOpsEnvironmentProvisionedEvent"),
+        ingester("MembershipRequestCreatedEvent"),
+        ingester("MembersAddedToTeamEvent"),
+        ingester("MemberRemovedFromTeamEvent"),
+        ingester("BitbucketProjectRequestedEvent"),
+        ingester("BitbucketProjectAddedEvent"),
+        ingester("ProjectProductionEnvironmentsRequestedEvent"),
+        ingester("ProjectProductionEnvironmentsRequestClosedEvent"),
     ],
-    token,
+    apiKey,
     http,
     logging: {
         level: "debug",
@@ -216,3 +177,7 @@ export const configuration: any = {
         timeout: 20000,
     },
 };
+
+if (QMConfig.proMetrics.enabled) {
+    PrometheusClient.initializePromClient(configuration);
+}

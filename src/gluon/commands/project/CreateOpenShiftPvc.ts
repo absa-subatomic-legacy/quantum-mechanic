@@ -1,5 +1,4 @@
 import {
-    CommandHandler,
     HandlerContext,
     HandlerResult,
     logger,
@@ -8,14 +7,18 @@ import {
     Parameter,
     Tags,
 } from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/spi/message/MessageClient";
-import {menuForCommand} from "@atomist/automation-client/spi/message/MessageClient";
+import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {
+    addressSlackChannelsFromContext,
+    menuForCommand,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {Attachment} from "@atomist/slack-messages/SlackMessages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
+import {QMColours} from "../../util/QMColour";
 import {
     GluonProjectNameSetter,
     GluonTeamNameSetter,
@@ -38,12 +41,6 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
         projectName: "PROJECT_NAME",
         openshiftProjectNames: "OPENSHIFT_PROJECT_NAMES",
     };
-
-    @MappedParameter(MappedParameters.SlackUserName)
-    public screenName: string;
-
-    @MappedParameter(MappedParameters.SlackChannelName)
-    public teamChannel: string;
 
     @RecursiveParameter({
         recursiveKey: CreateOpenShiftPvc.RecursiveKeys.teamName,
@@ -98,12 +95,15 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
                     mrkdwn_in: ["text"],
                     title_link: `${QMConfig.subatomic.openshiftNonProd.masterUrl}/console/project/${environment}/browse/persistentvolumeclaims/${pvcName}`,
                     title: `${environment}`,
-                    color: "#45B254",
+                    color:  QMColours.stdGreenyMcAppleStroodle.hex,
                 });
             }
 
-            return await this.sendPvcResultMessage(ctx, pvcAttachments);
+            const result =  await this.sendPvcResultMessage(ctx, pvcAttachments);
+            this.succeedCommand();
+            return result;
         } catch (error) {
+            this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }
@@ -116,14 +116,14 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     }
 
     private async sendPvcResultMessage(ctx: HandlerContext, pvcAttachments: any[]): Promise<HandlerResult> {
-        const destination =  await addressSlackChannelsFromContext(ctx, this.teamChannel);
+        const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
         const msg: SlackMessage = {
             text: `Your Persistent Volume Claims have been processed...`,
             attachments: pvcAttachments.concat({
                 fallback: `Using PVCs`,
                 text: `
 Now that your PVCs have been created, you can add this PVC as storage to an application. Follow the Subatomic documentation for more details on how to add storage.`,
-                color: "#00a5ff",
+                color:  QMColours.stdShySkyBlue.hex,
                 mrkdwn_in: ["text"],
                 thumb_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/OpenShift-LogoType.svg/959px-OpenShift-LogoType.svg.png",
                 footer: `For more information, please read the ${this.docs()}`,

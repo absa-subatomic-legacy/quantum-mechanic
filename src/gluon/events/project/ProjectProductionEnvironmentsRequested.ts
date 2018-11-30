@@ -1,20 +1,20 @@
 import {
+    addressSlackUsersFromContext, buttonForCommand,
     EventFired,
-    EventHandler,
-    HandleEvent,
     HandlerContext,
     HandlerResult,
     logger,
     success,
 } from "@atomist/automation-client";
-import {buttonForCommand} from "@atomist/automation-client/spi/message/MessageClient";
-import {addressSlackUsersFromContext} from "@atomist/automation-client/spi/message/MessageClient";
+import {EventHandler} from "@atomist/automation-client/lib/decorators";
+import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {v4 as uuid} from "uuid";
 import {UpdateProjectProdRequest} from "../../commands/project/UpdateProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ProjectProdRequestApprovalResponse} from "../../util/project/Project";
+import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 
 @EventHandler("Receive ProjectProductionEnvironmentsRequestedEvent events", `
@@ -25,9 +25,10 @@ subscription ProjectProductionEnvironmentsRequestedEvent {
   }
 }
 `)
-export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> {
+export class ProjectProductionEnvironmentsRequested extends BaseQMEvent implements HandleEvent<any> {
 
     constructor(public gluonService = new GluonService()) {
+        super();
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
@@ -54,7 +55,7 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
 
             for (const teamMember of membersToMessage) {
                 const requestCorrelationId: string = uuid();
-                const destination =  await addressSlackUsersFromContext(ctx, teamMember.slack.screenName);
+                const destination = await addressSlackUsersFromContext(ctx, teamMember.slack.screenName);
                 await ctx.messageClient.send({
                     text: `The project *${projectName}* owned by team *${project.owningTeam.name}* has been requested to move into prod. As a member of the team you have please select an option below indicating whether you approve of this request.`,
                 }, destination);
@@ -67,9 +68,10 @@ export class ProjectProductionEnvironmentsRequested implements HandleEvent<any> 
             }
 
             await qmMessageClient.send("Successfully created project production request. Approval requests have been sent out.");
-
+            this.succeedEvent();
             return await success();
         } catch (error) {
+            this.failEvent();
             return await handleQMError(qmMessageClient, error);
         }
     }
