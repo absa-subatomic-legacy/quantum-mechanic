@@ -4,8 +4,6 @@ import {inspect} from "util";
 import {isSuccessCode} from "../../../http/Http";
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
-import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
-import {OCCommon} from "../../../openshift/OCCommon";
 import {QMError} from "../../util/shared/Error";
 
 export class OCImageService {
@@ -109,18 +107,4 @@ export class OCImageService {
         }
         return imageStreamTags;
     }
-
-    public async tagImageToNamespace(sourceNamespace: string, sourceImageStreamTagName: string, destinationProjectNamespace: string, destinationImageStreamTagName: string = sourceImageStreamTagName): Promise<OCCommandResult> {
-        logger.debug(`Trying tag image to namespace. sourceNamespace: ${sourceNamespace}; imageStreamTagName: ${sourceImageStreamTagName}; destinationProjectNamespace: ${destinationProjectNamespace}; destinationImageStreamTagName: ${destinationImageStreamTagName}`);
-        return await OCCommon.commonCommand("tag",
-            `${sourceNamespace}/${sourceImageStreamTagName}`,
-            [`${destinationProjectNamespace}/${destinationImageStreamTagName}`]);
-    }
-
-    public async tagAllImagesToNamespace(sourceNamespace: string, sourceImageStreamsTagNames: string[], destinationProjectNamespace: string) {
-        for (const imageStreamTag of sourceImageStreamsTagNames) {
-            await this.tagImageToNamespace(sourceNamespace, imageStreamTag, destinationProjectNamespace);
-        }
-    }
-
 }
