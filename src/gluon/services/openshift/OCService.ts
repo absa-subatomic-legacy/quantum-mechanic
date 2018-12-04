@@ -536,14 +536,17 @@ export class OCService {
     }
 
     public async findProject(projectId: string) {
-        const listOfProjectsResult = await OCCommon.commonCommand("get", "projects",
-            [], [new SimpleOption("-output", "json")]);
-        for (const project of JSON.parse(listOfProjectsResult.output).items) {
-            if (project.metadata.name === projectId) {
-                return project;
-            }
-        }
-        return null;
+        // const listOfProjectsResult = await OCCommon.commonCommand("get", "projects", [], [new SimpleOption("-output", "json")]);
+
+        const listOfProjectsResult = await this.openShiftApi.get.get("Project", projectId );
+
+        return listOfProjectsResult;
+        // for (const project of JSON.parse(listOfProjectsResult.output).items) {
+        //     if (project.metadata.name === projectId) {
+        //         return project;
+        //     }
+        // }
+        // return null;
     }
 
     public async exportAllResources(projectId: string) {
