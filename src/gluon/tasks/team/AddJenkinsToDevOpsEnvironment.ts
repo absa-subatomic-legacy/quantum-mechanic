@@ -87,11 +87,18 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
     }
 
     private async copyJenkinsTemplateToDevOpsEnvironment(projectId: string) {
-        const jenkinsTemplateJSON = await this.ocService.getJenkinsTemplate();
-
-        const jenkinsTemplate: any = JSON.parse(jenkinsTemplateJSON.output);
+        let jenkinsTemplate: OpenshiftResource = null;
+        try {
+            jenkinsTemplate = await this.ocService.getJenkinsTemplate();
+        } catch (error) {
+            throw new QMError(error, `Failed to find jenkins template for namespace subatomic`);
+        }
         jenkinsTemplate.metadata.namespace = projectId;
-        await this.ocService.applyResourceFromDataInNamespace(jenkinsTemplate, projectId);
+        try {
+            await this.ocService.applyResourceFromDataInNamespace(jenkinsTemplate, projectId);
+        } catch (error) {
+            throw new QMError(error, `Failed to apply jenkins template for namespace subatomic to devops environment`);
+        }
     }
 
     private async createJenkinsDeploymentConfig(projectId: string, openShiftCloud: string) {
