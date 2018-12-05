@@ -1,5 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
+import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -58,9 +59,9 @@ export class AddJenkinsToProdEnvironment extends Task {
 
         const jenkinsToken = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsNonProd);
 
-        const jenkinsHost = await this.ocService.getJenkinsHost(teamDevOpsNonProd);
+        const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsNonProd);
 
-        await this.createJenkinsCredentials(teamDevOpsNonProd, jenkinsHost.output, jenkinsToken, this.openshiftEnvironment.name, prodToken);
+        await this.createJenkinsCredentials(teamDevOpsNonProd, jenkinsHost, jenkinsToken, this.openshiftEnvironment.name, prodToken);
 
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_CREDENTIALS);
 

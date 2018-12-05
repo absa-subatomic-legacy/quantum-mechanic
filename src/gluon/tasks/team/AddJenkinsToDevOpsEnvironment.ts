@@ -2,6 +2,7 @@ import {HandlerContext, logger} from "@atomist/automation-client";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
+import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {DevOpsMessages} from "../../messages/team/DevOpsMessages";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
@@ -133,11 +134,8 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
     }
 
     private async createJenkinsRoute(projectId: string): Promise<string> {
-
         await this.ocService.annotateJenkinsRoute(projectId);
-        const jenkinsHost = await this.ocService.getJenkinsHost(projectId);
-
-        return jenkinsHost.output;
+        return await this.ocService.getJenkinsHost(projectId);
     }
 
     private async addJenkinsCredentials(projectId: string, jenkinsHost: string, token: string, openShiftCloud: string) {

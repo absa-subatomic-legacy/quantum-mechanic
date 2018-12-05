@@ -415,16 +415,14 @@ export class OCService {
             ]);
     }
 
-    public async getJenkinsHost(namespace: string): Promise<OCCommandResult> {
-        logger.debug(`Trying to get jenkins host in namespace. namespace: ${namespace}`);
-        return await OCCommon.commonCommand(
-            "get",
-            "route/jenkins",
-            [],
-            [
-                new SimpleOption("-output", "jsonpath={.spec.host}"),
-                new SimpleOption("-namespace", namespace),
-            ]);
+    public async getJenkinsHost(namespace: string): Promise<string> {
+        const response = await this.openShiftApi.get.get("route", "jenkins", namespace);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Found jenkins host: ${response.data.spec.host} for namespace: ${namespace}`);
+            return response.data.spec.host;
+        } else {
+            throw new QMError(`Failed to find jenkins host for namespace ${namespace}`);
+        }
     }
 
     public async getSecretFromNamespace(secretName: string, namespace: string): Promise<OpenshiftApiResult> {

@@ -102,8 +102,8 @@ export class ConfigurePackageInJenkins extends Task {
                                    application: QMApplication,
                                    jenkinsJobTemplate: JenkinsJobTemplate): Promise<HandlerResult> {
         const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
-        const jenkinsHost = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
-        logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to add Bitbucket credentials`);
+        const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
+        logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
 
         const jenkinsTemplate: QMTemplate = new QMTemplate(`resources/templates/jenkins/${jenkinsJobTemplate.templateFilename}`);
         const builtTemplate: string = jenkinsTemplate.build(
@@ -119,7 +119,7 @@ export class ConfigurePackageInJenkins extends Task {
         );
 
         const createJenkinsJobResponse = await this.jenkinsService.createJenkinsJob(
-            jenkinsHost.output,
+            jenkinsHost,
             token,
             project.name,
             application.name + jenkinsJobTemplate.jobNamePostfix,

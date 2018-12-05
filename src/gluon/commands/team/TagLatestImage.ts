@@ -3,6 +3,7 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {inspect} from "util";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
+import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {getProjectDevOpsId} from "../../util/project/Project";
@@ -17,7 +18,6 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 
 @CommandHandler("Tag an individual subatomic image to a devops environment ", QMConfig.subatomic.commandPrefix + " tag image")
 @Tags("subatomic", "devops", "team", "images")

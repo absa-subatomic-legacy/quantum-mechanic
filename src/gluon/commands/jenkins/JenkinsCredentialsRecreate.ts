@@ -9,6 +9,7 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
+import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
@@ -68,12 +69,12 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
         const teamDevOpsProjectId = getDevOpsEnvironmentDetails(gluonTeamName).openshiftProjectId;
         const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
 
-        const jenkinsHost = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
+        const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
 
-        logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to kick off build`);
+        logger.debug(`Using Jenkins Route host [${jenkinsHost}] to kick off build`);
 
         const kickOffBuildResult = await this.jenkinsService.updateGlobalCredential(
-            jenkinsHost.output,
+            jenkinsHost,
             token,
             getJenkinsBitbucketAccessCredentialXML(teamDevOpsProjectId),
             `${teamDevOpsProjectId}-bitbucket`,
