@@ -24,44 +24,48 @@ Here is an example `local.json`:
     "gluon": {
       "baseUrl": "http://localhost:8080"
     },
-    "openshiftNonProd": {
-      "name": "nonprod",
-      "dockerRepoUrl": "172.30.1.1:5000",
-      "masterUrl": "<minishift ip>",
-      "auth": {
-        "token": "<subatomic service account token>"
-      },
-      "defaultEnvironments": [
-        {
-          "id": "dev",
-          "description": "Development"
+    "openshiftClouds": {
+      "ab-cloud": {
+        "openshiftNonProd": {
+          "name": "nonprod",
+          "dockerRepoUrl": "172.30.1.1:5000",
+          "masterUrl": "<minishift ip>",
+          "auth": {
+            "token": "<subatomic service account token>"
+          },
+          "defaultEnvironments": [
+            {
+              "id": "dev",
+              "description": "Development"
+            },
+            {
+              "id": "sit",
+              "description": "Integration testing"
+            },
+            {
+              "id": "uat",
+              "description": "User acceptance"
+            }
+          ]
         },
-        {
-          "id": "sit",
-          "description": "Integration testing"
-        },
-        {
-          "id": "uat",
-          "description": "User acceptance"
-        }
-      ]
-    },
-    "openshiftProd": [
-      {
-        "name": "prod-a",
-        "dockerRepoUrl": "172.30.1.1:5000",
-        "masterUrl": "<minishift ip>",
-        "auth": {
-          "token": "<subatomic service account token>"
-        },
-        "defaultEnvironments": [
+        "openshiftProd": [
           {
-            "id": "prod-a",
-            "description": "Production A"
+            "name": "prod-a",
+            "dockerRepoUrl": "172.30.1.1:5000",
+            "masterUrl": "<minishift ip>",
+            "auth": {
+              "token": "<subatomic service account token>"
+            },
+            "defaultEnvironments": [
+              {
+                "id": "prod-a",
+                "description": "Production A"
+              }
+            ]
           }
         ]
       }
-    ],
+    },
     "bitbucket": {
       "baseUrl": "https://bitbucket.subatomic.local",
       "restUrl": "https://bitbucket.subatomic.local/rest",
@@ -84,13 +88,13 @@ Here is an example `local.json`:
     "docs": {
       "baseUrl": "http://subatomic.bison.ninja"
     },
-    "plugins":{
+    "plugins": {
       "directory": "<plugins directory>"
     }
   },
   "teamId": "<team Id>",
   "apiKey": "<Atomist workspace apiKey>",
-  // lifecycle configuration
+  //lifecycyle configuration
   "lifecycles": {
     "push": {
       "configuration": {
@@ -113,8 +117,7 @@ Here is an example `local.json`:
     }
   },
   "fingerprints": {
-    "data": {
-    }
+    "data": {}
   },
   "http": {
     "enabled": true,
@@ -130,7 +133,6 @@ Here is an example `local.json`:
     }
   }
 }
-
 ```
 
 Replace the relevant values above:

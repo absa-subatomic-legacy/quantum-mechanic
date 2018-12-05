@@ -1,8 +1,6 @@
 import {
     HandlerContext,
     HandlerResult,
-    MappedParameter,
-    MappedParameters,
     Parameter,
     Tags,
 } from "@atomist/automation-client";
@@ -14,13 +12,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMColours} from "../../util/QMColour";
 import {
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
@@ -33,12 +28,8 @@ import {
 export class ListTeamProjects extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: ListTeamProjects.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team you wish to list associated projects for",
     })
     public teamName: string;
@@ -53,10 +44,6 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand
         } catch (error) {
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(ListTeamProjects.RecursiveKeys.teamName, setGluonTeamName);
     }
 
     private async listTeamProjects(ctx: HandlerContext, teamName: string): Promise<HandlerResult> {
@@ -101,7 +88,7 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand
                 attachments,
             };
 
-            const result =  await ctx.messageClient.respond(msg);
+            const result = await ctx.messageClient.respond(msg);
             this.succeedCommand();
             return result;
         } catch (error) {

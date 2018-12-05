@@ -104,11 +104,12 @@ export class TeamService {
         return teamQueryResult.data;
     }
 
-    public async createGluonTeam(teamName: string, teamDescription: string, createdBy: string): Promise<any> {
+    public async createGluonTeam(teamName: string, teamDescription: string, openShiftCloud: string, createdBy: string): Promise<any> {
         logger.debug(`Trying to create team. teamName: ${teamName}; teamDescription: ${teamDescription}; createdBy: ${createdBy}`);
         return await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/teams`, {
             name: teamName,
             description: teamDescription,
+            openShiftCloud,
             createdBy,
         });
     }

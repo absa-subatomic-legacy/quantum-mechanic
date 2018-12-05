@@ -10,6 +10,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMError} from "../shared/Error";
 import {createMenuAttachment} from "../shared/GenericMenu";
+import {
+    RecursiveParameter,
+    RecursiveParameterDetails,
+} from "./RecursiveParameterRequestCommand";
 import {RecursiveSetterResult} from "./RecursiveSetterResult";
 
 export const JENKINSFILE_EXISTS_FLAG = "JENKINS_FILE_EXISTS";
@@ -96,4 +100,9 @@ export interface JenkinsfileNameSetter {
     applicationName: string;
     jenkinsfileName: string;
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
+}
+
+export function JenkinsFileParam(details: RecursiveParameterDetails) {
+    details.setter = setJenkinsfileName;
+    return RecursiveParameter(details);
 }

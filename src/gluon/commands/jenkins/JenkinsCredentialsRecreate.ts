@@ -14,13 +14,10 @@ import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getJenkinsBitbucketAccessCredentialXML} from "../../util/jenkins/JenkinsCredentials";
 import {
-    GluonTeamNameSetter,
-    setGluonTeamName,
+    GluonTeamNameParam,
+    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
@@ -33,18 +30,19 @@ import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-    };
-
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
 
-    @RecursiveParameter({
-        recursiveKey: JenkinsCredentialsRecreate.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select the team which contains the owning project of the jenkins you would like to reconfigure",
     })
     public teamName: string;
+
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 1,
+    })
+    public openShiftCloud: string;
 
     constructor(public gluonService = new GluonService(),
                 private jenkinsService = new JenkinsService(),
@@ -54,7 +52,7 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            await this.ocService.login();
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
             const result = await this.recreateBitbucketJenkinsCredential(ctx, this.teamName);
             this.succeedCommand();
             return result;
@@ -62,10 +60,6 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(JenkinsCredentialsRecreate.RecursiveKeys.teamName, setGluonTeamName);
     }
 
     private async recreateBitbucketJenkinsCredential(ctx: HandlerContext,

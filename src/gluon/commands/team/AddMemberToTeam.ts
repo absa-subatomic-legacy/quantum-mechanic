@@ -1,6 +1,6 @@
 import {
     HandlerContext,
-    HandlerResult, logger,
+    HandlerResult,
     MappedParameter,
     MappedParameters,
     Parameter,
@@ -14,22 +14,15 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddMemberToTeamTask} from "../../tasks/team/AddMemberToTeamTask";
 import {MemberRole} from "../../util/member/Members";
 import {
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Add a member to a team", QMConfig.subatomic.commandPrefix + " add team member")
 @Tags("subatomic", "member", "team")
 export class AddMemberToTeam extends RecursiveParameterRequestCommand implements GluonTeamNameSetter {
-
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-    };
 
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
@@ -37,23 +30,19 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
     @MappedParameter(MappedParameters.SlackChannel)
     public channelId: string;
 
-        @Parameter({
+    @Parameter({
         description: "slack name (@User.Name) of the member to make a member",
     })
     public slackName: string;
 
-    @RecursiveParameter({
-        recursiveKey: AddMemberToTeam.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team you would like to add a member to",
     })
     public teamName: string;
 
     constructor(public gluonService = new GluonService()) {
         super();
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(AddMemberToTeam.RecursiveKeys.teamName, setGluonTeamName);
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {

@@ -1,8 +1,6 @@
 import {
     HandlerContext,
     HandlerResult,
-    MappedParameter,
-    MappedParameters,
     Parameter,
     Tags,
 } from "@atomist/automation-client";
@@ -15,30 +13,21 @@ import {PackageCommandService} from "../../services/packages/PackageCommandServi
 import {ApplicationType} from "../../util/packages/Applications";
 import {
     BitbucketRepoSetter,
-    setBitbucketRepository,
+    BitbucketRepositoryParam,
 } from "../../util/recursiveparam/BitbucketParamSetters";
 import {
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Link an existing library", QMConfig.subatomic.commandPrefix + " link library")
 @Tags("subatomic", "package", "project")
 export class LinkExistingLibrary extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, BitbucketRepoSetter {
-
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        projectName: "PROJECT_NAME",
-        bitbucketRepositorySlug: "BITBUCKET_REPOSITORY_SLUG",
-    };
 
     @Parameter({
         description: "library name",
@@ -50,21 +39,21 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
     })
     public description: string;
 
-    @RecursiveParameter({
-        recursiveKey: LinkExistingLibrary.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         forceSet: false,
         selectionMessage: "Please select a team, whose project you would like to link a library to",
     })
     public teamName: string;
 
-    @RecursiveParameter({
-        recursiveKey: LinkExistingLibrary.RecursiveKeys.projectName,
+    @GluonProjectNameParam({
+        callOrder: 1,
         selectionMessage: "Please select a project to which you would like to link a library to",
     })
     public projectName: string;
 
-    @RecursiveParameter({
-        recursiveKey: LinkExistingLibrary.RecursiveKeys.bitbucketRepositorySlug,
+    @BitbucketRepositoryParam({
+        callOrder: 2,
         selectionMessage: "Please select the Bitbucket repository which contains the library you want to link",
     })
     public bitbucketRepositorySlug: string;
@@ -96,11 +85,5 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(LinkExistingLibrary.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(LinkExistingLibrary.RecursiveKeys.projectName, setGluonProjectName);
-        this.addRecursiveSetter(LinkExistingLibrary.RecursiveKeys.bitbucketRepositorySlug, setBitbucketRepository);
     }
 }

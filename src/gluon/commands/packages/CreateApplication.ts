@@ -1,23 +1,20 @@
 import {
     HandlerContext,
-    HandlerResult, logger,
-    MappedParameter,
-    MappedParameters,
+    HandlerResult,
+    logger,
     Parameter,
 } from "@atomist/automation-client";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ApplicationType} from "../../util/packages/Applications";
+import {QMProject} from "../../util/project/Project";
 import {
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
@@ -26,11 +23,6 @@ import {
 
 export class CreateApplication extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
-
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        projectName: "PROJECT_NAME",
-    };
 
     @Parameter({
         description: "application name",
@@ -52,17 +44,17 @@ export class CreateApplication extends RecursiveParameterRequestCommand
     })
     public bitbucketRepositoryRepoUrl: string;
 
-    @RecursiveParameter({
-        recursiveKey: CreateApplication.RecursiveKeys.projectName,
-        selectionMessage: "Please select the owning project of the Bitbucket project you wish to create",
-    })
-    public projectName: string;
-
-    @RecursiveParameter({
-        recursiveKey: CreateApplication.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to create the Bitbucket project in",
     })
     public teamName: string;
+
+    @GluonProjectNameParam({
+        callOrder: 1,
+        selectionMessage: "Please select the owning project of the Bitbucket project you wish to create",
+    })
+    public projectName: string;
 
     constructor(public gluonService = new GluonService()) {
         super();
@@ -77,11 +69,11 @@ export class CreateApplication extends RecursiveParameterRequestCommand
 
             const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             await this.createApplicationInGluon(project, member);
 
-            const result =  await ctx.messageClient.respond({
+            const result = await ctx.messageClient.respond({
                 text: "🚀 Application created successfully.",
             });
             this.succeedCommand();
@@ -90,11 +82,6 @@ export class CreateApplication extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(CreateApplication.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(CreateApplication.RecursiveKeys.projectName, setGluonProjectName);
     }
 
     private async createApplicationInGluon(project, member) {

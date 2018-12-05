@@ -50,6 +50,7 @@ export interface QMProjectBase {
     projectId: string;
     name: string;
     bitbucketProject: QMBitbucketProject;
+    owningTenant: string;
 }
 
 export interface QMProject extends QMProjectBase {

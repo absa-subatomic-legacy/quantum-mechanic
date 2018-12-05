@@ -1,8 +1,6 @@
 import {
     HandlerContext,
     logger,
-    MappedParameter,
-    MappedParameters,
     Parameter,
     Tags,
 } from "@atomist/automation-client";
@@ -11,15 +9,12 @@ import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
+    GluonTeamNameParam,
     GluonTeamNameSetter,
+    GluonTenantNameParam,
     GluonTenantNameSetter,
-    setGluonTeamName,
-    setGluonTenantName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
@@ -31,11 +26,6 @@ import {
 export class CreateProject extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonTenantNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        tenantName: "TENANT_NAME",
-    };
-
     @Parameter({
         description: "project name",
     })
@@ -46,14 +36,14 @@ export class CreateProject extends RecursiveParameterRequestCommand
     })
     public description: string;
 
-    @RecursiveParameter({
-        recursiveKey: CreateProject.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team you would like to associate this project with",
     })
     public teamName: string;
 
-    @RecursiveParameter({
-        recursiveKey: CreateProject.RecursiveKeys.tenantName,
+    @GluonTenantNameParam({
+        callOrder: 1,
         selectionMessage: "Please select a tenant you would like to associate this project with. Choose Default if you have no tenant specified for this project.",
     })
     public tenantName: string;
@@ -65,18 +55,13 @@ export class CreateProject extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext) {
         try {
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantName(this.tenantName);
-            const result =  await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
+            const result = await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
             this.succeedCommand();
             return result;
         } catch (error) {
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(CreateProject.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(CreateProject.RecursiveKeys.tenantName, setGluonTenantName);
     }
 
     private async requestNewProjectForTeamAndTenant(ctx: HandlerContext, screenName: string,

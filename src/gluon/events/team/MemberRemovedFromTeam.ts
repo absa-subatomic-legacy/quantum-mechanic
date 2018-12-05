@@ -20,7 +20,8 @@ import {
     handleQMError,
     OCResultError,
 } from "../../util/shared/Error";
-import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
+import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive MemberRemovedFromTeam events", `
 subscription MemberRemovedFromTeamEvent {
@@ -31,6 +32,7 @@ subscription MemberRemovedFromTeamEvent {
       slackIdentity {
         teamChannel
       }
+      openShiftCloud
     }
     memberRemoved{
       firstName
@@ -73,7 +75,7 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
                 team.name, false);
             const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
             await this.removePermissionsForUserFromTeams(
-                bitbucketConfiguration, team.name, projects, memberRemovedFromTeam);
+                bitbucketConfiguration, EventToGluon.gluonTeam(team), projects, memberRemovedFromTeam);
 
             this.succeedEvent();
             return await ctx.messageClient.addressChannels(
@@ -87,11 +89,13 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
         }
     }
 
-    private async removePermissionsForUserFromTeams(
-        bitbucketConfiguration: BitbucketConfigurationService, teamName: string, projects, memberRemovedFromTeam) {
+    private async removePermissionsForUserFromTeams(bitbucketConfiguration: BitbucketConfigurationService,
+                                                    team: QMTeam, projects, memberRemovedFromTeam) {
         try {
-            await this.ocService.login(QMConfig.subatomic.openshiftNonProd, true);
-            const devopsProject = getDevOpsEnvironmentDetails(teamName).openshiftProjectId;
+            const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
+            await this.ocService.login(osEnv, true);
+
+            const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
             await this.ocService.removeTeamMembershipPermissionsFromProject(
                 devopsProject, memberRemovedFromTeam.memberRemoved.domainUsername);
 
@@ -104,7 +108,7 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
                     [memberRemovedFromTeam.memberRemoved.domainUsername]);
 
                 // Remove from OpenShift environments
-                for (const environment of QMConfig.subatomic.openshiftNonProd.defaultEnvironments) {
+                for (const environment of osEnv.defaultEnvironments) {
                     const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
                     const projectId = getProjectId(tenant.name, project.name, environment.id);
                     await this.ocService.removeTeamMembershipPermissionsFromProject(

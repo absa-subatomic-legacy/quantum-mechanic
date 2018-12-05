@@ -14,22 +14,15 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {RemoveMemberFromTeamTask} from "../../tasks/team/RemoveMemberFromTeamTask";
 import {MemberRole} from "../../util/member/Members";
 import {
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Remove a member from a team", QMConfig.subatomic.commandPrefix + " remove team member")
 @Tags("subatomic", "team", "member")
 export class RemoveMemberFromTeam extends RecursiveParameterRequestCommand implements GluonTeamNameSetter {
-
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-    };
 
     @MappedParameter(MappedParameters.SlackTeam)
     public teamId: string;
@@ -42,18 +35,14 @@ export class RemoveMemberFromTeam extends RecursiveParameterRequestCommand imple
     })
     public slackName: string;
 
-    @RecursiveParameter({
-        recursiveKey: RemoveMemberFromTeam.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team you would like to remove a member from",
     })
     public teamName: string;
 
     constructor(public gluonService = new GluonService()) {
         super();
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(RemoveMemberFromTeam.RecursiveKeys.teamName, setGluonTeamName);
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {

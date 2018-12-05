@@ -2,8 +2,6 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
-    MappedParameter,
-    MappedParameters,
     success,
     Tags,
 } from "@atomist/automation-client";
@@ -11,40 +9,33 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMProject} from "../../util/project/Project";
 import {
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonProjectName,
-    setGluonTeamName,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Create the OpenShift production environments for a project", QMConfig.subatomic.commandPrefix + " request project prod")
-@Tags("subatomic", "openshiftProd", "project", "other")
+@Tags("subatomic", "project", "other")
 export class CreateProjectProdEnvironments extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        projectName: "PROJECT_NAME",
-    };
-
-    @RecursiveParameter({
-        recursiveKey: CreateProjectProdEnvironments.RecursiveKeys.projectName,
-        selectionMessage: "Please select the projects you wish to provision the production environments for",
-    })
-    public projectName: string = null;
-
-    @RecursiveParameter({
-        recursiveKey: CreateProjectProdEnvironments.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to provision the production environments for",
         forceSet: false,
     })
     public teamName: string = null;
+
+    @GluonProjectNameParam({
+        callOrder: 1,
+        selectionMessage: "Please select the projects you wish to provision the production environments for",
+    })
+    public projectName: string = null;
 
     constructor(public gluonService = new GluonService()) {
         super();
@@ -59,7 +50,7 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
                 text: `Requesting production environments's for project *${this.projectName}*`,
             }, destination);
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
@@ -71,11 +62,6 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
             this.failCommand();
             return await this.handleError(ctx, error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(CreateProjectProdEnvironments.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(CreateProjectProdEnvironments.RecursiveKeys.projectName, setGluonProjectName);
     }
 
     private async handleError(ctx: HandlerContext, error) {

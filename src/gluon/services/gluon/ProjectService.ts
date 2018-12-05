@@ -6,6 +6,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
 import {CreateProject} from "../../commands/project/CreateProject";
+import {QMProject} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 

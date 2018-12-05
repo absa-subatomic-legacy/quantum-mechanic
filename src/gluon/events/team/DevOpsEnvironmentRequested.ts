@@ -8,6 +8,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {addressEvent} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {timeout, TimeoutError} from "promise-timeout";
+import {QMConfig} from "../../../config/QMConfig";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToDevOpsEnvironment} from "../../tasks/team/AddJenkinsToDevOpsEnvironment";
@@ -15,6 +16,7 @@ import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvi
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive DevOpsEnvironmentRequestedEvent events", `
 subscription DevOpsEnvironmentRequestedEvent {
@@ -26,6 +28,7 @@ subscription DevOpsEnvironmentRequestedEvent {
       slackIdentity {
         teamChannel
       }
+      openShiftCloud
       owners {
         firstName
         domainUsername
@@ -61,9 +64,9 @@ export class DevOpsEnvironmentRequested extends BaseQMEvent implements HandleEve
             const teamChannel = devOpsRequestedEvent.team.slackIdentity.teamChannel;
             const taskListMessage = new TaskListMessage(`🚀 Provisioning of DevOps environment for team *${devOpsRequestedEvent.team.name}* started:`, new ChannelMessageClient(ctx).addDestination(teamChannel));
             const taskRunner = new TaskRunner(taskListMessage);
-
+            const openShiftCloud = EventToGluon.gluonTeam(devOpsRequestedEvent.team).openShiftCloud;
             taskRunner.addTask(
-                new CreateTeamDevOpsEnvironment(devOpsRequestedEvent),
+                new CreateTeamDevOpsEnvironment(devOpsRequestedEvent, QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd),
             ).addTask(
                 new AddJenkinsToDevOpsEnvironment(devOpsRequestedEvent),
             );

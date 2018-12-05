@@ -1,9 +1,9 @@
 import {OpenshiftProjectEnvironment} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 
-export function getHighestPreProdEnvironment(): OpenshiftProjectEnvironment {
-    const nEnvironments = QMConfig.subatomic.openshiftNonProd.defaultEnvironments.length;
-    return QMConfig.subatomic.openshiftNonProd.defaultEnvironments[nEnvironments - 1];
+export function getHighestPreProdEnvironment(openShiftCloud: string): OpenshiftProjectEnvironment {
+    const nEnvironments = QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.defaultEnvironments.length;
+    return QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.defaultEnvironments[nEnvironments - 1];
 }
 
 export function getResourceDisplayMessage(allResources) {

@@ -3,6 +3,7 @@ type GluonTeam @rootType {
 	name: String
 	description: String
 	slackIdentity: SlackIdentity
+	openShiftCloud: String
 	owners: [Owner]
 	members: [Member]
 }

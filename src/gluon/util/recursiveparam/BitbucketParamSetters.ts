@@ -9,6 +9,10 @@ import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {menuAttachmentForBitbucketRepositories} from "../bitbucket/Bitbucket";
 import {QMError} from "../shared/Error";
+import {
+    RecursiveParameter,
+    RecursiveParameterDetails,
+} from "./RecursiveParameterRequestCommand";
 import {RecursiveSetterResult} from "./RecursiveSetterResult";
 
 export async function setBitbucketRepository(ctx: HandlerContext, commandHandler: BitbucketRepoSetter, selectionMessage: string): Promise<RecursiveSetterResult> {
@@ -40,4 +44,9 @@ export interface BitbucketRepoSetter {
     projectName: string;
     bitbucketRepositorySlug: string;
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
+}
+
+export function BitbucketRepositoryParam(details: RecursiveParameterDetails) {
+    details.setter = setBitbucketRepository;
+    return RecursiveParameter(details);
 }

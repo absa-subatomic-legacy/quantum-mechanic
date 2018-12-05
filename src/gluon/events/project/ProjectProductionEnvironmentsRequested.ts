@@ -13,7 +13,7 @@ import _ = require("lodash");
 import {v4 as uuid} from "uuid";
 import {UpdateProjectProdRequest} from "../../commands/project/UpdateProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
-import {ProjectProdRequestApprovalResponse} from "../../util/project/Project";
+import {ProjectProdRequestApprovalResponse, QMProject} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 
@@ -49,7 +49,7 @@ export class ProjectProductionEnvironmentsRequested extends BaseQMEvent implemen
         try {
             const projectName = projectProdRequest.project.name;
 
-            const project = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
+            const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
 
             const membersToMessage = await this.gluonService.members.findMembersAssociatedToTeam(project.owningTeam.teamId);
 

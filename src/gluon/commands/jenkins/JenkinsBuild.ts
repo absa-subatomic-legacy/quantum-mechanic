@@ -14,17 +14,15 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {
+    GluonApplicationNameParam,
     GluonApplicationNameSetter,
+    GluonProjectNameParam,
     GluonProjectNameSetter,
+    GluonTeamNameParam,
     GluonTeamNameSetter,
-    setGluonApplicationName,
-    setGluonProjectName,
-    setGluonTeamName,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {
-    RecursiveParameter,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
     QMError,
@@ -34,34 +32,33 @@ import {
 @CommandHandler("Kick off a Jenkins build", QMConfig.subatomic.commandPrefix + " jenkins build")
 @Tags("subatomic", "jenkins", "package")
 export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
-    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
-
-    private static RecursiveKeys = {
-        teamName: "TEAM_NAME",
-        projectName: "PROJECT_NAME",
-        applicationName: "APPLICATION_NAME",
-    };
+    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, GluonTeamNameSetter {
 
     @MappedParameter(MappedParameters.SlackUser)
     public slackName: string;
 
-    @RecursiveParameter({
-        recursiveKey: KickOffJenkinsBuild.RecursiveKeys.projectName,
-        selectionMessage: "Please select a project which contains the application you would like to build",
-    })
-    public projectName: string;
-
-    @RecursiveParameter({
-        recursiveKey: KickOffJenkinsBuild.RecursiveKeys.teamName,
+    @GluonTeamNameParam({
+        callOrder: 0,
         selectionMessage: "Please select the team which contains the owning project of the application you would like to build",
     })
     public teamName: string;
 
-    @RecursiveParameter({
-        recursiveKey: KickOffJenkinsBuild.RecursiveKeys.applicationName,
+    @GluonProjectNameParam({
+        callOrder: 1,
+        selectionMessage: "Please select a project which contains the application you would like to build",
+    })
+    public projectName: string;
+
+    @GluonApplicationNameParam({
+        callOrder: 2,
         selectionMessage: "Please select the application you would like to build",
     })
     public applicationName: string;
+
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 3,
+    })
+    public openShiftCloud: string;
 
     constructor(public gluonService = new GluonService(),
                 private jenkinsService = new JenkinsService(),
@@ -71,20 +68,14 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            await this.ocService.login();
-            const result =  await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
+            await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
+            const result = await this.applicationsForGluonProject(ctx, this.applicationName, this.teamName, this.projectName);
             this.succeedCommand();
             return result;
         } catch (error) {
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected configureParameterSetters() {
-        this.addRecursiveSetter(KickOffJenkinsBuild.RecursiveKeys.teamName, setGluonTeamName);
-        this.addRecursiveSetter(KickOffJenkinsBuild.RecursiveKeys.projectName, setGluonProjectName);
-        this.addRecursiveSetter(KickOffJenkinsBuild.RecursiveKeys.applicationName, setGluonApplicationName);
     }
 
     private async applicationsForGluonProject(ctx: HandlerContext,
