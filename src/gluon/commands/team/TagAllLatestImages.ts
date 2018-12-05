@@ -3,6 +3,7 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {inspect} from "util";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
+import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {getProjectDevOpsId} from "../../util/project/Project";
@@ -52,7 +53,7 @@ export class TagAllLatestImages extends RecursiveParameterRequestCommand
         const devopsEnvironment = getProjectDevOpsId(this.teamName);
         await ctx.messageClient.respond(`Tagging latest images to devops environment *${devopsEnvironment}*...`, {id: messageId});
         await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
-        const project = this.ocService.findProject(devopsEnvironment);
+        const project: OpenshiftResource = await this.ocService.findProject(devopsEnvironment);
         if (project === null) {
             this.failCommand();
             throw new QMError(`No devops environment for team ${this.teamName} has been provisioned yet.`);

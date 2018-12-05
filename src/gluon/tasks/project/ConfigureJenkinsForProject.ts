@@ -46,15 +46,15 @@ export class ConfigureJenkinsForProject extends Task {
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_SA_RIGHTS);
 
         const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
-        const jenkinsHost = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
+        const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
 
-        logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to add Bitbucket credentials`);
+        logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
 
-        await this.createJenkinsBuildTemplate(this.environmentsRequestedEvent, teamDevOpsProjectId, jenkinsHost.output, token);
+        await this.createJenkinsBuildTemplate(this.environmentsRequestedEvent, teamDevOpsProjectId, jenkinsHost, token);
 
         await this.taskListMessage.succeedTask(this.TASK_CREATE_JENKINS_BUILD_TEMPLATE);
 
-        await this.createJenkinsCredentials(teamDevOpsProjectId, jenkinsHost.output, token);
+        await this.createJenkinsCredentials(teamDevOpsProjectId, jenkinsHost, token);
 
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_CREDENTIALS);
 
