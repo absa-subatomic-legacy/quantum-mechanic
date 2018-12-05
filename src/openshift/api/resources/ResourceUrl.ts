@@ -127,6 +127,14 @@ export class ResourceUrl {
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
+        project: [
+            {
+                apiVersion: "v1",
+                url: "projects",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
+
     };
 }
 

@@ -17,6 +17,7 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 
 @CommandHandler("Tag an individual subatomic image to a devops environment ", QMConfig.subatomic.commandPrefix + " tag image")
 @Tags("subatomic", "devops", "team", "images")
@@ -59,7 +60,7 @@ export class TagLatestImage extends RecursiveParameterRequestCommand
         const devopsEnvironment = getProjectDevOpsId(this.teamName);
         await ctx.messageClient.respond(`Tagging selected image to devops environment *${devopsEnvironment}*...`, {id: messageId});
         await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
-        const project = this.ocService.findProject(devopsEnvironment);
+        const project: OpenshiftResource = await this.ocService.findProject(devopsEnvironment);
         if (project === null) {
             this.failCommand();
             throw new QMError(`No devops environment for team ${this.teamName} has been provisioned yet.`);

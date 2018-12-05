@@ -536,14 +536,12 @@ export class OCService {
     }
 
     public async findProject(projectId: string) {
-        const listOfProjectsResult = await OCCommon.commonCommand("get", "projects",
-            [], [new SimpleOption("-output", "json")]);
-        for (const project of JSON.parse(listOfProjectsResult.output).items) {
-            if (project.metadata.name === projectId) {
-                return project;
-            }
+        let project: OpenshiftResource = null;
+        const response = await this.openShiftApi.get.get("project", projectId, null);
+        if (isSuccessCode(response.status)) {
+            project = response.data;
         }
-        return null;
+        return project;
     }
 
     public async exportAllResources(projectId: string) {
