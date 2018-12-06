@@ -176,15 +176,16 @@ export class OCService {
         return createResult.data;
     }
 
-    public async getSubatomicTemplate(templateName: string, namespace: string = "subatomic"): Promise<OCCommandResult> {
+    public async getSubatomicTemplate(templateName: string, namespace: string = "subatomic"): Promise<OpenshiftResource> {
         logger.debug(`Trying to get subatomic template. templateName: ${templateName}`);
-        return await OCCommon.commonCommand("get", "templates",
-            [templateName],
-            [
-                new SimpleOption("-namespace", namespace),
-                new SimpleOption("-output", "json"),
-            ],
-        );
+        const response = await this.openShiftApi.get.get("template", templateName, namespace);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Found ${templateName} for namespace: ${namespace} | template JSON: ${JSON.stringify(response.data)}`);
+            return response.data;
+        } else {
+            logger.error(`Failed to find Subatomic Templates in Subatomic namespace: ${inspect(response)}`);
+            throw new QMError("Failed to find Subatomic Templates in the Subatomic namespace");
+        }
     }
 
     public async getSubatomicAppTemplates(namespace = "subatomic"): Promise<OpenshiftResource[]> {
@@ -341,11 +342,16 @@ export class OCService {
     }
 
     public async getDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OCCommandResult> {
+
         logger.debug(`Trying to get dc in namespace. dcName: ${dcName}, namespace: ${namespace}`);
-        return await OCCommon.commonCommand("get", `dc/${dcName}`, [],
-            [
-                new SimpleOption("-namespace", namespace),
-            ]);
+        const response: OpenshiftApiResult = await this.openShiftApi.get.get("deploymentconfig", dcName, `${namespace}`);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Found dc/${dcName} for namespace: ${namespace} | template JSON: ${JSON.stringify(response.data)}`);
+            return response.data;
+        } else {
+            logger.error(`Failed to find dc${dcName} in Subatomic namespace: ${inspect(response)}`);
+            throw new QMError("Failed to find dcName in the Subatomic namespace");
+        }
     }
 
     public async rolloutDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OCCommandResult> {

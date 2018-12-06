@@ -160,8 +160,7 @@ export class ConfigurePackageInOpenshift extends Task {
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);
             logger.info(`Processing app [${appName}] Template for: ${projectId}`);
 
-            const template = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate, devOpsProjectId);
-            const appBaseTemplate: any = JSON.parse(template.output);
+            const appBaseTemplate = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate, devOpsProjectId);
             appBaseTemplate.metadata.namespace = projectId;
             await this.ocService.applyResourceFromDataInNamespace(appBaseTemplate, projectId);
 
