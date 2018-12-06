@@ -89,7 +89,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
     private async copyJenkinsTemplateToDevOpsEnvironment(projectId: string) {
         let jenkinsTemplate: OpenshiftResource = null;
         try {
-            jenkinsTemplate = await this.ocService.getJenkinsTemplate();
+            jenkinsTemplate = await this.ocService.getTemplate("jenkins-persistent-subatomic", "subatomic");
         } catch (error) {
             throw new QMError(error, `Failed to find jenkins template for namespace subatomic`);
         }

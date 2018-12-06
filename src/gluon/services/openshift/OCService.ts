@@ -210,9 +210,9 @@ export class OCService {
         }
     }
 
-    public async getJenkinsTemplate(): Promise<OpenshiftResource> {
+    public async getTemplate(templateName: string, namespace: string): Promise<OpenshiftResource> {
         logger.debug(`Trying to get jenkins template...`);
-        const response = await this.openShiftApi.get.get("template", "jenkins-persistent-subatomic", "subatomic");
+        const response = await this.openShiftApi.get.get("template", templateName, namespace);
         if (isSuccessCode(response.status)) {
             logger.debug(`Found jenkins template for namespace: subatomic | template JSON: ${JSON.stringify(response.data)}`);
             return response.data;
@@ -306,6 +306,7 @@ export class OCService {
 
     public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, openShiftCloud: string): Promise<OCCommandResult> {
         logger.debug(`Trying to process jenkins template for devops project template. devopsNamespace: ${devopsNamespace}`);
+
         const parameters = [
             `NAMESPACE=${devopsNamespace}`,
             "BITBUCKET_NAME=Subatomic Bitbucket",
@@ -317,14 +318,20 @@ export class OCService {
             // If no team email then the address of the createdBy member
             `DEVOPS_URL=${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
         ];
+
         return await this.processOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
     }
 
     public async processOpenshiftTemplate(templateName: string, namespace: string, parameters: string[], ignoreUnknownParameters: boolean = false) {
+
         logger.debug(`Trying to process openshift template in namespace. templateName: ${templateName}; namespace: ${namespace}, paramaters: ${JSON.stringify(parameters)}`);
         const commandOptions: AbstractOption[] = [];
+
+        commandOptions.push(new StandardOption("loglevel", "10"));
+
         if (ignoreUnknownParameters) {
             commandOptions.push(new StandardOption("ignore-unknown-parameters", "true"));
+
         }
 
         for (const parameter of parameters) {
@@ -332,7 +339,35 @@ export class OCService {
         }
 
         commandOptions.push(new SimpleOption("-namespace", namespace));
+        // ------------------------------------------------------------------------------------------------------------
 
+        // convert passed in params to a dictionary
+        const paramMap = parameters.map(p => ({key: p.split("=")[0], value: p.split("=")[1]}));
+        logger.debug(`paramMap = ${JSON.stringify(paramMap)}`);
+
+        // get the template
+        const aTemplate = await this.getTemplate(templateName, namespace);
+        logger.debug(`aTemplate = ${JSON.stringify(aTemplate)}`);
+
+        // find the templateParam for each passed in parameter and then set the value
+        logger.debug(`templateParams before: ${JSON.stringify(aTemplate.templateParams)}`);
+        paramMap.forEach(pMap => {
+            logger.debug(`pMap = ${JSON.stringify(pMap)}`);
+
+            aTemplate.parameters.forEach(tempParam => {
+                logger.debug(`tempParam = ${JSON.stringify(tempParam)}`);
+
+                if (tempParam.name === pMap.key) {
+                    tempParam.value = pMap.value;
+                    logger.debug(`Keys match: ${tempParam.name} === ${pMap.key} ... added and updated value property`);
+                }
+            });
+        });
+
+        logger.debug(`templateParams after: ${JSON.stringify(aTemplate.templateParams)}`);
+        logger.debug(`aTemplate after: ${JSON.stringify(aTemplate)}`);
+
+        // ------------------------------------------------------------------------------------------------------------
         return await OCCommon.commonCommand("process",
             templateName,
             [],
