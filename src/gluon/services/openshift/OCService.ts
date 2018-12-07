@@ -26,6 +26,7 @@ import {retryFunction} from "../../util/shared/RetryFunction";
 import {QMTeam} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";
 import {OCImageService} from "./OCImageService";
+import {instance} from "ts-mockito";
 
 export class OCService {
     get loggedIn(): boolean {
@@ -376,10 +377,10 @@ export class OCService {
         );
     }
 
-    public async getDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OCCommandResult> {
+    public async getDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OpenshiftApiResult> {
 
         logger.debug(`Trying to get dc in namespace. dcName: ${dcName}, namespace: ${namespace}`);
-        const response: OpenshiftApiResult = await this.openShiftApi.get.get("deploymentconfig", dcName, `${namespace}`);
+        const response: OpenshiftApiResult = await this.openShiftApi.get.get("deploymentconfig", dcName, namespace);
         if (isSuccessCode(response.status)) {
             logger.debug(`Found dc/${dcName} for namespace: ${namespace} | template JSON: ${JSON.stringify(response.data)}`);
             return response.data;
@@ -389,16 +390,15 @@ export class OCService {
         }
     }
 
-    public async rolloutDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OCCommandResult> {
+    public async rolloutDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OpenshiftApiResult> {
         logger.debug(`Trying to rollout dc in namespace. dcName: ${dcName}, namespace: ${namespace}`);
-        return await OCCommon.commonCommand(
-            "rollout status",
-            `dc/${dcName}`,
-            [],
-            [
-                new SimpleOption("-namespace", namespace),
-                new SimpleOption("-watch=false"),
-            ], true);
+        const response: OpenshiftApiResult = await this.openShiftApi.get.get("deploymentconfig", `${dcName}/status`, namespace);
+        if (isSuccessCode(response.status)) {
+            return response.data;
+        } else {
+            logger.error(`Failed to find dc${dcName} in Subatomic namespace: ${inspect(response)}`);
+            throw new QMError("Failed to find dcName in the Subatomic namespace");
+        }
     }
 
     public async getServiceAccountToken(serviceAccountName: string, namespace: string): Promise<string> {

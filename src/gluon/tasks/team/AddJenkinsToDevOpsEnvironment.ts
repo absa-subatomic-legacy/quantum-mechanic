@@ -126,9 +126,9 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
             return this.ocService.rolloutDeploymentConfigInNamespace("jenkins", projectId)
                 .then(rolloutStatus => {
-                    logger.debug(JSON.stringify(rolloutStatus.output));
+                    logger.debug(JSON.stringify(rolloutStatus));
 
-                    if (rolloutStatus.output.indexOf("successfully rolled out") === -1) {
+                    if (JSON.stringify(rolloutStatus).indexOf("successfully rolled out") === -1) {
                         retryFunction();
                     }
                 });
