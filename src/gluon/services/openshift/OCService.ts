@@ -324,72 +324,44 @@ export class OCService {
     }
 
     public async processOpenshiftTemplate(templateName: string, namespace: string, parameters: string[], ignoreUnknownParameters: boolean = false) {
-        logger.debug(`start================================================================================`);
-        logger.debug(`Trying to process openshift template in namespace. templateName: ${templateName}; namespace: ${namespace}, paramaters: ${JSON.stringify(parameters)}`);
+        // Convert passed in params to a kvp
+        const paramMap = parameters.map(p => ({key: p.split("=")[0], value: p.split("=")[1]}));
 
-        const commandOptions: AbstractOption[] = [];
+        // Get the required template
+        const template: OpenshiftResource = await this.getTemplate(templateName, namespace);
 
-        commandOptions.push(new StandardOption("loglevel", "10"));
+        // Find the templateParam for each passed in parameter and then set the value
+        logger.debug(`templateParams before: ${JSON.stringify(template.paramaters)}`);
+        paramMap.forEach(pMap => {
+            template.parameters.forEach(tempParam => {
+                if (tempParam.name === pMap.key) {
+                    tempParam.value = pMap.value;
+                }
+            });
+        });
 
-        if (ignoreUnknownParameters) {
-            commandOptions.push(new StandardOption("ignore-unknown-parameters", "true"));
+        // Post the populated template
+        const response = await this.openShiftApi.create.post(`namespaces/${namespace}/processedtemplates`, template);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Processed template ${templateName} for namespace ${namespace} OK `);
+
+            const returnedTemplate: OpenshiftResource = response.data;
+
+            // Build the list object from the response object (objects[] maps to items[])
+            const openShiftResourceList: OpenshiftResource = {
+                kind: "List",
+                apiVersion: "v1",
+                metadata: {},
+                items: returnedTemplate.objects,
+            };
+            return openShiftResourceList;
+        } else {
+            logger.error(`Failed to process template ${templateName} for namespace ${namespace}, status code: ${response.status} status text: ${response.statusText}`);
+            throw new QMError(`Failed to create resource from template ${templateName} for namespace ${namespace}`);
         }
-
-        for (const parameter of parameters) {
-            commandOptions.push(new SimpleOption("p", parameter));
-        }
-
-        commandOptions.push(new SimpleOption("-namespace", namespace));
-        const x = await OCCommon.commonCommand("process",
-            templateName,
-            [],
-            commandOptions,
-        );
-        logger.debug(`commonCommand returned resource = ${JSON.stringify(x.output)}`);
-        logger.debug(`end================================================================================`);
-        return x;
-        // ------------------------------------------------------------------------------------------------------------
-
-        // // convert passed in params to a dictionary
-        // const paramMap = parameters.map(p => ({key: p.split("=")[0], value: p.split("=")[1]}));
-        // logger.debug(`paramMap = ${JSON.stringify(paramMap)}`);
-        //
-        // // get the template
-        // const template: OpenshiftResource = await this.getTemplate(templateName, namespace);
-        // logger.debug(`aTemplate = ${JSON.stringify(template)}`);
-        //
-        // // find the templateParam for each passed in parameter and then set the value
-        // logger.debug(`templateParams before: ${JSON.stringify(template.paramaters)}`);
-        // paramMap.forEach(pMap => {
-        //     logger.debug(`pMap = ${JSON.stringify(pMap)}`);
-        //
-        //     template.parameters.forEach(tempParam => {
-        //         logger.debug(`tempParam = ${JSON.stringify(tempParam)}`);
-        //
-        //         if (tempParam.name === pMap.key) {
-        //             tempParam.value = pMap.value;
-        //             logger.debug(`Keys match: ${tempParam.name} === ${pMap.key} ... added and updated value property`);
-        //         }
-        //     });
-        // });
-        //
-        // // logger.debug(`templateParams after: ${JSON.stringify(template.paramaters)}`);
-        // logger.debug(`aTemplate after: ${JSON.stringify(template)}`);
-        //
-        // // POST/CREATE
-        // const response = await this.openShiftApi.create.post(`namespaces/${namespace}/processedtemplates`, template);
-        // if (isSuccessCode(response.status)) {
-        //     logger.debug(`Processed template ${templateName} for namespace ${namespace} OK `);
-        //     logger.debug(`response.data = ${JSON.stringify(response.data)} `);
-        //     return response.data;
-        // } else {
-        //     logger.error(`Failed to process template ${templateName} for namespace ${namespace}, status code: ${response.status} status text: ${response.statusText}`);
-        //     throw new QMError(`Failed to create resource from template ${templateName} for namespace ${namespace}`);
-        // }
     }
 
     public async getDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OpenshiftResource> {
-
         logger.debug(`Trying to get dc in namespace. dcName: ${dcName}, namespace: ${namespace}`);
         const response: OpenshiftApiResult = await this.openShiftApi.get.get("deploymentconfig", dcName, namespace);
         if (isSuccessCode(response.status)) {

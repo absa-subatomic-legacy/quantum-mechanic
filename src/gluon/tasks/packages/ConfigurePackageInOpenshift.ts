@@ -176,14 +176,14 @@ export class ConfigurePackageInOpenshift extends Task {
                 templateParameters,
                 true);
 
-            logger.debug(`Processed app [${appName}] Template: ${JSON.stringify(appProcessedTemplate.output)}`);
+            logger.debug(`Processed app [${appName}] Template: ${JSON.stringify(appProcessedTemplate)}`);
 
             try {
                 await this.ocService.getDeploymentConfigInNamespace(appName, projectId);
                 logger.warn(`App [${appName}] Template has already been processed, deployment exists`);
             } catch (error) {
                 await this.ocService.applyResourceFromDataInNamespace(
-                    JSON.parse(appProcessedTemplate.output),
+                    appProcessedTemplate,
                     projectId,
                 );
             }

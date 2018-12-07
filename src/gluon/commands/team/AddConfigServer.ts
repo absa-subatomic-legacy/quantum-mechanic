@@ -144,9 +144,9 @@ spring:
                 "subatomic",
                 templateParameters);
 
-            logger.debug(`Processed Subatomic Config Server Template: ${JSON.stringify(appTemplate.output)}`);
+            logger.debug(`Processed Subatomic Config Server Template: ${JSON.stringify(appTemplate)}`);
 
-            await this.ocService.applyResourceFromDataInNamespace(JSON.parse(appTemplate.output), devOpsProjectId);
+            await this.ocService.applyResourceFromDataInNamespace(appTemplate, devOpsProjectId);
         }
     }
 
