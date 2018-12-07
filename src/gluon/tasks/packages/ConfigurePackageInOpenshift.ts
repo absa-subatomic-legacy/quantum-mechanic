@@ -176,7 +176,7 @@ export class ConfigurePackageInOpenshift extends Task {
                 templateParameters,
                 true);
 
-            logger.debug(`Processed app [${appName}] Template: ${appProcessedTemplate.output}`);
+            logger.debug(`Processed app [${appName}] Template: ${JSON.stringify(appProcessedTemplate.output)}`);
 
             try {
                 await this.ocService.getDeploymentConfigInNamespace(appName, projectId);
