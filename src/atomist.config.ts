@@ -2,7 +2,6 @@ import {ingester} from "@atomist/automation-client/lib/graph/graphQL";
 import {QMConfig} from "./config/QMConfig";
 import {
     ListExistingBitbucketProject,
-    NewBitbucketProject,
 } from "./gluon/commands/bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "./gluon/commands/bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "./gluon/commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
@@ -45,7 +44,6 @@ import {RemoveMemberFromTeam} from "./gluon/commands/team/RemoveMemberFromTeam";
 import {TagAllLatestImages} from "./gluon/commands/team/TagAllLatestImages";
 import {TagLatestImage} from "./gluon/commands/team/TagLatestImage";
 import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAdded";
-import {BitbucketProjectRequested} from "./gluon/events/bitbucket/BitbucketProjectRequested";
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
 import {ApplicationProdRequested} from "./gluon/events/packages/ApplicationProdRequested";
@@ -102,7 +100,6 @@ export const configuration: any = {
         ListTeamMembers,
         ListTeamProjects,
         MembershipRequestClosed,
-        NewBitbucketProject,
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,
         NewProjectEnvironments,
@@ -119,7 +116,6 @@ export const configuration: any = {
         ApplicationCreated,
         ApplicationProdRequested,
         BitbucketProjectAdded,
-        BitbucketProjectRequested,
         BotJoinedChannel,
         DevOpsEnvironmentRequested,
         GenericProdRequested,
@@ -160,7 +156,6 @@ export const configuration: any = {
         ingester("MembershipRequestCreatedEvent"),
         ingester("MembersAddedToTeamEvent"),
         ingester("MemberRemovedFromTeamEvent"),
-        ingester("BitbucketProjectRequestedEvent"),
         ingester("BitbucketProjectAddedEvent"),
         ingester("ProjectProductionEnvironmentsRequestedEvent"),
         ingester("ProjectProductionEnvironmentsRequestClosedEvent"),
