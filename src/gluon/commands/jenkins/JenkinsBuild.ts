@@ -10,6 +10,7 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
+import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
@@ -87,12 +88,12 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
         const teamDevOpsProjectId = `${_.kebabCase(gluonTeamName).toLowerCase()}-devops`;
         const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
 
-        const jenkinsHost = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
+        const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
 
-        logger.debug(`Using Jenkins Route host [${jenkinsHost.output}] to kick off build`);
+        logger.debug(`Using Jenkins Route host [${jenkinsHost}] to kick off build`);
 
         const kickOffBuildResult = await this.jenkinsService.kickOffBuild(
-            jenkinsHost.output,
+            jenkinsHost,
             token,
             gluonProjectName,
             gluonApplicationName,
@@ -105,7 +106,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
             if (kickOffBuildResult.status === 404) {
                 logger.warn(`This is probably the first build and therefore a master branch job does not exist`);
                 await this.jenkinsService.kickOffFirstBuild(
-                    jenkinsHost.output,
+                    jenkinsHost,
                     token,
                     gluonProjectName,
                     gluonApplicationName,

@@ -210,15 +210,16 @@ export class OCService {
         }
     }
 
-    public async getJenkinsTemplate(): Promise<OCCommandResult> {
-        logger.debug(`Trying to get jenkins template.`);
-        return await OCCommon.commonCommand("get", "templates",
-            ["jenkins-persistent-subatomic"],
-            [
-                new SimpleOption("-namespace", "subatomic"),
-                new SimpleOption("-output", "json"),
-            ],
-        );
+    public async getJenkinsTemplate(): Promise<OpenshiftResource> {
+        logger.debug(`Trying to get jenkins template...`);
+        const response = await this.openShiftApi.get.get("template", "jenkins-persistent-subatomic", "subatomic");
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Found jenkins template for namespace: subatomic | template JSON: ${JSON.stringify(response.data)}`);
+            return response.data;
+        } else {
+            logger.error(`Failed to find jenkins template for namespace: subatomic, status code: ${response.status} status text: ${response.statusText}`);
+            throw new QMError(`Failed to find jenkins template for namespace subatomic`);
+        }
     }
 
     public async getSubatomicImageStreamTags(namespace: string = "subatomic") {
@@ -415,16 +416,16 @@ export class OCService {
             ]);
     }
 
-    public async getJenkinsHost(namespace: string): Promise<OCCommandResult> {
-        logger.debug(`Trying to get jenkins host in namespace. namespace: ${namespace}`);
-        return await OCCommon.commonCommand(
-            "get",
-            "route/jenkins",
-            [],
-            [
-                new SimpleOption("-output", "jsonpath={.spec.host}"),
-                new SimpleOption("-namespace", namespace),
-            ]);
+    public async getJenkinsHost(namespace: string): Promise<string> {
+        logger.debug(`Trying to get jenkins host ...`);
+        const response = await this.openShiftApi.get.get("route", "jenkins", namespace);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Found jenkins host: ${response.data.spec.host} for namespace: ${namespace}`);
+            return response.data.spec.host;
+        } else {
+            logger.error(`Failed to find jenkins host for namespace ${namespace} | response JSON: ${JSON.stringify(response)}`);
+            throw new QMError(`Failed to find jenkins host for namespace ${namespace}`);
+        }
     }
 
     public async getSecretFromNamespace(secretName: string, namespace: string): Promise<OpenshiftApiResult> {

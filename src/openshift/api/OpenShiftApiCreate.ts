@@ -82,6 +82,7 @@ export class OpenShiftApiCreate extends OpenShiftApiElement {
 
     private async processList(resource: OpenshiftResource, namespace: string, createType: CreateType): Promise<OpenshiftApiResult> {
         let status = 200;
+        let statusText = "OK";
         const result = {
             items: [],
         };
@@ -109,11 +110,13 @@ export class OpenShiftApiCreate extends OpenShiftApiElement {
                     },
                 );
                 status = 400;
+                statusText = "Bad Request";
             }
         }
         return {
             data: result,
             status,
+            statusText,
         };
     }
 
