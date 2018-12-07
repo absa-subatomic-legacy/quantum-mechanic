@@ -170,7 +170,7 @@ export class ConfigurePackageInOpenshift extends Task {
                 `DEVOPS_NAMESPACE=${devOpsProjectId}`,
             ];
 
-            const appProcessedTemplate = await this.ocService.processOpenshiftTemplate(
+            const appProcessedTemplate = await this.ocService.findAndProcessOpenshiftTemplate(
                 this.deploymentDetails.openshiftTemplate,
                 projectId,
                 templateParameters,

@@ -320,10 +320,10 @@ export class OCService {
             `DEVOPS_URL=${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
         ];
 
-        return await this.processOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
+        return await this.findAndProcessOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
     }
 
-    public async processOpenshiftTemplate(templateName: string, namespace: string, parameters: string[], ignoreUnknownParameters: boolean = false) {
+    public async findAndProcessOpenshiftTemplate(templateName: string, namespace: string, parameters: string[], ignoreUnknownParameters: boolean = false) {
         // Convert passed in params to a kvp
         const paramMap = parameters.map(p => ({key: p.split("=")[0], value: p.split("=")[1]}));
 
@@ -339,7 +339,10 @@ export class OCService {
                 }
             });
         });
+        return await this.processOpenShiftTemplate(namespace, template, templateName);
+    }
 
+    public async processOpenShiftTemplate(namespace: string, template: OpenshiftResource, templateName: string) {
         // Post the populated template
         const response = await this.openShiftApi.create.post(`namespaces/${namespace}/processedtemplates`, template);
         if (isSuccessCode(response.status)) {
@@ -535,29 +538,30 @@ export class OCService {
         return await OCClient.createPvc(pvcName, namespace);
     }
 
-    public async initilizeProjectWithDefaultProjectTemplate(projectId: string, projectName: string, apply = true) {
+    public async initilizeProjectWithDefaultProjectTemplate(projectNamespaceId: string, projectName: string, apply = true) {
 
-        const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
-        const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+        // const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
+        // const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
 
         const template = this.baseProjectTemplateLoader.getTemplate();
         if (!_.isEmpty(template.objects)) {
-            logger.info(`Applying base project template to ${projectId}`);
+            logger.info(`Applying base project template to ${projectNamespaceId}`);
 
-            const fileName = Date.now() + ".json";
-            fs.writeFileSync(`/tmp/${fileName}`, JSON.stringify(template));
-
-            // log client into non prod to process template - hacky! Need to fix.
-            await OCClient.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.auth.token);
-            const processedTemplateResult = await OCCommon.commonCommand("process", `-f /tmp/${fileName}`);
-            const result = await this.applyResourceFromDataInNamespace(JSON.parse(processedTemplateResult.output), projectId, apply);
+            // const fileName = Date.now() + ".json";
+            // fs.writeFileSync(`/tmp/${fileName}`, JSON.stringify(template));
+            //
+            // // log client into non prod to process template - hacky! Need to fix.
+            // await OCClient.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.auth.token);
+            // const processedTemplateResult = await OCCommon.commonCommand("process", `-f /tmp/${fileName}`);
+            const processedTemplateResult: OpenshiftResource = await this.processOpenShiftTemplate(projectNamespaceId, template, "New-Project-Template");
+            const result = await this.applyResourceFromDataInNamespace(processedTemplateResult, projectNamespaceId, apply);
 
             if (!isSuccessCode(result.status)) {
                 logger.error(`Template failed to create properly: ${inspect(result)}`);
                 throw new QMError("Failed to create all items in base project template.");
             }
         } else {
-            logger.debug(`Base template is empty. Not applying to project ${projectId}`);
+            logger.debug(`Base template is empty. Not applying to project ${projectNamespaceId}`);
         }
     }
 
