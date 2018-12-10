@@ -60,18 +60,18 @@ export class CreateOpenshiftEnvironments extends Task {
         await this.ocService.login(this.openshiftEnvironment, true);
 
         for (const environment of environments) {
-            const projectId = getProjectId(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, environment[0]);
-            logger.info(`Working with OpenShift project Id: ${projectId}`);
+            const projectNamespaceId = getProjectId(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, environment[0]);
+            logger.info(`Working with OpenShift project Id: ${projectNamespaceId}`);
 
-            await this.createOpenshiftProject(projectId, this.environmentsRequestedEvent, environment);
+            await this.createOpenshiftProject(projectNamespaceId, this.environmentsRequestedEvent, environment);
             await this.taskListMessage.succeedTask(this.dynamicTaskNameStore[`${environment[0]}Environment`]);
         }
     }
 
-    private async createOpenshiftProject(projectId: string, environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest, environment) {
+    private async createOpenshiftProject(projectNamespaceId: string, environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest, environment) {
         try {
             await this.ocService.newSubatomicProject(
-                projectId,
+                projectNamespaceId,
                 environmentsRequestedEvent.project.name,
                 environmentsRequestedEvent.owningTenant.name,
                 environment);
@@ -83,11 +83,11 @@ export class CreateOpenshiftEnvironments extends Task {
             }
         }
 
-        await this.ocService.initilizeProjectWithDefaultProjectTemplate(projectId, environmentsRequestedEvent.project.name);
+        await this.ocService.initilizeProjectWithDefaultProjectTemplate(projectNamespaceId, environmentsRequestedEvent.project.name);
         await environmentsRequestedEvent.teams.map(async team => {
-            await this.ocService.addTeamMembershipPermissionsToProject(projectId, team);
+            await this.ocService.addTeamMembershipPermissionsToProject(projectNamespaceId, team);
         });
-        await this.createProjectQuotasAndLimits(projectId);
+        await this.createProjectQuotasAndLimits(projectNamespaceId);
     }
 
     private async createProjectQuotasAndLimits(projectId: string) {

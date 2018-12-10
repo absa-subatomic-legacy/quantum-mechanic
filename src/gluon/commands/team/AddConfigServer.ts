@@ -139,14 +139,14 @@ spring:
                 `IMAGE_STREAM_PROJECT=${devOpsProjectId}`,
             ];
 
-            const appTemplate = await this.ocService.processOpenshiftTemplate(
+            const appTemplate = await this.ocService.findAndProcessOpenshiftTemplate(
                 "subatomic-config-server-template",
                 "subatomic",
                 templateParameters);
 
-            logger.debug(`Processed Subatomic Config Server Template: ${appTemplate.output}`);
+            logger.debug(`Processed Subatomic Config Server Template: ${JSON.stringify(appTemplate)}`);
 
-            await this.ocService.applyResourceFromDataInNamespace(JSON.parse(appTemplate.output), devOpsProjectId);
+            await this.ocService.applyResourceFromDataInNamespace(appTemplate, devOpsProjectId);
         }
     }
 

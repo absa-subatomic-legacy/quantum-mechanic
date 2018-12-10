@@ -306,7 +306,7 @@ export class OCService {
         }
     }
 
-    public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, openShiftCloud: string): Promise<OCCommandResult> {
+    public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, openShiftCloud: string): Promise<any> {
         logger.debug(`Trying to process jenkins template for devops project template. devopsNamespace: ${devopsNamespace}`);
 
         const parameters = [
@@ -321,64 +321,51 @@ export class OCService {
             `DEVOPS_URL=${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
         ];
 
-        return await this.processOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
+        return await this.findAndProcessOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
     }
 
-    public async processOpenshiftTemplate(templateName: string, namespace: string, parameters: string[], ignoreUnknownParameters: boolean = false) {
-
-        logger.debug(`Trying to process openshift template in namespace. templateName: ${templateName}; namespace: ${namespace}, paramaters: ${JSON.stringify(parameters)}`);
-        const commandOptions: AbstractOption[] = [];
-
-        commandOptions.push(new StandardOption("loglevel", "10"));
-
-        if (ignoreUnknownParameters) {
-            commandOptions.push(new StandardOption("ignore-unknown-parameters", "true"));
-
-        }
-
-        for (const parameter of parameters) {
-            commandOptions.push(new SimpleOption("p", parameter));
-        }
-
-        commandOptions.push(new SimpleOption("-namespace", namespace));
-        // ------------------------------------------------------------------------------------------------------------
-
-        // convert passed in params to a dictionary
+    public async findAndProcessOpenshiftTemplate(templateName: string, namespace: string, parameters: string[], ignoreUnknownParameters: boolean = false) {
+        // Convert passed in params to a kvp
         const paramMap = parameters.map(p => ({key: p.split("=")[0], value: p.split("=")[1]}));
-        logger.debug(`paramMap = ${JSON.stringify(paramMap)}`);
 
-        // get the template
-        const aTemplate = await this.getTemplate(templateName, namespace);
-        logger.debug(`aTemplate = ${JSON.stringify(aTemplate)}`);
+        // Get the required template
+        const template: OpenshiftResource = await this.getTemplate(templateName, namespace);
 
-        // find the templateParam for each passed in parameter and then set the value
-        logger.debug(`templateParams before: ${JSON.stringify(aTemplate.templateParams)}`);
+        // Find the templateParam for each passed in parameter and then set the value
+        logger.debug(`templateParams before: ${JSON.stringify(template.paramaters)}`);
         paramMap.forEach(pMap => {
-            logger.debug(`pMap = ${JSON.stringify(pMap)}`);
-
-            aTemplate.parameters.forEach(tempParam => {
-                logger.debug(`tempParam = ${JSON.stringify(tempParam)}`);
-
+            template.parameters.forEach(tempParam => {
                 if (tempParam.name === pMap.key) {
                     tempParam.value = pMap.value;
-                    logger.debug(`Keys match: ${tempParam.name} === ${pMap.key} ... added and updated value property`);
                 }
             });
         });
-
-        logger.debug(`templateParams after: ${JSON.stringify(aTemplate.templateParams)}`);
-        logger.debug(`aTemplate after: ${JSON.stringify(aTemplate)}`);
-
-        // ------------------------------------------------------------------------------------------------------------
-        return await OCCommon.commonCommand("process",
-            templateName,
-            [],
-            commandOptions,
-        );
+        return await this.processOpenShiftTemplate(namespace, template, templateName);
     }
 
-    public async getDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OpenshiftApiResult> {
+    public async processOpenShiftTemplate(namespace: string, template: OpenshiftResource, templateName: string) {
+        // Post the populated template
+        const response = await this.openShiftApi.create.post(`namespaces/${namespace}/processedtemplates`, template);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Processed template ${templateName} for namespace ${namespace} OK `);
 
+            const returnedTemplate: OpenshiftResource = response.data;
+
+            // Build the list object from the response object (objects[] maps to items[])
+            const openShiftResourceList: OpenshiftResource = {
+                kind: "List",
+                apiVersion: "v1",
+                metadata: {},
+                items: returnedTemplate.objects,
+            };
+            return openShiftResourceList;
+        } else {
+            logger.error(`Failed to process template ${templateName} for namespace ${namespace}, status code: ${response.status} status text: ${response.statusText}`);
+            throw new QMError(`Failed to create resource from template ${templateName} for namespace ${namespace}`);
+        }
+    }
+
+    public async getDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OpenshiftResource> {
         logger.debug(`Trying to get dc in namespace. dcName: ${dcName}, namespace: ${namespace}`);
         const response: OpenshiftApiResult = await this.openShiftApi.get.get("deploymentconfig", dcName, namespace);
         if (isSuccessCode(response.status)) {
@@ -551,29 +538,18 @@ export class OCService {
         return await OCClient.createPvc(pvcName, namespace);
     }
 
-    public async initilizeProjectWithDefaultProjectTemplate(projectId: string, projectName: string, apply = true) {
-
-        const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
-        const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
-
+    public async initilizeProjectWithDefaultProjectTemplate(projectNamespaceId: string, projectName: string, apply = true) {
         const template = this.baseProjectTemplateLoader.getTemplate();
         if (!_.isEmpty(template.objects)) {
-            logger.info(`Applying base project template to ${projectId}`);
-
-            const fileName = Date.now() + ".json";
-            fs.writeFileSync(`/tmp/${fileName}`, JSON.stringify(template));
-
-            // log client into non prod to process template - hacky! Need to fix.
-            await OCClient.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.auth.token);
-            const processedTemplateResult = await OCCommon.commonCommand("process", `-f /tmp/${fileName}`);
-            const result = await this.applyResourceFromDataInNamespace(JSON.parse(processedTemplateResult.output), projectId, apply);
-
+            logger.info(`Base template is NOT empty for projectNamespaceId: ${projectNamespaceId}`);
+            const processedTemplateResult: OpenshiftResource = await this.processOpenShiftTemplate(projectNamespaceId, template, "New-Project-Template");
+            const result = await this.applyResourceFromDataInNamespace(processedTemplateResult, projectNamespaceId, apply);
             if (!isSuccessCode(result.status)) {
                 logger.error(`Template failed to create properly: ${inspect(result)}`);
                 throw new QMError("Failed to create all items in base project template.");
             }
         } else {
-            logger.debug(`Base template is empty. Not applying to project ${projectId}`);
+            logger.info(`Base template is empty. Not applying to project ${projectNamespaceId}`);
         }
     }
 

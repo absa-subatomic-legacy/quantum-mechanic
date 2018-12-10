@@ -134,7 +134,13 @@ export class ResourceUrl {
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
-
+        processedtemplate: [
+            {
+                apiVersion: "v1",
+                url: "processedtemplates",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
     };
 }
 
