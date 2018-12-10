@@ -1,5 +1,4 @@
 import {
-    addressSlackChannelsFromContext,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -7,15 +6,20 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
+import _ = require("lodash");
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
+import {ChannelMessageClient} from "../../util/shared/Error";
 
 @EventHandler("Receive TeamsLinkedToProject events", `
 subscription TeamsLinkedToProjectEvent {
   TeamsLinkedToProjectEvent {
     id
-    team {
+    project {
+      projectId
+      name
+      description
+    }
+    teams {
       teamId
       name
       description
@@ -39,18 +43,17 @@ export class TeamsLinkedToProject extends BaseQMEvent implements HandleEvent<any
 
         try {
             const teamsLinkedToProjectEvent = event.data.TeamsLinkedToProjectEvent[0];
-
-            const destination = await addressSlackChannelsFromContext(ctx, teamsLinkedToProjectEvent.team[0].slackIdentity.teamChannel);
+            const messageClient = new ChannelMessageClient(ctx);
+            const teams = teamsLinkedToProjectEvent.teams;
+            for (const team of teams) {
+                if (!_.isEmpty(team.slackIdentity)) {
+                    messageClient.addDestination(team.slackIdentity.teamChannel);
+                }
+            }
             this.succeedEvent();
-            return ctx.messageClient.send(`Your team has been successfully associated with ${teamsLinkedToProjectEvent.id}`,
-                destination);
-        } catch {
+            return messageClient.send(`Your team has been successfully associated with the *${teamsLinkedToProjectEvent.project.name}* project.`);
+        } catch (error) {
             this.failEvent();
         }
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/user-guide/create-a-team#associate-a-slack-channel`,
-            "documentation")}`;
     }
 }

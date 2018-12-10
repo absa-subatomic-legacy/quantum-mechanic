@@ -9,7 +9,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
-import {menuAttachmentForProjects, QMProject} from "../../util/project/Project";
+import {menuAttachmentForProjects} from "../../util/project/Project";
 import {
     RecursiveParameter,
     RecursiveParameterRequestCommand,
@@ -62,11 +62,11 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
         try {
             updateGluonWithProjectDetails = await this.updateGluonProject(gluonProject.projectId, gluonProject.createdBy, team.teamId, team.name);
         } catch (error) {
-            throw new QMError(`Team *${team.name}* was already associated with project ${gluonProject.projectId}`);
+            throw new QMError(`Team *${team.name}* was already associated with project *${gluonProject.name}*`);
         }
 
         if (isSuccessCode(updateGluonWithProjectDetails.status)) {
-            return await ctx.messageClient.respond(`Team *${team.name}* has been successfully associated with ${gluonProject.projectId}`);
+            return await ctx.messageClient.respond(`Team *${team.name}* has been successfully associated with *${gluonProject.name}*`);
         } else {
             logger.error(`Failed to link project. Error ${updateGluonWithProjectDetails.data}`);
             throw new QMError(`Failed to link project.`);
