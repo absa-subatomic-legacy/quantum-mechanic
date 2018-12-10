@@ -13,7 +13,6 @@
 
 import groovy.json.JsonOutput
 
-
 def deploy(project, app, tag) {
     openshift.withProject(project) {
         def dc = openshift.selector('dc', app);
@@ -26,14 +25,10 @@ def deploy(project, app, tag) {
                     openshift.selector('dc', app).patch("\'{ \"spec\": { \"triggers\": [{ \"type\": \"ImageChange\", \"imageChangeParams\": { \"automatic\": false, \"containerNames\": [\"${app}\"], \"from\": { \"kind\": \"ImageStreamTag\", \"name\": \"${app}:${tag}\" } } }] } }\'")
                 }
                 def latestVersion = dc.object().status.latestVersion
-                if (latestVersion != 0) {
-                    break
-                }
-                echo "Running initial deployment"
             }
             openshift.selector('dc', app).rollout().latest()
 
-            timeout(5) {
+            timeout(10) {
                 def deploymentObject = openshift.selector('dc', "${app}").object()
                 if (deploymentObject.spec.replicas > 0) {
                     def latestDeploymentVersion = deploymentObject.status.latestVersion
