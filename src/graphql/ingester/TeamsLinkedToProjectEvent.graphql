@@ -1,4 +1,5 @@
 type TeamsLinkedToProjectEvent @rootType {
-	team: [GluonTeam]
+	project: Project
+	teams: [GluonTeam]
 	requestedBy: ActionedBy
 }

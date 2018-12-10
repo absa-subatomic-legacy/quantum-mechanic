@@ -2,7 +2,6 @@ import * as _ from "lodash";
 import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
 import {
     ListExistingBitbucketProject,
-    NewBitbucketProject,
 } from "../bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "../bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "../bitbucket/BitbucketProjectRecommendedPracticesCommand";
@@ -76,7 +75,6 @@ export class HelpCategory {
         ListTeamMembers,
         ListTeamProjects,
         MembershipRequestClosed,
-        NewBitbucketProject,
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,
         NewProjectEnvironments,
