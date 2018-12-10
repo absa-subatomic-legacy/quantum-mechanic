@@ -148,6 +148,13 @@ export class ResourceUrl {
                 api: OpenshiftApiBaseRoute.API,
             },
         ],
+        service: [
+            {
+                apiVersion: "v1",
+                url: "services",
+                api: OpenshiftApiBaseRoute.API,
+            },
+        ],
     };
 }
 

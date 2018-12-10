@@ -118,13 +118,13 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
             message.attachments.push({
                 text: `*Confirmed*`,
                 fallback: "*Confirmed*",
-                color:  QMColours.stdGreenyMcAppleStroodle.hex,
+                color: QMColours.stdGreenyMcAppleStroodle.hex,
             });
         } else if (result === ApprovalEnum.REJECTED) {
             message.attachments.push({
                 text: `*Cancelled*`,
                 fallback: "*Cancelled*",
-                color:  QMColours.stdReddyMcRedFace.hex,
+                color: QMColours.stdReddyMcRedFace.hex,
             });
         }
 
@@ -172,7 +172,6 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         return await qmMessageClient.send({
             text: getResourceDisplayMessage(resources),
         });
-
     }
 
     private async createGenericProdRequest() {

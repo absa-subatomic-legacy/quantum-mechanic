@@ -11,7 +11,6 @@ import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
-import {AbstractOption} from "../../../openshift/base/options/AbstractOption";
 import {NamedSimpleOption} from "../../../openshift/base/options/NamedSimpleOption";
 import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
 import {StandardOption} from "../../../openshift/base/options/StandardOption";
@@ -19,7 +18,7 @@ import {OCClient} from "../../../openshift/OCClient";
 import {OCCommon} from "../../../openshift/OCCommon";
 import {userFromDomainUser} from "../../util/member/Members";
 import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
-import {getProjectDisplayName, QMProject} from "../../util/project/Project";
+import {getProjectDisplayName} from "../../util/project/Project";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
 import {QuotaLoader} from "../../util/resources/QuotaLoader";
 import {QMError, QMErrorType} from "../../util/shared/Error";
@@ -575,7 +574,7 @@ export class OCService {
             },
         };
 
-        const response = await this.openShiftApi.create.create(persistentVolumeClasimObject, namespace , true);
+        const response = await this.openShiftApi.create.create(persistentVolumeClasimObject, namespace, true);
         if (isSuccessCode(response.status)) {
             logger.debug(`Created PVC ${pvcName} for namespace: ${namespace} OK`);
             return response.data;
@@ -609,10 +608,41 @@ export class OCService {
         return project;
     }
 
-    public async exportAllResources(projectId: string) {
-        const listOfResourcesResult = await OCCommon.commonCommand("export", "all",
-            [], [new SimpleOption("-output", "json"), new SimpleOption("-namespace", projectId)]);
-        return JSON.parse(listOfResourcesResult.output);
+    public async exportAllResources(projectIdNameSpace: string): Promise<any> {
+
+        logger.debug("Trying to export all required resources...");
+
+        const resourceKindsRequired: string[] = ["Service", "DeploymentConfig", "ImageStream", "Route", "PersistentVolumeClaim"];
+
+        const resources: OpenshiftResource[] = [];
+
+        for (const resourceKind of resourceKindsRequired) {
+            const result = await this.openShiftApi.get.get(`${_.toLower(resourceKind)}`, "", projectIdNameSpace);
+            if (isSuccessCode(result.status)) {
+                const items: OpenshiftResource[] = result.data.items.map(resource => {
+                    resource.kind = resourceKind;
+                    resource.apiVersion = "v1";
+                    return resource;
+                });
+                resources.push(...items);
+            } else {
+                logger.error(`Failed to export all resources ${resourceKind} in namespace: ${projectIdNameSpace}, ${inspect(result)}`);
+                throw new QMError(`Failed to export all resources ${resourceKind} in namespace: ${projectIdNameSpace}`);
+            }
+        }
+
+        const openShiftResourceList: OpenshiftResource = {
+            kind: "List",
+            apiVersion: "v1",
+            metadata: {},
+            items: resources,
+        };
+        return openShiftResourceList;
+
+        // const listOfResourcesResult = await OCCommon.commonCommand("export", "all",
+        //     [], [new SimpleOption("-output", "json"), new SimpleOption("-namespace", projectIdNameSpace)]);
+        //
+        // return JSON.parse(listOfResourcesResult.output);
     }
 
     public async patchResourceInNamespace(resourcePatch: OpenshiftResource, namespace: string, deleteMetaData: boolean = true) {
