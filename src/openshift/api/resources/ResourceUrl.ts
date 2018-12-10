@@ -141,6 +141,13 @@ export class ResourceUrl {
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
+        persistentvolumeclaim: [
+            {
+                apiVersion: "v1",
+                url: "persistentvolumeclaims",
+                api: OpenshiftApiBaseRoute.API,
+            },
+        ],
     };
 }
 

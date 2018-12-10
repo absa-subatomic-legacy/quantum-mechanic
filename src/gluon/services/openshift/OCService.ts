@@ -556,9 +556,33 @@ export class OCService {
         return addRoleResult;
     }
 
-    public async createPVC(pvcName: string, namespace: string): Promise<OCCommandResult> {
-        logger.debug(`Trying to create pvc in namespace. pvcName: ${pvcName}; namespace: ${namespace}`);
-        return await OCClient.createPvc(pvcName, namespace);
+    public async createPVC(pvcName: string, namespace: string, size: string = "10Gi", accessModes: string[] = ["ReadWriteMany"]): Promise<OpenshiftResource> {
+        logger.debug(`Trying to create pvc in namespace. pvcName: ${pvcName}; namespace: ${namespace}...`);
+
+        const persistentVolumeClasimObject = {
+            kind: "PersistentVolumeClaim",
+            apiVersion: "v1",
+            metadata: {
+                name: pvcName,
+            },
+            spec: {
+                accessModes,
+                resources: {
+                    requests: {
+                        storage: size,
+                    },
+                },
+            },
+        };
+
+        const response = await this.openShiftApi.create.create(persistentVolumeClasimObject, namespace , true);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Created PVC ${pvcName} for namespace: ${namespace} OK`);
+            return response.data;
+        } else {
+            logger.error(`Failed to create PVC ${pvcName} for ${namespace}, ${inspect(response)}`);
+            throw new QMError(`Failed to create PVC ${pvcName} for ${namespace}`);
+        }
     }
 
     public async initilizeProjectWithDefaultProjectTemplate(projectNamespaceId: string, projectName: string, apply = true) {
