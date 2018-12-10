@@ -539,29 +539,17 @@ export class OCService {
     }
 
     public async initilizeProjectWithDefaultProjectTemplate(projectNamespaceId: string, projectName: string, apply = true) {
-
-        // const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
-        // const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
-
         const template = this.baseProjectTemplateLoader.getTemplate();
         if (!_.isEmpty(template.objects)) {
-            logger.info(`Applying base project template to ${projectNamespaceId}`);
-
-            // const fileName = Date.now() + ".json";
-            // fs.writeFileSync(`/tmp/${fileName}`, JSON.stringify(template));
-            //
-            // // log client into non prod to process template - hacky! Need to fix.
-            // await OCClient.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.auth.token);
-            // const processedTemplateResult = await OCCommon.commonCommand("process", `-f /tmp/${fileName}`);
+            logger.info(`Base template is NOT empty for projectNamespaceId: ${projectNamespaceId}`);
             const processedTemplateResult: OpenshiftResource = await this.processOpenShiftTemplate(projectNamespaceId, template, "New-Project-Template");
             const result = await this.applyResourceFromDataInNamespace(processedTemplateResult, projectNamespaceId, apply);
-
             if (!isSuccessCode(result.status)) {
                 logger.error(`Template failed to create properly: ${inspect(result)}`);
                 throw new QMError("Failed to create all items in base project template.");
             }
         } else {
-            logger.debug(`Base template is empty. Not applying to project ${projectNamespaceId}`);
+            logger.info(`Base template is empty. Not applying to project ${projectNamespaceId}`);
         }
     }
 
