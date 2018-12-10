@@ -55,7 +55,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
 
         if (!isSuccessCode(teamUpdateResult.status)) {
             this.failCommand();
-            logger.error(`Unable to request ${teamName} devops environment. Error: ${JSON.stringify(teamUpdateResult)}`);
+            logger.error(`Unable to request ${teamName} devops environment. Error: ${teamUpdateResult}`);
             return await ctx.messageClient.respond(`❗Unable to request devops environment for ${teamName}.`);
         }
 

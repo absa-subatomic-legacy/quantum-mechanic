@@ -1,6 +1,7 @@
 import {logger} from "@atomist/automation-client";
 import * as fs from "fs";
 import _ = require("lodash");
+import {instance} from "ts-mockito";
 import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
@@ -26,7 +27,6 @@ import {retryFunction} from "../../util/shared/RetryFunction";
 import {QMTeam} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";
 import {OCImageService} from "./OCImageService";
-import {instance} from "ts-mockito";
 
 export class OCService {
     get loggedIn(): boolean {
@@ -433,15 +433,38 @@ export class OCService {
         return Buffer.from(secretDetailsResult.data.data.token, "base64").toString("ascii");
     }
 
-    public async annotateJenkinsRoute(namespace: string): Promise<OCCommandResult> {
-        logger.debug(`Trying to annotate jenkins route in namespace. namespace: ${namespace}`);
-        return await OCCommon.commonCommand("annotate route",
-            "jenkins",
-            [],
-            [
-                new SimpleOption("-overwrite", "haproxy.router.openshiftNonProd.io/timeout=120s"),
-                new SimpleOption("-namespace", namespace),
-            ]);
+    public async annotateJenkinsRoute(namespace: string): Promise<OpenshiftResource> {
+        logger.debug(`Trying to annotate jenkins route in namespace. namespace: ${namespace}...`);
+        // Get the jenkins route object for namespace x
+        const response = await this.openShiftApi.get.get("route", "jenkins", namespace);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Found jenkins host: ${response.data.spec.host} for namespace: ${namespace}`);
+
+            const jenkinsRoute: OpenshiftResource = response.data;
+            const key = "haproxy.router.openshiftNonProd.io/timeout";
+            const value = "120s";
+            const annotations = Object.entries(jenkinsRoute.metadata.annotations).map(p => ({key: p[0], value: p[1]}));
+
+            // If KVP combination doesn't exist...
+            if (!annotations.some(a => a.key === key && a.value === value)) {
+                // ... add it to the annotations object and patch resource
+                jenkinsRoute.metadata.annotations[key] = value;
+                const patchResponse: OpenshiftApiResult = await this.openShiftApi.patch.patch(jenkinsRoute, namespace, false);
+                if (isSuccessCode(patchResponse.status)) {
+                    logger.info(`Patched jenkins resource for ${namespace} OK `);
+                    return await patchResponse.data;
+                } else {
+                    logger.error(`Failed to patch jenkins resource for ${namespace} | response JSON: ${JSON.stringify(patchResponse)}`);
+                    throw new QMError(`Failed to patch jenkins resource for ${namespace}`);
+                }
+            } else {
+                logger.info("Annotation already exists, nothing to do");
+                return jenkinsRoute;
+            }
+        } else {
+            logger.error(`Failed to find jenkins host for namespace ${namespace} | response JSON: ${JSON.stringify(response)}`);
+            throw new QMError(`Failed to find jenkins host for namespace ${namespace}`);
+        }
     }
 
     public async getJenkinsHost(namespace: string): Promise<string> {
