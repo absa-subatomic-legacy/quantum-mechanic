@@ -36,7 +36,7 @@ export class CreateOpenshiftResourcesInProject extends Task {
     }
 
     private async doConfiguration() {
-        await this.ocService.login(this.openshiftEnvironment, true);
+        await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
         for (const environment of this.openshiftEnvironment.defaultEnvironments) {
             const prodProjectId = getProjectId(this.tenantName, this.projectName, environment.id);

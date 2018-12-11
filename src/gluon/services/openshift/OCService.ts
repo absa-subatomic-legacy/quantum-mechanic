@@ -10,11 +10,6 @@ import {OpenshiftApiResult} from "../../../openshift/api/base/OpenshiftApiResult
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory";
-import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
-import {NamedSimpleOption} from "../../../openshift/base/options/NamedSimpleOption";
-import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
-import {OCClient} from "../../../openshift/OCClient";
-import {OCCommon} from "../../../openshift/OCCommon";
 import {userFromDomainUser} from "../../util/member/Members";
 import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
 import {getProjectDisplayName} from "../../util/project/Project";
@@ -27,13 +22,6 @@ import {GluonService} from "../gluon/GluonService";
 import {OCImageService} from "./OCImageService";
 
 export class OCService {
-    get loggedIn(): boolean {
-        return this.isLoggedIn;
-    }
-
-    set loggedIn(value: boolean) {
-        this.isLoggedIn = value;
-    }
 
     get openShiftApi(): OpenShiftApi {
         if (this.openShiftApiInstance === undefined) {
@@ -49,21 +37,15 @@ export class OCService {
 
     private openShiftApiInstance: OpenShiftApi;
 
-    private isLoggedIn: boolean;
-
     private quotaLoader: QuotaLoader = new QuotaLoader();
     private baseProjectTemplateLoader: BaseProjectTemplateLoader = new BaseProjectTemplateLoader();
 
     constructor(private ocImageService = new OCImageService(), private gluonService = new GluonService()) {
     }
 
-    public async login(openshiftDetails: OpenShiftConfig, softLogin = false) {
+    public async setOpenShiftDetails(openshiftDetails: OpenShiftConfig) {
         this.openShiftApi = new OpenShiftApi(openshiftDetails);
         this.ocImageService.openShiftApi = this.openShiftApi;
-        this.loggedIn = true;
-        if (!softLogin) {
-            return await OCClient.login(openshiftDetails.masterUrl, openshiftDetails.auth.token);
-        }
     }
 
     public async newDevOpsProject(openshiftProjectId: string, teamName: string, rawResult = false): Promise<any> {
@@ -323,6 +305,7 @@ export class OCService {
     }
 
     public async findAndProcessOpenshiftTemplate(templateName: string, namespace: string, parameters: string[], ignoreUnknownParameters: boolean = false) {
+        logger.debug(`Trying to find And Process Openshift Template template. templateName: ${templateName}`);
         // Convert passed in params to a kvp
         const paramMap = parameters.map(p => ({key: p.split("=")[0], value: p.split("=")[1]}));
 
@@ -342,6 +325,7 @@ export class OCService {
     }
 
     public async processOpenShiftTemplate(namespace: string, template: OpenshiftResource, templateName: string) {
+        logger.debug(`Trying to Process Openshift Template template. templateName: ${templateName}`);
         // Post the populated template
         const response = await this.openShiftApi.create.post(`namespaces/${namespace}/processedtemplates`, template);
         if (isSuccessCode(response.status)) {
@@ -356,6 +340,7 @@ export class OCService {
                 metadata: {},
                 items: returnedTemplate.objects,
             };
+            logger.info(`Processed template ${templateName} for namespace ${namespace} OK`);
             return openShiftResourceList;
         } else {
             logger.error(`Failed to process template ${templateName} for namespace ${namespace}, status code: ${response.status} status text: ${response.statusText}`);
@@ -501,21 +486,38 @@ export class OCService {
         return createSecretResult;
     }
 
-    public async createConfigServerSecret(namespace: string): Promise<OCCommandResult> {
-        logger.debug(`Trying to create config server secret. namespace: ${namespace}`);
+    public async createConfigServerSecret(namespace: string): Promise<OpenshiftResource> {
+        logger.debug(`Trying to create config server secret for namespace: ${namespace}...`);
 
         logger.debug("Extracting raw ssh key from cicd key");
         // Ignore the ssh-rsa encoding string, and any user name details at the end.
+        const nme = "subatomic-config-server";
         const rawSSHKey = QMConfig.subatomic.bitbucket.cicdKey.split(" ")[1];
+        const cicdPrivateKey = fs.readFileSync(
+            QMConfig.subatomic.bitbucket.cicdPrivateKeyPath,
+            "utf8").split("-----")[2].replace(/\n|\r/g, "");
 
-        return await OCCommon.commonCommand("create secret generic",
-            "subatomic-config-server",
-            [],
-            [
-                new NamedSimpleOption("-from-literal=spring.cloud.config.server.git.hostKey", rawSSHKey),
-                new NamedSimpleOption("-from-file=spring.cloud.config.server.git.privateKey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
-                new SimpleOption("-namespace", namespace),
-            ]);
+        const secretResource: OpenshiftResource = {
+            kind: "Secret",
+            apiVersion: "v1",
+            metadata: {
+                name: nme,
+                creationTimestamp: null,
+            },
+            data: {
+                "spring.cloud.config.server.git.hostKey": rawSSHKey,
+                "spring.cloud.config.server.git.privateKey": cicdPrivateKey,
+            },
+        };
+
+        const response = await this.openShiftApi.create.create(secretResource, namespace, true);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Created secret for ${nme} for namespace: ${namespace} OK`);
+            return response.data;
+        } else {
+            logger.error(`Failed to createsecret for ${nme} for namespace: ${namespace}, ${inspect(response)}`);
+            throw new QMError(`Failed to createsecret for ${nme} for namespace: ${namespace}`);
+        }
     }
 
     public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {
@@ -584,6 +586,7 @@ export class OCService {
     }
 
     public async initilizeProjectWithDefaultProjectTemplate(projectNamespaceId: string, projectName: string, apply = true) {
+        logger.debug(`Trying to initialize project with default project template ${projectNamespaceId}...`);
         const template = this.baseProjectTemplateLoader.getTemplate();
         if (!_.isEmpty(template.objects)) {
             logger.info(`Base template is NOT empty for projectNamespaceId: ${projectNamespaceId}`);
@@ -599,16 +602,17 @@ export class OCService {
     }
 
     public async findProject(projectId: string) {
+        logger.debug(`Trying to find project ${projectId}...`);
         let project: OpenshiftResource = null;
         const response = await this.openShiftApi.get.get("project", projectId, null);
         if (isSuccessCode(response.status)) {
             project = response.data;
+            logger.debug(`Project ${projectId} found OK`);
         }
         return project;
     }
 
     public async exportAllResources(projectIdNameSpace: string): Promise<any> {
-
         logger.debug("Trying to export all required resources...");
 
         const resourceKindsRequired: string[] = ["Service", "DeploymentConfig", "ImageStream", "Route", "PersistentVolumeClaim"];

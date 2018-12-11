@@ -38,7 +38,7 @@ export class CreateTeamDevOpsEnvironment extends Task {
         const projectId = this.devopsEnvironmentDetails.openshiftProjectId;
         logger.info(`Working with OpenShift project Id: ${projectId}`);
 
-        await this.ocService.login(this.openshiftEnvironment, true);
+        await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
         await this.createDevOpsEnvironment(projectId, this.devOpsRequestedEvent.team.name);
 

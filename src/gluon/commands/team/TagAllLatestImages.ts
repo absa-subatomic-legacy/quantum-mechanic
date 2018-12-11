@@ -52,7 +52,7 @@ export class TagAllLatestImages extends RecursiveParameterRequestCommand
         const messageId = uuid();
         const devopsEnvironment = getProjectDevOpsId(this.teamName);
         await ctx.messageClient.respond(`Tagging latest images to devops environment *${devopsEnvironment}*...`, {id: messageId});
-        await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
+        await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
         const project: OpenshiftResource = await this.ocService.findProject(devopsEnvironment);
         if (project === null) {
             this.failCommand();

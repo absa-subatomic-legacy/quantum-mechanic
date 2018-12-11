@@ -36,7 +36,7 @@ export class ConfigureJenkinsForProject extends Task {
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
         const teamDevOpsProjectId = getDevOpsEnvironmentDetails(this.environmentsRequestedEvent.teams[0].name).openshiftProjectId;
 
-        await this.ocService.login(this.openshiftEnvironment);
+        await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
         await this.addEditRolesToJenkinsServiceAccount(
             teamDevOpsProjectId,

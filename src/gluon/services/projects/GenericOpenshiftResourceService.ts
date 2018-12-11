@@ -26,7 +26,7 @@ export class GenericOpenshiftResourceService {
 
     private cleanServices(allResources) {
         for (const resource of allResources.items) {
-            if (resource.kind === "PersistentVolumeClaim") {
+            if (resource.kind === "Service") {
                 delete resource.spec.clusterIP;
             }
         }

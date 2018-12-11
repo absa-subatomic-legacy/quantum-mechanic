@@ -93,7 +93,7 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
                                                     team: QMTeam, projects, memberRemovedFromTeam) {
         try {
             const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
-            await this.ocService.login(osEnv, true);
+            await this.ocService.setOpenShiftDetails(osEnv);
 
             const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
             await this.ocService.removeTeamMembershipPermissionsFromProject(

@@ -125,7 +125,7 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
         try {
             const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
             const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
-            await this.ocService.login(osEnv);
+            await this.ocService.setOpenShiftDetails(osEnv);
 
             const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
             await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);

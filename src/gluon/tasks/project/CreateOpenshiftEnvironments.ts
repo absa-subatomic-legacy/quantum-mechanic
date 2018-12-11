@@ -57,7 +57,7 @@ export class CreateOpenshiftEnvironments extends Task {
             environments.push([environment.id, environment.description]);
         }
 
-        await this.ocService.login(this.openshiftEnvironment, true);
+        await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
         for (const environment of environments) {
             const projectNamespaceId = getProjectId(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, environment[0]);

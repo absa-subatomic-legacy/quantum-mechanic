@@ -56,7 +56,7 @@ export class ConfigurePackageInOpenshift extends Task {
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.packageDetails.projectName);
             const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
 
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
+            await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
             const appBuildName = getBuildConfigName(this.packageDetails.projectName, this.packageDetails.packageName);
             await this.createApplicationImageStream(appBuildName, teamDevOpsProjectId);
 
