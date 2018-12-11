@@ -1,6 +1,6 @@
+import {logger} from "@atomist/automation-client";
 import {OpenshiftProjectEnvironment} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
-import {logger} from "@atomist/automation-client";
 
 export function getHighestPreProdEnvironment(openShiftCloud: string): OpenshiftProjectEnvironment {
     const nEnvironments = QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.defaultEnvironments.length;
