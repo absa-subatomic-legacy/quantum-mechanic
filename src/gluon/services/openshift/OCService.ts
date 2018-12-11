@@ -13,7 +13,6 @@ import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory"
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {NamedSimpleOption} from "../../../openshift/base/options/NamedSimpleOption";
 import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
-import {StandardOption} from "../../../openshift/base/options/StandardOption";
 import {OCClient} from "../../../openshift/OCClient";
 import {OCCommon} from "../../../openshift/OCCommon";
 import {userFromDomainUser} from "../../util/member/Members";
