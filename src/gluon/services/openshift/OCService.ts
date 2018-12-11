@@ -613,7 +613,6 @@ export class OCService {
         logger.debug("Trying to export all required resources...");
 
         const resourceKindsRequired: string[] = ["Service", "DeploymentConfig", "ImageStream", "Route", "PersistentVolumeClaim"];
-
         const resources: OpenshiftResource[] = [];
 
         for (const resourceKind of resourceKindsRequired) {
@@ -638,11 +637,6 @@ export class OCService {
             items: resources,
         };
         return openShiftResourceList;
-
-        // const listOfResourcesResult = await OCCommon.commonCommand("export", "all",
-        //     [], [new SimpleOption("-output", "json"), new SimpleOption("-namespace", projectIdNameSpace)]);
-        //
-        // return JSON.parse(listOfResourcesResult.output);
     }
 
     public async patchResourceInNamespace(resourcePatch: OpenshiftResource, namespace: string, deleteMetaData: boolean = true) {

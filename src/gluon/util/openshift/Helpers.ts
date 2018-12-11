@@ -9,13 +9,9 @@ export function getHighestPreProdEnvironment(openShiftCloud: string): OpenshiftP
 
 export function getResourceDisplayMessage(allResources) {
     let text = "Found the following resources:\n";
-    try {
-        for (const resource of allResources.items) {
-            text += `\t*${resource.kind}:* ${resource.metadata.name}\n`;
-        }
-        return text;
-    } catch (error) {
-        logger.error(error);
-    }
 
+    for (const resource of allResources.items) {
+        text += `\t*${resource.kind}:* ${resource.metadata.name}\n`;
+    }
+    return text;
 }
