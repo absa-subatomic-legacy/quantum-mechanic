@@ -13,6 +13,7 @@ import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory"
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {NamedSimpleOption} from "../../../openshift/base/options/NamedSimpleOption";
 import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
+import {StandardOption} from "../../../openshift/base/options/StandardOption";
 import {OCClient} from "../../../openshift/OCClient";
 import {OCCommon} from "../../../openshift/OCCommon";
 import {userFromDomainUser} from "../../util/member/Members";
@@ -501,21 +502,38 @@ export class OCService {
         return createSecretResult;
     }
 
-    public async createConfigServerSecret(namespace: string): Promise<OCCommandResult> {
-        logger.debug(`Trying to create config server secret. namespace: ${namespace}`);
+    public async createConfigServerSecret(namespace: string): Promise<OpenshiftResource> {
+        logger.debug(`Trying to create config server secret for namespace: ${namespace}...`);
 
         logger.debug("Extracting raw ssh key from cicd key");
         // Ignore the ssh-rsa encoding string, and any user name details at the end.
+        const nme = "subatomic-config-server";
         const rawSSHKey = QMConfig.subatomic.bitbucket.cicdKey.split(" ")[1];
+        const cicdPrivateKey = fs.readFileSync(
+            QMConfig.subatomic.bitbucket.cicdPrivateKeyPath,
+            "utf8").split("-----")[2].replace(/\n|\r/g, "");
 
-        return await OCCommon.commonCommand("create secret generic",
-            "subatomic-config-server",
-            [],
-            [
-                new NamedSimpleOption("-from-literal=spring.cloud.config.server.git.hostKey", rawSSHKey),
-                new NamedSimpleOption("-from-file=spring.cloud.config.server.git.privateKey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
-                new SimpleOption("-namespace", namespace),
-            ]);
+        const secretResource: OpenshiftResource = {
+            kind: "Secret",
+            apiVersion: "v1",
+            metadata: {
+                name: nme,
+                creationTimestamp: null,
+            },
+            data: {
+                "spring.cloud.config.server.git.hostKey": rawSSHKey,
+                "spring.cloud.config.server.git.privateKey": cicdPrivateKey,
+            },
+        };
+
+        const response = await this.openShiftApi.create.create(secretResource, namespace, true);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Created secret for ${nme} for namespace: ${namespace} OK`);
+            return response.data;
+        } else {
+            logger.error(`Failed to createsecret for ${nme} for namespace: ${namespace}, ${inspect(response)}`);
+            throw new QMError(`Failed to createsecret for ${nme} for namespace: ${namespace}`);
+        }
     }
 
     public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {

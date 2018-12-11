@@ -155,6 +155,13 @@ export class ResourceUrl {
                 api: OpenshiftApiBaseRoute.API,
             },
         ],
+        secret: [
+            {
+                apiVersion: "v1",
+                url: "secrets",
+                api: OpenshiftApiBaseRoute.API,
+            },
+        ],
     };
 }
 
