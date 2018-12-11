@@ -1,6 +1,7 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {menuForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {Attachment} from "@atomist/slack-messages";
 
 export function createAndSendMenu(ctx: HandlerContext, menuOptions: Array<{ value: string, text: string }>,
                                   command: HandleCommand, description: string, selectionMessage: string,
@@ -17,8 +18,8 @@ export function createAndSendMenu(ctx: HandlerContext, menuOptions: Array<{ valu
 
 export function createMenuAttachment(menuOptions: Array<{ value: string, text: string }>,
                                      command: HandleCommand, text: string, fallback: string, selectionMessage: string,
-                                     resultVariableName: string, thumbUrl: string = "") {
-    const attachment: { [k: string]: any } = {
+                                     resultVariableName: string, thumbUrl: string = ""): Attachment {
+    const attachment: Attachment = {
         text,
         fallback,
         actions: [

@@ -34,6 +34,10 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
 
     private parameterStatusDisplay: ParameterStatusDisplay;
 
+    protected constructor(private updateMenuEachRun = true) {
+        super();
+    }
+
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         if (_.isEmpty(this.messagePresentationCorrelationId)) {
             this.messagePresentationCorrelationId = uuid.v4();
@@ -52,9 +56,10 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
             }
         }
 
-        const displayMessage = this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
-
-        await ctx.messageClient.respond(displayMessage, {id: this.messagePresentationCorrelationId});
+        if (this.updateMenuEachRun) {
+            const displayMessage = this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
+            await ctx.messageClient.respond(displayMessage, {id: this.messagePresentationCorrelationId});
+        }
 
         return await this.runCommand(ctx);
     }
@@ -95,6 +100,10 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
 
     protected abstract runCommand(ctx: HandlerContext): Promise<HandlerResult>;
 
+    protected getDisplayMessage() {
+        return this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
+    }
+
     private async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
         const dynamicClassInstance: any = this;
         for (const parameter of this.recursiveParameterList) {
@@ -106,7 +115,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
                 if (result.setterSuccess) {
                     return await this.handle(ctx);
                 } else {
-                    const displayMessage = this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
+                    const displayMessage = this.getDisplayMessage();
                     result.messagePrompt.color = QMColours.stdShySkyBlue.hex;
                     displayMessage.attachments.push(result.messagePrompt);
                     return await ctx.messageClient.respond(displayMessage, {id: this.messagePresentationCorrelationId});
