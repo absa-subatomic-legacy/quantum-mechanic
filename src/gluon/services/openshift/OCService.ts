@@ -359,7 +359,7 @@ export class OCService {
         }
     }
 
-    public async rolloutDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OpenshiftApiResult> {
+    public async rolloutDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OpenshiftResource> {
         logger.debug(`Trying to rollout dc in namespace. dcName: ${dcName}, namespace: ${namespace}`);
         const response: OpenshiftApiResult = await this.openShiftApi.get.get("deploymentconfig", `${dcName}/status`, namespace);
         if (isSuccessCode(response.status)) {

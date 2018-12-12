@@ -120,13 +120,21 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
     private async rolloutJenkinsDeployment(projectId) {
         await promiseRetry((retryFunction, attemptCount: number) => {
-            logger.debug(`Jenkins rollout status check attempt number ${attemptCount}`);
+            logger.debug(`Jenkins roll-out status check, attempt number ${attemptCount}`);
 
             return this.ocService.rolloutDeploymentConfigInNamespace("jenkins", projectId)
-                .then(rolloutStatus => {
-                    logger.debug(JSON.stringify(rolloutStatus));
+                .then(openShiftResource => {
+                    logger.debug(`openShiftResource: ${JSON.stringify(openShiftResource)}`);
 
-                    if (JSON.stringify(rolloutStatus).indexOf("successfully rolled out") === -1) {
+                    try {
+                        if (openShiftResource.status.conditions[1].message.includes("successfully rolled out")) {
+                            logger.debug(`Successfully rolled out Jenkins for project ${projectId}`);
+                        } else {
+                            logger.debug(`openShiftResource.status.conditions[1].message is set, rechecking status...`);
+                            retryFunction();
+                        }
+                    } catch (error) {
+                        logger.debug(`${error}, rechecking status...`);
                         retryFunction();
                     }
                 });
