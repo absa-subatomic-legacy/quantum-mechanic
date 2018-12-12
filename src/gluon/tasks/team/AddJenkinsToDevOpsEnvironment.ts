@@ -124,17 +124,10 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
             return this.ocService.rolloutDeploymentConfigInNamespace("jenkins", projectId)
                 .then(openShiftResource => {
-                    logger.debug(`openShiftResource: ${JSON.stringify(openShiftResource)}`);
-
-                    try {
-                        if (openShiftResource.status.conditions[1].message.includes("successfully rolled out")) {
-                            logger.debug(`Successfully rolled out Jenkins for project ${projectId}`);
-                        } else {
-                            logger.debug(`openShiftResource.status.conditions[1].message is set, rechecking status...`);
-                            retryFunction();
-                        }
-                    } catch (error) {
-                        logger.debug(`${error}, rechecking status...`);
+                    if (openShiftResource.spec.replicas === openShiftResource.status.availableReplicas) {
+                        logger.debug(`Successfully rolled out Jenkins for project ${projectId}`);
+                    } else {
+                        logger.debug(`Rechecking status...`);
                         retryFunction();
                     }
                 });
