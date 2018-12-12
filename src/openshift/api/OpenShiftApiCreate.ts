@@ -17,11 +17,9 @@ export class OpenShiftApiCreate extends OpenShiftApiElement {
         this.immutabilityPreserver = new ImmutabilityPreserver();
     }
 
-    public serviceAccount(serviceAccountName: string, namespace: string): Promise<OpenshiftApiResult> {
-        return this.create(
-            ResourceFactory.serviceAccountResource(serviceAccountName),
-            namespace,
-        );
+    public async post( url: string, resource: OpenshiftResource, api: string = "v1") {
+        const instance = this.getAxiosInstanceOApi(api);
+        return await instance.post(url, resource);
     }
 
     public async create(resource: OpenshiftResource, namespace: string = "default", apply = false): Promise<OpenshiftApiResult> {

@@ -134,7 +134,34 @@ export class ResourceUrl {
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
-
+        processedtemplate: [
+            {
+                apiVersion: "v1",
+                url: "processedtemplates",
+                api: OpenshiftApiBaseRoute.OAPI,
+            },
+        ],
+        persistentvolumeclaim: [
+            {
+                apiVersion: "v1",
+                url: "persistentvolumeclaims",
+                api: OpenshiftApiBaseRoute.API,
+            },
+        ],
+        service: [
+            {
+                apiVersion: "v1",
+                url: "services",
+                api: OpenshiftApiBaseRoute.API,
+            },
+        ],
+        secret: [
+            {
+                apiVersion: "v1",
+                url: "secrets",
+                api: OpenshiftApiBaseRoute.API,
+            },
+        ],
     };
 }
 

@@ -47,7 +47,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
+            await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
             return await this.addConfigServer(
                 ctx,
                 this.teamName,
@@ -135,18 +135,18 @@ spring:
             const saneGitUri = _.replace(gitUri, /(<)|>/g, "");
 
             const templateParameters = [
-                `GIT_URI=${saneGitUri}`,
-                `IMAGE_STREAM_PROJECT=${devOpsProjectId}`,
+                {key: "GIT_URI", value: saneGitUri},
+                {key: "IMAGE_STREAM_PROJECT", value: devOpsProjectId},
             ];
 
-            const appTemplate = await this.ocService.processOpenshiftTemplate(
+            const appTemplate = await this.ocService.findAndProcessOpenshiftTemplate(
                 "subatomic-config-server-template",
                 "subatomic",
                 templateParameters);
 
-            logger.debug(`Processed Subatomic Config Server Template: ${appTemplate.output}`);
+            logger.debug(`Processed Subatomic Config Server Template: ${JSON.stringify(appTemplate)}`);
 
-            await this.ocService.applyResourceFromDataInNamespace(JSON.parse(appTemplate.output), devOpsProjectId);
+            await this.ocService.applyResourceFromDataInNamespace(appTemplate, devOpsProjectId);
         }
     }
 

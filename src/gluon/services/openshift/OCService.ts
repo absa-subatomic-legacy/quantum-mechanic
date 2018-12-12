@@ -9,16 +9,9 @@ import {OpenshiftApiResult} from "../../../openshift/api/base/OpenshiftApiResult
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory";
-import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
-import {AbstractOption} from "../../../openshift/base/options/AbstractOption";
-import {NamedSimpleOption} from "../../../openshift/base/options/NamedSimpleOption";
-import {SimpleOption} from "../../../openshift/base/options/SimpleOption";
-import {StandardOption} from "../../../openshift/base/options/StandardOption";
-import {OCClient} from "../../../openshift/OCClient";
-import {OCCommon} from "../../../openshift/OCCommon";
 import {userFromDomainUser} from "../../util/member/Members";
 import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
-import {getProjectDisplayName, QMProject} from "../../util/project/Project";
+import {getProjectDisplayName} from "../../util/project/Project";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
 import {QuotaLoader} from "../../util/resources/QuotaLoader";
 import {QMError, QMErrorType} from "../../util/shared/Error";
@@ -28,13 +21,6 @@ import {GluonService} from "../gluon/GluonService";
 import {OCImageService} from "./OCImageService";
 
 export class OCService {
-    get loggedIn(): boolean {
-        return this.isLoggedIn;
-    }
-
-    set loggedIn(value: boolean) {
-        this.isLoggedIn = value;
-    }
 
     get openShiftApi(): OpenShiftApi {
         if (this.openShiftApiInstance === undefined) {
@@ -50,21 +36,15 @@ export class OCService {
 
     private openShiftApiInstance: OpenShiftApi;
 
-    private isLoggedIn: boolean;
-
     private quotaLoader: QuotaLoader = new QuotaLoader();
     private baseProjectTemplateLoader: BaseProjectTemplateLoader = new BaseProjectTemplateLoader();
 
     constructor(private ocImageService = new OCImageService(), private gluonService = new GluonService()) {
     }
 
-    public async login(openshiftDetails: OpenShiftConfig, softLogin = false) {
+    public async setOpenShiftDetails(openshiftDetails: OpenShiftConfig) {
         this.openShiftApi = new OpenShiftApi(openshiftDetails);
         this.ocImageService.openShiftApi = this.openShiftApi;
-        this.loggedIn = true;
-        if (!softLogin) {
-            return await OCClient.login(openshiftDetails.masterUrl, openshiftDetails.auth.token);
-        }
     }
 
     public async newDevOpsProject(openshiftProjectId: string, teamName: string, rawResult = false): Promise<any> {
@@ -176,15 +156,16 @@ export class OCService {
         return createResult.data;
     }
 
-    public async getSubatomicTemplate(templateName: string, namespace: string = "subatomic"): Promise<OCCommandResult> {
+    public async getSubatomicTemplate(templateName: string, namespace: string = "subatomic"): Promise<OpenshiftResource> {
         logger.debug(`Trying to get subatomic template. templateName: ${templateName}`);
-        return await OCCommon.commonCommand("get", "templates",
-            [templateName],
-            [
-                new SimpleOption("-namespace", namespace),
-                new SimpleOption("-output", "json"),
-            ],
-        );
+        const response = await this.openShiftApi.get.get("template", templateName, namespace);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Found ${templateName} for namespace: ${namespace} | template JSON: ${JSON.stringify(response.data)}`);
+            return response.data;
+        } else {
+            logger.error(`Failed to find Subatomic Templates in Subatomic namespace: ${inspect(response)}`);
+            throw new QMError("Failed to find Subatomic Templates in the Subatomic namespace");
+        }
     }
 
     public async getSubatomicAppTemplates(namespace = "subatomic"): Promise<OpenshiftResource[]> {
@@ -210,15 +191,15 @@ export class OCService {
         }
     }
 
-    public async getJenkinsTemplate(): Promise<OpenshiftResource> {
-        logger.debug(`Trying to get jenkins template...`);
-        const response = await this.openShiftApi.get.get("template", "jenkins-persistent-subatomic", "subatomic");
+    public async getTemplate(templateName: string, namespace: string): Promise<OpenshiftResource> {
+        logger.debug(`Trying to get template ${templateName} for namespace ${namespace}`);
+        const response = await this.openShiftApi.get.get("template", templateName, namespace);
         if (isSuccessCode(response.status)) {
-            logger.debug(`Found jenkins template for namespace: subatomic | template JSON: ${JSON.stringify(response.data)}`);
+            logger.debug(`Found template ${templateName} for namespace ${namespace}`);
             return response.data;
         } else {
-            logger.error(`Failed to find jenkins template for namespace: subatomic, status code: ${response.status} status text: ${response.statusText}`);
-            throw new QMError(`Failed to find jenkins template for namespace subatomic`);
+            logger.error(`Failed to find template ${templateName} for namespace ${namespace}, status code: ${response.status} status text: ${response.statusText}`);
+            throw new QMError(`Failed to find template ${templateName} for namespace ${namespace}`);
         }
     }
 
@@ -304,60 +285,88 @@ export class OCService {
         }
     }
 
-    public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, openShiftCloud: string): Promise<OCCommandResult> {
+    public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, openShiftCloud: string): Promise<any> {
         logger.debug(`Trying to process jenkins template for devops project template. devopsNamespace: ${devopsNamespace}`);
-        const parameters = [
-            `NAMESPACE=${devopsNamespace}`,
-            "BITBUCKET_NAME=Subatomic Bitbucket",
-            `BITBUCKET_URL=${QMConfig.subatomic.bitbucket.baseUrl}`,
-            `BITBUCKET_CREDENTIALS_ID=${devopsNamespace}-bitbucket`,
-            // TODO this should be a property on Team. I.e. teamEmail
-            "JENKINS_ADMIN_EMAIL=subatomic@local",
-            // TODO the registry Cluster IP we will have to get by introspecting the registry Service
-            // If no team email then the address of the createdBy member
-            `DEVOPS_URL=${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
+
+        // TODO: this should be a property on Team. I.e. teamEmail
+        // TODO: the registry Cluster IP we will have to get by introspecting the registry Service
+        const params = [
+            {key: "NAMESPACE", value: devopsNamespace},
+            {key: "BITBUCKET_NAME", value: "Subatomic Bitbucket"},
+            {key: "BITBUCKET_URL", value: QMConfig.subatomic.bitbucket.baseUrl},
+            {key: "BITBUCKET_CREDENTIALS_ID", value: `${devopsNamespace}-bitbucket`},
+            {key: "JENKINS_ADMIN_EMAIL", value: "subatomic@local"},
+            {key: "DEVOPS_URL", value: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`},
         ];
-        return await this.processOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
+
+        return await this.findAndProcessOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, params);
     }
 
-    public async processOpenshiftTemplate(templateName: string, namespace: string, parameters: string[], ignoreUnknownParameters: boolean = false) {
-        logger.debug(`Trying to process openshift template in namespace. templateName: ${templateName}; namespace: ${namespace}, paramaters: ${JSON.stringify(parameters)}`);
-        const commandOptions: AbstractOption[] = [];
-        if (ignoreUnknownParameters) {
-            commandOptions.push(new StandardOption("ignore-unknown-parameters", "true"));
-        }
+    public async findAndProcessOpenshiftTemplate(templateName: string, namespace: string, params: Array<{key: string, value: string}>, ignoreUnknownParameters: boolean = false) {
+        logger.debug(`Trying to find And Process Openshift Template template. templateName: ${templateName}`);
 
-        for (const parameter of parameters) {
-            commandOptions.push(new SimpleOption("p", parameter));
-        }
+        // Get the required template
+        const template: OpenshiftResource = await this.getTemplate(templateName, namespace);
 
-        commandOptions.push(new SimpleOption("-namespace", namespace));
+        // Find the templateParam for each passed in parameter and then set the value
+        logger.debug(`templateParams before mapping: ${JSON.stringify(template)}`);
+        params.forEach(pMap => {
+            template.parameters.forEach(tempParam => {
+                if (tempParam.name === pMap.key) {
+                    tempParam.value = pMap.value;
+                }
+            });
+        });
 
-        return await OCCommon.commonCommand("process",
-            templateName,
-            [],
-            commandOptions,
-        );
+        logger.debug(`templateParams after mapping: ${JSON.stringify(template)}`);
+        return await this.processOpenShiftTemplate(namespace, template, templateName);
     }
 
-    public async getDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OCCommandResult> {
+    public async processOpenShiftTemplate(namespace: string, template: OpenshiftResource, templateName: string) {
+        logger.debug(`Trying to Process Openshift Template template. templateName: ${templateName}`);
+        // Post the populated template
+        const response = await this.openShiftApi.create.post(`namespaces/${namespace}/processedtemplates`, template);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Processed template ${templateName} for namespace ${namespace} OK `);
+
+            const returnedTemplate: OpenshiftResource = response.data;
+
+            // Build the list object from the response object (objects[] maps to items[])
+            const openShiftResourceList: OpenshiftResource = {
+                kind: "List",
+                apiVersion: "v1",
+                metadata: {},
+                items: returnedTemplate.objects,
+            };
+            logger.info(`Processed template ${templateName} for namespace ${namespace} OK`);
+            return openShiftResourceList;
+        } else {
+            logger.error(`Failed to process template ${templateName} for namespace ${namespace}, status code: ${response.status} status text: ${response.statusText}`);
+            throw new QMError(`Failed to create resource from template ${templateName} for namespace ${namespace}`);
+        }
+    }
+
+    public async getDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OpenshiftResource> {
         logger.debug(`Trying to get dc in namespace. dcName: ${dcName}, namespace: ${namespace}`);
-        return await OCCommon.commonCommand("get", `dc/${dcName}`, [],
-            [
-                new SimpleOption("-namespace", namespace),
-            ]);
+        const response: OpenshiftApiResult = await this.openShiftApi.get.get("deploymentconfig", dcName, namespace);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Found dc/${dcName} for namespace: ${namespace} | template JSON: ${JSON.stringify(response.data)}`);
+            return response.data;
+        } else {
+            logger.error(`Failed to find dc${dcName} in Subatomic namespace: ${inspect(response)}`);
+            throw new QMError("Failed to find dcName in the Subatomic namespace");
+        }
     }
 
-    public async rolloutDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OCCommandResult> {
+    public async rolloutDeploymentConfigInNamespace(dcName: string, namespace: string): Promise<OpenshiftResource> {
         logger.debug(`Trying to rollout dc in namespace. dcName: ${dcName}, namespace: ${namespace}`);
-        return await OCCommon.commonCommand(
-            "rollout status",
-            `dc/${dcName}`,
-            [],
-            [
-                new SimpleOption("-namespace", namespace),
-                new SimpleOption("-watch=false"),
-            ], true);
+        const response: OpenshiftApiResult = await this.openShiftApi.get.get("deploymentconfig", `${dcName}/status`, namespace);
+        if (isSuccessCode(response.status)) {
+            return response.data;
+        } else {
+            logger.error(`Failed to find dc${dcName} in Subatomic namespace: ${inspect(response)}`);
+            throw new QMError("Failed to find dcName in the Subatomic namespace");
+        }
     }
 
     public async getServiceAccountToken(serviceAccountName: string, namespace: string): Promise<string> {
@@ -405,15 +414,38 @@ export class OCService {
         return Buffer.from(secretDetailsResult.data.data.token, "base64").toString("ascii");
     }
 
-    public async annotateJenkinsRoute(namespace: string): Promise<OCCommandResult> {
-        logger.debug(`Trying to annotate jenkins route in namespace. namespace: ${namespace}`);
-        return await OCCommon.commonCommand("annotate route",
-            "jenkins",
-            [],
-            [
-                new SimpleOption("-overwrite", "haproxy.router.openshiftNonProd.io/timeout=120s"),
-                new SimpleOption("-namespace", namespace),
-            ]);
+    public async annotateJenkinsRoute(namespace: string): Promise<OpenshiftResource> {
+        logger.debug(`Trying to annotate jenkins route in namespace. namespace: ${namespace}...`);
+        // Get the jenkins route object for namespace x
+        const response = await this.openShiftApi.get.get("route", "jenkins", namespace);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Found jenkins host: ${response.data.spec.host} for namespace: ${namespace}`);
+
+            const jenkinsRoute: OpenshiftResource = response.data;
+            const key = "haproxy.router.openshiftNonProd.io/timeout";
+            const value = "120s";
+            const annotations = Object.entries(jenkinsRoute.metadata.annotations).map(p => ({key: p[0], value: p[1]}));
+
+            // If KVP combination doesn't exist...
+            if (!annotations.some(a => a.key === key && a.value === value)) {
+                // ... add it to the annotations object and patch resource
+                jenkinsRoute.metadata.annotations[key] = value;
+                const patchResponse: OpenshiftApiResult = await this.openShiftApi.patch.patch(jenkinsRoute, namespace, false);
+                if (isSuccessCode(patchResponse.status)) {
+                    logger.info(`Patched jenkins resource for ${namespace} OK `);
+                    return await patchResponse.data;
+                } else {
+                    logger.error(`Failed to patch jenkins resource for ${namespace} | response JSON: ${JSON.stringify(patchResponse)}`);
+                    throw new QMError(`Failed to patch jenkins resource for ${namespace}`);
+                }
+            } else {
+                logger.info("Annotation already exists, nothing to do");
+                return jenkinsRoute;
+            }
+        } else {
+            logger.error(`Failed to find jenkins host for namespace ${namespace} | response JSON: ${JSON.stringify(response)}`);
+            throw new QMError(`Failed to find jenkins host for namespace ${namespace}`);
+        }
     }
 
     public async getJenkinsHost(namespace: string): Promise<string> {
@@ -452,21 +484,38 @@ export class OCService {
         return createSecretResult;
     }
 
-    public async createConfigServerSecret(namespace: string): Promise<OCCommandResult> {
-        logger.debug(`Trying to create config server secret. namespace: ${namespace}`);
+    public async createConfigServerSecret(namespace: string): Promise<OpenshiftResource> {
+        logger.debug(`Trying to create config server secret for namespace: ${namespace}...`);
 
         logger.debug("Extracting raw ssh key from cicd key");
         // Ignore the ssh-rsa encoding string, and any user name details at the end.
+        const nme = "subatomic-config-server";
         const rawSSHKey = QMConfig.subatomic.bitbucket.cicdKey.split(" ")[1];
+        const cicdPrivateKey = fs.readFileSync(
+            QMConfig.subatomic.bitbucket.cicdPrivateKeyPath,
+            "utf8").split("-----")[2].replace(/\n|\r/g, "");
 
-        return await OCCommon.commonCommand("create secret generic",
-            "subatomic-config-server",
-            [],
-            [
-                new NamedSimpleOption("-from-literal=spring.cloud.config.server.git.hostKey", rawSSHKey),
-                new NamedSimpleOption("-from-file=spring.cloud.config.server.git.privateKey", QMConfig.subatomic.bitbucket.cicdPrivateKeyPath),
-                new SimpleOption("-namespace", namespace),
-            ]);
+        const secretResource: OpenshiftResource = {
+            kind: "Secret",
+            apiVersion: "v1",
+            metadata: {
+                name: nme,
+                creationTimestamp: null,
+            },
+            data: {
+                "spring.cloud.config.server.git.hostKey": rawSSHKey,
+                "spring.cloud.config.server.git.privateKey": cicdPrivateKey,
+            },
+        };
+
+        const response = await this.openShiftApi.create.create(secretResource, namespace, true);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Created secret for ${nme} for namespace: ${namespace} OK`);
+            return response.data;
+        } else {
+            logger.error(`Failed to createsecret for ${nme} for namespace: ${namespace}, ${inspect(response)}`);
+            throw new QMError(`Failed to createsecret for ${nme} for namespace: ${namespace}`);
+        }
     }
 
     public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {
@@ -505,50 +554,90 @@ export class OCService {
         return addRoleResult;
     }
 
-    public async createPVC(pvcName: string, namespace: string): Promise<OCCommandResult> {
-        logger.debug(`Trying to create pvc in namespace. pvcName: ${pvcName}; namespace: ${namespace}`);
-        return await OCClient.createPvc(pvcName, namespace);
+    public async createPVC(pvcName: string, namespace: string, size: string = "10Gi", accessModes: string[] = ["ReadWriteMany"]): Promise<OpenshiftResource> {
+        logger.debug(`Trying to create pvc in namespace. pvcName: ${pvcName}; namespace: ${namespace}...`);
+
+        const persistentVolumeClasimObject = {
+            kind: "PersistentVolumeClaim",
+            apiVersion: "v1",
+            metadata: {
+                name: pvcName,
+            },
+            spec: {
+                accessModes,
+                resources: {
+                    requests: {
+                        storage: size,
+                    },
+                },
+            },
+        };
+
+        const response = await this.openShiftApi.create.create(persistentVolumeClasimObject, namespace, true);
+        if (isSuccessCode(response.status)) {
+            logger.debug(`Created PVC ${pvcName} for namespace: ${namespace} OK`);
+            return response.data;
+        } else {
+            logger.error(`Failed to create PVC ${pvcName} for ${namespace}, ${inspect(response)}`);
+            throw new QMError(`Failed to create PVC ${pvcName} for ${namespace}`);
+        }
     }
 
-    public async initilizeProjectWithDefaultProjectTemplate(projectId: string, projectName: string, apply = true) {
-
-        const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
-        const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
-
+    public async initilizeProjectWithDefaultProjectTemplate(projectNamespaceId: string, projectName: string, apply = true) {
+        logger.debug(`Trying to initialize project with default project template ${projectNamespaceId}...`);
         const template = this.baseProjectTemplateLoader.getTemplate();
         if (!_.isEmpty(template.objects)) {
-            logger.info(`Applying base project template to ${projectId}`);
-
-            const fileName = Date.now() + ".json";
-            fs.writeFileSync(`/tmp/${fileName}`, JSON.stringify(template));
-
-            // log client into non prod to process template - hacky! Need to fix.
-            await OCClient.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.masterUrl, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd.auth.token);
-            const processedTemplateResult = await OCCommon.commonCommand("process", `-f /tmp/${fileName}`);
-            const result = await this.applyResourceFromDataInNamespace(JSON.parse(processedTemplateResult.output), projectId, apply);
-
+            logger.info(`Base template is NOT empty for projectNamespaceId: ${projectNamespaceId}`);
+            const processedTemplateResult: OpenshiftResource = await this.processOpenShiftTemplate(projectNamespaceId, template, "New-Project-Template");
+            const result = await this.applyResourceFromDataInNamespace(processedTemplateResult, projectNamespaceId, apply);
             if (!isSuccessCode(result.status)) {
                 logger.error(`Template failed to create properly: ${inspect(result)}`);
                 throw new QMError("Failed to create all items in base project template.");
             }
         } else {
-            logger.debug(`Base template is empty. Not applying to project ${projectId}`);
+            logger.info(`Base template is empty. Not applying to project ${projectNamespaceId}`);
         }
     }
 
     public async findProject(projectId: string) {
+        logger.debug(`Trying to find project ${projectId}...`);
         let project: OpenshiftResource = null;
         const response = await this.openShiftApi.get.get("project", projectId, null);
         if (isSuccessCode(response.status)) {
             project = response.data;
+            logger.debug(`Project ${projectId} found OK`);
         }
         return project;
     }
 
-    public async exportAllResources(projectId: string) {
-        const listOfResourcesResult = await OCCommon.commonCommand("export", "all",
-            [], [new SimpleOption("-output", "json"), new SimpleOption("-namespace", projectId)]);
-        return JSON.parse(listOfResourcesResult.output);
+    public async exportAllResources(projectIdNameSpace: string): Promise<any> {
+        logger.debug("Trying to export all required resources...");
+
+        const resourceKindsRequired: string[] = ["Service", "DeploymentConfig", "ImageStream", "Route", "PersistentVolumeClaim"];
+        const resources: OpenshiftResource[] = [];
+
+        for (const resourceKind of resourceKindsRequired) {
+            const result = await this.openShiftApi.get.get(`${_.toLower(resourceKind)}`, "", projectIdNameSpace);
+            if (isSuccessCode(result.status)) {
+                const items: OpenshiftResource[] = result.data.items.map(resource => {
+                    resource.kind = resourceKind;
+                    resource.apiVersion = "v1";
+                    return resource;
+                });
+                resources.push(...items);
+            } else {
+                logger.error(`Failed to export all resources ${resourceKind} in namespace: ${projectIdNameSpace}, ${inspect(result)}`);
+                throw new QMError(`Failed to export all resources ${resourceKind} in namespace: ${projectIdNameSpace}`);
+            }
+        }
+
+        const openShiftResourceList: OpenshiftResource = {
+            kind: "List",
+            apiVersion: "v1",
+            metadata: {},
+            items: resources,
+        };
+        return openShiftResourceList;
     }
 
     public async patchResourceInNamespace(resourcePatch: OpenshiftResource, namespace: string, deleteMetaData: boolean = true) {

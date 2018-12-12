@@ -118,13 +118,13 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
             message.attachments.push({
                 text: `*Confirmed*`,
                 fallback: "*Confirmed*",
-                color:  QMColours.stdGreenyMcAppleStroodle.hex,
+                color: QMColours.stdGreenyMcAppleStroodle.hex,
             });
         } else if (result === ApprovalEnum.REJECTED) {
             message.attachments.push({
                 text: `*Cancelled*`,
                 fallback: "*Cancelled*",
-                color:  QMColours.stdReddyMcRedFace.hex,
+                color: QMColours.stdReddyMcRedFace.hex,
             });
         }
 
@@ -149,7 +149,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
-        await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
+        await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
         const projectId = getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(this.openShiftCloud).id);
         const allResources = await this.ocService.exportAllResources(projectId);
@@ -172,7 +172,6 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         return await qmMessageClient.send({
             text: getResourceDisplayMessage(resources),
         });
-
     }
 
     private async createGenericProdRequest() {

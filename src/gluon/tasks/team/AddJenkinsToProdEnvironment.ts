@@ -42,7 +42,7 @@ export class AddJenkinsToProdEnvironment extends Task {
         const teamDevOpsProd = getDevOpsEnvironmentDetailsProd(this.devOpsRequestedEvent.team.name).openshiftProjectId;
         logger.info(`Working with OpenShift project Id: ${teamDevOpsProd}`);
 
-        await this.ocService.login(this.openshiftEnvironment, true);
+        await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
         await this.createJenkinsServiceAccount(teamDevOpsProd);
         const prodToken = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProd);
@@ -55,7 +55,7 @@ export class AddJenkinsToProdEnvironment extends Task {
         }
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_SA_RIGHTS);
 
-        await this.ocService.login(this.openshiftEnvironment);
+        await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
         const jenkinsToken = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsNonProd);
 

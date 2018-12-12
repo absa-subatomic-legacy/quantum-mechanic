@@ -51,7 +51,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         const openShiftCloud = this.devOpsRequestedEvent.team.openShiftCloud;
 
-        await this.ocService.login(QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd);
+        await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd);
 
         await this.copyJenkinsTemplateToDevOpsEnvironment(projectId);
 
@@ -89,7 +89,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
     private async copyJenkinsTemplateToDevOpsEnvironment(projectId: string) {
         let jenkinsTemplate: OpenshiftResource = null;
         try {
-            jenkinsTemplate = await this.ocService.getJenkinsTemplate();
+            jenkinsTemplate = await this.ocService.getTemplate("jenkins-persistent-subatomic", "subatomic");
         } catch (error) {
             throw new QMError(error, `Failed to find jenkins template for namespace subatomic`);
         }
@@ -103,14 +103,12 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
     private async createJenkinsDeploymentConfig(projectId: string, openShiftCloud: string) {
         logger.info("Processing Jenkins QMTemplate...");
-        const jenkinsTemplateResultJSON = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId, openShiftCloud);
-        logger.debug(`Processed Jenkins Template: ${jenkinsTemplateResultJSON.output}`);
-
+        const openShiftResourceList = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId, openShiftCloud);
         try {
             await this.ocService.getDeploymentConfigInNamespace("jenkins", projectId);
             logger.warn("Jenkins QMTemplate has already been processed, deployment exists");
         } catch (error) {
-            await this.ocService.applyResourceFromDataInNamespace(JSON.parse(jenkinsTemplateResultJSON.output), projectId);
+            await this.ocService.applyResourceFromDataInNamespace(openShiftResourceList, projectId);
         }
     }
 
@@ -122,13 +120,14 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
     private async rolloutJenkinsDeployment(projectId) {
         await promiseRetry((retryFunction, attemptCount: number) => {
-            logger.debug(`Jenkins rollout status check attempt number ${attemptCount}`);
+            logger.debug(`Jenkins roll-out status check, attempt number ${attemptCount}`);
 
             return this.ocService.rolloutDeploymentConfigInNamespace("jenkins", projectId)
-                .then(rolloutStatus => {
-                    logger.debug(JSON.stringify(rolloutStatus.output));
-
-                    if (rolloutStatus.output.indexOf("successfully rolled out") === -1) {
+                .then(openShiftResource => {
+                    if (openShiftResource.spec.replicas === openShiftResource.status.availableReplicas) {
+                        logger.debug(`Successfully rolled out Jenkins for project ${projectId}`);
+                    } else {
+                        logger.debug(`Rechecking status...`);
                         retryFunction();
                     }
                 });

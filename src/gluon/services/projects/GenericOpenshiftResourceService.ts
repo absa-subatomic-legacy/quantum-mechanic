@@ -2,13 +2,34 @@ export class GenericOpenshiftResourceService {
 
     public async getAllPromotableResources(resources) {
 
+        this.cleanAll(resources);
+        this.cleanServices(resources);
         this.cleanDeploymentConfigs(resources);
         this.cleanImageStreams(resources);
         this.cleanRoutes(resources);
         this.cleanPVCs(resources);
-        this.removeUnwantedResources(resources);
 
         return resources;
+    }
+
+    private cleanAll(allResources) {
+        for (const resource of allResources.items) {
+            delete resource.generation;
+            delete resource.metadata.creationTimestamp;
+            delete resource.metadata.namespace;
+            delete resource.metadata.resourceVersion;
+            delete resource.metadata.selfLink;
+            delete resource.metadata.uid;
+            delete resource.metadata.generation;
+        }
+    }
+
+    private cleanServices(allResources) {
+        for (const resource of allResources.items) {
+            if (resource.kind === "Service") {
+                delete resource.spec.clusterIP;
+            }
+        }
     }
 
     private cleanPVCs(allResources) {
@@ -24,6 +45,9 @@ export class GenericOpenshiftResourceService {
         for (const resource of allResources.items) {
             if (resource.kind === "DeploymentConfig") {
                 resource.spec.replicas = 0;
+                delete resource.status;
+                delete resource.spec.template.spec.containers.terminationMessagePolicy;
+                delete resource.spec.template.spec.schedulerName;
             }
         }
     }
@@ -41,15 +65,6 @@ export class GenericOpenshiftResourceService {
             if (resource.kind === "Route") {
                 delete resource.spec.host;
                 resource.status = {};
-            }
-        }
-    }
-
-    private removeUnwantedResources(allResources) {
-        for (let i = allResources.items.length - 1; i >= 0; i--) {
-            const resource = allResources.items[i];
-            if (resource.kind === "Pod" || resource.kind === "ReplicationController") {
-                allResources.items.splice(i, 1);
             }
         }
     }

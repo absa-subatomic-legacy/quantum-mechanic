@@ -74,7 +74,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
 
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
+            await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
             const qmProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 

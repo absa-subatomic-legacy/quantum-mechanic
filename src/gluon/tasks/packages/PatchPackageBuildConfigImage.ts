@@ -31,7 +31,7 @@ export class PatchPackageBuildConfigImage extends Task {
         if (this.taskListMessage === undefined) {
             throw new QMError("TaskListMessage is undefined.");
         }
-        await this.ocService.login(this.openshiftEnvironment, true);
+        await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
         await this.patchBuildConfig();
         return true;
     }

@@ -56,7 +56,7 @@ export class ConfigurePackageInOpenshift extends Task {
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.packageDetails.projectName);
             const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
 
-            await this.ocService.login(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
+            await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
             const appBuildName = getBuildConfigName(this.packageDetails.projectName, this.packageDetails.packageName);
             await this.createApplicationImageStream(appBuildName, teamDevOpsProjectId);
 
@@ -160,31 +160,30 @@ export class ConfigurePackageInOpenshift extends Task {
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);
             logger.info(`Processing app [${appName}] Template for: ${projectId}`);
 
-            const template = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate, devOpsProjectId);
-            const appBaseTemplate: any = JSON.parse(template.output);
+            const appBaseTemplate = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate, devOpsProjectId);
             appBaseTemplate.metadata.namespace = projectId;
             await this.ocService.applyResourceFromDataInNamespace(appBaseTemplate, projectId);
 
             const templateParameters = [
-                `APP_NAME=${appName}`,
-                `IMAGE_STREAM_PROJECT=${projectId}`,
-                `DEVOPS_NAMESPACE=${devOpsProjectId}`,
+                {key: "APP_NAME", value: appName},
+                {key: "IMAGE_STREAM_PROJECT", value: projectId},
+                {key: "DEVOPS_NAMESPACE", value: devOpsProjectId},
             ];
 
-            const appProcessedTemplate = await this.ocService.processOpenshiftTemplate(
+            const appProcessedTemplate = await this.ocService.findAndProcessOpenshiftTemplate(
                 this.deploymentDetails.openshiftTemplate,
                 projectId,
                 templateParameters,
                 true);
 
-            logger.debug(`Processed app [${appName}] Template: ${appProcessedTemplate.output}`);
+            logger.debug(`Processed app [${appName}] Template: ${JSON.stringify(appProcessedTemplate)}`);
 
             try {
                 await this.ocService.getDeploymentConfigInNamespace(appName, projectId);
                 logger.warn(`App [${appName}] Template has already been processed, deployment exists`);
             } catch (error) {
                 await this.ocService.applyResourceFromDataInNamespace(
-                    JSON.parse(appProcessedTemplate.output),
+                    appProcessedTemplate,
                     projectId,
                 );
             }
