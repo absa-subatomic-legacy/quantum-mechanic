@@ -44,8 +44,8 @@ export class GenericOpenshiftResourceService {
     private cleanDeploymentConfigs(allResources) {
         for (const resource of allResources.items) {
             if (resource.kind === "DeploymentConfig") {
+                resource.spec.replicas = 0;
                 delete resource.status;
-                delete resource.spec.replicas;
                 delete resource.spec.template.spec.containers.terminationMessagePolicy;
                 delete resource.spec.template.spec.schedulerName;
             }
