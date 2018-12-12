@@ -135,8 +135,8 @@ spring:
             const saneGitUri = _.replace(gitUri, /(<)|>/g, "");
 
             const templateParameters = [
-                `GIT_URI=${saneGitUri}`,
-                `IMAGE_STREAM_PROJECT=${devOpsProjectId}`,
+                {key: "GIT_URI", value: saneGitUri},
+                {key: "IMAGE_STREAM_PROJECT", value: devOpsProjectId},
             ];
 
             const appTemplate = await this.ocService.findAndProcessOpenshiftTemplate(

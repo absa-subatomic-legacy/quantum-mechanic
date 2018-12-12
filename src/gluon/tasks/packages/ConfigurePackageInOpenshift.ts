@@ -165,9 +165,9 @@ export class ConfigurePackageInOpenshift extends Task {
             await this.ocService.applyResourceFromDataInNamespace(appBaseTemplate, projectId);
 
             const templateParameters = [
-                `APP_NAME=${appName}`,
-                `IMAGE_STREAM_PROJECT=${projectId}`,
-                `DEVOPS_NAMESPACE=${devOpsProjectId}`,
+                {key: "APP_NAME", value: appName},
+                {key: "IMAGE_STREAM_PROJECT", value: projectId},
+                {key: "DEVOPS_NAMESPACE", value: devOpsProjectId},
             ];
 
             const appProcessedTemplate = await this.ocService.findAndProcessOpenshiftTemplate(

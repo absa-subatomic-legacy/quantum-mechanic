@@ -288,38 +288,37 @@ export class OCService {
     public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, openShiftCloud: string): Promise<any> {
         logger.debug(`Trying to process jenkins template for devops project template. devopsNamespace: ${devopsNamespace}`);
 
-        const parameters = [
-            `NAMESPACE=${devopsNamespace}`,
-            "BITBUCKET_NAME=Subatomic Bitbucket",
-            `BITBUCKET_URL=${QMConfig.subatomic.bitbucket.baseUrl}`,
-            `BITBUCKET_CREDENTIALS_ID=${devopsNamespace}-bitbucket`,
-            // TODO this should be a property on Team. I.e. teamEmail
-            "JENKINS_ADMIN_EMAIL=subatomic@local",
-            // TODO the registry Cluster IP we will have to get by introspecting the registry Service
-            // If no team email then the address of the createdBy member
-            `DEVOPS_URL=${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
+        // TODO: this should be a property on Team. I.e. teamEmail
+        // TODO: the registry Cluster IP we will have to get by introspecting the registry Service
+        const params = [
+            {key: "NAMESPACE", value: devopsNamespace},
+            {key: "BITBUCKET_NAME", value: "Subatomic Bitbucket"},
+            {key: "BITBUCKET_URL", value: QMConfig.subatomic.bitbucket.baseUrl},
+            {key: "BITBUCKET_CREDENTIALS_ID", value: `${devopsNamespace}-bitbucket`},
+            {key: "JENKINS_ADMIN_EMAIL", value: "subatomic@local"},
+            {key: "DEVOPS_URL", value: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`},
         ];
 
-        return await this.findAndProcessOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, parameters);
+        return await this.findAndProcessOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, params);
     }
 
-    public async findAndProcessOpenshiftTemplate(templateName: string, namespace: string, parameters: string[], ignoreUnknownParameters: boolean = false) {
+    public async findAndProcessOpenshiftTemplate(templateName: string, namespace: string, params: Array<{key: string, value: string}>, ignoreUnknownParameters: boolean = false) {
         logger.debug(`Trying to find And Process Openshift Template template. templateName: ${templateName}`);
-        // Convert passed in params to a kvp
-        const paramMap = parameters.map(p => ({key: p.split("=")[0], value: p.split("=")[1]}));
 
         // Get the required template
         const template: OpenshiftResource = await this.getTemplate(templateName, namespace);
 
         // Find the templateParam for each passed in parameter and then set the value
-        logger.debug(`templateParams before: ${JSON.stringify(template.paramaters)}`);
-        paramMap.forEach(pMap => {
+        logger.debug(`templateParams before mapping: ${JSON.stringify(template)}`);
+        params.forEach(pMap => {
             template.parameters.forEach(tempParam => {
                 if (tempParam.name === pMap.key) {
                     tempParam.value = pMap.value;
                 }
             });
         });
+
+        logger.debug(`templateParams after mapping: ${JSON.stringify(template)}`);
         return await this.processOpenShiftTemplate(namespace, template, templateName);
     }
 
