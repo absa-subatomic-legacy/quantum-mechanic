@@ -192,14 +192,14 @@ export class OCService {
     }
 
     public async getTemplate(templateName: string, namespace: string): Promise<OpenshiftResource> {
-        logger.debug(`Trying to get jenkins template...`);
+        logger.debug(`Trying to get template ${templateName} for namespace ${namespace}`);
         const response = await this.openShiftApi.get.get("template", templateName, namespace);
         if (isSuccessCode(response.status)) {
-            logger.debug(`Found jenkins template for namespace: subatomic | template JSON: ${JSON.stringify(response.data)}`);
+            logger.debug(`Found template ${templateName} for namespace ${namespace}`);
             return response.data;
         } else {
-            logger.error(`Failed to find jenkins template for namespace: subatomic, status code: ${response.status} status text: ${response.statusText}`);
-            throw new QMError(`Failed to find jenkins template for namespace subatomic`);
+            logger.error(`Failed to find template ${templateName} for namespace ${namespace}, status code: ${response.status} status text: ${response.statusText}`);
+            throw new QMError(`Failed to find template ${templateName} for namespace ${namespace}`);
         }
     }
 
