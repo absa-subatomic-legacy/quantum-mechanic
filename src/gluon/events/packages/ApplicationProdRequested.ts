@@ -16,7 +16,6 @@ import {QMProject} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
-import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive ApplicationProdRequestedEvent events", `
 subscription ApplicationProdRequestedEvent {
@@ -88,6 +87,8 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
             const applicationProdRequest = await this.gluonService.prod.application.getApplicationProdRequestById(applicationProdRequestedEvent.applicationProdRequest.applicationProdRequestId);
 
             const resources = this.getRequestedProdResources(applicationProdRequest);
+
+            logger.debug("List of requested prod resources: " + JSON.stringify(resources));
 
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Creating requested application resources in project *${project.name}* production environments started:`,
                 qmMessageClient);
