@@ -1,8 +1,12 @@
 import {logger} from "@atomist/automation-client";
 import _ = require("lodash");
 import {QMError} from "../../util/shared/Error";
+import {GenericOpenshiftResourceService} from "../projects/GenericOpenshiftResourceService";
 
 export class PackageOpenshiftResourceService {
+
+    constructor(private genericOpenshiftResourceService: GenericOpenshiftResourceService = new GenericOpenshiftResourceService()) {
+    }
 
     public async getAllApplicationRelatedResources(applicationName, resources) {
 
@@ -30,7 +34,7 @@ export class PackageOpenshiftResourceService {
         resources.items.push(...services);
         resources.items.push(...routes);
 
-        return resources;
+        return this.genericOpenshiftResourceService.cleanAllPromotableResources(resources);
     }
 
     private findApplicationDeploymentConfig(applicationName: string, openshiftResources) {

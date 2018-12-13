@@ -154,7 +154,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         const projectId = getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(this.openShiftCloud).id);
         const allResources = await this.ocService.exportAllResources(projectId);
 
-        const resources = await this.genericOpenshiftResourceService.getAllPromotableResources(
+        const resources = this.genericOpenshiftResourceService.cleanAllPromotableResources(
             allResources,
         );
 

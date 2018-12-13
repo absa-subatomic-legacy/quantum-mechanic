@@ -1,6 +1,6 @@
 export class GenericOpenshiftResourceService {
 
-    public async getAllPromotableResources(resources) {
+    public cleanAllPromotableResources(resources) {
 
         this.cleanAll(resources);
         this.cleanServices(resources);
