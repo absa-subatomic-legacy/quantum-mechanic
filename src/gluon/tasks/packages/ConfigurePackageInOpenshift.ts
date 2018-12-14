@@ -13,7 +13,7 @@ import {
     ApplicationType,
     getBuildConfigName,
 } from "../../util/packages/Applications";
-import {getProjectDevOpsId, getProjectId, QMProject} from "../../util/project/Project";
+import {getProjectDevOpsId, getProjectOpenShiftNamespace, QMProject} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -155,7 +155,7 @@ export class ConfigurePackageInOpenshift extends Task {
     private async createApplicationOpenshiftResources(tenantName: string, projectName: string, applicationName: string, openShiftCloud: string): Promise<HandlerResult> {
 
         for (const environment of QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.defaultEnvironments) {
-            const projectId = getProjectId(tenantName, projectName, environment.id);
+            const projectId = getProjectOpenShiftNamespace(tenantName, projectName, environment.id);
             const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);
             logger.info(`Processing app [${appName}] Template for: ${projectId}`);

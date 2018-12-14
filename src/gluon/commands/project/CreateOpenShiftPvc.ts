@@ -16,7 +16,7 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {getProjectId, QMProject} from "../../util/project/Project";
+import {getProjectOpenShiftNamespace, QMProject} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     GluonProjectNameParam,
@@ -83,7 +83,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
             if (this.openShiftProjectNames === "all") {
                 this.openShiftProjectNames = "";
                 for (const environment of QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd.defaultEnvironments) {
-                    this.openShiftProjectNames += getProjectId(qmTenant.name, qmProject.name, environment.id) + ",";
+                    this.openShiftProjectNames += getProjectOpenShiftNamespace(qmTenant.name, qmProject.name, environment.id) + ",";
                 }
                 this.openShiftProjectNames.substr(0, this.openShiftProjectNames.length - 1);
             }
@@ -148,7 +148,7 @@ async function setProjectForPvc(ctx: HandlerContext, commandHandler: CreateOpenS
     const options = [{value: "all", text: "All environments"}];
 
     for (const environment of QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].openshiftNonProd.defaultEnvironments) {
-        const envId = getProjectId(qmTenant.name, qmProject.name, environment.id);
+        const envId = getProjectOpenShiftNamespace(qmTenant.name, qmProject.name, environment.id);
         options.push(
             {
                 value: envId,

@@ -16,7 +16,7 @@ import {
     getHighestPreProdEnvironment,
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
-import {getProjectId, QMProject} from "../../util/project/Project";
+import {getProjectOpenShiftNamespace, QMProject} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     GluonApplicationNameParam,
@@ -160,7 +160,7 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
-        const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(owningTeam.openShiftCloud).id));
+        const allResources = await this.ocService.exportAllResources(getProjectOpenShiftNamespace(tenant.name, project.name, getHighestPreProdEnvironment(owningTeam.openShiftCloud).id));
 
         const resources = await this.packageOpenshiftResourceService.getAllApplicationRelatedResources(
             this.applicationName,

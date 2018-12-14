@@ -24,17 +24,21 @@ export class PackageOpenshiftResourceService {
 
         const routes = this.findRoutes(resources, services);
 
-        resources.items = [];
+        const collectedResources = [];
 
-        resources.items.push(applicationDC);
-        resources.items.push(...pvcs);
+        collectedResources.push(applicationDC);
+        collectedResources.push(...pvcs);
         // resources.items.push(...secrets);
         // resources.items.push(...configMaps);
-        resources.items.push(...imageStreams);
-        resources.items.push(...services);
-        resources.items.push(...routes);
+        collectedResources.push(...imageStreams);
+        collectedResources.push(...services);
+        collectedResources.push(...routes);
 
-        return this.genericOpenshiftResourceService.cleanAllPromotableResources(resources);
+        resources.items = [];
+
+        resources.items.push(...this.genericOpenshiftResourceService.cleanAllPromotableResources(collectedResources));
+
+        return resources;
     }
 
     private findApplicationDeploymentConfig(applicationName: string, openshiftResources) {

@@ -15,7 +15,7 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService";
 import {userFromDomainUser} from "../../util/member/Members";
-import {getProjectId} from "../../util/project/Project";
+import {getProjectOpenShiftNamespace} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
@@ -23,7 +23,7 @@ import {
     OCResultError,
     QMError,
 } from "../../util/shared/Error";
-import {getDevOpsEnvironmentDetails, QMTeam, QMTeamBase} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive MembersAddedToTeamEvent events", `
@@ -142,7 +142,7 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
                 // Add to openshift environments
                 for (const environment of osEnv.defaultEnvironments) {
                     const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
-                    const projectId = getProjectId(tenant.name, project.name, environment.id);
+                    const projectId = getProjectOpenShiftNamespace(tenant.name, project.name, environment.id);
                     await this.ocService.addTeamMembershipPermissionsToProject(projectId, membersAddedToTeamEvent);
                 }
             }

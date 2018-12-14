@@ -4,7 +4,7 @@ import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OCService} from "../../services/openshift/OCService";
 import {
-    getProjectId,
+    getProjectOpenShiftNamespace,
     OpenshiftProjectEnvironmentRequest,
 } from "../../util/project/Project";
 import {QMError, QMErrorType} from "../../util/shared/Error";
@@ -60,7 +60,7 @@ export class CreateOpenshiftEnvironments extends Task {
         await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
         for (const environment of environments) {
-            const projectNamespaceId = getProjectId(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, environment[0]);
+            const projectNamespaceId = getProjectOpenShiftNamespace(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, environment[0]);
             logger.info(`Working with OpenShift project Id: ${projectNamespaceId}`);
 
             await this.createOpenshiftProject(projectNamespaceId, this.environmentsRequestedEvent, environment);
@@ -98,7 +98,7 @@ export class CreateOpenshiftEnvironments extends Task {
     private async createPodNetwork(tenantName: string, projectName: string) {
         const teamDevOpsProjectId = this.devopsEnvironmentDetails.openshiftProjectId;
         for (const environment of this.openshiftEnvironment.defaultEnvironments) {
-            const projectEnvironment = getProjectId(tenantName, projectName, environment.id);
+            const projectEnvironment = getProjectOpenShiftNamespace(tenantName, projectName, environment.id);
             const createPodNetworkResult = await this.ocService.createPodNetwork(projectEnvironment, teamDevOpsProjectId);
 
             if (!isSuccessCode(createPodNetworkResult.status)) {

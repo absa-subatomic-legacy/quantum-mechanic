@@ -6,7 +6,7 @@ import {createMenuAttachment} from "../shared/GenericMenu";
 import {QMTenant} from "../shared/Tenants";
 import {QMTeam} from "../team/Teams";
 
-export function getProjectId(tenant: string, project: string, environment: string): string {
+export function getProjectOpenShiftNamespace(tenant: string, project: string, environment: string): string {
     return `${_.kebabCase(tenant).toLowerCase()}-${_.kebabCase(project).toLowerCase()}-${environment.toLowerCase()}`;
 }
 

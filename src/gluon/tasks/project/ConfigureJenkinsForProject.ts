@@ -6,7 +6,7 @@ import {QMTemplate} from "../../../template/QMTemplate";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getJenkinsBitbucketAccessCredential} from "../../util/jenkins/JenkinsCredentials";
-import {getProjectId} from "../../util/project/Project";
+import {getProjectOpenShiftNamespace} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -66,7 +66,7 @@ export class ConfigureJenkinsForProject extends Task {
     private async addEditRolesToJenkinsServiceAccount(teamDevOpsProjectId: string, projectName: string, tenant: string) {
 
         for (const environment of this.openshiftEnvironment.defaultEnvironments) {
-            const openshiftProjectId = getProjectId(tenant, projectName, environment.id);
+            const openshiftProjectId = getProjectOpenShiftNamespace(tenant, projectName, environment.id);
             await this.ocService.addRoleToUserInNamespace(
                 `system:serviceaccount:${teamDevOpsProjectId}:jenkins`,
                 "edit",
@@ -83,7 +83,7 @@ export class ConfigureJenkinsForProject extends Task {
         };
 
         for (const environment of this.openshiftEnvironment.defaultEnvironments) {
-            parameters[`${environment.id}ProjectId`] = getProjectId(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, environment.id);
+            parameters[`${environment.id}ProjectId`] = getProjectOpenShiftNamespace(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, environment.id);
         }
 
         const builtTemplate: string = projectTemplate.build(parameters);

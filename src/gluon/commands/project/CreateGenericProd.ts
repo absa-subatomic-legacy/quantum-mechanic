@@ -16,13 +16,14 @@ import {
     getHighestPreProdEnvironment,
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
-import {getProjectId, QMProject} from "../../util/project/Project";
+import {getProjectOpenShiftNamespace, QMProject} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
+    GluonTeamNameSetter,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
@@ -151,16 +152,16 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
-        const projectId = getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(this.openShiftCloud).id);
+        const projectId = getProjectOpenShiftNamespace(tenant.name, project.name, getHighestPreProdEnvironment(this.openShiftCloud).id);
         const allResources = await this.ocService.exportAllResources(projectId);
 
-        const resources = this.genericOpenshiftResourceService.cleanAllPromotableResources(
-            allResources,
-        );
+        /*const resources = this.genericOpenshiftResourceService.cleanAllPromotableResources(
+            allResources.items,
+        );*/
 
-        logger.info(resources);
+        logger.info(allResources);
 
-        this.openShiftResourcesJSON = JSON.stringify(resources.items.map(resource => {
+        this.openShiftResourcesJSON = JSON.stringify(allResources.items.map(resource => {
                 return {
                     kind: resource.kind,
                     name: resource.metadata.name,
@@ -170,7 +171,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         ));
 
         return await qmMessageClient.send({
-            text: getResourceDisplayMessage(resources),
+            text: getResourceDisplayMessage(allResources),
         });
     }
 

@@ -1,13 +1,12 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {
     roleBindingDefinition,
     serviceAccountDefinition,
 } from "../../util/jenkins/JenkinsOpenshiftResources";
-import {getProjectId} from "../../util/project/Project";
+import {getProjectOpenShiftNamespace} from "../../util/project/Project";
 import {
     getDevOpsEnvironmentDetails,
     getDevOpsEnvironmentDetailsProd,
@@ -49,7 +48,7 @@ export class AddJenkinsToProdEnvironment extends Task {
         await this.taskListMessage.succeedTask(this.TASK_CREATE_JENKINS_SA);
 
         for (const environment of this.openshiftEnvironment.defaultEnvironments) {
-            const projectId = getProjectId(this.environmentsRequestedDetails.owningTenant.name, this.environmentsRequestedDetails.project.name, environment.id);
+            const projectId = getProjectOpenShiftNamespace(this.environmentsRequestedDetails.owningTenant.name, this.environmentsRequestedDetails.project.name, environment.id);
             logger.info(`Working with OpenShift project Id: ${projectId}`);
             await this.addEditRolesToJenkinsServiceAccount(teamDevOpsProd, projectId);
         }

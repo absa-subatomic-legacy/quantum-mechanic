@@ -9,10 +9,15 @@ import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
+import {GenericOpenshiftResourceService} from "../../services/projects/GenericOpenshiftResourceService";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {QMProject} from "../../util/project/Project";
+import {getHighestPreProdEnvironment} from "../../util/openshift/Helpers";
+import {
+    getProjectOpenShiftNamespace,
+    QMProject,
+} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
@@ -65,7 +70,8 @@ subscription ApplicationProdRequestedEvent {
 export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent<any> {
 
     constructor(public ocService = new OCService(),
-                public gluonService = new GluonService()) {
+                public gluonService = new GluonService(),
+                public genericOpenshiftResourceService = new GenericOpenshiftResourceService()) {
         super();
     }
 
@@ -93,9 +99,11 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Creating requested application resources in project *${project.name}* production environments started:`,
                 qmMessageClient);
 
+            const preProdNamespace = getProjectOpenShiftNamespace(tenant.name, qmProject.name, getHighestPreProdEnvironment(owningTeam.openShiftCloud).id);
+
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
-                taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
+                taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, preProdNamespace, openshiftProd, resources));
             }
 
             await taskRunner.execute(ctx);

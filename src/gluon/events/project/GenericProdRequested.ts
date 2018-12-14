@@ -12,7 +12,11 @@ import {OCService} from "../../services/openshift/OCService";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {QMProject} from "../../util/project/Project";
+import {getHighestPreProdEnvironment} from "../../util/openshift/Helpers";
+import {
+    getProjectOpenShiftNamespace,
+    QMProject,
+} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
@@ -59,8 +63,10 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
+            const preProdNamespace = getProjectOpenShiftNamespace(tenant.name, qmProject.name, getHighestPreProdEnvironment(owningTeam.openShiftCloud).id);
+
             for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
-                taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
+                taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, preProdNamespace, openshiftProd, resources));
             }
 
             await taskRunner.execute(ctx);

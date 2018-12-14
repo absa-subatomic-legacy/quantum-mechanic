@@ -13,7 +13,7 @@ import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
-import {getProjectId} from "../../util/project/Project";
+import {getProjectOpenShiftNamespace} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
@@ -110,7 +110,7 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
                 // Remove from OpenShift environments
                 for (const environment of osEnv.defaultEnvironments) {
                     const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
-                    const projectId = getProjectId(tenant.name, project.name, environment.id);
+                    const projectId = getProjectOpenShiftNamespace(tenant.name, project.name, environment.id);
                     await this.ocService.removeTeamMembershipPermissionsFromProject(
                         projectId,
                         memberRemovedFromTeam.memberRemoved.domainUsername);
