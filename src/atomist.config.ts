@@ -1,8 +1,6 @@
 import {ingester} from "@atomist/automation-client/lib/graph/graphQL";
 import {QMConfig} from "./config/QMConfig";
-import {
-    ListExistingBitbucketProject,
-} from "./gluon/commands/bitbucket/BitbucketProject";
+import {ListExistingBitbucketProject} from "./gluon/commands/bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "./gluon/commands/bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "./gluon/commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {Help} from "./gluon/commands/help/Help";

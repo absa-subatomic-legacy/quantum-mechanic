@@ -2,13 +2,17 @@ import {
     HandlerContext,
     HandlerResult,
     logger,
+    Parameter,
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {QMTemplate} from "../../../template/QMTemplate";
 import {GluonService} from "../../services/gluon/GluonService";
-import {PackageDefinition} from "../../util/packages/PackageDefinition";
+import {PackageDefinition} from "../../util/packages/packagedef/PackageDefinition";
+import {SetterLoader} from "../../util/packages/packagedef/SetterLoader";
+import {QMColours} from "../../util/QMColour";
 import {
     GluonApplicationNameParam,
     GluonApplicationNameSetter,
@@ -66,25 +70,40 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
     })
     public packageDefinition: string;
 
+    @Parameter({
+        required: false,
+        displayable: false,
+    })
+    public environmentVariableValueHolder: string;
+
+    @Parameter({
+        required: false,
+        displayable: false,
+    })
+    public currentEnvironmentVariablesJSON: string;
+
     constructor(public gluonService = new GluonService()) {
-        super();
+        super(false);
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const result = await this.callPackageConfiguration(ctx);
-            this.succeedCommand();
-            return result;
+            const configTemplate: QMTemplate = new QMTemplate(this.getPathFromDefinitionName(this.packageDefinition));
+            const definition: PackageDefinition = JSON.parse(configTemplate.build(QMConfig.publicConfig()));
+            const environmentVariablePrompt = await this.getEnvironmentVariablePrompt(definition);
+            await ctx.messageClient.respond(environmentVariablePrompt.message, {id: this.messagePresentationCorrelationId});
+            if (environmentVariablePrompt.complete) {
+                const result = await this.callPackageConfiguration(ctx, definition);
+                this.succeedCommand();
+                return result;
+            }
         } catch (error) {
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
     }
 
-    private async callPackageConfiguration(ctx: HandlerContext): Promise<HandlerResult> {
-        const configTemplate: QMTemplate = new QMTemplate(this.getPathFromDefinitionName(this.packageDefinition));
-        const definition: PackageDefinition = JSON.parse(configTemplate.build(QMConfig.publicConfig()));
-
+    private async callPackageConfiguration(ctx: HandlerContext, definition: PackageDefinition): Promise<HandlerResult> {
         const configurePackage = new ConfigurePackage();
         configurePackage.screenName = this.screenName;
         configurePackage.teamChannel = this.teamChannel;
@@ -93,6 +112,15 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         configurePackage.imageName = definition.buildConfig.imageStream;
         if (definition.buildConfig.envVariables != null) {
             configurePackage.buildEnvironmentVariables = definition.buildConfig.envVariables;
+        } else {
+            configurePackage.buildEnvironmentVariables = {};
+        }
+        let currentEnvVarValues: { [key: string]: string } = {};
+        if (!_.isEmpty(this.currentEnvironmentVariablesJSON)) {
+            currentEnvVarValues = JSON.parse(this.currentEnvironmentVariablesJSON);
+        }
+        for (const variableName of Object.keys(currentEnvVarValues)) {
+            configurePackage.buildEnvironmentVariables[variableName] = currentEnvVarValues[variableName];
         }
         configurePackage.applicationName = this.applicationName;
         configurePackage.teamName = this.teamName;
@@ -101,6 +129,45 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         configurePackage.displayResultMenu = ParameterDisplayType.hide;
 
         return await configurePackage.handle(ctx);
+    }
+
+    private async getEnvironmentVariablePrompt(definition: PackageDefinition) {
+        // Test to see if all expected environment variables are set
+        if (definition.requiredEnvironmentVariables !== undefined) {
+            let currentEnvVarValues: { [key: string]: string } = {};
+            if (!_.isEmpty(this.currentEnvironmentVariablesJSON)) {
+                currentEnvVarValues = JSON.parse(this.currentEnvironmentVariablesJSON);
+            }
+
+            for (const requiredVariable of definition.requiredEnvironmentVariables) {
+                if (!currentEnvVarValues.hasOwnProperty(requiredVariable.name)) {
+                    if (this.environmentVariableValueHolder !== undefined) {
+                        currentEnvVarValues[requiredVariable.name] = this.environmentVariableValueHolder;
+                        this.environmentVariableValueHolder = undefined;
+                        this.currentEnvironmentVariablesJSON = JSON.stringify(currentEnvVarValues);
+                    } else {
+                        this.currentEnvironmentVariablesJSON = JSON.stringify(currentEnvVarValues);
+                        const optionsSetterFunction = await new SetterLoader(requiredVariable.setter).getLoader();
+                        const menuOptions = optionsSetterFunction(this);
+                        const displayMessage = this.getDisplayMessage();
+
+                        const variablePromptAttachment = createMenuAttachment(
+                            menuOptions,
+                            this,
+                            `Please set the ${requiredVariable.description} environment variable.`,
+                            `Please set the ${requiredVariable.description} environment variable.`,
+                            "Select a value",
+                            "environmentVariableValueHolder",
+                        );
+
+                        variablePromptAttachment.color = QMColours.stdShySkyBlue.hex;
+                        displayMessage.attachments.push(variablePromptAttachment);
+                        return {complete: false, message: displayMessage};
+                    }
+                }
+            }
+        }
+        return {complete: true, message: this.getDisplayMessage()};
     }
 
     private getPathFromDefinitionName(definitionName: string): string {

@@ -2,6 +2,7 @@ import {
     HandlerContext,
     MappedParameter,
     MappedParameters,
+    Parameter,
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
@@ -28,6 +29,13 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
         selectionMessage: "Please select the team you would like to link the slack channel to",
     })
     public teamName: string;
+
+    @Parameter({
+        required: true,
+        displayName: "Team Slack Channel",
+        description: "The slack channel to link to your team.",
+    })
+    public newTeamChannel: string;
 
     constructor(public gluonService = new GluonService(),
                 private teamSlackChannelService = new TeamSlackChannelService()) {
