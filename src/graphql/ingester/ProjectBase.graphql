@@ -1,0 +1,6 @@
+type ProjectBase @rootType {
+    projectId: String
+    name: String
+    description: String
+    tenant: GluonTenantId
+}
