@@ -5,6 +5,7 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -20,6 +21,7 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {QMTeam} from "../../util/team/Teams";
 
 @CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
 @Tags("subatomic", "project", "team")
@@ -69,7 +71,7 @@ export class CreateProject extends RecursiveParameterRequestCommand
 
         const member = await this.gluonService.members.gluonMemberFromScreenName(screenName);
 
-        const team = await this.gluonService.teams.gluonTeamByName(teamName);
+        const team: QMTeam = await this.gluonService.teams.gluonTeamByName(teamName);
 
         await this.createGluonProject(
             {
@@ -80,9 +82,46 @@ export class CreateProject extends RecursiveParameterRequestCommand
                 teams: [{
                     teamId: team.teamId,
                 }],
+                devDeploymentPipeline: this.getDefaultDevDeploymentPipeline(QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd),
+                releaseDeploymentPipelines: [this.getDefaultReleaseDeploymentPipeline(QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd)],
             });
 
         return await ctx.messageClient.respond("🚀Project successfully created.");
+    }
+
+    private getDefaultDevDeploymentPipeline(openshiftNonProd: OpenShiftConfig) {
+        const deploymentPipeline = {
+            name: "",
+            environments: [],
+        };
+        for (let i = 0; i < openshiftNonProd.defaultEnvironments.length - 1; i++) {
+            const environment = openshiftNonProd.defaultEnvironments[i];
+            deploymentPipeline.environments.push(
+                {
+                    positionInPipeline: i,
+                    displayName: environment.description,
+                    prefix: environment.id,
+                },
+            );
+        }
+        return deploymentPipeline;
+    }
+
+    private getDefaultReleaseDeploymentPipeline(openshiftNonProd: OpenShiftConfig) {
+        const deploymentPipeline = {
+            name: "",
+            environments: [],
+        };
+        const environment = openshiftNonProd.defaultEnvironments[openshiftNonProd.defaultEnvironments.length - 1];
+        deploymentPipeline.environments.push(
+            {
+                positionInPipeline: deploymentPipeline.environments.length,
+                displayName: environment.description,
+                prefix: environment.id,
+            },
+        );
+
+        return deploymentPipeline;
     }
 
     private async createGluonProject(projectDetails) {

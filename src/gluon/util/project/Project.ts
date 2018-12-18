@@ -55,6 +55,19 @@ export interface QMProjectBase {
 
 export interface QMProject extends QMProjectBase {
     owningTeam: QMTeam;
+    devDeploymentPipeline: QMDeploymentPipeline;
+    releaseDeploymentPipelines: QMDeploymentPipeline[];
+}
+
+export interface QMDeploymentPipeline {
+    name: string;
+    environments: QMDeploymentEnvironment[];
+}
+
+export interface QMDeploymentEnvironment {
+    positionInPipeline: number;
+    displayName: string;
+    prefix: string;
 }
 
 export enum ProjectProdRequestApprovalResponse {

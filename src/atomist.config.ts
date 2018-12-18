@@ -134,6 +134,8 @@ export const configuration: any = {
         ingester("ProjectEnvironmentsRequestedEvent"),
         ingester("TeamsLinkedToProjectEvent"),
         ingester("SlackIdentity"),
+        ingester("DeploymentEnvironment"),
+        ingester("DeploymentPipeline"),
         ingester("Project"),
         ingester("BitbucketProject"),
         ingester("GluonTeam"),
