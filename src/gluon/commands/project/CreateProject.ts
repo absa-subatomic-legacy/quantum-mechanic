@@ -9,6 +9,7 @@ import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMDeploymentPipeline} from "../../util/project/Project";
 import {
     GluonTeamNameParam,
     GluonTeamNameSetter,
@@ -90,8 +91,9 @@ export class CreateProject extends RecursiveParameterRequestCommand
     }
 
     private getDefaultDevDeploymentPipeline(openshiftNonProd: OpenShiftConfig) {
-        const deploymentPipeline = {
-            name: "",
+        const deploymentPipeline: QMDeploymentPipeline = {
+            name: "Default",
+            tag: "",
             environments: [],
         };
         for (let i = 0; i < openshiftNonProd.defaultEnvironments.length - 1; i++) {
@@ -108,8 +110,9 @@ export class CreateProject extends RecursiveParameterRequestCommand
     }
 
     private getDefaultReleaseDeploymentPipeline(openshiftNonProd: OpenShiftConfig) {
-        const deploymentPipeline = {
-            name: "",
+        const deploymentPipeline: QMDeploymentPipeline = {
+            name: "Default",
+            tag: "",
             environments: [],
         };
         const environment = openshiftNonProd.defaultEnvironments[openshiftNonProd.defaultEnvironments.length - 1];
