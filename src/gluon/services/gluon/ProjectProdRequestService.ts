@@ -13,7 +13,7 @@ export class ProjectProdRequestService {
     constructor(public axiosInstance = new AwaitAxios()) {
     }
 
-    public async createProjectProdRequest(actionedByMemberId: string, projectId: string, rawResult: boolean = false): Promise<any> {
+    public async createProjectProdRequest(actionedByMemberId: string, projectId: string, deploymentPipelineId: string, rawResult: boolean = false): Promise<any> {
         logger.debug(`Trying to create project prod request. actionedBy: ${actionedByMemberId}, projectId: ${projectId}`);
         const request = {
             actionedBy: {
@@ -21,6 +21,9 @@ export class ProjectProdRequestService {
             },
             project: {
                 projectId,
+            },
+            deploymentPipeline: {
+                pipelineId: deploymentPipelineId,
             },
         };
         const prodRequestResult = await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/projectProdRequests`, request);
@@ -81,9 +84,9 @@ export class ProjectProdRequestService {
         return prodRequestUpdateResult.data;
     }
 
-    public async getProjectProdRequestsByProjectId(projectId: string, rawResult: boolean = false): Promise<QMProjectProdRequest[] | any> {
+    public async getProjectProdRequestsByProjectIdAndPipelineId(projectId: string, pipelineId: string, rawResult: boolean = false): Promise<QMProjectProdRequest[] | any> {
         logger.debug(`Trying to get project prod request by projectId. projectId: ${projectId}`);
-        const prodRequestResult = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/projectProdRequests?projectId=${projectId}`);
+        const prodRequestResult = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/projectProdRequests?projectId=${projectId}&pipelineId=${pipelineId}`);
         if (rawResult) {
             return prodRequestResult;
         }
@@ -97,6 +100,23 @@ export class ProjectProdRequestService {
             result = prodRequestResult.data._embedded.projectProdRequestResources;
         }
         return result;
+    }
+
+    public async assertProjectProdIsApproved(projectId: string, pipelineId: string) {
+        const projectProdRequests: QMProjectProdRequest[] = await this.getProjectProdRequestsByProjectIdAndPipelineId(projectId, pipelineId);
+
+        let isProjectProdApproved = false;
+
+        for (const prodRequest of projectProdRequests) {
+            if (prodRequest.approvalStatus.toUpperCase() === "APPROVED") {
+                isProjectProdApproved = true;
+                break;
+            }
+        }
+
+        if (!isProjectProdApproved) {
+            throw new QMError(`The project has not been approved for a production release. Please request and approve prod promotion for this project before retrying.`);
+        }
     }
 
     private async updateProjectProdRequest(projectProdRequestId: string, actionedBy: string, approvalStatus: string): Promise<any> {

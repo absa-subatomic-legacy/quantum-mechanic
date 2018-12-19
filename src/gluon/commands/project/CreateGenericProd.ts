@@ -19,10 +19,13 @@ import {
 import {getProjectId, QMProject} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
+    DeploymentPipelineIdParam,
+    DeploymentPipelineIdSetter,
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
+    GluonTeamNameSetter,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
@@ -36,7 +39,7 @@ import {
 @CommandHandler("Move openshift resources to prod", QMConfig.subatomic.commandPrefix + " request generic prod")
 @Tags("subatomic", "project", "other")
 export class CreateGenericProd extends RecursiveParameterRequestCommand
-    implements GluonTeamNameSetter, GluonProjectNameSetter {
+    implements GluonTeamNameSetter, GluonProjectNameSetter, DeploymentPipelineIdSetter {
 
     @GluonTeamNameParam({
         callOrder: 0,
@@ -50,8 +53,14 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
     })
     public projectName: string;
 
-    @GluonTeamOpenShiftCloudParam({
+    @DeploymentPipelineIdParam({
         callOrder: 2,
+        selectionMessage: "Please select the deployment pipeline you wish to deploy the generic resources into prod for",
+    })
+    public deploymentPipelineId: string;
+
+    @GluonTeamOpenShiftCloudParam({
+        callOrder: 3,
     })
     public openShiftCloud: string;
 
@@ -177,6 +186,8 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
     private async createGenericProdRequest() {
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
+        await this.gluonService.prod.project.assertProjectProdIsApproved(project.projectId, this.deploymentPipelineId);
+
         const actionedBy = await this.gluonService.members.gluonMemberFromScreenName(this.screenName, false);
 
         const openShiftResources = JSON.parse(this.openShiftResourcesJSON);
@@ -184,6 +195,9 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         const request = {
             project: {
                 projectId: project.projectId,
+            },
+            deploymentPipeline: {
+                pipelineId: this.deploymentPipelineId,
             },
             actionedBy: {
                 memberId: actionedBy.memberId,

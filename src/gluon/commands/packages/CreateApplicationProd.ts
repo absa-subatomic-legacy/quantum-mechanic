@@ -19,12 +19,15 @@ import {
 import {getProjectId, QMProject} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
+    DeploymentPipelineIdParam,
+    DeploymentPipelineIdSetter,
     GluonApplicationNameParam,
     GluonApplicationNameSetter,
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
+    GluonTeamNameSetter,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
@@ -39,7 +42,7 @@ import {QMTeam} from "../../util/team/Teams";
 @CommandHandler("Create application in prod", QMConfig.subatomic.commandPrefix + " request application prod")
 @Tags("subatomic", "package")
 export class CreateApplicationProd extends RecursiveParameterRequestCommand
-    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
+    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, DeploymentPipelineIdSetter {
 
     @GluonTeamNameParam({
         callOrder: 0,
@@ -53,14 +56,20 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
     })
     public projectName: string;
 
-    @GluonApplicationNameParam({
+    @DeploymentPipelineIdParam({
         callOrder: 2,
+        selectionMessage: "Please select the deployment pipeline to deploy the package into",
+    })
+    public deploymentPipelineId: string;
+
+    @GluonApplicationNameParam({
+        callOrder: 3,
         selectionMessage: "Please select the package you wish to configure",
     })
     public applicationName: string;
 
     @GluonTeamOpenShiftCloudParam({
-        callOrder: 3,
+        callOrder: 4,
     })
     public openShiftCloud: string;
 
@@ -126,13 +135,13 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
             message.attachments.push({
                 text: `*Confirmed*`,
                 fallback: "*Confirmed*",
-                color:  QMColours.stdGreenyMcAppleStroodle.hex,
+                color: QMColours.stdGreenyMcAppleStroodle.hex,
             });
         } else if (result === ApprovalEnum.REJECTED) {
             message.attachments.push({
                 text: `*Cancelled*`,
                 fallback: "*Cancelled*",
-                color:  QMColours.stdReddyMcRedFace.hex,
+                color: QMColours.stdReddyMcRedFace.hex,
             });
         }
 
@@ -154,6 +163,9 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
     private async findAndListResources(qmMessageClient: QMMessageClient) {
 
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
+
+        await this.gluonService.prod.project.assertProjectProdIsApproved(project.projectId, this.deploymentPipelineId);
+
         const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
 
         const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
@@ -196,6 +208,9 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
         const request = {
             applicationId: application.applicationId,
             actionedBy: actionedBy.memberId,
+            deploymentPipeline: {
+                pipelineId: this.deploymentPipelineId,
+            },
             openShiftResources,
         };
 
