@@ -137,6 +137,7 @@ export const configuration: any = {
         ingester("DeploymentEnvironment"),
         ingester("DeploymentPipeline"),
         ingester("Project"),
+        ingester("ProjectBase"),
         ingester("BitbucketProject"),
         ingester("GluonTeam"),
         ingester("ActionedBy"),

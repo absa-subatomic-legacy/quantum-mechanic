@@ -60,7 +60,7 @@ export interface QMProject extends QMProjectBase {
 }
 
 export interface QMDeploymentPipeline {
-    pipelineId: string;
+    pipelineId?: string;
     name: string;
     tag: string;
     environments: QMDeploymentEnvironment[];
