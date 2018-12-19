@@ -40,6 +40,28 @@ export function menuAttachmentForProjects(ctx: HandlerContext, projects: any[],
     );
 }
 
+export function getDeploymentEnvironmentNamespacesFromProject(tenantName: string, project: QMProject) {
+    const namespaces: string[] = getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName, project.name, project.devDeploymentPipeline);
+    namespaces.push(...getDeploymentEnvironmentNamespacesFromDeploymentPipelines(tenantName, project.name, project.releaseDeploymentPipelines));
+    return namespaces;
+}
+
+export function getDeploymentEnvironmentNamespacesFromDeploymentPipelines(tenantName: string, projectName: string, deploymentPipelines: QMDeploymentPipeline[]) {
+    const namespaces: string[] = [];
+    for (const pipeline of deploymentPipelines) {
+        namespaces.push(...getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName, projectName, pipeline));
+    }
+    return namespaces;
+}
+
+export function getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName: string, projectName: string, deploymentPipeline: QMDeploymentPipeline) {
+    const namespaces: string[] = [];
+    for (const environment of deploymentPipeline.environments) {
+        namespaces.push(getProjectId(tenantName, projectName, environment.prefix));
+    }
+    return namespaces;
+}
+
 export interface OpenshiftProjectEnvironmentRequest {
     teams: QMTeam[];
     project: QMProjectBase;
