@@ -23,6 +23,7 @@ import {
     handleQMError,
     OCResultError,
 } from "../../util/shared/Error";
+import {QMTenant} from "../../util/shared/Tenants";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
 
@@ -109,7 +110,7 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
                 await bitbucketConfiguration.removeUserFromBitbucketProject(
                     project.bitbucketProject.key,
                     [memberRemovedFromTeam.memberRemoved.domainUsername]);
-                const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+                const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
                 // Remove from OpenShift environments
                 for (const projectNamespace of getDeploymentEnvironmentNamespacesFromProject(tenant.name, project)) {
