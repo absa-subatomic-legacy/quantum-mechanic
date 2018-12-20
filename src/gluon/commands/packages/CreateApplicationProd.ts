@@ -16,7 +16,11 @@ import {
     getHighestPreProdEnvironment,
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
-import {getProjectId, QMProject} from "../../util/project/Project";
+import {
+    getProjectId,
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     DeploymentPipelineIdParam,
@@ -37,7 +41,6 @@ import {
     QMMessageClient,
     ResponderMessageClient,
 } from "../../util/shared/Error";
-import {QMTeam} from "../../util/team/Teams";
 
 @CommandHandler("Create application in prod", QMConfig.subatomic.commandPrefix + " request application prod")
 @Tags("subatomic", "package")
@@ -166,13 +169,13 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
 
         await this.gluonService.prod.project.assertProjectProdIsApproved(project.projectId, this.deploymentPipelineId);
 
-        const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
-
         const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
-        const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(owningTeam.openShiftCloud).id));
+        const deploymentPipeline: QMDeploymentPipeline = project.releaseDeploymentPipelines.filter(pipeline => pipeline.pipelineId === this.deploymentPipelineId)[0];
+
+        const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(deploymentPipeline).postfix));
 
         const resources = await this.packageOpenshiftResourceService.getAllApplicationRelatedResources(
             this.applicationName,

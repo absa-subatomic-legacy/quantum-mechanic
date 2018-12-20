@@ -16,7 +16,11 @@ import {
     getHighestPreProdEnvironment,
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
-import {getProjectId, QMProject} from "../../util/project/Project";
+import {
+    getProjectId,
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     DeploymentPipelineIdParam,
@@ -160,8 +164,10 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
-        const projectId = getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(this.openShiftCloud).id);
-        const allResources = await this.ocService.exportAllResources(projectId);
+        const deploymentPipeline: QMDeploymentPipeline = project.releaseDeploymentPipelines.filter(pipeline => pipeline.pipelineId === this.deploymentPipelineId)[0];
+
+        const projectNamespace = getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(deploymentPipeline).postfix);
+        const allResources = await this.ocService.exportAllResources(projectNamespace);
 
         const resources = this.genericOpenshiftResourceService.cleanAllPromotableResources(
             allResources,
