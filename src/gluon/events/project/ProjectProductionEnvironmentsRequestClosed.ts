@@ -1,5 +1,6 @@
 import {
-    addressSlackChannelsFromContext, buttonForCommand,
+    addressSlackChannelsFromContext,
+    buttonForCommand,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -9,15 +10,24 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {v4 as uuid} from "uuid";
+import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMProjectProdRequest} from "../../services/gluon/ProjectProdRequestService";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToProdEnvironment} from "../../tasks/team/AddJenkinsToProdEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
-import {OpenshiftProjectEnvironmentRequest, QMProject} from "../../util/project/Project";
+import {
+    getProjectDisplayName,
+    getProjectId,
+    OpenshiftProjectEnvironmentRequest,
+    OpenShiftProjectNamespace,
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
@@ -31,7 +41,7 @@ subscription ProjectProductionEnvironmentsRequestClosedEvent {
   }
 }
 `)
-export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  implements HandleEvent<any> {
+export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent implements HandleEvent<any> {
 
     constructor(public gluonService = new GluonService()) {
         super();
@@ -44,7 +54,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
 
         logger.info("Trying to find projectProdRequestDetails");
 
-        const projectProdRequest = await this.gluonService.prod.project.getProjectProdRequestById(projectProductionRequestClosedEvent.projectProdRequestId);
+        const projectProdRequest: QMProjectProdRequest = await this.gluonService.prod.project.getProjectProdRequestById(projectProductionRequestClosedEvent.projectProdRequestId);
 
         const associatedTeams = await this.gluonService.teams.getTeamsAssociatedToProject(projectProdRequest.project.projectId);
 
@@ -71,9 +81,11 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
 
                     const devopsEnvironmentDetails = getDevOpsEnvironmentDetailsProd(owningTeam.name);
 
+                    const environmentsForCreation: OpenShiftProjectNamespace[] = this.getEnvironmentsForCreation(owningTenant.name, project, projectProdRequest.deploymentPipeline, prodOpenshift);
+
                     taskRunner.addTask(new CreateTeamDevOpsEnvironment({team: owningTeam}, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
-                        new CreateOpenshiftEnvironments(request, prodOpenshift, devopsEnvironmentDetails),
+                        new CreateOpenshiftEnvironments(request, environmentsForCreation, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
                         new AddJenkinsToProdEnvironment({team: owningTeam}, request, prodOpenshift),
                     );
@@ -105,6 +117,22 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
         };
     }
 
+    private getEnvironmentsForCreation(tenantName: string, project: QMProject, deploymentPipeline: QMDeploymentPipeline, openShiftProd: OpenShiftConfig): OpenShiftProjectNamespace[] {
+        // TODO: need deploymentPipeline to use the tag
+        const environmentsForCreation: OpenShiftProjectNamespace[] = [];
+
+        for (const environment of openShiftProd.defaultEnvironments) {
+            environmentsForCreation.push(
+                {
+                    namespace: getProjectId(tenantName, project.name, environment.id),
+                    displayName: getProjectDisplayName(tenantName, project.name, environment.description),
+                    postfix: environment.id,
+                },
+            );
+        }
+        return environmentsForCreation;
+    }
+
     private createMessageClient(ctx: HandlerContext,
                                 teams: Array<{ slack: { teamChannel: string } }>) {
         const messageClient = new ChannelMessageClient(ctx);
@@ -120,7 +148,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
             attachments: [{
                 text: "Please check with your system admin and retry when the reason of failure has been determined.",
                 fallback: "Please check with your system admin and retry when the reason of failure has been determined.",
-                color:  QMColours.stdReddyMcRedFace.hex,
+                color: QMColours.stdReddyMcRedFace.hex,
                 actions: [
                     buttonForCommand(
                         {

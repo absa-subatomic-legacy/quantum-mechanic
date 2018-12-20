@@ -5,7 +5,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
 import {QMMemberBase} from "../../util/member/Members";
-import {QMProjectBase} from "../../util/project/Project";
+import {QMDeploymentPipeline, QMProjectBase} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 
 export class ProjectProdRequestService {
@@ -141,4 +141,5 @@ export interface QMProjectProdRequest extends QMProjectProdRequestBase {
     actionedBy: QMMemberBase;
     authorizingMembers: QMMemberBase[];
     rejectingMember?: QMMemberBase;
+    deploymentPipeline: QMDeploymentPipeline;
 }

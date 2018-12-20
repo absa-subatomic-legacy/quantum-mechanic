@@ -68,6 +68,12 @@ export interface OpenshiftProjectEnvironmentRequest {
     owningTenant: QMTenant;
 }
 
+export interface OpenShiftProjectNamespace {
+    namespace: string;
+    displayName: string;
+    postfix: string;
+}
+
 export interface QMProjectBase {
     projectId: string;
     name: string;

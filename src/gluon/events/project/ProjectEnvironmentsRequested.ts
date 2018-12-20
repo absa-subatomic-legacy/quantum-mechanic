@@ -17,10 +17,17 @@ import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsFo
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {QMProject} from "../../util/project/Project";
+import {
+    getProjectDisplayName,
+    getProjectId,
+    OpenShiftProjectNamespace,
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {QMTenant} from "../../util/shared/Tenants";
 import {QMTeam} from "../../util/team/Teams";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
@@ -72,7 +79,7 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
 
     private qmMessageClient: ChannelMessageClient;
 
-    constructor( public gluonService = new GluonService()) {
+    constructor(public gluonService = new GluonService()) {
         super();
     }
 
@@ -90,11 +97,14 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Provisioning of environment's for project *${environmentsRequestedEvent.project.name}* started:`,
                 this.qmMessageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
-            const osNP = QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd;
+            const openshiftNonProd = QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd;
+
+            const environmentsForCreation: OpenShiftProjectNamespace[] = this.getEnvironmentsForCreation(environmentsRequestedEvent.owningTenant, project);
+
             taskRunner.addTask(
-                new CreateOpenshiftEnvironments(environmentsRequestedEvent, osNP),
+                new CreateOpenshiftEnvironments(environmentsRequestedEvent, environmentsForCreation, openshiftNonProd),
             ).addTask(
-                new ConfigureJenkinsForProject(environmentsRequestedEvent, osNP),
+                new ConfigureJenkinsForProject(environmentsRequestedEvent, openshiftNonProd),
             );
 
             await taskRunner.execute(ctx);
@@ -122,7 +132,7 @@ A package is either an application or a library, click the button below to creat
             attachments: [{
                 fallback: "Create or link existing package",
                 footer: `For more information, please read the ${this.docs()}`,
-                color:  QMColours.stdGreenyMcAppleStroodle.hex,
+                color: QMColours.stdGreenyMcAppleStroodle.hex,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(
@@ -143,6 +153,26 @@ A package is either an application or a library, click the button below to creat
         const destination = await addressSlackChannelsFromContext(ctx, ...teams.map(team =>
             team.slackIdentity.teamChannel));
         return await ctx.messageClient.send(msg, destination);
+    }
+
+    private getEnvironmentsForCreation(owningTenant: QMTenant, project: QMProject): OpenShiftProjectNamespace[] {
+        const pipelines: QMDeploymentPipeline[] = [project.devDeploymentPipeline];
+        pipelines.push(...project.releaseDeploymentPipelines);
+
+        const environmentsForCreation: OpenShiftProjectNamespace[] = [];
+        for (const pipeline of pipelines) {
+            for (const environment of pipeline.environments) {
+                environmentsForCreation.push(
+                    {
+                        namespace: getProjectId(owningTenant.name, project.name, environment.postfix),
+                        displayName: getProjectDisplayName(owningTenant.name, project.name, environment.displayName),
+                        postfix: environment.postfix,
+                    },
+                );
+            }
+        }
+
+        return environmentsForCreation;
     }
 
     private docs(): string {
