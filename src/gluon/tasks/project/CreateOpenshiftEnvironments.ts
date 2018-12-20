@@ -3,7 +3,10 @@ import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OCService} from "../../services/openshift/OCService";
-import {OpenshiftProjectEnvironmentRequest} from "../../util/project/Project";
+import {
+    OpenshiftProjectEnvironmentRequest,
+    OpenShiftProjectNamespace,
+} from "../../util/project/Project";
 import {QMError, QMErrorType} from "../../util/shared/Error";
 import {
     DevOpsEnvironmentDetails,
@@ -19,7 +22,7 @@ export class CreateOpenshiftEnvironments extends Task {
     private dynamicTaskNameStore: { [k: string]: string } = {};
 
     constructor(private environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest,
-                private environmentsForCreation: Array<{ namespace: string, displayName: string, postfix: string }>,
+                private environmentsForCreation: OpenShiftProjectNamespace[],
                 private openshiftEnvironment: OpenShiftConfig,
                 private devopsEnvironmentDetails: DevOpsEnvironmentDetails = getDevOpsEnvironmentDetails(environmentsRequestedEvent.teams[0].name),
                 private ocService = new OCService()) {

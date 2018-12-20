@@ -10,7 +10,6 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {v4 as uuid} from "uuid";
-import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -21,11 +20,9 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToProdEnvironment} from "../../tasks/team/AddJenkinsToProdEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
 import {
-    getProjectDisplayName,
-    getProjectId,
+    getPipelineOpenShiftNamespacesForOpenShiftCluster,
     OpenshiftProjectEnvironmentRequest,
     OpenShiftProjectNamespace,
-    QMDeploymentPipeline,
     QMProject,
 } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
@@ -81,7 +78,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
 
                     const devopsEnvironmentDetails = getDevOpsEnvironmentDetailsProd(owningTeam.name);
 
-                    const environmentsForCreation: OpenShiftProjectNamespace[] = this.getEnvironmentsForCreation(owningTenant.name, project, projectProdRequest.deploymentPipeline, prodOpenshift);
+                    const environmentsForCreation: OpenShiftProjectNamespace[] = getPipelineOpenShiftNamespacesForOpenShiftCluster(owningTenant.name, project, projectProdRequest.deploymentPipeline, prodOpenshift);
 
                     taskRunner.addTask(new CreateTeamDevOpsEnvironment({team: owningTeam}, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
@@ -115,22 +112,6 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
             project,
             owningTenant,
         };
-    }
-
-    private getEnvironmentsForCreation(tenantName: string, project: QMProject, deploymentPipeline: QMDeploymentPipeline, openShiftProd: OpenShiftConfig): OpenShiftProjectNamespace[] {
-        // TODO: need deploymentPipeline to use the tag
-        const environmentsForCreation: OpenShiftProjectNamespace[] = [];
-
-        for (const environment of openShiftProd.defaultEnvironments) {
-            environmentsForCreation.push(
-                {
-                    namespace: getProjectId(tenantName, project.name, environment.id),
-                    displayName: getProjectDisplayName(tenantName, project.name, environment.description),
-                    postfix: environment.id,
-                },
-            );
-        }
-        return environmentsForCreation;
     }
 
     private createMessageClient(ctx: HandlerContext,

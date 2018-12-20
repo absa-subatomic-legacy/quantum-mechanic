@@ -7,14 +7,20 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMApplicationProdRequest} from "../../services/gluon/ApplicationProdRequestService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {QMProject} from "../../util/project/Project";
+import {
+    getPipelineOpenShiftNamespacesForOpenShiftCluster,
+    OpenShiftProjectNamespace,
+    QMProject,
+} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {QMTenant} from "../../util/shared/Tenants";
 import {QMTeam} from "../../util/team/Teams";
 
 @EventHandler("Receive ApplicationProdRequestedEvent events", `
@@ -82,9 +88,9 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
             const qmProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(project.name);
             const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(qmProject.owningTeam.teamId);
 
-            const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.tenant.tenantId);
+            const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.tenant.tenantId);
 
-            const applicationProdRequest = await this.gluonService.prod.application.getApplicationProdRequestById(applicationProdRequestedEvent.applicationProdRequest.applicationProdRequestId);
+            const applicationProdRequest: QMApplicationProdRequest = await this.gluonService.prod.application.getApplicationProdRequestById(applicationProdRequestedEvent.applicationProdRequest.applicationProdRequestId);
 
             logger.debug("List of requested prod resources: " + JSON.stringify(applicationProdRequest));
 
@@ -95,7 +101,8 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
-                taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
+                const environmentsForCreation: OpenShiftProjectNamespace[] = getPipelineOpenShiftNamespacesForOpenShiftCluster(tenant.name, qmProject, applicationProdRequest.deploymentPipeline, openshiftProd);
+                taskRunner.addTask(new CreateOpenshiftResourcesInProject(environmentsForCreation, resources, openshiftProd));
             }
 
             await taskRunner.execute(ctx);

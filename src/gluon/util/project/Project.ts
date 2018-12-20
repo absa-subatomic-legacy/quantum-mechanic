@@ -1,6 +1,7 @@
 import {HandlerContext} from "@atomist/automation-client";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import * as _ from "lodash";
+import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMBitbucketProject} from "../bitbucket/Bitbucket";
 import {createMenuAttachment} from "../shared/GenericMenu";
 import {QMTenant} from "../shared/Tenants";
@@ -60,6 +61,22 @@ export function getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantN
         namespaces.push(getProjectId(tenantName, projectName, environment.postfix));
     }
     return namespaces;
+}
+
+export function getPipelineOpenShiftNamespacesForOpenShiftCluster(tenantName: string, project: QMProject, deploymentPipeline: QMDeploymentPipeline, openShiftCluster: OpenShiftConfig): OpenShiftProjectNamespace[] {
+    // TODO: need deploymentPipeline to use the tag
+    const environmentsForCreation: OpenShiftProjectNamespace[] = [];
+
+    for (const environment of openShiftCluster.defaultEnvironments) {
+        environmentsForCreation.push(
+            {
+                namespace: getProjectId(tenantName, project.name, environment.id),
+                displayName: getProjectDisplayName(tenantName, project.name, environment.description),
+                postfix: environment.id,
+            },
+        );
+    }
+    return environmentsForCreation;
 }
 
 export interface OpenshiftProjectEnvironmentRequest {
