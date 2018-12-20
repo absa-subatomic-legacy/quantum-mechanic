@@ -76,15 +76,17 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
 
                 for (const prodOpenshift of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
 
+                    // Get the devops prod environment details.
                     const devopsEnvironmentDetails = getDevOpsEnvironmentDetailsProd(owningTeam.name);
 
+                    // Get details of all the prod project namespaces we need to operate on.
                     const environmentsForCreation: OpenShiftProjectNamespace[] = getPipelineOpenShiftNamespacesForOpenShiftCluster(owningTenant.name, project, projectProdRequest.deploymentPipeline, prodOpenshift);
 
                     taskRunner.addTask(new CreateTeamDevOpsEnvironment({team: owningTeam}, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
                         new CreateOpenshiftEnvironments(request, environmentsForCreation, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
-                        new AddJenkinsToProdEnvironment({team: owningTeam}, request, prodOpenshift),
+                        new AddJenkinsToProdEnvironment({team: owningTeam}, environmentsForCreation, prodOpenshift),
                     );
                 }
 
