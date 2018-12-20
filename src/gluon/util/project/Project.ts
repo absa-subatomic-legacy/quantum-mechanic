@@ -17,10 +17,10 @@ export function getProjectDevOpsId(team: string): string {
 
 export function getProjectDisplayName(tenant: string, project: string, environment: string) {
     if (tenant.toLowerCase() === "default") {
-        return `${project} ${environment.toUpperCase()}`;
+        return `${project} ${environment}`;
     }
 
-    return `${tenant} ${project} ${environment.toUpperCase()}`;
+    return `${tenant} ${project} ${environment}`;
 }
 
 export function menuAttachmentForProjects(ctx: HandlerContext, projects: any[],
