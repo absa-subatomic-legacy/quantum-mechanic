@@ -4,8 +4,13 @@ import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OCService} from "../../services/openshift/OCService";
 import {
+    getDeploymentEnvironmentNamespacesFromProject,
+    getProjectDisplayName,
     getProjectId,
     OpenshiftProjectEnvironmentRequest,
+    QMDeploymentEnvironment,
+    QMDeploymentPipeline,
+    QMProject,
 } from "../../util/project/Project";
 import {QMError, QMErrorType} from "../../util/shared/Error";
 import {
@@ -43,7 +48,7 @@ export class CreateOpenshiftEnvironments extends Task {
 
         await this.createPodNetwork(
             this.environmentsRequestedEvent.owningTenant.name,
-            this.environmentsRequestedEvent.project.name);
+            this.environmentsRequestedEvent.project);
 
         await this.taskListMessage.succeedTask(this.TASK_CREATE_POD_NETWORK);
         await this.taskListMessage.succeedTask(this.TASK_HEADER);
@@ -52,29 +57,27 @@ export class CreateOpenshiftEnvironments extends Task {
     }
 
     private async createOpenshiftEnvironments() {
-        const environments = [];
-        for (const environment of this.openshiftEnvironment.defaultEnvironments) {
-            environments.push([environment.id, environment.description]);
-        }
+        const pipelines: QMDeploymentPipeline[] = [this.environmentsRequestedEvent.project.devDeploymentPipeline];
+        pipelines.push(...this.environmentsRequestedEvent.project.releaseDeploymentPipelines);
 
         await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
-        for (const environment of environments) {
-            const projectNamespaceId = getProjectId(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, environment[0]);
-            logger.info(`Working with OpenShift project Id: ${projectNamespaceId}`);
+        for (const pipeline of pipelines) {
+            for (const environment of pipeline.environments) {
+                // can use pipeline tag here as necessary
+                const projectNamespaceId = getProjectId(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, environment.postfix);
+                const projectDisplayName = getProjectDisplayName(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, environment.displayName);
+                logger.info(`Working with OpenShift project Id: ${projectNamespaceId}`);
 
-            await this.createOpenshiftProject(projectNamespaceId, this.environmentsRequestedEvent, environment);
-            await this.taskListMessage.succeedTask(this.dynamicTaskNameStore[`${environment[0]}Environment`]);
+                await this.createOpenshiftProject(projectNamespaceId, projectDisplayName, this.environmentsRequestedEvent, environment);
+                await this.taskListMessage.succeedTask(this.dynamicTaskNameStore[`${environment[0]}Environment`]);
+            }
         }
     }
 
-    private async createOpenshiftProject(projectNamespaceId: string, environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest, environment) {
+    private async createOpenshiftProject(projectNamespaceId: string, projectDisplayName: string, environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest, environment: QMDeploymentEnvironment) {
         try {
-            await this.ocService.newSubatomicProject(
-                projectNamespaceId,
-                environmentsRequestedEvent.project.name,
-                environmentsRequestedEvent.owningTenant.name,
-                environment);
+            await this.ocService.newSubatomicProject(projectNamespaceId, projectDisplayName, environmentsRequestedEvent.project.name, environment.postfix);
         } catch (error) {
             if (error instanceof QMError && error.errorType === QMErrorType.conflict) {
                 logger.warn("OpenShift project requested already exists.");
@@ -95,11 +98,10 @@ export class CreateOpenshiftEnvironments extends Task {
         await this.ocService.createProjectDefaultLimits(projectId);
     }
 
-    private async createPodNetwork(tenantName: string, projectName: string) {
+    private async createPodNetwork(tenantName: string, project: QMProject) {
         const teamDevOpsProjectId = this.devopsEnvironmentDetails.openshiftProjectId;
-        for (const environment of this.openshiftEnvironment.defaultEnvironments) {
-            const projectEnvironment = getProjectId(tenantName, projectName, environment.id);
-            const createPodNetworkResult = await this.ocService.createPodNetwork(projectEnvironment, teamDevOpsProjectId);
+        for (const deploymentNamespace of getDeploymentEnvironmentNamespacesFromProject(tenantName, project)) {
+            const createPodNetworkResult = await this.ocService.createPodNetwork(deploymentNamespace, teamDevOpsProjectId);
 
             if (!isSuccessCode(createPodNetworkResult.status)) {
                 const errorResponse = createPodNetworkResult.data;
@@ -107,11 +109,11 @@ export class CreateOpenshiftEnvironments extends Task {
                     logger.warn("Openshift multitenant network plugin not found. Assuming running on Minishift test environment");
                     break;
                 } else {
-                    logger.error(`Failed to join project ${projectEnvironment} to ${teamDevOpsProjectId}: ${inspect(createPodNetworkResult)}`);
-                    throw new QMError(`Failed to join project ${projectEnvironment} to ${teamDevOpsProjectId}`);
+                    logger.error(`Failed to join project ${deploymentNamespace} to ${teamDevOpsProjectId}: ${inspect(createPodNetworkResult)}`);
+                    throw new QMError(`Failed to join project ${deploymentNamespace} to ${teamDevOpsProjectId}`);
                 }
             } else {
-                logger.info(`Successfully joined project ${projectEnvironment} to ${teamDevOpsProjectId}`);
+                logger.info(`Successfully joined project ${deploymentNamespace} to ${teamDevOpsProjectId}`);
             }
         }
     }

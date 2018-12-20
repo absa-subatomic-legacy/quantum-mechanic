@@ -102,7 +102,7 @@ export class CreateProject extends RecursiveParameterRequestCommand
                 {
                     positionInPipeline: i,
                     displayName: environment.description,
-                    prefix: environment.id,
+                    postfix: environment.id,
                 },
             );
         }
@@ -120,7 +120,7 @@ export class CreateProject extends RecursiveParameterRequestCommand
             {
                 positionInPipeline: deploymentPipeline.environments.length,
                 displayName: environment.description,
-                prefix: environment.id,
+                postfix: environment.id,
             },
         );
 

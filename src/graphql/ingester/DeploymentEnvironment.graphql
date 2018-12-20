@@ -1,5 +1,5 @@
 type DeploymentEnvironment @rootType {
 	positionInPipeline: Int
 	displayName: String
-	prefix: String
+	postfix: String
 }

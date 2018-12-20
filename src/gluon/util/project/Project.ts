@@ -57,14 +57,14 @@ export function getDeploymentEnvironmentNamespacesFromDeploymentPipelines(tenant
 export function getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName: string, projectName: string, deploymentPipeline: QMDeploymentPipeline) {
     const namespaces: string[] = [];
     for (const environment of deploymentPipeline.environments) {
-        namespaces.push(getProjectId(tenantName, projectName, environment.prefix));
+        namespaces.push(getProjectId(tenantName, projectName, environment.postfix));
     }
     return namespaces;
 }
 
 export interface OpenshiftProjectEnvironmentRequest {
     teams: QMTeam[];
-    project: QMProjectBase;
+    project: QMProject;
     owningTenant: QMTenant;
 }
 
@@ -91,7 +91,7 @@ export interface QMDeploymentPipeline {
 export interface QMDeploymentEnvironment {
     positionInPipeline: number;
     displayName: string;
-    prefix: string;
+    postfix: string;
 }
 
 export enum ProjectProdRequestApprovalResponse {
