@@ -17,7 +17,7 @@ import {
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
 import {
-    getProjectId,
+    getProjectOpenshiftNamespace,
     QMDeploymentPipeline,
     QMProject,
 } from "../../util/project/Project";
@@ -175,7 +175,7 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
 
         const deploymentPipeline: QMDeploymentPipeline = project.releaseDeploymentPipelines.filter(pipeline => pipeline.pipelineId === this.deploymentPipelineId)[0];
 
-        const allResources = await this.ocService.exportAllResources(getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(deploymentPipeline).postfix));
+        const allResources = await this.ocService.exportAllResources(getProjectOpenshiftNamespace(tenant.name, project.name, deploymentPipeline.tag, getHighestPreProdEnvironment(deploymentPipeline).postfix));
 
         const resources = await this.packageOpenshiftResourceService.getAllApplicationRelatedResources(
             this.applicationName,

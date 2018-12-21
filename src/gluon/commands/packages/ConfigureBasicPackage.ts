@@ -83,7 +83,11 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
     public currentEnvironmentVariablesJSON: string;
 
     constructor(public gluonService = new GluonService()) {
-        super(false);
+        super();
+    }
+
+    protected initialise() {
+        this.displayResultMenu = ParameterDisplayType.showInitial;
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {

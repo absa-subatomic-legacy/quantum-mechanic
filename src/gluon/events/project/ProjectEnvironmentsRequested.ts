@@ -18,16 +18,13 @@ import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEn
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {
-    getProjectDisplayName,
-    getProjectId,
+    getAllProjectOpenshiftNamespaces,
     OpenShiftProjectNamespace,
-    QMDeploymentPipeline,
     QMProject,
 } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
-import {QMTenant} from "../../util/shared/Tenants";
 import {QMTeam} from "../../util/team/Teams";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
@@ -99,12 +96,12 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             const openshiftNonProd = QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd;
 
-            const environmentsForCreation: OpenShiftProjectNamespace[] = this.getEnvironmentsForCreation(environmentsRequestedEvent.owningTenant, project);
+            const environmentsForCreation: OpenShiftProjectNamespace[] = getAllProjectOpenshiftNamespaces(environmentsRequestedEvent.owningTenant, project);
 
             taskRunner.addTask(
                 new CreateOpenshiftEnvironments(environmentsRequestedEvent, environmentsForCreation, openshiftNonProd),
             ).addTask(
-                new ConfigureJenkinsForProject(environmentsRequestedEvent, openshiftNonProd),
+                new ConfigureJenkinsForProject(environmentsRequestedEvent, project.devDeploymentPipeline, project.releaseDeploymentPipelines, openshiftNonProd),
             );
 
             await taskRunner.execute(ctx);
@@ -153,26 +150,6 @@ A package is either an application or a library, click the button below to creat
         const destination = await addressSlackChannelsFromContext(ctx, ...teams.map(team =>
             team.slackIdentity.teamChannel));
         return await ctx.messageClient.send(msg, destination);
-    }
-
-    private getEnvironmentsForCreation(owningTenant: QMTenant, project: QMProject): OpenShiftProjectNamespace[] {
-        const pipelines: QMDeploymentPipeline[] = [project.devDeploymentPipeline];
-        pipelines.push(...project.releaseDeploymentPipelines);
-
-        const environmentsForCreation: OpenShiftProjectNamespace[] = [];
-        for (const pipeline of pipelines) {
-            for (const environment of pipeline.environments) {
-                environmentsForCreation.push(
-                    {
-                        namespace: getProjectId(owningTenant.name, project.name, environment.postfix),
-                        displayName: getProjectDisplayName(owningTenant.name, project.name, environment.displayName),
-                        postfix: environment.postfix,
-                    },
-                );
-            }
-        }
-
-        return environmentsForCreation;
     }
 
     private docs(): string {

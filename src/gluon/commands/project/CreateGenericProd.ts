@@ -17,7 +17,7 @@ import {
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
 import {
-    getProjectId,
+    getProjectOpenshiftNamespace,
     QMDeploymentPipeline,
     QMProject,
 } from "../../util/project/Project";
@@ -166,7 +166,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         const deploymentPipeline: QMDeploymentPipeline = project.releaseDeploymentPipelines.filter(pipeline => pipeline.pipelineId === this.deploymentPipelineId)[0];
 
-        const projectNamespace = getProjectId(tenant.name, project.name, getHighestPreProdEnvironment(deploymentPipeline).postfix);
+        const projectNamespace = getProjectOpenshiftNamespace(tenant.name, project.name, deploymentPipeline.tag, getHighestPreProdEnvironment(deploymentPipeline).postfix);
         const allResources = await this.ocService.exportAllResources(projectNamespace);
 
         const resources = this.genericOpenshiftResourceService.cleanAllPromotableResources(

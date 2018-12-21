@@ -7,20 +7,34 @@ import {createMenuAttachment} from "../shared/GenericMenu";
 import {QMTenant} from "../shared/Tenants";
 import {QMTeam} from "../team/Teams";
 
-export function getProjectId(tenant: string, project: string, environment: string): string {
-    return `${_.kebabCase(tenant).toLowerCase()}-${_.kebabCase(project).toLowerCase()}-${environment.toLowerCase()}`;
+export function getProjectOpenshiftNamespace(tenant: string, project: string, pipelineTag: string, environment: string): string {
+
+    let postFix = `${_.kebabCase(pipelineTag)}-${environment.toLowerCase()}`;
+    if (!_.isEmpty(pipelineTag)) {
+        postFix = "-" + postFix;
+    }
+
+    return `${_.kebabCase(tenant).toLowerCase()}-${_.kebabCase(project).toLowerCase()}${postFix}`;
 }
 
 export function getProjectDevOpsId(team: string): string {
     return `${_.kebabCase(team).toLowerCase()}-devops`;
 }
 
-export function getProjectDisplayName(tenant: string, project: string, environment: string) {
-    if (tenant.toLowerCase() === "default") {
-        return `${project} ${environment}`;
+export function getProjectDisplayName(tenant: string, project: string, pipelineTag: string, environment: string) {
+    let displayName = environment;
+
+    if (!_.isEmpty(pipelineTag)) {
+        displayName = pipelineTag + " " + displayName;
     }
 
-    return `${tenant} ${project} ${environment}`;
+    displayName = project + " " + displayName;
+
+    if (tenant.toLowerCase() !== "default") {
+        displayName = tenant + " " + displayName;
+    }
+
+    return displayName;
 }
 
 export function menuAttachmentForProjects(ctx: HandlerContext, projects: any[],
@@ -58,24 +72,52 @@ export function getDeploymentEnvironmentNamespacesFromDeploymentPipelines(tenant
 export function getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName: string, projectName: string, deploymentPipeline: QMDeploymentPipeline) {
     const namespaces: string[] = [];
     for (const environment of deploymentPipeline.environments) {
-        namespaces.push(getProjectId(tenantName, projectName, environment.postfix));
+        namespaces.push(getProjectOpenshiftNamespace(tenantName, projectName, deploymentPipeline.tag, environment.postfix));
     }
     return namespaces;
 }
 
 export function getPipelineOpenShiftNamespacesForOpenShiftCluster(tenantName: string, project: QMProject, deploymentPipeline: QMDeploymentPipeline, openShiftCluster: OpenShiftConfig): OpenShiftProjectNamespace[] {
-    // TODO: need deploymentPipeline to use the tag
     const environmentsForCreation: OpenShiftProjectNamespace[] = [];
 
     for (const environment of openShiftCluster.defaultEnvironments) {
         environmentsForCreation.push(
             {
-                namespace: getProjectId(tenantName, project.name, environment.id),
-                displayName: getProjectDisplayName(tenantName, project.name, environment.description),
+                namespace: getProjectOpenshiftNamespace(tenantName, project.name, deploymentPipeline.tag, environment.id),
+                displayName: getProjectDisplayName(tenantName, project.name, deploymentPipeline.tag, environment.description),
                 postfix: environment.id,
             },
         );
     }
+    return environmentsForCreation;
+}
+
+export function getAllProjectOpenshiftNamespaces(owningTenant: QMTenant, project: QMProject): OpenShiftProjectNamespace[] {
+    const pipelines: QMDeploymentPipeline[] = [project.devDeploymentPipeline];
+    pipelines.push(...project.releaseDeploymentPipelines);
+
+    const environmentsForCreation: OpenShiftProjectNamespace[] = [];
+    for (const pipeline of pipelines) {
+        environmentsForCreation.push(
+            ...getAllPipelineOpenshiftNamespaces(owningTenant.name, project.name, pipeline),
+        );
+    }
+
+    return environmentsForCreation;
+}
+
+export function getAllPipelineOpenshiftNamespaces(owningTenantName: string, projectName: string, pipeline: QMDeploymentPipeline): OpenShiftProjectNamespace[] {
+    const environmentsForCreation: OpenShiftProjectNamespace[] = [];
+    for (const environment of pipeline.environments) {
+        environmentsForCreation.push(
+            {
+                namespace: getProjectOpenshiftNamespace(owningTenantName, projectName, pipeline.tag, environment.postfix),
+                displayName: getProjectDisplayName(owningTenantName, projectName, pipeline.tag, environment.displayName),
+                postfix: environment.postfix,
+            },
+        );
+    }
+
     return environmentsForCreation;
 }
 
