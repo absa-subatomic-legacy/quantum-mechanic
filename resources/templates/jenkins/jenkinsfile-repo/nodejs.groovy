@@ -5,9 +5,12 @@
  * ---
  * Type          | ID                | Description
  * Secret text   | devops-project    | The OpenShift project Id of the DevOps project that this Jenkins instance is running in
- * Secret text   | dev-project       | The OpenShift project Id of the project's development environment
- * Secret text   | sit-project       | The OpenShift project Id of the project's sit environment
- * Secret text   | uat-project       | The OpenShift project Id of the project's uat environment
+ {{#each devDeploymentEnvironments}}
+ * Secret text   | {{toKebabCase postfix}}-project       | The OpenShift project Id of the project's {{displayName}} environment
+ {{/each}}
+ {{#each releaseDeploymentEnvironments}}
+ * Secret text   | {{toKebabCase postfix}}-project       | The OpenShift project Id of the project's {{displayName}} environment
+ {{/each}}
  *
  */
 
@@ -56,20 +59,29 @@ def getSCMInformation() {
 
 node('nodejs') {
     def teamDevOpsProject
-    def projectDevProject
-    def projectSitProject
-    def projectUatProject
+    {{#each devDeploymentEnvironments}}
+    def project{{toPascalCase postfix}}Project
+    {{/each}}
+    {{#each releaseDeploymentEnvironments}}
+    def project{{toPascalCase postfix}}Project
+    {{/each}}
 
     withCredentials([
-            string(credentialsId: 'devops-project', variable: 'DEVOPS_PROJECT_ID'),
-            string(credentialsId: 'dev-project', variable: 'DEV_PROJECT_ID'),
-            string(credentialsId: 'sit-project', variable: 'SIT_PROJECT_ID'),
-            string(credentialsId: 'uat-project', variable: 'UAT_PROJECT_ID')
+            {{#each devDeploymentEnvironments}}
+                string(credentialsId: '{{toKebabCase postfix}}-project', variable: '{{toUpperSnakeCase postfix}}_PROJECT_ID'),
+            {{/each}}
+            {{#each releaseDeploymentEnvironments}}
+                string(credentialsId: '{{toKebabCase postfix}}-project', variable: '{{toUpperSnakeCase postfix}}_PROJECT_ID'),
+            {{/each}}
+            string(credentialsId: 'devops-project', variable: 'DEVOPS_PROJECT_ID')
     ]) {
         teamDevOpsProject = "${env.DEVOPS_PROJECT_ID}"
-        projectDevProject = "${env.DEV_PROJECT_ID}"
-        projectSitProject = "${env.SIT_PROJECT_ID}"
-        projectUatProject = "${env.UAT_PROJECT_ID}"
+        {{#each devDeploymentEnvironments}}
+        project{{toPascalCase postfix}}Project = "${env.{{toUpperSnakeCase postfix}}_PROJECT_ID}"
+        {{/each}}
+        {{#each releaseDeploymentEnvironments}}
+        project{{toPascalCase postfix}}Project = "${env.{{toUpperSnakeCase postfix}}_PROJECT_ID}"
+        {{/each}}
     }
 
     def project = "${env.JOB_NAME.split('/')[0]}"
@@ -109,37 +121,31 @@ node('nodejs') {
             }
         }
 
-        stage('Deploy to DEV') {
-            sh ': Deploying to DEV...'
+        {{#each devDeploymentEnvironments}}
+        stage('Deploy to {{displayName}}') {
+            sh ': Deploying to {{displayName}}...'
 
             openshift.withProject(teamDevOpsProject) {
-                openshift.tag("${teamDevOpsProject}/${appBuildConfig}:${tag}", "${projectDevProject}/${app}:${tag}")
+                openshift.tag("${teamDevOpsProject}/${appBuildConfig}:${tag}", "${project{{toPascalCase postfix}}Project}/${app}:${tag}")
             }
 
-            deploy(projectDevProject, app, tag);
+            deploy(project{{toPascalCase postfix}}Project, app, tag);
         }
+        {{/each}}
 
-        stage('Deploy to SIT') {
-            sh ': Deploying to SIT...'
+        {{#each releaseDeploymentEnvironments}}
+        stage('Deploy to {{displayName}}') {
+            sh ': Deploying to {{displayName}}...'
 
-            openshift.withProject(projectDevProject) {
-                openshift.tag("${projectDevProject}/${app}:${tag}", "${projectSitProject}/${app}:${tag}")
+            input "Confirm deployment to {{displayName}}"
+
+            openshift.withProject(teamDevOpsProject) {
+                openshift.tag("${teamDevOpsProject}/${appBuildConfig}:${tag}", "${project{{toPascalCase postfix}}Project}/${app}:${tag}")
             }
 
-            deploy(projectSitProject, app, tag)
+            deploy(project{{toPascalCase postfix}}Project, app, tag);
         }
-
-        stage('Deploy to UAT') {
-            sh ': Deploying to UAT...'
-
-            input "Confirm deployment to UAT"
-
-            openshift.withProject(projectSitProject) {
-                openshift.tag("${projectSitProject}/${app}:${tag}", "${projectUatProject}/${app}:${tag}")
-            }
-
-            deploy(projectUatProject, app, tag);
-        }
+        {{/each}}
     }
 
 }
