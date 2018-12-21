@@ -91,11 +91,14 @@ export class CreateProject extends RecursiveParameterRequestCommand
     }
 
     private getDefaultDevDeploymentPipeline(openshiftNonProd: OpenShiftConfig) {
+        // The default dev deployment pipeline will consist of all environments
+        // except the last one defined in the default environment list
         const deploymentPipeline: QMDeploymentPipeline = {
             name: "Default",
             tag: "",
             environments: [],
         };
+        // Add all environments except the last one as per above
         for (let i = 0; i < openshiftNonProd.defaultEnvironments.length - 1; i++) {
             const environment = openshiftNonProd.defaultEnvironments[i];
             deploymentPipeline.environments.push(
@@ -110,11 +113,15 @@ export class CreateProject extends RecursiveParameterRequestCommand
     }
 
     private getDefaultReleaseDeploymentPipeline(openshiftNonProd: OpenShiftConfig) {
+        // The default release deployment pipeline will consist of a single
+        // environment only which will be the last environment defined in the
+        // default environment list
         const deploymentPipeline: QMDeploymentPipeline = {
             name: "Default",
             tag: "",
             environments: [],
         };
+        // Take only the last environment
         const environment = openshiftNonProd.defaultEnvironments[openshiftNonProd.defaultEnvironments.length - 1];
         deploymentPipeline.environments.push(
             {
