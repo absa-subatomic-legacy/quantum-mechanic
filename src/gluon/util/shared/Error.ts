@@ -1,12 +1,8 @@
-import {
-    HandlerContext,
-    HandlerResult,
-    logger,
-    success,
-} from "@atomist/automation-client";
+import {HandlerContext, HandlerResult, logger, success} from "@atomist/automation-client";
 import {MessageOptions} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage} from "@atomist/slack-messages";
+import {SlackMessage, url} from "@atomist/slack-messages";
 import * as util from "util";
+import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 
 export function logErrorAndReturnSuccess(method, error): HandlerResult {
@@ -52,11 +48,11 @@ export class QMError extends Error {
     public getSlackMessage() {
         if (this.slackMessage === null) {
             return {
-                text: `❗${this.message}`,
+                text: `❗${this.message} ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")}`,
             };
         } else if (typeof this.slackMessage === "string") {
             return {
-                text: `❗${this.slackMessage}`,
+                text: `❗${this.slackMessage} ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")}`,
             };
         }
         return this.slackMessage;

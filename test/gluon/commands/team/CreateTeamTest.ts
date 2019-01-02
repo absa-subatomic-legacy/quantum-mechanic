@@ -1,3 +1,4 @@
+import {url} from "@atomist/slack-messages";
 import "mocha";
 import * as assert from "power-assert";
 import {QMConfig} from "../../../../src/config/QMConfig";
@@ -89,6 +90,6 @@ describe("Create Team test", () => {
         };
 
         await subject.runCommand(fakeContext);
-        assert(fakeContext.messageClient.textMsg[0].text === "❗Failed to create team since the team name is already in use. Please retry using a different team name.");
+        assert(fakeContext.messageClient.textMsg[0].text === `❗Failed to create team since the team name is already in use. Please retry using a different team name. ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")}`);
     });
 });

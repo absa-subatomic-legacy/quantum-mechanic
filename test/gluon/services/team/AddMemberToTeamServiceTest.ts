@@ -1,5 +1,7 @@
+import {url} from "@atomist/slack-messages";
 import assert = require("power-assert");
 import {anything, instance, mock, when} from "ts-mockito";
+import {QMConfig} from "../../../../src/config/QMConfig";
 import {GluonService} from "../../../../src/gluon/services/gluon/GluonService";
 import {MemberService} from "../../../../src/gluon/services/gluon/MemberService";
 import {TeamService} from "../../../../src/gluon/services/gluon/TeamService";
@@ -57,7 +59,7 @@ describe("AddMemberToTeamService addUserToGluonTeam", () => {
             errorThrown = error;
         }
 
-        assert.equal(errorThrown.getSlackMessage().text, `❗Failed to add member to the team. Server side failure.`);
+        assert.equal(errorThrown.getSlackMessage().text, `❗Failed to add member to the team. Server side failure. ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")}`);
 
     });
 
