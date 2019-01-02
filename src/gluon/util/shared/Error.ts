@@ -16,7 +16,7 @@ export async function handleQMError(messageClient: QMMessageClient, error) {
 
     if (error && "code" in error && error.code === "ECONNREFUSED") {
         logger.error(`Error code suggests and external service is down.\nError: ${util.inspect(error)}`);
-        return await messageClient.send(`❗Unexpected failure. An external service dependency appears to be down ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")}`);
+        return await messageClient.send(`❗Unexpected failure. An external service dependency appears to be down.`);
     } else if (error instanceof GitError) {
         logger.error(`Error is of GitError type. Error: ${error.message}`);
         return await messageClient.send(error.getSlackMessage());
