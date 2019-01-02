@@ -25,8 +25,7 @@ export async function handleQMError(messageClient: QMMessageClient, error) {
         return await messageClient.send(error.getSlackMessage());
     } else if (error instanceof Error) {
         logger.error(`Error is of default Error type.\nError: ${util.inspect(error)}`);
-        return await messageClient.send(`❗Unhandled exception occurred. Please alert your system admin to check the logs and correct the issue accordingly ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`,
-            "FAQ")}`);
+        return await messageClient.send(`❗Unhandled exception occurred. Please alert your system admin to check the logs and correct the issue accordingly.`);
     } else if (error instanceof OCResultError) {
         logger.error(`Error is of OCResultError type. Error: ${error.message}`);
         return await messageClient.send(`${error.getSlackMessage()}`);
@@ -35,8 +34,7 @@ export async function handleQMError(messageClient: QMMessageClient, error) {
         Command: ${error.command}
         Error: ${error.error}`);
 
-        return await messageClient.send(`❗An Openshift command failed to run successfully. Please alert your system admin to check the logs and correct the issue accordingly ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`,
-            "FAQ")}`);
+        return await messageClient.send(`❗An Openshift command failed to run successfully. Please alert your system admin to check the logs and correct the issue accordingly.`);
     }
     logger.error("Unknown error type. Rethrowing error.");
     throw new Error(error);
