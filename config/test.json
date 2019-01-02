@@ -13,15 +13,15 @@
           "defaultEnvironments": [
             {
               "id": "dev",
-              "description": "Development"
+              "description": "DEV"
             },
             {
               "id": "sit",
-              "description": "Integration testing"
+              "description": "SIT"
             },
             {
               "id": "uat",
-              "description": "User acceptance"
+              "description": "SIT"
             }
           ]
         },
@@ -36,7 +36,7 @@
             "defaultEnvironments": [
               {
                 "id": "prod-a",
-                "description": "Production A"
+                "description": "PROD"
               }
             ]
           }

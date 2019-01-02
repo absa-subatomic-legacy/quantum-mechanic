@@ -13,7 +13,11 @@ import {
     ApplicationType,
     getBuildConfigName,
 } from "../../util/packages/Applications";
-import {getProjectDevOpsId, getProjectId, QMProject} from "../../util/project/Project";
+import {
+    getDeploymentEnvironmentNamespacesFromProject,
+    getProjectDevOpsId,
+    QMProject,
+} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -69,7 +73,7 @@ export class ConfigurePackageInOpenshift extends Task {
             logger.info(`Trying to find tenant: ${project.owningTenant}`);
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
             logger.info(`Found tenant: ${tenant}`);
-            await this.createApplicationOpenshiftResources(tenant.name, project.name, this.packageDetails.packageName, owningTeam.openShiftCloud);
+            await this.createApplicationOpenshiftResources(tenant.name, project, this.packageDetails.packageName);
 
             await this.taskListMessage.succeedTask(this.TASK_ADD_RESOURCES_TO_ENVIRONMENTS);
         }
@@ -152,39 +156,37 @@ export class ConfigurePackageInOpenshift extends Task {
             true);  // TODO clean up this hack - cannot be a boolean (magic)
     }
 
-    private async createApplicationOpenshiftResources(tenantName: string, projectName: string, applicationName: string, openShiftCloud: string): Promise<HandlerResult> {
-
-        for (const environment of QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.defaultEnvironments) {
-            const projectId = getProjectId(tenantName, projectName, environment.id);
+    private async createApplicationOpenshiftResources(tenantName: string, project: QMProject, applicationName: string): Promise<HandlerResult> {
+        for (const deploymentNamespace of getDeploymentEnvironmentNamespacesFromProject(tenantName, project)) {
             const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);
-            logger.info(`Processing app [${appName}] Template for: ${projectId}`);
+            logger.info(`Processing app [${appName}] Template for: ${deploymentNamespace}`);
 
             const appBaseTemplate = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate, devOpsProjectId);
-            appBaseTemplate.metadata.namespace = projectId;
-            await this.ocService.applyResourceFromDataInNamespace(appBaseTemplate, projectId);
+            appBaseTemplate.metadata.namespace = deploymentNamespace;
+            await this.ocService.applyResourceFromDataInNamespace(appBaseTemplate, deploymentNamespace);
 
             const templateParameters = [
                 {key: "APP_NAME", value: appName},
-                {key: "IMAGE_STREAM_PROJECT", value: projectId},
+                {key: "IMAGE_STREAM_PROJECT", value: deploymentNamespace},
                 {key: "DEVOPS_NAMESPACE", value: devOpsProjectId},
             ];
 
             const appProcessedTemplate = await this.ocService.findAndProcessOpenshiftTemplate(
                 this.deploymentDetails.openshiftTemplate,
-                projectId,
+                deploymentNamespace,
                 templateParameters,
                 true);
 
             logger.debug(`Processed app [${appName}] Template: ${JSON.stringify(appProcessedTemplate)}`);
 
             try {
-                await this.ocService.getDeploymentConfigInNamespace(appName, projectId);
+                await this.ocService.getDeploymentConfigInNamespace(appName, deploymentNamespace);
                 logger.warn(`App [${appName}] Template has already been processed, deployment exists`);
             } catch (error) {
                 await this.ocService.applyResourceFromDataInNamespace(
                     appProcessedTemplate,
-                    projectId,
+                    deploymentNamespace,
                 );
             }
         }

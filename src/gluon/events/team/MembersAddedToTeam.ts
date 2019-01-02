@@ -15,7 +15,10 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService";
 import {userFromDomainUser} from "../../util/member/Members";
-import {getProjectId} from "../../util/project/Project";
+import {
+    getDeploymentEnvironmentNamespacesFromProject,
+    QMProject,
+} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
@@ -23,7 +26,8 @@ import {
     OCResultError,
     QMError,
 } from "../../util/shared/Error";
-import {getDevOpsEnvironmentDetails, QMTeam, QMTeamBase} from "../../util/team/Teams";
+import {QMTenant} from "../../util/shared/Tenants";
+import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive MembersAddedToTeamEvent events", `
@@ -121,7 +125,7 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
         }
     }
 
-    private async addPermissionsForUserToTeams(team: QMTeam, projects, membersAddedToTeamEvent) {
+    private async addPermissionsForUserToTeams(team: QMTeam, projects: QMProject[], membersAddedToTeamEvent) {
         try {
             const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
             const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
@@ -139,11 +143,10 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
                     project.bitbucketProject.key,
                     membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername)),
                 );
+                const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
                 // Add to openshift environments
-                for (const environment of osEnv.defaultEnvironments) {
-                    const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
-                    const projectId = getProjectId(tenant.name, project.name, environment.id);
-                    await this.ocService.addTeamMembershipPermissionsToProject(projectId, membersAddedToTeamEvent);
+                for (const projectNamespace of getDeploymentEnvironmentNamespacesFromProject(tenant.name, project)) {
+                    await this.ocService.addTeamMembershipPermissionsToProject(projectNamespace, membersAddedToTeamEvent);
                 }
             }
         } catch (error) {

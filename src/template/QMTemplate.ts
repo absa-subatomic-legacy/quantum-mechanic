@@ -1,4 +1,5 @@
 import * as Handlebars from "handlebars";
+import _ = require("lodash");
 
 export class QMTemplate {
 
@@ -7,6 +8,12 @@ export class QMTemplate {
     constructor(templateFile: string) {
         const fs = require("fs");
         const buffer = fs.readFileSync(templateFile);
+        Handlebars.registerHelper("toLowerCase", str => str.toLowerCase());
+        Handlebars.registerHelper("toUpperCase", str => str.toUpperCase());
+        Handlebars.registerHelper("toKebabCase", str => _.kebabCase(str));
+        Handlebars.registerHelper("toCamelCase", str => _.camelCase(str));
+        Handlebars.registerHelper("toPascalCase", str => _.capitalize(_.camelCase(str)));
+        Handlebars.registerHelper("toUpperSnakeCase", str => _.snakeCase(str).toUpperCase());
         this.template = Handlebars.compile(buffer.toString());
     }
 

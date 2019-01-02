@@ -9,32 +9,30 @@ import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {QMProjectProdRequest} from "../../services/gluon/ProjectProdRequestService";
 import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {ProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
 import {QMMemberBase} from "../../util/member/Members";
-import {QMProject, QMProjectBase} from "../../util/project/Project";
+import {QMProject} from "../../util/project/Project";
 import {
+    DeploymentPipelineIdParam,
+    DeploymentPipelineIdSetter,
     GluonApplicationNameParam,
-    GluonApplicationNameSetter, GluonProjectNameParam,
+    GluonApplicationNameSetter,
+    GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {
-    handleQMError,
-    QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
 
 @CommandHandler("Add a prod deployment job to jenkins for an application", QMConfig.subatomic.commandPrefix + " configure application jenkins prod")
 @Tags("subatomic", "package", "jenkins")
 export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCommand
-    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
+    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, DeploymentPipelineIdSetter {
 
     private static PROD_JENKINSFILE = "jenkinsfile.prod";
 
@@ -49,8 +47,14 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
     })
     public projectName: string;
 
-    @GluonApplicationNameParam({
+    @DeploymentPipelineIdParam({
         callOrder: 2,
+        selectionMessage: "Please select the deployment pipeline to configure the prod deployment for",
+    })
+    public deploymentPipelineId: string;
+
+    @GluonApplicationNameParam({
+        callOrder: 3,
         selectionMessage: "Please select the application you wish to deploy to prod",
     })
     public applicationName: string;
@@ -78,7 +82,7 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-            await this.assertProjectProdIsApproved(project);
+            await this.gluonService.prod.project.assertProjectProdIsApproved(project.projectId, this.deploymentPipelineId);
 
             const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
 
@@ -94,23 +98,6 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
         } catch (error) {
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
-        }
-    }
-
-    private async assertProjectProdIsApproved(project: QMProjectBase) {
-        const projectProdRequests: QMProjectProdRequest[] = await this.gluonService.prod.project.getProjectProdRequestsByProjectId(project.projectId);
-
-        let isProjectProdApproved = false;
-
-        for (const prodRequest of projectProdRequests) {
-            if (prodRequest.approvalStatus.toUpperCase() === "APPROVED") {
-                isProjectProdApproved = true;
-                break;
-            }
-        }
-
-        if (!isProjectProdApproved) {
-            throw new QMError(`The project ${project.name} has not been approved for a production release. Please request and approve prod promotion for this project before retrying.`);
         }
     }
 

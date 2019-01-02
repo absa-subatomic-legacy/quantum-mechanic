@@ -26,7 +26,11 @@ import {ApplicationType} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
 import {ParameterDisplayType} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {GitError, QMError} from "../../util/shared/Error";
-import {getDevOpsEnvironmentDetails, QMTeam, QMTeamBase} from "../../util/team/Teams";
+import {
+    getDevOpsEnvironmentDetails,
+    QMTeam,
+    QMTeamBase,
+} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -167,7 +171,10 @@ export class ConfigurePackageInJenkins extends Task {
                 logger.info("Jenkinsfile doesnt exist. Adding it!");
                 const jenkinsTemplate: QMTemplate = new QMTemplate(this.getPathFromJenkinsfileName(jenkinsfileName as string));
                 await project.addFile(destinationJenkinsfileName,
-                    jenkinsTemplate.build({}));
+                    jenkinsTemplate.build({
+                        devDeploymentEnvironments: this.project.devDeploymentPipeline.environments,
+                        releaseDeploymentEnvironments: this.project.releaseDeploymentPipelines[0].environments,
+                    }));
             }
 
             const clean = await project.isClean();

@@ -36,15 +36,15 @@ Here is an example `local.json`:
           "defaultEnvironments": [
             {
               "id": "dev",
-              "description": "Development"
+              "description": "DEV"
             },
             {
               "id": "sit",
-              "description": "Integration testing"
+              "description": "SIT"
             },
             {
               "id": "uat",
-              "description": "User acceptance"
+              "description": "UAT"
             }
           ]
         },
@@ -59,7 +59,7 @@ Here is an example `local.json`:
             "defaultEnvironments": [
               {
                 "id": "prod-a",
-                "description": "Production A"
+                "description": "PROD"
               }
             ]
           }

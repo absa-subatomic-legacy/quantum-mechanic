@@ -7,14 +7,20 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMGenericProdRequest} from "../../services/gluon/GenericProdRequestService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {QMProject} from "../../util/project/Project";
+import {
+    getPipelineOpenShiftNamespacesForOpenShiftCluster,
+    OpenShiftProjectNamespace,
+    QMProject,
+} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {QMTenant} from "../../util/shared/Tenants";
 import {QMTeam} from "../../util/team/Teams";
 
 @EventHandler("Receive GenericProdRequestedEvent events", `
@@ -37,7 +43,7 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
 
         const genericProdRequestedEvent = event.data.GenericProdRequestedEvent[0];
 
-        const genericProdRequest = await this.gluonService.prod.generic.getGenericProdRequestById(genericProdRequestedEvent.genericProdRequestId);
+        const genericProdRequest: QMGenericProdRequest = await this.gluonService.prod.generic.getGenericProdRequestById(genericProdRequestedEvent.genericProdRequestId);
 
         logger.info(JSON.stringify(genericProdRequest));
 
@@ -50,7 +56,7 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
             const qmProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(project.name);
             const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(qmProject.owningTeam.teamId);
 
-            const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+            const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
             const resources = this.getRequestedProdResources(genericProdRequest);
 
@@ -60,7 +66,8 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
             for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
-                taskRunner.addTask(new CreateOpenshiftResourcesInProject(project.name, tenant.name, openshiftProd, resources));
+                const environmentsForResources: OpenShiftProjectNamespace[] = getPipelineOpenShiftNamespacesForOpenShiftCluster(tenant.name, qmProject, genericProdRequest.deploymentPipeline, openshiftProd);
+                taskRunner.addTask(new CreateOpenshiftResourcesInProject(environmentsForResources, resources, openshiftProd));
             }
 
             await taskRunner.execute(ctx);

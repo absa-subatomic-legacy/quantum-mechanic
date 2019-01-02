@@ -1,6 +1,8 @@
 type Project @rootType {
-	projectId: String
-	name: String
-	description: String
-	tenant: GluonTenantId
+    projectId: String
+    name: String
+    description: String
+    tenant: GluonTenantId
+    devDeploymentPipeline: DeploymentPipeline
+    releaseDeploymentPipelines: [DeploymentPipeline]
 }

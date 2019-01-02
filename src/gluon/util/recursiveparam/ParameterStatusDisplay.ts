@@ -19,7 +19,7 @@ export class ParameterStatusDisplay {
 
     public getDisplayMessage(commandName: string, displayRequested: ParameterDisplayType): SlackMessage {
         const attachments = [];
-        if (displayRequested === ParameterDisplayType.show) {
+        if (displayRequested !== ParameterDisplayType.hide) {
             let textDisplay = `Preparing command *${commandName}*: \n`;
 
             for (const parameter of this.paramOrder) {
@@ -28,7 +28,7 @@ export class ParameterStatusDisplay {
             attachments.push(
                 {
                     text: textDisplay,
-                    color:  QMColours.stdGreenyMcAppleStroodle.hex,
+                    color: QMColours.stdGreenyMcAppleStroodle.hex,
                     fallback: "",
                     mrkdwn_in: ["text"],
                 },

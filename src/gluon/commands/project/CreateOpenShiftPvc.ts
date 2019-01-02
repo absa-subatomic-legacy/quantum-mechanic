@@ -16,13 +16,17 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {getProjectId, QMProject} from "../../util/project/Project";
+import {
+    getDeploymentEnvironmentNamespacesFromProject,
+    QMProject,
+} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
+    GluonTeamNameSetter,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
@@ -56,7 +60,7 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     @RecursiveParameter({
         callOrder: 3,
         selectionMessage: "Please select the project environment(s) to create the PVCs in",
-        setter: setProjectForPvc,
+        setter: setOpenShiftNamespaceForPvc,
     })
     public openShiftProjectNames: string;
 
@@ -82,8 +86,8 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
 
             if (this.openShiftProjectNames === "all") {
                 this.openShiftProjectNames = "";
-                for (const environment of QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd.defaultEnvironments) {
-                    this.openShiftProjectNames += getProjectId(qmTenant.name, qmProject.name, environment.id) + ",";
+                for (const projectNamespace of getDeploymentEnvironmentNamespacesFromProject(qmTenant.name, qmProject)) {
+                    this.openShiftProjectNames += projectNamespace + ",";
                 }
                 this.openShiftProjectNames.substr(0, this.openShiftProjectNames.length - 1);
             }
@@ -139,7 +143,7 @@ Now that your PVCs have been created, you can add this PVC as storage to an appl
 
 }
 
-async function setProjectForPvc(ctx: HandlerContext, commandHandler: CreateOpenShiftPvc, selectionMessage: string) {
+async function setOpenShiftNamespaceForPvc(ctx: HandlerContext, commandHandler: CreateOpenShiftPvc, selectionMessage: string) {
 
     const qmProject: QMProject = await commandHandler.gluonService.projects.gluonProjectFromProjectName(commandHandler.projectName);
 
@@ -147,12 +151,11 @@ async function setProjectForPvc(ctx: HandlerContext, commandHandler: CreateOpenS
 
     const options = [{value: "all", text: "All environments"}];
 
-    for (const environment of QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].openshiftNonProd.defaultEnvironments) {
-        const envId = getProjectId(qmTenant.name, qmProject.name, environment.id);
+    for (const environmentNamespace of getDeploymentEnvironmentNamespacesFromProject(qmTenant.name, qmProject)) {
         options.push(
             {
-                value: envId,
-                text: envId,
+                value: environmentNamespace,
+                text: environmentNamespace,
             },
         );
     }
