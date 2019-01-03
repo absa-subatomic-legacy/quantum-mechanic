@@ -44,7 +44,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, "link-team-channel", false);
+            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, "link-team-channel", false);
             this.succeedCommand();
             return result;
         } catch (error) {
