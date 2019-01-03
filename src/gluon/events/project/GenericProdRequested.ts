@@ -7,14 +7,17 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
+import {OpenshiftListResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {QMGenericProdRequest} from "../../services/gluon/GenericProdRequestService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {getHighestPreProdEnvironment} from "../../util/openshift/Helpers";
 import {
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
+    getProjectOpenshiftNamespace,
     OpenShiftProjectNamespace,
     QMProject,
 } from "../../util/project/Project";
@@ -58,18 +61,23 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
 
             const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
-            const resources = this.getRequestedProdResources(genericProdRequest);
+            const resources: OpenshiftListResource = this.getRequestedProdResources(genericProdRequest);
 
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Creating requested resources in project *${project.name}* production environments started:`,
                 qmMessageClient);
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            const preProdNamespace = getProjectOpenShiftNamespace(tenant.name, qmProject.name, getHighestPreProdEnvironment(owningTeam.openShiftCloud).id);
+            const preProdNamespace: string = getProjectOpenshiftNamespace(
+                tenant.name,
+                project.name,
+                genericProdRequest.deploymentPipeline.tag,
+                getHighestPreProdEnvironment(genericProdRequest.deploymentPipeline).postfix,
+            );
 
             for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
                 const environmentsForResources: OpenShiftProjectNamespace[] = getPipelineOpenShiftNamespacesForOpenShiftCluster(tenant.name, qmProject, genericProdRequest.deploymentPipeline, openshiftProd);
-                taskRunner.addTask(new CreateOpenshiftResourcesInProject(environmentsForResources, resources, openshiftProd));
+                taskRunner.addTask(new CreateOpenshiftResourcesInProject(environmentsForResources, preProdNamespace, resources, openshiftProd));
             }
 
             await taskRunner.execute(ctx);
@@ -82,7 +90,7 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
         }
     }
 
-    private getRequestedProdResources(applicationProdRequest: any) {
+    private getRequestedProdResources(applicationProdRequest: any): OpenshiftListResource {
         const resources = {
             kind: "List",
             apiVersion: "v1",
