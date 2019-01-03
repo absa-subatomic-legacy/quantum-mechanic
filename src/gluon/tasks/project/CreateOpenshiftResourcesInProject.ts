@@ -1,7 +1,9 @@
 import {HandlerContext} from "@atomist/automation-client";
+import _ = require("lodash");
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
+import {OpenshiftListResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {OCService} from "../../services/openshift/OCService";
+import {GenericOpenshiftResourceService} from "../../services/projects/GenericOpenshiftResourceService";
 import {OpenShiftProjectNamespace} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {Task} from "../Task";
@@ -12,9 +14,11 @@ export class CreateOpenshiftResourcesInProject extends Task {
     private dynamicTaskNameStore: { [k: string]: string } = {};
 
     constructor(private environmentsForResources: OpenShiftProjectNamespace[],
-                private openshiftResources: OpenshiftResource,
+                private originalNamespace: string,
+                private openshiftResources: OpenshiftListResource,
                 private openshiftEnvironment: OpenShiftConfig,
-                private ocService = new OCService()) {
+                private ocService = new OCService(),
+                private genericOpenShiftResourceService = new GenericOpenshiftResourceService()) {
         super();
     }
 
@@ -39,7 +43,15 @@ export class CreateOpenshiftResourcesInProject extends Task {
         await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
         for (const environment of this.environmentsForResources) {
-            await this.ocService.applyResourceFromDataInNamespace(this.openshiftResources, environment.namespace, true);
+            const clonedResources = _.cloneDeep(this.openshiftResources);
+
+            clonedResources.items = this.genericOpenShiftResourceService.migrateDeploymentConfigImageStreamNamespaces(
+                this.genericOpenShiftResourceService.cleanAllPromotableResources(clonedResources.items),
+                this.originalNamespace,
+                environment.namespace,
+            );
+
+            await this.ocService.applyResourceFromDataInNamespace(clonedResources, environment.namespace, true);
             await this.taskListMessage.succeedTask(this.dynamicTaskNameStore[`${environment.postfix}Environment`]);
         }
 

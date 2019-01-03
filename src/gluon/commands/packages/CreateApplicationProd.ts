@@ -1,13 +1,13 @@
 import {
     HandlerContext,
     HandlerResult,
-    logger,
     Parameter,
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
+import {OpenshiftListResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {ApplicationProdRequestMessages} from "../../messages/package/ApplicationProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -175,14 +175,12 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
 
         const deploymentPipeline: QMDeploymentPipeline = project.releaseDeploymentPipelines.filter(pipeline => pipeline.pipelineId === this.deploymentPipelineId)[0];
 
-        const allResources = await this.ocService.exportAllResources(getProjectOpenshiftNamespace(tenant.name, project.name, deploymentPipeline.tag, getHighestPreProdEnvironment(deploymentPipeline).postfix));
+        const allResources: OpenshiftListResource = await this.ocService.exportAllResources(getProjectOpenshiftNamespace(tenant.name, project.name, deploymentPipeline.tag, getHighestPreProdEnvironment(deploymentPipeline).postfix));
 
         const resources = await this.packageOpenshiftResourceService.getAllApplicationRelatedResources(
             this.applicationName,
             allResources,
         );
-
-        logger.info(resources);
 
         this.openShiftResourcesJSON = JSON.stringify(resources.items.map(resource => {
                 return {
