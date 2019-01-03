@@ -1,5 +1,6 @@
 import {
-    addressSlackChannelsFromContext, buttonForCommand,
+    addressSlackChannelsFromContext,
+    buttonForCommand,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -12,12 +13,18 @@ import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMProjectProdRequest} from "../../services/gluon/ProjectProdRequestService";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToProdEnvironment} from "../../tasks/team/AddJenkinsToProdEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
-import {OpenshiftProjectEnvironmentRequest, QMProject} from "../../util/project/Project";
+import {
+    getPipelineOpenShiftNamespacesForOpenShiftCluster,
+    OpenshiftProjectEnvironmentRequest,
+    OpenShiftProjectNamespace,
+    QMProject,
+} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
@@ -31,7 +38,7 @@ subscription ProjectProductionEnvironmentsRequestClosedEvent {
   }
 }
 `)
-export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  implements HandleEvent<any> {
+export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent implements HandleEvent<any> {
 
     constructor(public gluonService = new GluonService()) {
         super();
@@ -44,7 +51,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
 
         logger.info("Trying to find projectProdRequestDetails");
 
-        const projectProdRequest = await this.gluonService.prod.project.getProjectProdRequestById(projectProductionRequestClosedEvent.projectProdRequestId);
+        const projectProdRequest: QMProjectProdRequest = await this.gluonService.prod.project.getProjectProdRequestById(projectProductionRequestClosedEvent.projectProdRequestId);
 
         const associatedTeams = await this.gluonService.teams.getTeamsAssociatedToProject(projectProdRequest.project.projectId);
 
@@ -69,13 +76,17 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
 
                 for (const prodOpenshift of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
 
+                    // Get the devops prod environment details.
                     const devopsEnvironmentDetails = getDevOpsEnvironmentDetailsProd(owningTeam.name);
+
+                    // Get details of all the prod project namespaces we need to operate on.
+                    const environmentsForCreation: OpenShiftProjectNamespace[] = getPipelineOpenShiftNamespacesForOpenShiftCluster(owningTenant.name, project, projectProdRequest.deploymentPipeline, prodOpenshift);
 
                     taskRunner.addTask(new CreateTeamDevOpsEnvironment({team: owningTeam}, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
-                        new CreateOpenshiftEnvironments(request, prodOpenshift, devopsEnvironmentDetails),
+                        new CreateOpenshiftEnvironments(request, environmentsForCreation, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
-                        new AddJenkinsToProdEnvironment({team: owningTeam}, request, prodOpenshift),
+                        new AddJenkinsToProdEnvironment({team: owningTeam}, environmentsForCreation, prodOpenshift),
                     );
                 }
 
@@ -120,7 +131,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent  imp
             attachments: [{
                 text: "Please check with your system admin and retry when the reason of failure has been determined.",
                 fallback: "Please check with your system admin and retry when the reason of failure has been determined.",
-                color:  QMColours.stdReddyMcRedFace.hex,
+                color: QMColours.stdReddyMcRedFace.hex,
                 actions: [
                     buttonForCommand(
                         {

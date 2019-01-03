@@ -34,11 +34,13 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
 
     private parameterStatusDisplay: ParameterStatusDisplay;
 
-    protected constructor(private updateMenuEachRun = true) {
+    protected constructor() {
         super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
+        this.initialise();
+
         if (_.isEmpty(this.messagePresentationCorrelationId)) {
             this.messagePresentationCorrelationId = uuid.v4();
         }
@@ -56,7 +58,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
             }
         }
 
-        if (this.updateMenuEachRun) {
+        if (this.displayResultMenu === ParameterDisplayType.show) {
             const displayMessage = this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
             await ctx.messageClient.respond(displayMessage, {id: this.messagePresentationCorrelationId});
         }
@@ -98,10 +100,14 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
         throw new QMError("Recursive parameters could not be set correctly. This is an implementation fault. Please raise an issue.");
     }
 
+    protected initialise() {
+        // override to intialise the class on each run
+    }
+
     protected abstract runCommand(ctx: HandlerContext): Promise<HandlerResult>;
 
-    protected getDisplayMessage() {
-        return this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), this.displayResultMenu);
+    protected getDisplayMessage(displayResultMenu: ParameterDisplayType = this.displayResultMenu) {
+        return this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), displayResultMenu);
     }
 
     private async setNextParameter(ctx: HandlerContext): Promise<HandlerResult> {
@@ -206,5 +212,6 @@ interface RecursiveParameterMapping {
 
 export enum ParameterDisplayType {
     show = "show",
+    showInitial = "showIntial",
     hide = "hide",
 }

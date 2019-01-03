@@ -1,10 +1,10 @@
-import {logger} from "@atomist/automation-client";
-import {OpenshiftProjectEnvironment} from "../../../config/OpenShiftConfig";
-import {QMConfig} from "../../../config/QMConfig";
+import {
+    QMDeploymentEnvironment,
+    QMDeploymentPipeline,
+} from "../project/Project";
 
-export function getHighestPreProdEnvironment(openShiftCloud: string): OpenshiftProjectEnvironment {
-    const nEnvironments = QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.defaultEnvironments.length;
-    return QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.defaultEnvironments[nEnvironments - 1];
+export function getHighestPreProdEnvironment(deploymentPipeline: QMDeploymentPipeline): QMDeploymentEnvironment {
+    return deploymentPipeline.environments[deploymentPipeline.environments.length - 1];
 }
 
 export function getResourceDisplayMessage(allResources) {

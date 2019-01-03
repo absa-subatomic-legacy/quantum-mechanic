@@ -11,6 +11,8 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMProject} from "../../util/project/Project";
 import {
+    DeploymentPipelineIdParam,
+    DeploymentPipelineIdSetter,
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
@@ -22,7 +24,7 @@ import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 @CommandHandler("Create the OpenShift production environments for a project", QMConfig.subatomic.commandPrefix + " request project prod")
 @Tags("subatomic", "project", "other")
 export class CreateProjectProdEnvironments extends RecursiveParameterRequestCommand
-    implements GluonTeamNameSetter, GluonProjectNameSetter {
+    implements GluonTeamNameSetter, GluonProjectNameSetter, DeploymentPipelineIdSetter {
 
     @GluonTeamNameParam({
         callOrder: 0,
@@ -36,6 +38,12 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
         selectionMessage: "Please select the projects you wish to provision the production environments for",
     })
     public projectName: string = null;
+
+    @DeploymentPipelineIdParam({
+        callOrder: 2,
+        selectionMessage: "Please select the deployment pipeline you wish to take to prod",
+    })
+    public deploymentPipelineId;
 
     constructor(public gluonService = new GluonService()) {
         super();
@@ -54,7 +62,7 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
 
             const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-            await this.gluonService.prod.project.createProjectProdRequest(member.memberId, project.projectId);
+            await this.gluonService.prod.project.createProjectProdRequest(member.memberId, project.projectId, this.deploymentPipelineId);
 
             this.succeedCommand();
             return await success();

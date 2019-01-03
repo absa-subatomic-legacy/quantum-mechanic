@@ -11,13 +11,11 @@ import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResou
 import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory";
 import {userFromDomainUser} from "../../util/member/Members";
 import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
-import {getProjectDisplayName} from "../../util/project/Project";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
 import {QuotaLoader} from "../../util/resources/QuotaLoader";
 import {QMError, QMErrorType} from "../../util/shared/Error";
 import {retryFunction} from "../../util/shared/RetryFunction";
 import {QMTeam} from "../../util/team/Teams";
-import {GluonService} from "../gluon/GluonService";
 import {OCImageService} from "./OCImageService";
 
 export class OCService {
@@ -39,7 +37,7 @@ export class OCService {
     private quotaLoader: QuotaLoader = new QuotaLoader();
     private baseProjectTemplateLoader: BaseProjectTemplateLoader = new BaseProjectTemplateLoader();
 
-    constructor(private ocImageService = new OCImageService(), private gluonService = new GluonService()) {
+    constructor(private ocImageService = new OCImageService()) {
     }
 
     public async setOpenShiftDetails(openshiftDetails: OpenShiftConfig) {
@@ -66,12 +64,11 @@ export class OCService {
         return createResult.data;
     }
 
-    public async newSubatomicProject(openshiftProjectId: string, projectName: string, owningTenant: string, environment: string[], rawResult = false): Promise<any> {
-        logger.debug(`Trying to create new Subatomic Project. openshiftProjectId: ${openshiftProjectId}; projectName: ${projectName}; environment: ${JSON.stringify(environment)} `);
-
+    public async newSubatomicProject(openshiftProjectId: string, projectDisplayName: string, projectName: string, environmentPrefix: string, rawResult = false): Promise<any> {
+        logger.debug(`Trying to create new Subatomic Project. openshiftProjectId: ${openshiftProjectId}; projectDisplayName: ${projectDisplayName}; projectName: ${projectName}; environmentPrefix: ${environmentPrefix} `);
         const createResult = await this.openShiftApi.newProject(openshiftProjectId,
-            getProjectDisplayName(owningTenant, projectName, environment[0]),
-            `${environment[1]} environment for ${projectName} [managed by Subatomic]`);
+            projectDisplayName,
+            `${environmentPrefix} environment for ${projectName} [managed by Subatomic]`);
         if (rawResult) {
             return createResult;
         } else if (!isSuccessCode(createResult.status)) {
@@ -294,15 +291,21 @@ export class OCService {
             {key: "NAMESPACE", value: devopsNamespace},
             {key: "BITBUCKET_NAME", value: "Subatomic Bitbucket"},
             {key: "BITBUCKET_URL", value: QMConfig.subatomic.bitbucket.baseUrl},
-            {key: "BITBUCKET_CREDENTIALS_ID", value: `${devopsNamespace}-bitbucket`},
+            {
+                key: "BITBUCKET_CREDENTIALS_ID",
+                value: `${devopsNamespace}-bitbucket`,
+            },
             {key: "JENKINS_ADMIN_EMAIL", value: "subatomic@local"},
-            {key: "DEVOPS_URL", value: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`},
+            {
+                key: "DEVOPS_URL",
+                value: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
+            },
         ];
 
         return await this.findAndProcessOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, params);
     }
 
-    public async findAndProcessOpenshiftTemplate(templateName: string, namespace: string, params: Array<{key: string, value: string}>, ignoreUnknownParameters: boolean = false) {
+    public async findAndProcessOpenshiftTemplate(templateName: string, namespace: string, params: Array<{ key: string, value: string }>, ignoreUnknownParameters: boolean = false) {
         logger.debug(`Trying to find And Process Openshift Template template. templateName: ${templateName}`);
 
         // Get the required template
@@ -424,7 +427,10 @@ export class OCService {
             const jenkinsRoute: OpenshiftResource = response.data;
             const key = "haproxy.router.openshiftNonProd.io/timeout";
             const value = "120s";
-            const annotations = Object.entries(jenkinsRoute.metadata.annotations).map(p => ({key: p[0], value: p[1]}));
+            const annotations = Object.entries(jenkinsRoute.metadata.annotations).map(p => ({
+                key: p[0],
+                value: p[1],
+            }));
 
             // If KVP combination doesn't exist...
             if (!annotations.some(a => a.key === key && a.value === value)) {
@@ -493,7 +499,7 @@ export class OCService {
         const rawSSHKey = QMConfig.subatomic.bitbucket.cicdKey.split(" ")[1];
         const cicdPrivateKey = fs.readFileSync(
             QMConfig.subatomic.bitbucket.cicdPrivateKeyPath,
-            "utf8").split("-----")[2].replace(/\n|\r/g, "");
+            "utf8").split("-----")[2].replace(/[\n\r]/g, "");
 
         const secretResource: OpenshiftResource = {
             kind: "Secret",

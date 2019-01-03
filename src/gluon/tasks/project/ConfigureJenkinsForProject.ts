@@ -6,7 +6,11 @@ import {QMTemplate} from "../../../template/QMTemplate";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getJenkinsBitbucketAccessCredential} from "../../util/jenkins/JenkinsCredentials";
-import {getProjectOpenShiftNamespace} from "../../util/project/Project";
+import {
+    getAllPipelineOpenshiftNamespaces,
+    OpenShiftProjectNamespace,
+    QMDeploymentPipeline,
+} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -19,11 +23,19 @@ export class ConfigureJenkinsForProject extends Task {
     private readonly TASK_CREATE_JENKINS_BUILD_TEMPLATE = TaskListMessage.createUniqueTaskName("JenkinsBuildTemplate");
     private readonly TASK_ADD_JENKINS_CREDENTIALS = TaskListMessage.createUniqueTaskName("JenkinsCredentials");
 
+    private allEnvironmentsForCreation: OpenShiftProjectNamespace[];
+
     constructor(private environmentsRequestedEvent,
+                private devDeployPipelineForCreation: QMDeploymentPipeline,
+                private releaseDeploymentPipelinesForCreation: QMDeploymentPipeline[],
                 private openshiftEnvironment: OpenShiftConfig,
                 private ocService = new OCService(),
                 private jenkinsService = new JenkinsService()) {
         super();
+        this.allEnvironmentsForCreation = getAllPipelineOpenshiftNamespaces(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, devDeployPipelineForCreation);
+        for (const pipeline of releaseDeploymentPipelinesForCreation) {
+            this.allEnvironmentsForCreation.push(...getAllPipelineOpenshiftNamespaces(this.environmentsRequestedEvent.owningTenant.name, this.environmentsRequestedEvent.project.name, pipeline));
+        }
     }
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
@@ -39,9 +51,7 @@ export class ConfigureJenkinsForProject extends Task {
         await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
         await this.addEditRolesToJenkinsServiceAccount(
-            teamDevOpsProjectId,
-            this.environmentsRequestedEvent.project.name,
-            this.environmentsRequestedEvent.owningTenant.name);
+            teamDevOpsProjectId);
 
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_SA_RIGHTS);
 
@@ -63,28 +73,26 @@ export class ConfigureJenkinsForProject extends Task {
         return true;
     }
 
-    private async addEditRolesToJenkinsServiceAccount(teamDevOpsProjectId: string, projectName: string, tenant: string) {
+    private async addEditRolesToJenkinsServiceAccount(teamDevOpsProjectId: string) {
 
-        for (const environment of this.openshiftEnvironment.defaultEnvironments) {
-            const openshiftProjectId = getProjectOpenShiftNamespace(tenant, projectName, environment.id);
+        for (const environment of this.allEnvironmentsForCreation) {
             await this.ocService.addRoleToUserInNamespace(
                 `system:serviceaccount:${teamDevOpsProjectId}:jenkins`,
                 "edit",
-                openshiftProjectId);
+                environment.namespace);
         }
+
     }
 
     private async createJenkinsBuildTemplate(environmentsRequestedEvent, teamDevOpsProjectId: string, jenkinsHost: string, token: string) {
         const projectTemplate: QMTemplate = new QMTemplate("resources/templates/jenkins/jenkins-openshift-environment-credentials.xml");
+
         const parameters: { [k: string]: any } = {
             projectName: environmentsRequestedEvent.project.name,
             docsUrl: QMConfig.subatomic.docs.baseUrl,
             teamDevOpsProjectId,
+            deploymentEnvironments: this.allEnvironmentsForCreation,
         };
-
-        for (const environment of this.openshiftEnvironment.defaultEnvironments) {
-            parameters[`${environment.id}ProjectId`] = getProjectOpenShiftNamespace(environmentsRequestedEvent.owningTenant.name, environmentsRequestedEvent.project.name, environment.id);
-        }
 
         const builtTemplate: string = projectTemplate.build(parameters);
         logger.info("Template found and built successfully.");

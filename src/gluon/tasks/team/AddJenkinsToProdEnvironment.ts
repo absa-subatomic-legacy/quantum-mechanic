@@ -6,7 +6,7 @@ import {
     roleBindingDefinition,
     serviceAccountDefinition,
 } from "../../util/jenkins/JenkinsOpenshiftResources";
-import {getProjectOpenShiftNamespace} from "../../util/project/Project";
+import {OpenShiftProjectNamespace} from "../../util/project/Project";
 import {
     getDevOpsEnvironmentDetails,
     getDevOpsEnvironmentDetailsProd,
@@ -22,7 +22,7 @@ export class AddJenkinsToProdEnvironment extends Task {
     private readonly TASK_ADD_JENKINS_CREDENTIALS = TaskListMessage.createUniqueTaskName("JenkinsCredentials");
 
     constructor(private devOpsRequestedEvent,
-                private environmentsRequestedDetails,
+                private prodOpenShiftNamespaces: OpenShiftProjectNamespace[],
                 private openshiftEnvironment: OpenShiftConfig,
                 private jenkinsService = new JenkinsService(),
                 private ocService = new OCService()) {
@@ -47,10 +47,9 @@ export class AddJenkinsToProdEnvironment extends Task {
         const prodToken = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProd);
         await this.taskListMessage.succeedTask(this.TASK_CREATE_JENKINS_SA);
 
-        for (const environment of this.openshiftEnvironment.defaultEnvironments) {
-            const projectId = getProjectOpenShiftNamespace(this.environmentsRequestedDetails.owningTenant.name, this.environmentsRequestedDetails.project.name, environment.id);
-            logger.info(`Working with OpenShift project Id: ${projectId}`);
-            await this.addEditRolesToJenkinsServiceAccount(teamDevOpsProd, projectId);
+        for (const environment of this.prodOpenShiftNamespaces) {
+            logger.info(`Working with OpenShift project Id: ${environment.namespace}`);
+            await this.addEditRolesToJenkinsServiceAccount(teamDevOpsProd, environment.namespace);
         }
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_SA_RIGHTS);
 

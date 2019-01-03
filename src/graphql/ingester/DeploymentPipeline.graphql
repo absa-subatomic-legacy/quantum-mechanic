@@ -1,0 +1,5 @@
+type DeploymentPipeline @rootType {
+    name: String
+    tag: String
+    environments: [DeploymentEnvironment]
+}

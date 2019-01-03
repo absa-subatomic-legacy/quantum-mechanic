@@ -6,7 +6,7 @@ import {
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {menuAttachmentForApplications} from "../packages/Applications";
-import {menuAttachmentForProjects} from "../project/Project";
+import {menuAttachmentForProjects, QMProject} from "../project/Project";
 import {QMError} from "../shared/Error";
 import {createMenuAttachment} from "../shared/GenericMenu";
 import {menuAttachmentForTenants} from "../shared/Tenants";
@@ -218,5 +218,54 @@ export interface GluonApplicationNameSetter {
     gluonService: GluonService;
     projectName: string;
     applicationName: string;
+    handle: (ctx: HandlerContext) => Promise<HandlerResult>;
+}
+
+export async function setDeploymentPipelineId(
+    ctx: HandlerContext,
+    commandHandler: DeploymentPipelineIdSetter,
+    selectionMessage: string = "Please select an application"): Promise<RecursiveSetterResult> {
+    if (commandHandler.gluonService === undefined) {
+        throw new QMError(`setGluonApplicationName commandHandler requires gluonService parameter to be defined`);
+    }
+
+    if (commandHandler.projectName === undefined) {
+        throw new QMError(`setGluonApplicationName commandHandler requires the projectName parameter to be defined`);
+    }
+
+    const project: QMProject = await commandHandler.gluonService.projects.gluonProjectFromProjectName(commandHandler.projectName);
+
+    if (project.releaseDeploymentPipelines.length === 1) {
+        commandHandler.deploymentPipelineId = project.releaseDeploymentPipelines[0].pipelineId;
+        return {setterSuccess: true};
+    } else {
+        return {
+            setterSuccess: false,
+            messagePrompt: createMenuAttachment(
+                project.releaseDeploymentPipelines.map(deploymentPipeline => {
+                    return {
+                        value: deploymentPipeline.pipelineId,
+                        text: deploymentPipeline.name,
+                    };
+                }),
+                commandHandler,
+                selectionMessage,
+                selectionMessage,
+                "Select Application/Library",
+                "deploymentPipelineId",
+            ),
+        };
+    }
+}
+
+export function DeploymentPipelineIdParam(details: RecursiveParameterDetails) {
+    details.setter = setDeploymentPipelineId;
+    return RecursiveParameter(details);
+}
+
+export interface DeploymentPipelineIdSetter {
+    gluonService: GluonService;
+    projectName: string;
+    deploymentPipelineId: string;
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
