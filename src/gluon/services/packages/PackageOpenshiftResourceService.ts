@@ -1,5 +1,9 @@
 import {logger} from "@atomist/automation-client";
 import _ = require("lodash");
+import {
+    OpenshiftListResource,
+    OpenshiftResource,
+} from "../../../openshift/api/resources/OpenshiftResource";
 import {QMError} from "../../util/shared/Error";
 import {GenericOpenshiftResourceService} from "../projects/GenericOpenshiftResourceService";
 
@@ -8,7 +12,7 @@ export class PackageOpenshiftResourceService {
     constructor(private genericOpenshiftResourceService: GenericOpenshiftResourceService = new GenericOpenshiftResourceService()) {
     }
 
-    public async getAllApplicationRelatedResources(applicationName, resources) {
+    public async getAllApplicationRelatedResources(applicationName, resources: OpenshiftListResource) {
 
         const applicationDC = this.findApplicationDeploymentConfig(applicationName, resources);
 
@@ -24,7 +28,7 @@ export class PackageOpenshiftResourceService {
 
         const routes = this.findRoutes(resources, services);
 
-        const collectedResources = [];
+        const collectedResources: OpenshiftResource[] = [];
 
         collectedResources.push(applicationDC);
         collectedResources.push(...pvcs);
@@ -41,7 +45,7 @@ export class PackageOpenshiftResourceService {
         return resources;
     }
 
-    private findApplicationDeploymentConfig(applicationName: string, openshiftResources) {
+    private findApplicationDeploymentConfig(applicationName: string, openshiftResources: OpenshiftListResource) {
         const kebabbedName = _.kebabCase(applicationName);
 
         for (const resource of openshiftResources.items) {
@@ -54,7 +58,7 @@ export class PackageOpenshiftResourceService {
         throw new QMError("Failed to find DeploymentConfig for selected application.");
     }
 
-    private findPVCs(applicationDC, allResources) {
+    private findPVCs(applicationDC, allResources: OpenshiftListResource) {
         const pvcs = [];
         try {
             const pvcNames = this.getPvcNames(applicationDC);
@@ -73,7 +77,7 @@ export class PackageOpenshiftResourceService {
         return pvcs;
     }
 
-    private findSecrets(applicationDC, allResources) {
+    private findSecrets(applicationDC, allResources: OpenshiftListResource) {
         const secrets = [];
         try {
             const secretNames = this.getSecretNames(applicationDC);
@@ -90,7 +94,7 @@ export class PackageOpenshiftResourceService {
         return secrets;
     }
 
-    private findConfigMaps(applicationDC, allResources) {
+    private findConfigMaps(applicationDC, allResources: OpenshiftListResource) {
         const configMaps = [];
         try {
             const configMapNames = this.getConfigMapNames(applicationDC);
@@ -107,7 +111,7 @@ export class PackageOpenshiftResourceService {
         return configMaps;
     }
 
-    private findResourceByKindAndName(allResources, kind: string, name: string) {
+    private findResourceByKindAndName(allResources: OpenshiftListResource, kind: string, name: string) {
         logger.info("Trying to find: " + name);
 
         for (const resource of allResources.items) {
@@ -150,7 +154,7 @@ export class PackageOpenshiftResourceService {
         return secretNames;
     }
 
-    private findImageStreams(applicationDC, allResources) {
+    private findImageStreams(applicationDC, allResources: OpenshiftListResource) {
         const imageStreams = [];
         try {
             const imageNameParts = applicationDC.spec.template.spec.containers[0].image.split("/");
@@ -167,7 +171,7 @@ export class PackageOpenshiftResourceService {
         return imageStreams;
     }
 
-    private findServices(applicationDc, allResources) {
+    private findServices(applicationDc, allResources: OpenshiftListResource) {
         const services = [];
         try {
             for (const resource of allResources.items) {
@@ -189,7 +193,7 @@ export class PackageOpenshiftResourceService {
         return services;
     }
 
-    private findRoutes(allResources, services) {
+    private findRoutes(allResources: OpenshiftListResource, services) {
         const routes = [];
         try {
             for (const resource of allResources.items) {

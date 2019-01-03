@@ -11,7 +11,6 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GenericProdRequestMessages} from "../../messages/project/GenericProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {GenericOpenshiftResourceService} from "../../services/projects/GenericOpenshiftResourceService";
 import {
     getHighestPreProdEnvironment,
     getResourceDisplayMessage,
@@ -88,7 +87,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
     private genericProdRequestMessages = new GenericProdRequestMessages();
 
-    constructor(public gluonService = new GluonService(), public ocService = new OCService(), public genericOpenshiftResourceService = new GenericOpenshiftResourceService()) {
+    constructor(public gluonService = new GluonService(), public ocService = new OCService()) {
         super();
     }
 
@@ -169,11 +168,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         const projectNamespace = getProjectOpenshiftNamespace(tenant.name, project.name, deploymentPipeline.tag, getHighestPreProdEnvironment(deploymentPipeline).postfix);
         const allResources = await this.ocService.exportAllResources(projectNamespace);
 
-        /*const resources = this.genericOpenshiftResourceService.cleanAllPromotableResources(
-            allResources.items,
-        );*/
-
-        logger.info(allResources);
+        // logger.info(allResources);
 
         this.openShiftResourcesJSON = JSON.stringify(allResources.items.map(resource => {
                 return {

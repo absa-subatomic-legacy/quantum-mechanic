@@ -7,7 +7,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OpenshiftApiResult} from "../../../openshift/api/base/OpenshiftApiResult";
 import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
+import {
+    OpenshiftListResource,
+    OpenshiftResource,
+} from "../../../openshift/api/resources/OpenshiftResource";
 import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory";
 import {userFromDomainUser} from "../../util/member/Members";
 import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
@@ -616,7 +619,7 @@ export class OCService {
         return project;
     }
 
-    public async exportAllResources(projectIdNameSpace: string): Promise<any> {
+    public async exportAllResources(projectIdNameSpace: string): Promise<OpenshiftListResource> {
         logger.debug("Trying to export all required resources...");
 
         const resourceKindsRequired: string[] = ["Service", "DeploymentConfig", "ImageStream", "Route", "PersistentVolumeClaim"];
@@ -637,7 +640,7 @@ export class OCService {
             }
         }
 
-        const openShiftResourceList: OpenshiftResource = {
+        const openShiftResourceList: OpenshiftListResource = {
             kind: "List",
             apiVersion: "v1",
             metadata: {},

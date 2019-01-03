@@ -29,7 +29,7 @@ export class GenericOpenshiftResourceService {
                 container.image = " ";
             }
         }
-        for (const trigger of deploymentConfig.spec.template.triggers) {
+        for (const trigger of deploymentConfig.spec.triggers) {
             if (trigger.type === "ImageChange" && trigger.imageChangeParams.from.namespace === oldNamespace) {
                 trigger.imageChangeParams.from.namespace = newNamespace;
             }
