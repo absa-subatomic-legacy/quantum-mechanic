@@ -6,6 +6,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
+import {QMMemberBase} from "../../util/member/Members";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 
@@ -70,7 +71,7 @@ Consider linking an existing application called ${applicationName}. Click the bu
                         fallback: "Application not managed by Subatomic",
                         footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-bitbucket-project`,
                             "documentation")}`,
-                        color:  QMColours.stdMuddyYellow.hex,
+                        color: QMColours.stdMuddyYellow.hex,
                         mrkdwn_in: ["text"],
                         actions: [
                             buttonForCommand(
@@ -104,11 +105,21 @@ Consider linking an existing application called ${applicationName}. Click the bu
             });
     }
 
-    public async createGluonApplication(applicationDetails: any): Promise<any> {
+    public async createGluonApplication(applicationDetails: QMNewApplication): Promise<any> {
         logger.debug(`Trying to create application.`);
         return await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`, applicationDetails);
     }
 
+}
+
+export interface QMNewApplication {
+    name: string;
+    description: string;
+    applicationType: string;
+    projectId: string;
+    bitbucketRepository: QMBitbucketRepository;
+    createdBy: QMMemberBase;
+    requestConfiguration: boolean;
 }
 
 export interface QMApplication {
@@ -118,12 +129,13 @@ export interface QMApplication {
     applicationType: string;
     projectId: string;
     bitbucketRepository: QMBitbucketRepository;
+    createdBy: QMMemberBase;
 }
 
 export interface QMBitbucketRepository {
-    bitbucketId: string;
-    slug: string;
+    bitbucketId?: string;
+    slug?: string;
     name: string;
     repoUrl: string;
-    remoteUrl: string;
+    remoteUrl?: string;
 }

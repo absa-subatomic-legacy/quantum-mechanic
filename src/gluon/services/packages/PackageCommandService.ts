@@ -2,6 +2,7 @@ import {HandlerResult, logger, success} from "@atomist/automation-client";
 import * as _ from "lodash";
 import {inspect} from "util";
 import {isSuccessCode} from "../../../http/Http";
+import {QMMemberBase} from "../../util/member/Members";
 import {ApplicationType} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
@@ -32,7 +33,7 @@ export class PackageCommandService {
         const member = await this.gluonService.members.gluonMemberFromScreenName(slackScreeName);
 
         return await this.linkBitbucketRepository(
-            member.memberId,
+            member,
             packageName,
             packageDescription,
             bitbucketRepositorySlug,
@@ -42,7 +43,7 @@ export class PackageCommandService {
             applicationType);
     }
 
-    private async linkBitbucketRepository(memberId: string,
+    private async linkBitbucketRepository(member: QMMemberBase,
                                           libraryName: string,
                                           libraryDescription: string,
                                           bitbucketRepositorySlug: string,
@@ -57,7 +58,7 @@ export class PackageCommandService {
                 description: libraryDescription,
                 applicationType,
                 projectId: gluonProjectId,
-                createdBy: memberId,
+                createdBy: member,
                 bitbucketRepository: {
                     bitbucketId: repo.id,
                     name: repo.name,
@@ -71,7 +72,7 @@ export class PackageCommandService {
         if (createApplicationResult.status === 409) {
             logger.error(`Failed to create application since the name of the application is already in use.`);
             throw new QMError(`Failed to create application since the name of the application is already in use. Please retry using a different name.`);
-        } else if (createApplicationResult.status === 403)  {
+        } else if (createApplicationResult.status === 403) {
             logger.error("Failed to create application since you are not a part of the team.");
             throw new QMError(`You are not a part of this team. Please either apply to join or get added by a team admin then re-run your command.`);
         } else if (!isSuccessCode(createApplicationResult.status)) {
