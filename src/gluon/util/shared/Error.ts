@@ -1,6 +1,12 @@
-import {HandlerContext, HandlerResult, logger, success} from "@atomist/automation-client";
+import {
+    HandlerContext,
+    HandlerResult,
+    logger,
+    success,
+} from "@atomist/automation-client";
 import {MessageOptions} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
+import _ = require("lodash");
 import * as util from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
@@ -46,16 +52,37 @@ export class QMError extends Error {
     }
 
     public getSlackMessage() {
+        // Concatenate the FAQ help message to all QMErrors. This requires some special logic
+        // to do correctly for cases where the message does not end with a punctuation mark,
+        // and for the different data types the message instance may be.
+        let displayMessage = ``;
+        let isFullSlackMessage = false;
         if (this.slackMessage === null) {
-            return {
-                text: `❗${this.message} ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")}`,
-            };
+            displayMessage = `❗${this.message}`;
         } else if (typeof this.slackMessage === "string") {
-            return {
-                text: `❗${this.slackMessage} ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")}`,
-            };
+            displayMessage = `❗${this.slackMessage}`;
+        } else {
+            isFullSlackMessage = true;
+            displayMessage = this.slackMessage.text;
         }
-        return this.slackMessage;
+
+        // Check whether the message ends with a punctation mark or special character.
+        if (displayMessage.charAt(displayMessage.length - 1).match(/[.,\/#!$%^&*;:{}=\-_`~()]/g) === null) {
+            displayMessage = displayMessage + ".";
+        }
+
+        displayMessage = displayMessage + ` Consulting the ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")} may be useful.`;
+        let result: SlackMessage = {
+            text: displayMessage,
+        };
+        if (isFullSlackMessage) {
+            result = _.cloneDeep(this.slackMessage) as SlackMessage;
+            result.text = displayMessage;
+        }
+
+        return {
+            text: displayMessage,
+        };
     }
 }
 

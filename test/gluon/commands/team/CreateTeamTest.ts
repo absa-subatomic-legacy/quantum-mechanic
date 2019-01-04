@@ -90,6 +90,6 @@ describe("Create Team test", () => {
         };
 
         await subject.runCommand(fakeContext);
-        assert(fakeContext.messageClient.textMsg[0].text === `❗Failed to create team since the team name is already in use. Please retry using a different team name. ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")}`);
+        assert(fakeContext.messageClient.textMsg[0].text === `❗Failed to create team since the team name is already in use. Please retry using a different team name. Consulting the ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")} may be useful.`);
     });
 });
