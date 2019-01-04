@@ -91,7 +91,7 @@ export class CreateApplication extends RecursiveParameterRequestCommand
                 description: this.description,
                 applicationType: ApplicationType.DEPLOYABLE,
                 projectId: project.projectId,
-                createdBy: member.memberId,
+                createdBy: member,
                 bitbucketRepository: {
                     name: this.bitbucketRepositoryName,
                     repoUrl: this.bitbucketRepositoryRepoUrl,
