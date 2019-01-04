@@ -59,7 +59,7 @@ describe("AddMemberToTeamService addUserToGluonTeam", () => {
             errorThrown = error;
         }
 
-        assert.equal(errorThrown.getSlackMessage().text, `❗Failed to add member to the team. Server side failure. ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")}`);
+        assert.equal(errorThrown.getSlackMessage().text, `❗Failed to add member to the team. Server side failure. Consulting the ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")} may be useful.`);
 
     });
 
@@ -97,7 +97,10 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
         };
 
         // Force invite to fail
-        fakeContext.graphClient.executeQueryResults.push({result: true, returnValue: {ChatTeam: [{id: "1234"}]}});
+        fakeContext.graphClient.executeQueryResults.push({
+            result: true,
+            returnValue: {ChatTeam: [{id: "1234"}]},
+        });
         fakeContext.graphClient.executeMutationResults.push({result: false});
 
         await service.inviteUserToSlackChannel(fakeContext,
@@ -126,7 +129,10 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
             graphClient: new TestGraphClient(),
         };
 
-        fakeContext.graphClient.executeQueryResults.push({result: true, returnValue: {ChatTeam: [{id: "1234"}]}});
+        fakeContext.graphClient.executeQueryResults.push({
+            result: true,
+            returnValue: {ChatTeam: [{id: "1234"}]},
+        });
 
         await service.inviteUserToSlackChannel(fakeContext,
             "Jude",
