@@ -619,10 +619,12 @@ export class OCService {
         return project;
     }
 
-    public async exportAllResources(projectIdNameSpace: string): Promise<OpenshiftListResource> {
+    public async exportAllResources(
+        projectIdNameSpace: string,
+        resourceKindsRequired: string[] = ["Service", "DeploymentConfig", "ImageStream", "Route", "PersistentVolumeClaim"],
+    ): Promise<OpenshiftListResource> {
         logger.debug("Trying to export all required resources...");
 
-        const resourceKindsRequired: string[] = ["Service", "DeploymentConfig", "ImageStream", "Route", "PersistentVolumeClaim"];
         const resources: OpenshiftResource[] = [];
 
         for (const resourceKind of resourceKindsRequired) {
