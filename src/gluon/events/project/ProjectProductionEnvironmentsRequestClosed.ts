@@ -82,7 +82,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
                     // Get details of all the prod project namespaces we need to operate on.
                     const environmentsForCreation: OpenShiftProjectNamespace[] = getPipelineOpenShiftNamespacesForOpenShiftCluster(owningTenant.name, project, projectProdRequest.deploymentPipeline, prodOpenshift);
 
-                    taskRunner.addTask(new CreateTeamDevOpsEnvironment({team: owningTeam}, prodOpenshift, devopsEnvironmentDetails),
+                    taskRunner.addTask(new CreateTeamDevOpsEnvironment(owningTeam, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
                         new CreateOpenshiftEnvironments(request, environmentsForCreation, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(

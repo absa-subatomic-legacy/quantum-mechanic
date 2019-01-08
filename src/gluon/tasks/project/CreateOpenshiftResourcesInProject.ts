@@ -27,7 +27,7 @@ export class CreateOpenshiftResourcesInProject extends Task {
             const internalTaskId = `${environment.postfix}Environment`;
             const projectName = environment.namespace;
             this.dynamicTaskNameStore[internalTaskId] = TaskListMessage.createUniqueTaskName(internalTaskId);
-            this.taskListMessage.addTask(this.dynamicTaskNameStore[internalTaskId], `\tCreate resources in *${this.openshiftEnvironment.name} - ${projectName}*`);
+            this.taskListMessage.addTask(this.dynamicTaskNameStore[internalTaskId], `Create resources in *${this.openshiftEnvironment.name} - ${projectName}*`);
         }
     }
 

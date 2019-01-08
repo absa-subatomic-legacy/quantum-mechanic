@@ -36,6 +36,7 @@ import {NewDevOpsEnvironment} from "./gluon/commands/team/DevOpsEnvironment";
 import {JoinTeam} from "./gluon/commands/team/JoinTeam";
 import {LinkExistingTeamSlackChannel} from "./gluon/commands/team/LinkExistingTeamSlackChannel";
 import {ListTeamMembers} from "./gluon/commands/team/ListTeamMembers";
+import {MigrateTeamCloud} from "./gluon/commands/team/MigrateTeamCloud";
 import {NewOrUseTeamSlackChannel} from "./gluon/commands/team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "./gluon/commands/team/NewSlackChannel";
 import {RemoveMemberFromTeam} from "./gluon/commands/team/RemoveMemberFromTeam";
@@ -98,6 +99,7 @@ export const configuration: any = {
         ListTeamMembers,
         ListTeamProjects,
         MembershipRequestClosed,
+        MigrateTeamCloud,
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,
         NewProjectEnvironments,

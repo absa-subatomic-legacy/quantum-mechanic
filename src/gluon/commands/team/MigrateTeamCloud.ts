@@ -18,6 +18,7 @@ import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEn
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {AddJenkinsToDevOpsEnvironment} from "../../tasks/team/AddJenkinsToDevOpsEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
 import {
     getAllProjectOpenshiftNamespaces,
@@ -100,7 +101,7 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
 
                 return success();
             } else if (this.approval === ApprovalEnum.REJECTED) {
-                return await qmMessageClient.send(this.getConfirmationResultMesssage(this.approval), {id: this.correlationId});
+                return await qmMessageClient.send(this.getConfirmationResultMessage(this.approval), {id: this.correlationId});
             }
 
         } catch (error) {
@@ -109,7 +110,7 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
         }
     }
 
-    private getConfirmationResultMesssage(result: ApprovalEnum) {
+    private getConfirmationResultMessage(result: ApprovalEnum) {
         const message = {
             text: `*Migration request status:*`,
             attachments: [],
@@ -138,7 +139,9 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
         const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
         taskRunner.addTask(
-            new CreateTeamDevOpsEnvironment({team}, QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd),
+            new CreateTeamDevOpsEnvironment(team, QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd),
+        ).addTask(
+            new AddJenkinsToDevOpsEnvironment(team),
         );
 
         const projects = await this.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(team.name, false);
@@ -174,9 +177,12 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
         const resourceKindsForExport = ["Service", "DeploymentConfig", "ImageStream", "Route", "PersistentVolumeClaim", "Secret", "ConfigMap"];
 
         for (const environment of environmentsForCreation) {
-            const allResources = await this.ocService.exportAllResources(environment.namespace, resourceKindsForExport);
+            // const allResources = await this.ocService.exportAllResources(environment.namespace, resourceKindsForExport);
+            const allResources = this.getAllResources();
             taskRunner.addTask(
                 new CreateOpenshiftResourcesInProject([environment], environment.namespace, allResources, openShiftNonProd),
+                undefined,
+                0,
             );
         }
     }
@@ -211,6 +217,225 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
                         }),
                 ],
             }],
+        };
+    }
+
+    private getAllResources() {
+        return {
+            kind: "List",
+            apiVersion: "v1",
+            metadata: {},
+            items: [
+                {
+                    metadata: {
+                        name: "hello-world",
+                        namespace: "default-demo-dev",
+                        selfLink: "/api/v1/namespaces/default-demo-dev/services/hello-world",
+                        uid: "5a6d3daa-1336-11e9-876b-3a7727ae98a4",
+                        resourceVersion: "468878",
+                        creationTimestamp: "2019-01-08T11:12:57Z",
+                        labels: {
+                            app: "hello-world",
+                            template: "subatomic-spring-boot-2x-template",
+                        },
+                    },
+                    spec: {
+                        ports: [
+                            {
+                                name: "web",
+                                protocol: "TCP",
+                                port: 8080,
+                                targetPort: "http-8080",
+                            },
+                        ],
+                        selector: {
+                            name: "hello-world",
+                        },
+                        clusterIP: "172.30.169.116",
+                        type: "ClusterIP",
+                        sessionAffinity: "None",
+                    },
+                    status: {
+                        loadBalancer: {},
+                    },
+                    kind: "Service",
+                    apiVersion: "v1",
+                },
+                {
+                    metadata: {
+                        name: "hello-world",
+                        namespace: "default-demo-dev",
+                        selfLink: "/oapi/v1/namespaces/default-demo-dev/deploymentconfigs/hello-world",
+                        uid: "5a66d50e-1336-11e9-a9e2-3a7727ae98a4",
+                        resourceVersion: "468882",
+                        generation: 1,
+                        creationTimestamp: "2019-01-08T11:12:57Z",
+                        labels: {
+                            template: "subatomic-spring-boot-2x-template",
+                        },
+                    },
+                    spec: {
+                        strategy: {
+                            type: "Rolling",
+                            rollingParams: {
+                                updatePeriodSeconds: 1,
+                                intervalSeconds: 1,
+                                timeoutSeconds: 600,
+                                maxUnavailable: "25%",
+                                maxSurge: "25%",
+                            },
+                            resources: {},
+                            activeDeadlineSeconds: 21600,
+                        },
+                        triggers: [
+                            {
+                                type: "ImageChange",
+                                imageChangeParams: {
+                                    automatic: true,
+                                    containerNames: [
+                                        "hello-world",
+                                    ],
+                                    from: {
+                                        kind: "ImageStreamTag",
+                                        namespace: "default-demo-dev",
+                                        name: "hello-world:latest",
+                                    },
+                                },
+                            },
+                            {
+                                type: "ConfigChange",
+                            },
+                        ],
+                        replicas: 1,
+                        revisionHistoryLimit: 2,
+                        test: false,
+                        selector: {
+                            name: "hello-world",
+                        },
+                        template: {
+                            metadata: {
+                                creationTimestamp: null,
+                                labels: {
+                                    name: "hello-world",
+                                },
+                            },
+                            spec: {
+                                containers: [
+                                    {
+                                        name: "hello-world",
+                                        image: " ",
+                                        ports: [
+                                            {
+                                                name: "http-8080",
+                                                containerPort: 8080,
+                                                protocol: "TCP",
+                                            },
+                                        ],
+                                        env: [
+                                            {
+                                                name: "SPRING_CLOUD_CONFIG_URI",
+                                                value: "http://subatomic-config-server.test-team-devops.svc.cluster.local",
+                                            },
+                                            {
+                                                name: "JAVA_MAX_CORE",
+                                                value: "4",
+                                            },
+                                            {
+                                                name: "JAVA_OPTIONS",
+                                                value: "-Djava.net.preferIPv4Stack=true -Djava.security.egd=file:/dev/./urandom",
+                                            },
+                                        ],
+                                        resources: {
+                                            limits: {
+                                                cpu: "4",
+                                                memory: "1Gi",
+                                            },
+                                            requests: {
+                                                cpu: "0",
+                                                memory: "0",
+                                            },
+                                        },
+                                        livenessProbe: {
+                                            httpGet: {
+                                                path: "/actuator/health",
+                                                port: "http-8080",
+                                                scheme: "HTTP",
+                                            },
+                                            initialDelaySeconds: 30,
+                                            timeoutSeconds: 1,
+                                            periodSeconds: 10,
+                                            successThreshold: 1,
+                                            failureThreshold: 3,
+                                        },
+                                        readinessProbe: {
+                                            httpGet: {
+                                                path: "/actuator/info",
+                                                port: "http-8080",
+                                                scheme: "HTTP",
+                                            },
+                                            timeoutSeconds: 1,
+                                            periodSeconds: 10,
+                                            successThreshold: 1,
+                                            failureThreshold: 3,
+                                        },
+                                        terminationMessagePath: "/dev/termination-log",
+                                        terminationMessagePolicy: "File",
+                                        imagePullPolicy: "IfNotPresent",
+                                    },
+                                ],
+                                restartPolicy: "Always",
+                                terminationGracePeriodSeconds: 30,
+                                dnsPolicy: "ClusterFirst",
+                                securityContext: {},
+                                schedulerName: "default-scheduler",
+                            },
+                        },
+                    },
+                    status: {
+                        latestVersion: 0,
+                        observedGeneration: 1,
+                        replicas: 0,
+                        updatedReplicas: 0,
+                        availableReplicas: 0,
+                        unavailableReplicas: 0,
+                        conditions: [
+                            {
+                                type: "Available",
+                                status: "False",
+                                lastUpdateTime: "2019-01-08T11:12:57Z",
+                                lastTransitionTime: "2019-01-08T11:12:57Z",
+                                message: "Deployment config does not have minimum availability.",
+                            },
+                        ],
+                    },
+                    kind: "DeploymentConfig",
+                    apiVersion: "v1",
+                },
+                {
+                    metadata: {
+                        name: "hello-world",
+                        namespace: "default-demo-dev",
+                        selfLink: "/oapi/v1/namespaces/default-demo-dev/imagestreams/hello-world",
+                        uid: "5a61c1dc-1336-11e9-a9e2-3a7727ae98a4",
+                        resourceVersion: "468873",
+                        generation: 1,
+                        creationTimestamp: "2019-01-08T11:12:57Z",
+                        labels: {
+                            template: "subatomic-spring-boot-2x-template",
+                        },
+                    },
+                    spec: {
+                        lookupPolicy: {
+                            local: false,
+                        },
+                    },
+                    status: {
+                        dockerImageRepository: "172.30.1.1:5000/default-demo-dev/hello-world",
+                    },
+                    kind: "ImageStream",
+                    apiVersion: "v1",
+                },
+            ],
         };
     }
 }
