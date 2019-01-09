@@ -28,7 +28,7 @@ import {
 } from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
 
-@CommandHandler("Move openshift resources to a different cloud", QMConfig.subatomic.commandPrefix + " team cloud migrate")
+@CommandHandler("Move all Openshift resources belonging to a team to a different cloud", QMConfig.subatomic.commandPrefix + " team migrate cloud")
 @Tags("subatomic", "team", "other")
 export class MigrateTeamCloud extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
