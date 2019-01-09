@@ -26,7 +26,11 @@ import {
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {
+    handleQMError,
+    QMMessageClient,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
 
 @CommandHandler("Add a prod deployment job to jenkins for an application", QMConfig.subatomic.commandPrefix + " configure application jenkins prod")
@@ -90,15 +94,23 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
             taskRunner.addTask(
-                new ConfigurePackageInJenkins(application, project, ConfigureApplicationJenkinsProd.PROD_JENKINSFILE, ProdDefaultJenkinsJobTemplate, this.getSuccessMessage(application.name, project.name)),
+                new ConfigurePackageInJenkins(application, project, ConfigureApplicationJenkinsProd.PROD_JENKINSFILE, ProdDefaultJenkinsJobTemplate),
             );
 
             await taskRunner.execute(ctx);
             this.succeedCommand();
+            return this.sendPackageProvisionedMessage(messageClient, this.applicationName, this.projectName);
         } catch (error) {
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
+    }
+
+    private async sendPackageProvisionedMessage(messageClient: QMMessageClient, applicationName: string, projectName: string) {
+
+        const returnableSuccessMessage = this.getSuccessMessage(applicationName, projectName);
+
+        return await messageClient.send(returnableSuccessMessage);
     }
 
     private getSuccessMessage(applicationName: string, projectName: string): SlackMessage {

@@ -3,7 +3,6 @@ import {
     HandlerContext,
     HandlerResult,
     Parameter,
-    success,
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
@@ -11,8 +10,10 @@ import {SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
+import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
 import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsForProject";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
@@ -99,7 +100,7 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
 
                 this.succeedCommand();
 
-                return success();
+                return qmMessageClient.send(`:rocket: Team successfully migrated to "${this.openShiftCloud}" cloud.`);
             } else if (this.approval === ApprovalEnum.REJECTED) {
                 return await qmMessageClient.send(this.getConfirmationResultMessage(this.approval), {id: this.correlationId});
             }
@@ -184,6 +185,12 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
                 undefined,
                 0,
             );
+        }
+
+        const applications: QMApplication[] = await this.gluonService.applications.gluonApplicationsLinkedToGluonProject(project.name, false);
+
+        for (const application of applications) {
+            taskRunner.addTask(new ConfigurePackageInJenkins(application, project), `*Create ${application.name} application Jenkins job*`);
         }
     }
 

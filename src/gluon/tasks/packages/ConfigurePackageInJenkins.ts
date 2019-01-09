@@ -7,13 +7,10 @@ import {
 } from "@atomist/automation-client";
 import {GitCommandGitProject} from "@atomist/automation-client/lib/project/git/GitCommandGitProject";
 import {GitProject} from "@atomist/automation-client/lib/project/git/GitProject";
-import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {QMTemplate} from "../../../template/QMTemplate";
-import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
@@ -22,15 +19,9 @@ import {
     JenkinsJobTemplate,
     NonProdDefaultJenkinsJobTemplate,
 } from "../../util/jenkins/JenkinsJobTemplates";
-import {ApplicationType} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
-import {ParameterDisplayType} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {GitError, QMError} from "../../util/shared/Error";
-import {
-    getDevOpsEnvironmentDetails,
-    QMTeam,
-    QMTeamBase,
-} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -45,9 +36,8 @@ export class ConfigurePackageInJenkins extends Task {
 
     constructor(private application: QMApplication,
                 private project: QMProject,
-                private jenkinsFile: string,
+                private jenkinsFile: string = "",
                 private jenkinsJobTemplate: JenkinsJobTemplate = NonProdDefaultJenkinsJobTemplate,
-                private successMessage?: SlackMessage,
                 private ocService = new OCService(),
                 private gluonService = new GluonService(),
                 private jenkinsService = new JenkinsService()) {
@@ -55,7 +45,9 @@ export class ConfigurePackageInJenkins extends Task {
     }
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
-        this.taskListMessage.addTask(this.TASK_ADD_JENKINS_FILE, "Add Jenkinsfile");
+        if (!_.isEmpty(this.jenkinsFile)) {
+            this.taskListMessage.addTask(this.TASK_ADD_JENKINS_FILE, "Add Jenkinsfile");
+        }
         this.taskListMessage.addTask(this.TASK_CREATE_JENKINS_JOB, "Create Jenkins Job");
     }
 
@@ -65,14 +57,15 @@ export class ConfigurePackageInJenkins extends Task {
         const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
 
-        await this.addJenkinsFile(
-            this.jenkinsFile,
-            this.project.bitbucketProject.key,
-            this.application.bitbucketRepository.slug,
-            this.jenkinsJobTemplate.expectedJenkinsfile,
-        );
-
-        await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_FILE);
+        if (!_.isEmpty(this.jenkinsFile)) {
+            await this.addJenkinsFile(
+                this.jenkinsFile,
+                this.project.bitbucketProject.key,
+                this.application.bitbucketRepository.slug,
+                this.jenkinsJobTemplate.expectedJenkinsfile,
+            );
+            await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_FILE);
+        }
 
         const devopsDetails = getDevOpsEnvironmentDetails(this.project.owningTeam.name);
 
@@ -85,18 +78,6 @@ export class ConfigurePackageInJenkins extends Task {
         await this.taskListMessage.succeedTask(this.TASK_CREATE_JENKINS_JOB);
 
         logger.info(`PackageConfigured successfully`);
-
-        let applicationType = ApplicationType.LIBRARY;
-        if (this.application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
-            applicationType = ApplicationType.DEPLOYABLE;
-        }
-
-        await this.sendPackageProvisionedMessage(
-            ctx,
-            this.application.name,
-            this.project.name,
-            [this.project.owningTeam],
-            applicationType);
 
         return true;
     }
@@ -138,18 +119,6 @@ export class ConfigurePackageInJenkins extends Task {
             }
         }
         return await success();
-    }
-
-    private async sendPackageProvisionedMessage(ctx: HandlerContext, applicationName: string, projectName: string, associatedTeams: QMTeamBase[], applicationType: ApplicationType) {
-
-        let returnableSuccessMessage = this.getDefaultSuccessMessage(applicationName, projectName, applicationType);
-
-        if (!_.isEmpty(this.successMessage)) {
-            returnableSuccessMessage = this.successMessage;
-        }
-
-        return await ctx.messageClient.addressChannels(returnableSuccessMessage, associatedTeams.map(team =>
-            team.slack.teamChannel));
     }
 
     private async addJenkinsFile(jenkinsfileName, bitbucketProjectKey, bitbucketRepositorySlug, destinationJenkinsfileName: string = "Jenkinsfile"): Promise<HandlerResult> {
@@ -202,43 +171,6 @@ export class ConfigurePackageInJenkins extends Task {
 
     private getPathFromJenkinsfileName(jenkinsfileName: string): string {
         return this.JENKINSFILE_FOLDER + jenkinsfileName + this.JENKINSFILE_EXTENSION;
-    }
-
-    private getDefaultSuccessMessage(applicationName: string, projectName: string, applicationType: ApplicationType): SlackMessage {
-        let packageTypeString = "application";
-        if (applicationType === ApplicationType.LIBRARY) {
-            packageTypeString = "library";
-        }
-
-        return {
-            text: `Your ${packageTypeString} *${applicationName}*, in project *${projectName}*, has been provisioned successfully ` +
-                "and is ready to build/deploy",
-            attachments: [{
-                fallback: `Your ${packageTypeString} has been provisioned successfully`,
-                footer: `For more information, please read the ${this.docs() + "#jenkins-build"}`,
-                text: `
-You can kick off the build pipeline for your ${packageTypeString} by clicking the button below or pushing changes to your ${packageTypeString}'s repository`,
-                mrkdwn_in: ["text"],
-                actions: [
-                    buttonForCommand(
-                        {
-                            text: "Start build",
-                            style: "primary",
-                        },
-                        new KickOffJenkinsBuild(),
-                        {
-                            projectName,
-                            applicationName,
-                            displayResultMenu: ParameterDisplayType.hide,
-                        }),
-                ],
-            }],
-        };
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference`,
-            "documentation")}`;
     }
 
 }

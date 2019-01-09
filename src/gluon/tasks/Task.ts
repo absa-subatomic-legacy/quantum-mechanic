@@ -18,7 +18,7 @@ export abstract class Task {
         const startTask = this.taskListMessage.countTasks();
         this.configureTaskListMessage(taskListMessage);
         const lastTask = this.taskListMessage.countTasks();
-        for (let i = startTask; i < lastTask - 1; i++) {
+        for (let i = startTask; i <= lastTask - 1; i++) {
             this.taskListMessage.indentTaskAtIndex(i, indentation);
         }
     }
