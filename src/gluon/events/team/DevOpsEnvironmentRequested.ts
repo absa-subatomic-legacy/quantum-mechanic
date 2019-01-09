@@ -99,6 +99,9 @@ export class DevOpsEnvironmentRequested extends BaseQMEvent implements HandleEve
     }
 
     private async sendDevOpsSuccessfullyProvisionedMessage(ctx: HandlerContext, team: QMTeam) {
+
+        await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd);
+
         const jenkinsHost = await this.ocService.getJenkinsHost(getDevOpsEnvironmentDetails(team.name).openshiftProjectId);
 
         const destination = await addressSlackChannelsFromContext(ctx, team.slack.teamChannel);

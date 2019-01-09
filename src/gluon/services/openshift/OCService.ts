@@ -25,7 +25,7 @@ export class OCService {
 
     get openShiftApi(): OpenShiftApi {
         if (this.openShiftApiInstance === undefined) {
-            logger.error(`Failed to access the openShiftApiInstance. Make sure the you have performed an OCService.login command`);
+            logger.error(`Failed to access the openShiftApiInstance. Make sure the you have performed an OCService.setOpenShiftDetails command`);
             throw new QMError("OpenShift login failure!");
         }
         return this.openShiftApiInstance;
