@@ -21,6 +21,7 @@ import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToDevOpsEnvironment} from "../../tasks/team/AddJenkinsToDevOpsEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
+import {QMMemberBase} from "../../util/member/Members";
 import {
     getAllProjectOpenshiftNamespaces,
     OpenshiftProjectEnvironmentRequest,
@@ -93,6 +94,10 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
 
                 return await qmMessageClient.send(message, {id: this.correlationId});
             } else if (this.approval === ApprovalEnum.APPROVED) {
+
+                const requestingMember: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+
+                await this.gluonService.teams.updateTeamOpenShiftCloud(team.teamId, this.openShiftCloud, requestingMember.memberId);
 
                 const taskRunner = await this.createMigrateTeamToCloudTasks(qmMessageClient, team);
 
