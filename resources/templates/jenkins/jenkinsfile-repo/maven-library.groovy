@@ -23,8 +23,7 @@ node('maven') {
                     file(credentialsId: 'maven-settings', variable: 'MVN_SETTINGS')
             ]) {
                 sh ': Maven build &&' +
-                        " ./mvnw --batch-mode test --settings $MVN_SETTINGS" +
-                        " || mvn --batch-mode test --settings $MVN_SETTINGS" +
+                        " mvn --batch-mode test --settings $MVN_SETTINGS" +
                         ' -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn' +
                         ' -Dmaven.test.redirectTestOutputToFile=true'
             }
