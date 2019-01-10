@@ -499,10 +499,9 @@ export class OCService {
         logger.debug("Extracting raw ssh key from cicd key");
         // Ignore the ssh-rsa encoding string, and any user name details at the end.
         const nme = "subatomic-config-server";
-        const rawSSHKey = QMConfig.subatomic.bitbucket.cicdKey.split(" ")[1];
+        const rawSSHKey = Buffer.from(QMConfig.subatomic.bitbucket.cicdKey.split(" ")[1]).toString("base64");
         const cicdPrivateKey = fs.readFileSync(
-            QMConfig.subatomic.bitbucket.cicdPrivateKeyPath,
-            "utf8").split("-----")[2].replace(/[\n\r]/g, "");
+            QMConfig.subatomic.bitbucket.cicdPrivateKeyPath).toString("base64");
 
         const secretResource: OpenshiftResource = {
             kind: "Secret",
