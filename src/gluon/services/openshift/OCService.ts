@@ -25,7 +25,7 @@ export class OCService {
 
     get openShiftApi(): OpenShiftApi {
         if (this.openShiftApiInstance === undefined) {
-            logger.error(`Failed to access the openShiftApiInstance. Make sure the you have performed an OCService.login command`);
+            logger.error(`Failed to access the openShiftApiInstance. Make sure the you have performed an OCService.setOpenShiftDetails command`);
             throw new QMError("OpenShift login failure!");
         }
         return this.openShiftApiInstance;
@@ -499,8 +499,9 @@ export class OCService {
         logger.debug("Extracting raw ssh key from cicd key");
         // Ignore the ssh-rsa encoding string, and any user name details at the end.
         const nme = "subatomic-config-server";
-        const rawSSHKey = QMConfig.subatomic.bitbucket.cicdKey.split(" ")[1];
-        const cicdPrivateKey = fs.readFileSync(QMConfig.subatomic.bitbucket.cicdPrivateKeyPath, "utf8");
+        const rawSSHKey = Buffer.from(QMConfig.subatomic.bitbucket.cicdKey.split(" ")[1]).toString("base64");
+        const cicdPrivateKey = fs.readFileSync(
+            QMConfig.subatomic.bitbucket.cicdPrivateKeyPath).toString("base64");
         const secretResource: OpenshiftResource = {
             kind: "Secret",
             apiVersion: "v1",
@@ -616,10 +617,12 @@ export class OCService {
         return project;
     }
 
-    public async exportAllResources(projectIdNameSpace: string): Promise<OpenshiftListResource> {
+    public async exportAllResources(
+        projectIdNameSpace: string,
+        resourceKindsRequired: string[] = ["Service", "DeploymentConfig", "ImageStream", "Route", "PersistentVolumeClaim"],
+    ): Promise<OpenshiftListResource> {
         logger.debug("Trying to export all required resources...");
 
-        const resourceKindsRequired: string[] = ["Service", "DeploymentConfig", "ImageStream", "Route", "PersistentVolumeClaim"];
         const resources: OpenshiftResource[] = [];
 
         for (const resourceKind of resourceKindsRequired) {

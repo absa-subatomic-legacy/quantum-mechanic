@@ -13,9 +13,14 @@ export abstract class Task {
         return await this.executeTask(ctx);
     }
 
-    public setTaskListMessage(taskListMessage: TaskListMessage) {
+    public setTaskListMessage(taskListMessage: TaskListMessage, indentation: number) {
         this.taskListMessage = taskListMessage;
+        const startTask = this.taskListMessage.countTasks();
         this.configureTaskListMessage(taskListMessage);
+        const lastTask = this.taskListMessage.countTasks();
+        for (let i = startTask; i <= lastTask - 1; i++) {
+            this.taskListMessage.indentTaskAtIndex(i, indentation);
+        }
     }
 
     protected abstract async executeTask(ctx: HandlerContext): Promise<boolean>;

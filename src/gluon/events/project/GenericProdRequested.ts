@@ -77,7 +77,11 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
 
             for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
                 const environmentsForResources: OpenShiftProjectNamespace[] = getPipelineOpenShiftNamespacesForOpenShiftCluster(tenant.name, qmProject, genericProdRequest.deploymentPipeline, openshiftProd);
-                taskRunner.addTask(new CreateOpenshiftResourcesInProject(environmentsForResources, preProdNamespace, resources, openshiftProd));
+                taskRunner.addTask(
+                    new CreateOpenshiftResourcesInProject(environmentsForResources, preProdNamespace, resources, openshiftProd),
+                    undefined,
+                    1,
+                );
             }
 
             await taskRunner.execute(ctx);

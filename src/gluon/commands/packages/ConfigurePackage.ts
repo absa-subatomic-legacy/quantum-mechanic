@@ -1,11 +1,15 @@
 import {
+    buttonForCommand,
     HandlerContext,
     HandlerResult,
+    SlackDestination,
     success,
 } from "@atomist/automation-client";
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
@@ -20,7 +24,8 @@ import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
+    GluonTeamNameSetter,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
     JenkinsfileNameSetter,
@@ -32,8 +37,12 @@ import {
     OpenShiftTemplateParam,
     OpenshiftTemplateSetter,
 } from "../../util/recursiveparam/OpenshiftParameterSetters";
-import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {
+    ParameterDisplayType,
+    RecursiveParameterRequestCommand,
+} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 
 @CommandHandler("Configure an existing application/library", QMConfig.subatomic.commandPrefix + " configure custom package")
 @Tags("subatomic", "package")
@@ -95,9 +104,13 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
             await ctx.messageClient.send({
                 text: "Preparing to configure your package...",
             }, destination);
-            const result = await this.configurePackage(ctx);
+
+            const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName, false);
+
+            await this.configurePackage(ctx);
+
             this.succeedCommand();
-            return result;
+            return this.sendPackageProvisionedMessage(ctx, this.applicationName, this.projectName, destination, ApplicationType[application.applicationType]);
         } catch (error) {
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
@@ -140,5 +153,49 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
         await taskRunner.execute(ctx);
 
         return success();
+    }
+
+    private async sendPackageProvisionedMessage(ctx: HandlerContext, applicationName: string, projectName: string, slackChannel: SlackDestination, applicationType: ApplicationType) {
+
+        const returnableSuccessMessage = this.getDefaultSuccessMessage(applicationName, projectName, applicationType);
+
+        return await ctx.messageClient.send(returnableSuccessMessage, slackChannel);
+    }
+
+    private getDefaultSuccessMessage(applicationName: string, projectName: string, applicationType: ApplicationType): SlackMessage {
+        let packageTypeString = "application";
+        if (applicationType === ApplicationType.LIBRARY) {
+            packageTypeString = "library";
+        }
+
+        return {
+            text: `Your ${packageTypeString} *${applicationName}*, in project *${projectName}*, has been provisioned successfully ` +
+                "and is ready to build/deploy",
+            attachments: [{
+                fallback: `Your ${packageTypeString} has been provisioned successfully`,
+                footer: `For more information, please read the ${this.docs() + "#jenkins-build"}`,
+                text: `
+You can kick off the build pipeline for your ${packageTypeString} by clicking the button below or pushing changes to your ${packageTypeString}'s repository`,
+                mrkdwn_in: ["text"],
+                actions: [
+                    buttonForCommand(
+                        {
+                            text: "Start build",
+                            style: "primary",
+                        },
+                        new KickOffJenkinsBuild(),
+                        {
+                            projectName,
+                            applicationName,
+                            displayResultMenu: ParameterDisplayType.hide,
+                        }),
+                ],
+            }],
+        };
+    }
+
+    private docs(): string {
+        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference`,
+            "documentation")}`;
     }
 }

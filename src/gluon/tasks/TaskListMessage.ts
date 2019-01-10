@@ -20,15 +20,15 @@ export class TaskListMessage {
         this.tasks = {};
         this.taskOrder = [];
         this.statusCosmetics.set(TaskStatus.Pending, {
-            color:  QMColours.stdMuddyYellow.hex,
+            color: QMColours.stdMuddyYellow.hex,
             symbol: "●",
         });
         this.statusCosmetics.set(TaskStatus.Failed, {
-            color:  QMColours.stdReddyMcRedFace.hex,
+            color: QMColours.stdReddyMcRedFace.hex,
             symbol: "✗",
         });
         this.statusCosmetics.set(TaskStatus.Successful, {
-            color:  QMColours.stdGreenyMcAppleStroodle.hex,
+            color: QMColours.stdGreenyMcAppleStroodle.hex,
             symbol: "✓",
         });
     }
@@ -36,6 +36,21 @@ export class TaskListMessage {
     public addTask(key: string, description: string) {
         this.tasks[key] = {description, status: TaskStatus.Pending};
         this.taskOrder.push(key);
+    }
+
+    public countTasks(): number {
+        return this.taskOrder.length;
+    }
+
+    public indentTaskAtIndex(taskIndex: number, indentation: number) {
+        const task: Task = this.tasks[this.taskOrder[taskIndex]];
+        const lines = task.description.split("\n");
+        let newDescription = "";
+        for (const line of lines) {
+            const indentationString = "\t".repeat(indentation);
+            newDescription += `${indentationString}${line}\n`;
+        }
+        task.description = newDescription;
     }
 
     public async succeedTask(key: string) {

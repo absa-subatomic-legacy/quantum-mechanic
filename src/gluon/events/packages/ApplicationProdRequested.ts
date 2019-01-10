@@ -114,7 +114,10 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
                 const environmentsForCreation: OpenShiftProjectNamespace[] = getPipelineOpenShiftNamespacesForOpenShiftCluster(tenant.name, qmProject, applicationProdRequest.deploymentPipeline, openshiftProd);
-                taskRunner.addTask(new CreateOpenshiftResourcesInProject(environmentsForCreation, preProdNamespace, resources, openshiftProd));
+                taskRunner.addTask(
+                    new CreateOpenshiftResourcesInProject(environmentsForCreation, preProdNamespace, resources, openshiftProd),
+                    undefined,
+                    1);
             }
 
             await taskRunner.execute(ctx);

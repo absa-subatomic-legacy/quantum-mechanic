@@ -19,9 +19,9 @@ export class CreateTeamDevOpsEnvironment extends Task {
     private readonly TASK_OPENSHIFT_RESOURCES = TaskListMessage.createUniqueTaskName("Resources");
     private readonly TASK_SECRETS = TaskListMessage.createUniqueTaskName("ConfigSecrets");
 
-    constructor(private devOpsRequestedEvent: { team: QMTeam },
+    constructor(private team: QMTeam,
                 private openshiftEnvironment: OpenShiftConfig,
-                private devopsEnvironmentDetails: DevOpsEnvironmentDetails = getDevOpsEnvironmentDetails(devOpsRequestedEvent.team.name),
+                private devopsEnvironmentDetails: DevOpsEnvironmentDetails = getDevOpsEnvironmentDetails(team.name),
                 private ocService = new OCService()) {
         super();
     }
@@ -40,12 +40,12 @@ export class CreateTeamDevOpsEnvironment extends Task {
 
         await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
-        await this.createDevOpsEnvironment(projectId, this.devOpsRequestedEvent.team.name);
+        await this.createDevOpsEnvironment(projectId, this.team.name);
 
         await this.taskListMessage.succeedTask(this.TASK_OPENSHIFT_ENV);
 
         await this.ocService.addTeamMembershipPermissionsToProject(projectId,
-            this.devOpsRequestedEvent.team);
+            this.team);
 
         await this.taskListMessage.succeedTask(this.TASK_OPENSHIFT_PERMISSIONS);
 
