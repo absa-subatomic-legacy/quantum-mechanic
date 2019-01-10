@@ -87,23 +87,30 @@ export async function setGluonTeamOpenShiftCloud(
         commandHandler.openShiftCloud = team.openShiftCloud;
         return {setterSuccess: true};
     } else {
-        return {
-            setterSuccess: false,
-            messagePrompt: createMenuAttachment(
-                Object.keys(QMConfig.subatomic.openshiftClouds).map(cloudName => {
-                    return {
-                        value: cloudName,
-                        text: cloudName,
-                    };
-                }),
-                commandHandler,
-                selectionMessage,
-                selectionMessage,
-                "Select OpenShift Cloud",
-                "openShiftCloud",
-            ),
-        };
+        return await setGluonTeamOpenShiftCloudForced(ctx, commandHandler, selectionMessage);
     }
+}
+
+export async function setGluonTeamOpenShiftCloudForced(
+    ctx: HandlerContext,
+    commandHandler: GluonTeamOpenShiftCloudBaseSetter,
+    selectionMessage: string = "Please select an OpenShift cloud"): Promise<RecursiveSetterResult> {
+    return {
+        setterSuccess: false,
+        messagePrompt: createMenuAttachment(
+            Object.keys(QMConfig.subatomic.openshiftClouds).map(cloudName => {
+                return {
+                    value: cloudName,
+                    text: cloudName,
+                };
+            }),
+            commandHandler,
+            selectionMessage,
+            selectionMessage,
+            "Select OpenShift Cloud",
+            "openShiftCloud",
+        ),
+    };
 }
 
 export function GluonTeamOpenShiftCloudParam(details: RecursiveParameterDetails) {
@@ -111,11 +118,14 @@ export function GluonTeamOpenShiftCloudParam(details: RecursiveParameterDetails)
     return RecursiveParameter(details);
 }
 
-export interface GluonTeamOpenShiftCloudSetter {
-    gluonService: GluonService;
-    teamName: string;
+export interface GluonTeamOpenShiftCloudBaseSetter {
     openShiftCloud: string;
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
+}
+
+export interface GluonTeamOpenShiftCloudSetter extends GluonTeamOpenShiftCloudBaseSetter {
+    gluonService: GluonService;
+    teamName: string;
 }
 
 export async function setGluonProjectName(

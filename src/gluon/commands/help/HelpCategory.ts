@@ -1,8 +1,6 @@
 import * as _ from "lodash";
 import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
-import {
-    ListExistingBitbucketProject,
-} from "../bitbucket/BitbucketProject";
+import {ListExistingBitbucketProject} from "../bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "../bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "../bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
@@ -22,10 +20,7 @@ import {CreateOpenShiftPvc} from "../project/CreateOpenShiftPvc";
 import {CreateProject} from "../project/CreateProject";
 import {CreateProjectProdEnvironments} from "../project/CreateProjectProdEnvironments";
 import {NewProjectEnvironments} from "../project/NewProjectEnvironments";
-import {
-    ListProjectDetails,
-    ListTeamProjects,
-} from "../project/ProjectDetails";
+import {ListProjectDetails, ListTeamProjects} from "../project/ProjectDetails";
 import {ReRunProjectProdRequest} from "../project/ReRunProjectProdRequest";
 import {UpdateProjectProdRequest} from "../project/UpdateProjectProdRequest";
 import {AddConfigServer} from "../team/AddConfigServer";
@@ -37,6 +32,7 @@ import {NewDevOpsEnvironment} from "../team/DevOpsEnvironment";
 import {JoinTeam} from "../team/JoinTeam";
 import {LinkExistingTeamSlackChannel} from "../team/LinkExistingTeamSlackChannel";
 import {ListTeamMembers} from "../team/ListTeamMembers";
+import {MigrateTeamCloud} from "../team/MigrateTeamCloud";
 import {NewOrUseTeamSlackChannel} from "../team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "../team/NewSlackChannel";
 import {RemoveMemberFromTeam} from "../team/RemoveMemberFromTeam";
@@ -75,6 +71,7 @@ export class HelpCategory {
         ListTeamMembers,
         ListTeamProjects,
         MembershipRequestClosed,
+        MigrateTeamCloud,
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,
         NewProjectEnvironments,

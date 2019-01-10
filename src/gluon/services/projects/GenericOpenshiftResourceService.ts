@@ -10,6 +10,7 @@ export class GenericOpenshiftResourceService {
         this.cleanImageStreams(resources);
         this.cleanRoutes(resources);
         this.cleanPVCs(resources);
+        this.cleanSecrets(resources);
 
         return resources;
     }
@@ -90,6 +91,17 @@ export class GenericOpenshiftResourceService {
             if (resource.kind === "Route") {
                 delete resource.spec.host;
                 resource.status = {};
+            }
+        }
+    }
+
+    private cleanSecrets(allResources: OpenshiftResource[]) {
+        for (let i = allResources.length - 1; i >= 0; i--) {
+            const resource = allResources[i];
+            if (resource.kind === "Secret") {
+                if (resource.metadata.name.indexOf("kubernetes.io/") !== -1) {
+                    allResources = allResources.splice(i, 1);
+                }
             }
         }
     }

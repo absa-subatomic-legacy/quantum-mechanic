@@ -1,9 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
-import {DevOpsMessages} from "../../messages/team/DevOpsMessages";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -17,6 +14,7 @@ import {
     serviceAccountDefinition,
 } from "../../util/jenkins/JenkinsOpenshiftResources";
 import {QMError} from "../../util/shared/Error";
+import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -24,14 +22,12 @@ const promiseRetry = require("promise-retry");
 
 export class AddJenkinsToDevOpsEnvironment extends Task {
 
-    private devopsMessages = new DevOpsMessages();
-
     private readonly TASK_HEADER = TaskListMessage.createUniqueTaskName("ConfigureDevOpsJenkins");
     private readonly TASK_TAG_TEMPLATE = TaskListMessage.createUniqueTaskName("TagTemplate");
     private readonly TASK_ROLLOUT_JENKINS = TaskListMessage.createUniqueTaskName("RolloutJenkins");
     private readonly TASK_CONFIG_JENKINS = TaskListMessage.createUniqueTaskName("ConfigJenkins");
 
-    constructor(private devOpsRequestedEvent,
+    constructor(private team: QMTeam,
                 private jenkinsService = new JenkinsService(),
                 private ocService = new OCService()) {
         super();
@@ -46,10 +42,10 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
 
-        const projectId = `${_.kebabCase(this.devOpsRequestedEvent.team.name).toLowerCase()}-devops`;
+        const projectId = getDevOpsEnvironmentDetails(this.team.name).openshiftProjectId;
         logger.info(`Working with OpenShift project Id: ${projectId}`);
 
-        const openShiftCloud = this.devOpsRequestedEvent.team.openShiftCloud;
+        const openShiftCloud = this.team.openShiftCloud;
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd);
 
@@ -76,12 +72,6 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         await this.taskListMessage.succeedTask(this.TASK_CONFIG_JENKINS);
 
         await this.taskListMessage.succeedTask(this.TASK_HEADER);
-
-        const destination = await addressSlackChannelsFromContext(ctx, this.devOpsRequestedEvent.team.slackIdentity.teamChannel);
-        await ctx.messageClient.send(
-            this.devopsMessages.jenkinsSuccessfullyProvisioned(jenkinsHost, this.devOpsRequestedEvent.team.name),
-            destination,
-        );
 
         return true;
     }

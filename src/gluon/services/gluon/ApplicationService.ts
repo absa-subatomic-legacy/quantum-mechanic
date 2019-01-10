@@ -15,7 +15,7 @@ export class ApplicationService {
     constructor(public axiosInstance = new AwaitAxios()) {
     }
 
-    public async gluonApplicationsLinkedToGluonProject(gluonProjectName: string, requestActionOnFailure: boolean = true): Promise<any> {
+    public async gluonApplicationsLinkedToGluonProject(gluonProjectName: string, requestActionOnFailure: boolean = true): Promise<any | QMApplication[]> {
         logger.debug(`Trying to get gluon applications associated to projectName. gluonProjectName: ${gluonProjectName} `);
 
         const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/applications?projectName=${gluonProjectName}`);

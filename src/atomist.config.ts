@@ -36,6 +36,7 @@ import {NewDevOpsEnvironment} from "./gluon/commands/team/DevOpsEnvironment";
 import {JoinTeam} from "./gluon/commands/team/JoinTeam";
 import {LinkExistingTeamSlackChannel} from "./gluon/commands/team/LinkExistingTeamSlackChannel";
 import {ListTeamMembers} from "./gluon/commands/team/ListTeamMembers";
+import {MigrateTeamCloud} from "./gluon/commands/team/MigrateTeamCloud";
 import {NewOrUseTeamSlackChannel} from "./gluon/commands/team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "./gluon/commands/team/NewSlackChannel";
 import {RemoveMemberFromTeam} from "./gluon/commands/team/RemoveMemberFromTeam";
@@ -58,6 +59,7 @@ import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
 import {MembershipRequestClosed} from "./gluon/events/team/MembershipRequestClosed";
 import {MembershipRequestCreated} from "./gluon/events/team/MembershipRequestCreated";
 import {TeamCreated} from "./gluon/events/team/TeamCreated";
+import {TeamOpenShiftCloudMigrated} from "./gluon/events/team/TeamOpenShiftCloudMigrated";
 import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
 
 const apiKey = QMConfig.apiKey;
@@ -98,6 +100,7 @@ export const configuration: any = {
         ListTeamMembers,
         ListTeamProjects,
         MembershipRequestClosed,
+        MigrateTeamCloud,
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,
         NewProjectEnvironments,
@@ -127,6 +130,7 @@ export const configuration: any = {
         TeamCreated,
         TeamMemberCreated,
         TeamsLinkedToProject,
+        TeamOpenShiftCloudMigrated,
     ],
     ingesters: [
         ingester("TeamDevOpsDetails"),
@@ -154,6 +158,7 @@ export const configuration: any = {
         ingester("TeamCreatedEvent"),
         ingester("DevOpsEnvironmentRequestedEvent"),
         ingester("DevOpsEnvironmentProvisionedEvent"),
+        ingester("TeamOpenShiftCloudMigratedEvent"),
         ingester("MembershipRequestCreatedEvent"),
         ingester("MembersAddedToTeamEvent"),
         ingester("MemberRemovedFromTeamEvent"),

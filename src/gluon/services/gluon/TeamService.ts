@@ -155,4 +155,24 @@ export class TeamService {
         }
         return result.data._embedded.teamResources;
     }
+
+    public async updateTeamOpenShiftCloud(teamId: string, openShiftCloud: string, requestedByMemberId: string, rawResult = false): Promise<any> {
+        logger.debug(`Trying to update gluon team openShiftCloud. teamId: ${teamId}, openShiftCloud: ${openShiftCloud}, requestedByMemberId: ${requestedByMemberId} `);
+
+        const teamUpdate = {
+            createdBy: requestedByMemberId,
+            openShiftCloud,
+        };
+
+        const teamUpdateResult = await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`, teamUpdate);
+
+        if (rawResult) {
+            return teamUpdateResult;
+        } else if (!isSuccessCode(teamUpdateResult.status)) {
+            logger.error(`Failed to update team ${teamId}. Error: ${inspect(teamUpdateResult)}`);
+            throw new QMError(`Unable to update team with id ${teamId}. Please make sure that you are an owner of the team.`);
+        }
+
+        return teamUpdateResult.data;
+    }
 }

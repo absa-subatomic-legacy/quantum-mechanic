@@ -8,6 +8,7 @@ import {OCService} from "../../services/openshift/OCService";
 import {getJenkinsBitbucketAccessCredential} from "../../util/jenkins/JenkinsCredentials";
 import {
     getAllPipelineOpenshiftNamespaces,
+    OpenshiftProjectEnvironmentRequest,
     OpenShiftProjectNamespace,
     QMDeploymentPipeline,
 } from "../../util/project/Project";
@@ -23,9 +24,9 @@ export class ConfigureJenkinsForProject extends Task {
     private readonly TASK_CREATE_JENKINS_BUILD_TEMPLATE = TaskListMessage.createUniqueTaskName("JenkinsBuildTemplate");
     private readonly TASK_ADD_JENKINS_CREDENTIALS = TaskListMessage.createUniqueTaskName("JenkinsCredentials");
 
-    private allEnvironmentsForCreation: OpenShiftProjectNamespace[];
+    private readonly allEnvironmentsForCreation: OpenShiftProjectNamespace[];
 
-    constructor(private environmentsRequestedEvent,
+    constructor(private environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest,
                 private devDeployPipelineForCreation: QMDeploymentPipeline,
                 private releaseDeploymentPipelinesForCreation: QMDeploymentPipeline[],
                 private openshiftEnvironment: OpenShiftConfig,
@@ -39,7 +40,7 @@ export class ConfigureJenkinsForProject extends Task {
     }
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
-        this.taskListMessage.addTask(this.TASK_HEADER, `*Configure project in Jenkins on ${this.openshiftEnvironment.name}*`);
+        this.taskListMessage.addTask(this.TASK_HEADER, `*Configure ${this.environmentsRequestedEvent.project.name} project in Jenkins on ${this.openshiftEnvironment.name}*`);
         this.taskListMessage.addTask(this.TASK_ADD_JENKINS_SA_RIGHTS, "\tGrant Jenkins Service Account permissions");
         this.taskListMessage.addTask(this.TASK_CREATE_JENKINS_BUILD_TEMPLATE, "\tCreate Jenkins build folder");
         this.taskListMessage.addTask(this.TASK_ADD_JENKINS_CREDENTIALS, "\tAdd project environment credentials to Jenkins");
