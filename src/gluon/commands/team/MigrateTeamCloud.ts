@@ -17,9 +17,13 @@ import {QMColours} from "../../util/QMColour";
 import {
     GluonTeamNameParam,
     GluonTeamNameSetter,
-    GluonTeamOpenShiftCloudParam,
+    GluonTeamOpenShiftCloudBaseSetter,
+    setGluonTeamOpenShiftCloudForced,
 } from "../../util/recursiveparam/GluonParameterSetters";
-import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {
+    RecursiveParameter,
+    RecursiveParameterRequestCommand,
+} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {
     ChannelMessageClient,
@@ -31,7 +35,7 @@ import {QMTeam} from "../../util/team/Teams";
 @CommandHandler("Move all Openshift resources belonging to a team to a different cloud", QMConfig.subatomic.commandPrefix + " team migrate cloud")
 @Tags("subatomic", "team", "other")
 export class MigrateTeamCloud extends RecursiveParameterRequestCommand
-    implements GluonTeamNameSetter {
+    implements GluonTeamNameSetter, GluonTeamOpenShiftCloudBaseSetter {
 
     @GluonTeamNameParam({
         callOrder: 0,
@@ -39,8 +43,9 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
     })
     public teamName: string;
 
-    @GluonTeamOpenShiftCloudParam({
+    @RecursiveParameter({
         callOrder: 1,
+        setter: setGluonTeamOpenShiftCloudForced,
     })
     public openShiftCloud: string;
 
@@ -55,12 +60,6 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
         displayable: false,
     })
     public correlationId: string;
-
-    @Parameter({
-        required: false,
-        displayable: false,
-    })
-    public openShiftResourcesJSON: string;
 
     constructor(public gluonService = new GluonService(), public ocService = new OCService()) {
         super();

@@ -1,4 +1,5 @@
 type TeamOpenShiftCloudMigratedEvent @rootType {
     team: GluonTeam
     requestedBy: ActionedBy
+    previousCloud: String
 }

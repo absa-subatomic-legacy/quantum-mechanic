@@ -68,6 +68,7 @@ subscription TeamOpenShiftCloudMigratedEvent {
         screenName
       }
     }
+    previousCloud
   }
 }
 `)
@@ -80,13 +81,13 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested TeamOpenShiftCloudMigrated event: ${JSON.stringify(event.data)}`);
 
-        const devOpsRequestedEvent = event.data.TeamOpenShiftCloudMigratedEvent[0];
+        const teamCloudMigrationEvent = event.data.TeamOpenShiftCloudMigratedEvent[0];
 
         try {
-            const team: QMTeam = EventToGluon.gluonTeam(devOpsRequestedEvent.team);
+            const team: QMTeam = EventToGluon.gluonTeam(teamCloudMigrationEvent.team);
             const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
-            const taskRunner = await this.createMigrateTeamToCloudTasks(qmMessageClient, team);
+            const taskRunner = await this.createMigrateTeamToCloudTasks(qmMessageClient, team, teamCloudMigrationEvent.previousCloud);
 
             await taskRunner.execute(ctx);
 
@@ -96,11 +97,11 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
 
         } catch (error) {
             this.failEvent();
-            return await this.handleError(ctx, error, devOpsRequestedEvent.team.slackIdentity.teamChannel);
+            return await this.handleError(ctx, error, teamCloudMigrationEvent.team.slackIdentity.teamChannel);
         }
     }
 
-    private async createMigrateTeamToCloudTasks(qmMessageClient: QMMessageClient, team: QMTeam) {
+    private async createMigrateTeamToCloudTasks(qmMessageClient: QMMessageClient, team: QMTeam, previousCloud: string) {
         const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Migrating Team to cloud *${team.openShiftCloud}* started:`,
             qmMessageClient);
         const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
@@ -113,17 +114,17 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
 
         const projects = await this.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(team.name, false);
         for (const project of projects) {
-            await this.addCreateProjectEnvironmentsTasks(taskRunner, team, project);
+            await this.addCreateProjectEnvironmentsTasks(taskRunner, team, project, previousCloud);
         }
 
         return taskRunner;
     }
 
-    private async addCreateProjectEnvironmentsTasks(taskRunner: TaskRunner, team: QMTeam, project: QMProject) {
+    private async addCreateProjectEnvironmentsTasks(taskRunner: TaskRunner, team: QMTeam, project: QMProject, previousCloud: string) {
 
         const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
-        await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd);
+        await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[previousCloud].openshiftNonProd);
 
         const environmentsForCreation: OpenShiftProjectNamespace[] = getAllProjectOpenshiftNamespaces(tenant, project);
 
