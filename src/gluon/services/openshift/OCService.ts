@@ -502,7 +502,6 @@ export class OCService {
         const rawSSHKey = Buffer.from(QMConfig.subatomic.bitbucket.cicdKey.split(" ")[1]).toString("base64");
         const cicdPrivateKey = fs.readFileSync(
             QMConfig.subatomic.bitbucket.cicdPrivateKeyPath).toString("base64");
-
         const secretResource: OpenshiftResource = {
             kind: "Secret",
             apiVersion: "v1",
