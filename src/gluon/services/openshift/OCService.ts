@@ -338,7 +338,7 @@ export class OCService {
             const returnedTemplate: OpenshiftResource = response.data;
 
             // Build the list object from the response object (objects[] maps to items[])
-            const openShiftResourceList: OpenshiftResource = {
+            const openShiftResourceList: OpenshiftListResource = {
                 kind: "List",
                 apiVersion: "v1",
                 metadata: {},

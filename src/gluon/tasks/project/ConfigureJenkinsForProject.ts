@@ -2,7 +2,7 @@ import {HandlerContext, logger} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
-import {QMTemplate} from "../../../template/QMTemplate";
+import {QMFileTemplate} from "../../../template/QMTemplate";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getJenkinsBitbucketAccessCredential} from "../../util/jenkins/JenkinsCredentials";
@@ -86,7 +86,7 @@ export class ConfigureJenkinsForProject extends Task {
     }
 
     private async createJenkinsBuildTemplate(environmentsRequestedEvent, teamDevOpsProjectId: string, jenkinsHost: string, token: string) {
-        const projectTemplate: QMTemplate = new QMTemplate("resources/templates/jenkins/jenkins-openshift-environment-credentials.xml");
+        const projectTemplate: QMFileTemplate = new QMFileTemplate("resources/templates/jenkins/jenkins-openshift-environment-credentials.xml");
 
         const parameters: { [k: string]: any } = {
             projectName: environmentsRequestedEvent.project.name,

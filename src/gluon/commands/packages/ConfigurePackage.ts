@@ -93,6 +93,8 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
 
     public buildEnvironmentVariables: { [key: string]: string } = {};
 
+    public deploymentEnvironmentVariables: { [key: string]: string } = {};
+
     constructor(public gluonService = new GluonService(),
                 public ocService = new OCService()) {
         super();
@@ -131,6 +133,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
                         buildEnvironmentVariables: this.buildEnvironmentVariables,
                         openshiftTemplate: this.openshiftTemplate,
                         baseS2IImage: this.imageName,
+                        deploymentEnvironmentVariables: this.deploymentEnvironmentVariables,
                     },
                     {
                         teamName: this.teamName,

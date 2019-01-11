@@ -81,11 +81,15 @@ export function getPipelineOpenShiftNamespacesForOpenShiftCluster(tenantName: st
     const environmentsForCreation: OpenShiftProjectNamespace[] = [];
 
     for (const environment of openShiftCluster.defaultEnvironments) {
+        let postFix = `${_.kebabCase(deploymentPipeline.tag)}-${environment.id}`;
+        if (_.isEmpty(deploymentPipeline.tag)) {
+            postFix = environment.id;
+        }
         environmentsForCreation.push(
             {
                 namespace: getProjectOpenshiftNamespace(tenantName, project.name, deploymentPipeline.tag, environment.id),
                 displayName: getProjectDisplayName(tenantName, project.name, deploymentPipeline.tag, environment.description),
-                postfix: environment.id,
+                postfix: postFix,
             },
         );
     }
@@ -106,9 +110,21 @@ export function getAllProjectOpenshiftNamespaces(owningTenant: QMTenant, project
     return environmentsForCreation;
 }
 
+export function getAllPipelineOpenshiftNamespacesForAllPipelines(tenantName: string, project: QMProject) {
+    const namespaces: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespaces(tenantName, project.name, project.devDeploymentPipeline);
+    for (const pipeline of project.releaseDeploymentPipelines) {
+        namespaces.push(...getAllPipelineOpenshiftNamespaces(tenantName, project.name, pipeline));
+    }
+    return namespaces;
+}
+
 export function getAllPipelineOpenshiftNamespaces(owningTenantName: string, projectName: string, pipeline: QMDeploymentPipeline): OpenShiftProjectNamespace[] {
     const environmentsForCreation: OpenShiftProjectNamespace[] = [];
     for (const environment of pipeline.environments) {
+        let postFix = `${_.kebabCase(pipeline.tag)}-${environment.postfix}`;
+        if (_.isEmpty(pipeline.tag)) {
+            postFix = environment.postfix;
+        }
         environmentsForCreation.push(
             {
                 namespace: getProjectOpenshiftNamespace(owningTenantName, projectName, pipeline.tag, environment.postfix),

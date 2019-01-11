@@ -5,16 +5,14 @@ export class QMTemplate {
 
     private readonly template: HandlebarsTemplateDelegate;
 
-    constructor(templateFile: string) {
-        const fs = require("fs");
-        const buffer = fs.readFileSync(templateFile);
+    constructor(rawTemplateString: string) {
         Handlebars.registerHelper("toLowerCase", str => str.toLowerCase());
         Handlebars.registerHelper("toUpperCase", str => str.toUpperCase());
         Handlebars.registerHelper("toKebabCase", str => _.kebabCase(str));
         Handlebars.registerHelper("toCamelCase", str => _.camelCase(str));
         Handlebars.registerHelper("toPascalCase", str => _.capitalize(_.camelCase(str)));
         Handlebars.registerHelper("toUpperSnakeCase", str => _.snakeCase(str).toUpperCase());
-        this.template = Handlebars.compile(buffer.toString());
+        this.template = Handlebars.compile(rawTemplateString);
     }
 
     public build(parameters: { [k: string]: any }): string {
@@ -23,7 +21,7 @@ export class QMTemplate {
         return this.template(safeParameters);
     }
 
-    public toSafeStrings(obj: any) {
+    private toSafeStrings(obj: any) {
         for (const property in obj) {
             if (obj.hasOwnProperty(property)) {
                 if (typeof obj[property] === "object") {
@@ -33,5 +31,14 @@ export class QMTemplate {
                 }
             }
         }
+    }
+}
+
+export class QMFileTemplate extends QMTemplate {
+
+    constructor(templateFile: string) {
+        const fs = require("fs");
+        const buffer = fs.readFileSync(templateFile);
+        super(buffer.toString());
     }
 }
