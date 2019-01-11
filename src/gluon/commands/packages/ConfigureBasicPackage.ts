@@ -8,7 +8,6 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
-import {QMTemplate} from "../../../template/QMTemplate";
 import {GluonService} from "../../services/gluon/GluonService";
 import {PackageDefinition} from "../../util/packages/packagedef/PackageDefinition";
 import {SetterLoader} from "../../util/packages/packagedef/SetterLoader";
@@ -27,6 +26,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {RecursiveSetterResult} from "../../util/recursiveparam/RecursiveSetterResult";
+import {JsonLoader} from "../../util/resources/JsonLoader";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {createMenuAttachment} from "../../util/shared/GenericMenu";
 import {ConfigurePackage} from "./ConfigurePackage";
@@ -92,8 +92,10 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const configTemplate: QMTemplate = new QMTemplate(this.getPathFromDefinitionName(this.packageDefinition));
-            const definition: PackageDefinition = JSON.parse(configTemplate.build(QMConfig.publicConfig()));
+            const jsonLoader = new JsonLoader();
+            const definition: PackageDefinition = jsonLoader.readTemplatizedFileContents(this.getPathFromDefinitionName(this.packageDefinition), QMConfig.publicConfig());
+            const unprocessedPackageDefinition: PackageDefinition = jsonLoader.readFileContents(this.getPathFromDefinitionName(this.packageDefinition));
+            definition.deploymentConfig = unprocessedPackageDefinition.deploymentConfig;
             const environmentVariablePrompt = await this.getEnvironmentVariablePrompt(definition);
             await ctx.messageClient.respond(environmentVariablePrompt.message, {id: this.messagePresentationCorrelationId});
             if (environmentVariablePrompt.complete) {
@@ -119,6 +121,12 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         } else {
             configurePackage.buildEnvironmentVariables = {};
         }
+        if (definition.deploymentConfig !== null) {
+            configurePackage.deploymentEnvironmentVariables = definition.deploymentConfig.envVariables;
+        } else {
+            configurePackage.deploymentEnvironmentVariables = {};
+        }
+
         let currentEnvVarValues: { [key: string]: string } = {};
         if (!_.isEmpty(this.currentEnvironmentVariablesJSON)) {
             currentEnvVarValues = JSON.parse(this.currentEnvironmentVariablesJSON);

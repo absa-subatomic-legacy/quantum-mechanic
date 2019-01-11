@@ -4,5 +4,12 @@
     "imageStream": "jdk8-maven3-newrelic-subatomic:2.0",
     "envVariables": {}
   },
+  "deploymentConfig": {
+    "envVariables": {
+      "SPRING_CLOUD_CONFIG_LABEL": "{{openShiftNamespaceDetails.postfix}}",
+      "SPRING_APPLICATION_NAME": "{{applicationName}}",
+      "SPRING_PROFILES_ACTIVE": "{{openShiftNamespaceDetails.postfix}},logging"
+    }
+  },
   "jenkinsfile": "maven-spring-boot"
 }

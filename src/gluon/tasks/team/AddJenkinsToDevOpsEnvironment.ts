@@ -92,11 +92,11 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
     }
 
     private async createJenkinsDeploymentConfig(projectId: string, openShiftCloud: string) {
-        logger.info("Processing Jenkins QMTemplate...");
+        logger.info("Processing Jenkins QMFileTemplate...");
         const openShiftResourceList = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId, openShiftCloud);
         try {
             await this.ocService.getDeploymentConfigInNamespace("jenkins", projectId);
-            logger.warn("Jenkins QMTemplate has already been processed, deployment exists");
+            logger.warn("Jenkins QMFileTemplate has already been processed, deployment exists");
         } catch (error) {
             await this.ocService.applyResourceFromDataInNamespace(openShiftResourceList, projectId);
         }

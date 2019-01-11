@@ -10,7 +10,7 @@ import {GitProject} from "@atomist/automation-client/lib/project/git/GitProject"
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
-import {QMTemplate} from "../../../template/QMTemplate";
+import {QMFileTemplate} from "../../../template/QMTemplate";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
@@ -90,7 +90,7 @@ export class ConfigurePackageInJenkins extends Task {
         const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
 
-        const jenkinsTemplate: QMTemplate = new QMTemplate(`resources/templates/jenkins/${jenkinsJobTemplate.templateFilename}`);
+        const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(`resources/templates/jenkins/${jenkinsJobTemplate.templateFilename}`);
         const builtTemplate: string = jenkinsTemplate.build(
             {
                 gluonApplicationName: application.name,
@@ -138,7 +138,7 @@ export class ConfigurePackageInJenkins extends Task {
                 await project.findFile(destinationJenkinsfileName);
             } catch (error) {
                 logger.info("Jenkinsfile doesnt exist. Adding it!");
-                const jenkinsTemplate: QMTemplate = new QMTemplate(this.getPathFromJenkinsfileName(jenkinsfileName as string));
+                const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(this.getPathFromJenkinsfileName(jenkinsfileName as string));
                 await project.addFile(destinationJenkinsfileName,
                     jenkinsTemplate.build({
                         devDeploymentEnvironments: this.project.devDeploymentPipeline.environments,

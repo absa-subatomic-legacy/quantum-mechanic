@@ -6,7 +6,11 @@ import {
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
+import {
+    OpenshiftListResource,
+    OpenshiftResource,
+} from "../../../openshift/api/resources/OpenshiftResource";
+import {QMTemplate} from "../../../template/QMTemplate";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -14,7 +18,7 @@ import {
     getBuildConfigName,
 } from "../../util/packages/Applications";
 import {
-    getDeploymentEnvironmentNamespacesFromProject,
+    getAllPipelineOpenshiftNamespacesForAllPipelines,
     getProjectDevOpsId,
     QMProject,
 } from "../../util/project/Project";
@@ -157,7 +161,8 @@ export class ConfigurePackageInOpenshift extends Task {
     }
 
     private async createApplicationOpenshiftResources(tenantName: string, project: QMProject, applicationName: string): Promise<HandlerResult> {
-        for (const deploymentNamespace of getDeploymentEnvironmentNamespacesFromProject(tenantName, project)) {
+        for (const openShiftNamespaceDetails of getAllPipelineOpenshiftNamespacesForAllPipelines(tenantName, project)) {
+            const deploymentNamespace = openShiftNamespaceDetails.namespace;
             const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);
             logger.info(`Processing app [${appName}] Template for: ${deploymentNamespace}`);
@@ -172,7 +177,7 @@ export class ConfigurePackageInOpenshift extends Task {
                 {key: "DEVOPS_NAMESPACE", value: devOpsProjectId},
             ];
 
-            const appProcessedTemplate = await this.ocService.findAndProcessOpenshiftTemplate(
+            const appProcessedTemplate: OpenshiftListResource = await this.ocService.findAndProcessOpenshiftTemplate(
                 this.deploymentDetails.openshiftTemplate,
                 deploymentNamespace,
                 templateParameters,
@@ -184,6 +189,16 @@ export class ConfigurePackageInOpenshift extends Task {
                 await this.ocService.getDeploymentConfigInNamespace(appName, deploymentNamespace);
                 logger.warn(`App [${appName}] Template has already been processed, deployment exists`);
             } catch (error) {
+
+                this.addDeploymentEnvironmentVariablesToDeploymentConfigs(
+                    appProcessedTemplate,
+                    this.deploymentDetails.deploymentEnvironmentVariables,
+                    {
+                        project,
+                        applicationName: appName,
+                        openShiftNamespaceDetails,
+                    });
+
                 await this.ocService.applyResourceFromDataInNamespace(
                     appProcessedTemplate,
                     deploymentNamespace,
@@ -192,10 +207,26 @@ export class ConfigurePackageInOpenshift extends Task {
         }
         return await success();
     }
+
+    private addDeploymentEnvironmentVariablesToDeploymentConfigs(processedTemplate: OpenshiftListResource, deploymentEnvironmentVariables: { [key: string]: string }, parameters: { [key: string]: any }) {
+        for (const resource of processedTemplate.items) {
+            if (resource.kind === "DeploymentConfig") {
+                for (const container of resource.spec.template.spec.containers) {
+                    for (const dcEnvVar of Object.keys(deploymentEnvironmentVariables)) {
+                        container.env.push({
+                            name: dcEnvVar,
+                            value: new QMTemplate(deploymentEnvironmentVariables[dcEnvVar]).build(parameters),
+                        });
+                    }
+                }
+            }
+        }
+    }
 }
 
 export interface PackageDeploymentDetails {
     buildEnvironmentVariables: { [key: string]: string };
+    deploymentEnvironmentVariables: { [key: string]: string };
     openshiftTemplate: string;
     baseS2IImage: string;
 }
