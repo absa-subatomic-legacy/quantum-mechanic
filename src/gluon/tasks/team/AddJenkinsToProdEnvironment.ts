@@ -1,5 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
+import {QMConfig} from "../../../config/QMConfig";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -53,7 +54,8 @@ export class AddJenkinsToProdEnvironment extends Task {
         }
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_SA_RIGHTS);
 
-        await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
+        // Add the prod token to the non prod jenkins instance
+        await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.devOpsRequestedEvent.team.openShiftCloud].openshiftNonProd);
 
         const jenkinsToken = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsNonProd);
 
