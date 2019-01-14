@@ -1,8 +1,8 @@
+import {configuration} from "@atomist/lifecycle-automation";
 import {isSuccessCode} from "../../http/Http";
 import {OpenShiftApiElement} from "./base/OpenShiftApiElement";
 import {OpenshiftApiResult} from "./base/OpenshiftApiResult";
 import {ResourceUrl} from "./resources/ResourceUrl";
-import {configuration} from "@atomist/lifecycle-automation";
 
 export class OpenShiftApiAdm extends OpenShiftApiElement {
 

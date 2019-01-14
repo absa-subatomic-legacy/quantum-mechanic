@@ -4,6 +4,7 @@ import {
     logger,
     success,
 } from "@atomist/automation-client";
+import {configuration} from "@atomist/lifecycle-automation";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {
@@ -26,7 +27,6 @@ import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
-import {configuration} from "@atomist/lifecycle-automation";
 
 export class ConfigurePackageInOpenshift extends Task {
 

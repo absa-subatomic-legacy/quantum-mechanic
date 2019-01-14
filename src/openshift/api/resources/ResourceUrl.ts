@@ -1,7 +1,7 @@
+import {configuration} from "@atomist/lifecycle-automation";
 import _ = require("lodash");
 import {OpenshiftApiBaseRoute} from "../base/OpenshiftApiBaseRoute";
 import {OpenshiftResource} from "./OpenshiftResource";
-import {configuration} from "@atomist/lifecycle-automation";
 
 export class ResourceUrl {
 

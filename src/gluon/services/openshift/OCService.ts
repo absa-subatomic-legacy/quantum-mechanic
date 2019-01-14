@@ -1,4 +1,5 @@
 import {logger} from "@atomist/automation-client";
+import {configuration} from "@atomist/lifecycle-automation";
 import * as fs from "fs";
 import _ = require("lodash");
 import {inspect} from "util";
@@ -20,7 +21,6 @@ import {QMError, QMErrorType} from "../../util/shared/Error";
 import {retryFunction} from "../../util/shared/RetryFunction";
 import {QMTeam} from "../../util/team/Teams";
 import {OCImageService} from "./OCImageService";
-import {configuration} from "@atomist/lifecycle-automation";
 
 export class OCService {
 

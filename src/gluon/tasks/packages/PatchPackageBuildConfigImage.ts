@@ -1,4 +1,5 @@
 import {HandlerContext} from "@atomist/automation-client";
+import {configuration} from "@atomist/lifecycle-automation";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {OCService} from "../../services/openshift/OCService";
@@ -7,7 +8,6 @@ import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
-import {configuration} from "@atomist/lifecycle-automation";
 
 export class PatchPackageBuildConfigImage extends Task {
 
