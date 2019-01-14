@@ -8,7 +8,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
-import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
+// import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -23,7 +23,7 @@ import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
     handleQMError,
-    OCResultError,
+    // OCResultError,
     QMError,
 } from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
@@ -150,10 +150,7 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
                 }
             }
         } catch (error) {
-            if (error instanceof OCCommandResult) {
-                throw new OCResultError(error, `Failed to add openshift team member permissions to the team projects.`);
-            }
-            throw error;
+            throw new QMError(error, `Failed to add OpenShift team member permissions to the team projects.`);
         }
     }
 

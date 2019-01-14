@@ -7,7 +7,7 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
-import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
+// import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -20,8 +20,8 @@ import {
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
-    handleQMError,
-    OCResultError,
+    handleQMError, QMError,
+    // OCResultError,
 } from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
@@ -120,12 +120,9 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
                 }
             }
         } catch (error) {
-            if (error instanceof OCCommandResult) {
-                throw new OCResultError(
+                throw new QMError(
                     error,
                     `Failed to remove OpenShift team member permissions from the team projects.`);
-            }
-            throw error;
         }
     }
 

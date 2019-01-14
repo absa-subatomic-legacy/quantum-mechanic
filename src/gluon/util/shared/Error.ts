@@ -9,7 +9,6 @@ import {SlackMessage, url} from "@atomist/slack-messages";
 import _ = require("lodash");
 import * as util from "util";
 import {QMConfig} from "../../../config/QMConfig";
-import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 
 export function logErrorAndReturnSuccess(method, error): HandlerResult {
     logger.info(`Don't display the error - ${method} already handles it.`);
@@ -32,15 +31,6 @@ export async function handleQMError(messageClient: QMMessageClient, error) {
     } else if (error instanceof Error) {
         logger.error(`Error is of default Error type.\nError: ${util.inspect(error)}`);
         return await messageClient.send(`❗Unhandled exception occurred. Please alert your system admin to check the logs and correct the issue accordingly.`);
-    } else if (error instanceof OCResultError) {
-        logger.error(`Error is of OCResultError type. Error: ${error.message}`);
-        return await messageClient.send(`${error.getSlackMessage()}`);
-    } else if (error instanceof OCCommandResult) {
-        logger.error(`Error is of OCCommandResult type (unhandled OCCommand failure).
-        Command: ${error.command}
-        Error: ${error.error}`);
-
-        return await messageClient.send(`❗An Openshift command failed to run successfully. Please alert your system admin to check the logs and correct the issue accordingly.`);
     }
     logger.error("Unknown error type. Rethrowing error.");
     throw new Error(error);
@@ -89,15 +79,6 @@ export class QMError extends Error {
 export enum QMErrorType {
     generic = "generic",
     conflict = "conflict",
-}
-
-export class OCResultError extends QMError {
-    constructor(private ocCommandResult: OCCommandResult, message: string, slackMessage: SlackMessage | string = message) {
-        super(message, slackMessage);
-        this.message = `${message}
-        Command: ${ocCommandResult.command}
-        Error: ${ocCommandResult.error}`;
-    }
 }
 
 export class GitError extends Error {
