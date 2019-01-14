@@ -116,12 +116,12 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         configurePackage.openshiftTemplate = definition.openshiftTemplate || "Default";
         configurePackage.jenkinsfileName = definition.jenkinsfile;
         configurePackage.imageName = definition.buildConfig.imageStream;
-        if (definition.buildConfig.envVariables != null) {
+        if (!_.isEmpty(definition.buildConfig.envVariables)) {
             configurePackage.buildEnvironmentVariables = definition.buildConfig.envVariables;
         } else {
             configurePackage.buildEnvironmentVariables = {};
         }
-        if (definition.deploymentConfig !== null) {
+        if (!_.isEmpty(definition.deploymentConfig)) {
             configurePackage.deploymentEnvironmentVariables = definition.deploymentConfig.envVariables;
         } else {
             configurePackage.deploymentEnvironmentVariables = {};
