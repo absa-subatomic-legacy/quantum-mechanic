@@ -35,14 +35,14 @@ export function getProjectDevOpsId(team: string): string {
  * Return the displayable or readable name for a given project pipeline environment
  * @param tenant - Owning tenant for the project
  * @param project - The name of the project
- * @param pipelineTag - The tag of the pipeline the namespace is for
+ * @param pipelineDisplayName - The name of the pipeline the namespace is for
  * @param environment - The environment description for the namespace
  */
-export function getProjectDisplayName(tenant: string, project: string, pipelineTag: string, environment: string): string {
+export function getProjectDisplayName(tenant: string, project: string, pipelineDisplayName: string, environment: string): string {
     let displayName = environment;
 
-    if (!_.isEmpty(pipelineTag)) {
-        displayName = pipelineTag + " " + displayName;
+    if (!_.isEmpty(pipelineDisplayName) && pipelineDisplayName.toLowerCase() !== "default") {
+        displayName = pipelineDisplayName + " " + displayName;
     }
 
     displayName = project + " " + displayName;
@@ -139,7 +139,7 @@ export function getPipelineOpenShiftNamespacesForOpenShiftCluster(tenantName: st
         environmentsForCreation.push(
             {
                 namespace: getProjectOpenshiftNamespace(tenantName, project.name, deploymentPipeline.tag, environment.id),
-                displayName: getProjectDisplayName(tenantName, project.name, deploymentPipeline.tag, environment.description),
+                displayName: getProjectDisplayName(tenantName, project.name, deploymentPipeline.name, environment.description),
                 postfix: postFix,
             },
         );
@@ -171,15 +171,15 @@ export function getAllPipelineOpenshiftNamespacesForAllPipelines(tenantName: str
 export function getAllPipelineOpenshiftNamespaces(owningTenantName: string, projectName: string, pipeline: QMDeploymentPipeline): OpenShiftProjectNamespace[] {
     const environmentsForCreation: OpenShiftProjectNamespace[] = [];
     for (const environment of pipeline.environments) {
-        let postFix = `${_.kebabCase(pipeline.tag)}-${environment.postfix}`;
+        let postfix = `${_.kebabCase(pipeline.tag)}-${environment.postfix}`;
         if (_.isEmpty(pipeline.tag)) {
-            postFix = environment.postfix;
+            postfix = environment.postfix;
         }
         environmentsForCreation.push(
             {
                 namespace: getProjectOpenshiftNamespace(owningTenantName, projectName, pipeline.tag, environment.postfix),
-                displayName: getProjectDisplayName(owningTenantName, projectName, pipeline.tag, environment.displayName),
-                postfix: environment.postfix,
+                displayName: getProjectDisplayName(owningTenantName, projectName, pipeline.name, environment.displayName),
+                postfix,
             },
         );
     }
