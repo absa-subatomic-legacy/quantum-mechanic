@@ -1,6 +1,8 @@
+import {configuration} from "@atomist/lifecycle-automation";
+
 export function serviceAccountDefinition() {
     return {
-        apiVersion: "v1",
+        apiVersion: configuration.apiVersion,
         kind: "ServiceAccount",
         metadata: {
             annotations: {
@@ -14,7 +16,7 @@ export function serviceAccountDefinition() {
 
 export function roleBindingDefinition() {
     return {
-        apiVersion: "v1",
+        apiVersion: configuration.apiVersion,
         kind: "RoleBinding",
         metadata: {
             annotations: {

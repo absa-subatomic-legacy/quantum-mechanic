@@ -26,6 +26,7 @@ import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
+import {configuration} from "@atomist/lifecycle-automation";
 
 export class ConfigurePackageInOpenshift extends Task {
 
@@ -85,7 +86,7 @@ export class ConfigurePackageInOpenshift extends Task {
 
     private async createApplicationImageStream(appBuildName: string, teamDevOpsProjectId: string) {
         await this.ocService.applyResourceFromDataInNamespace({
-            apiVersion: "v1",
+            apiVersion: configuration.apiVersion,
             kind: "ImageStream",
             metadata: {
                 name: appBuildName,
@@ -95,7 +96,7 @@ export class ConfigurePackageInOpenshift extends Task {
 
     private getBuildConfigData(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string): OpenshiftResource {
         return {
-            apiVersion: "v1",
+            apiVersion: configuration.apiVersion,
             kind: "BuildConfig",
             metadata: {
                 name: appBuildName,

@@ -20,6 +20,7 @@ import {QMError, QMErrorType} from "../../util/shared/Error";
 import {retryFunction} from "../../util/shared/RetryFunction";
 import {QMTeam} from "../../util/team/Teams";
 import {OCImageService} from "./OCImageService";
+import {configuration} from "@atomist/lifecycle-automation";
 
 export class OCService {
 
@@ -340,7 +341,7 @@ export class OCService {
             // Build the list object from the response object (objects[] maps to items[])
             const openShiftResourceList: OpenshiftListResource = {
                 kind: "List",
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 metadata: {},
                 items: returnedTemplate.objects,
             };
@@ -504,7 +505,7 @@ export class OCService {
             QMConfig.subatomic.bitbucket.cicdPrivateKeyPath).toString("base64");
         const secretResource: OpenshiftResource = {
             kind: "Secret",
-            apiVersion: "v1",
+            apiVersion: configuration.apiVersion,
             metadata: {
                 name: nme,
                 creationTimestamp: null,
@@ -566,7 +567,7 @@ export class OCService {
 
         const persistentVolumeClasimObject = {
             kind: "PersistentVolumeClaim",
-            apiVersion: "v1",
+            apiVersion: configuration.apiVersion,
             metadata: {
                 name: pvcName,
             },
@@ -642,7 +643,7 @@ export class OCService {
 
         const openShiftResourceList: OpenshiftListResource = {
             kind: "List",
-            apiVersion: "v1",
+            apiVersion: configuration.apiVersion,
             metadata: {},
             items: resources,
         };

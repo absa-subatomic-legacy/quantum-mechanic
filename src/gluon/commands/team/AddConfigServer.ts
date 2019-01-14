@@ -18,6 +18,7 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {configuration} from "@atomist/lifecycle-automation";
 
 @CommandHandler("Add a new Subatomic Config Server", QMConfig.subatomic.commandPrefix + " add config server")
 @Tags("subatomic", "team")
@@ -92,7 +93,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
 
     private async createConfigServerConfigurationMap(devOpsProjectId: string) {
         const configurationMapDefintion = {
-            apiVersion: "v1",
+            apiVersion: configuration.apiVersion,
             kind: "ConfigMap",
             metadata: {
                 name: "subatomic-config-server",

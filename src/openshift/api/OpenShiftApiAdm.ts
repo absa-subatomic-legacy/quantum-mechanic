@@ -2,13 +2,14 @@ import {isSuccessCode} from "../../http/Http";
 import {OpenShiftApiElement} from "./base/OpenShiftApiElement";
 import {OpenshiftApiResult} from "./base/OpenshiftApiResult";
 import {ResourceUrl} from "./resources/ResourceUrl";
+import {configuration} from "@atomist/lifecycle-automation";
 
 export class OpenShiftApiAdm extends OpenShiftApiElement {
 
     public async podNetworkJoinToProject(projectToJoin: string, projectToJoinTo: string): Promise<OpenshiftApiResult> {
         const clusterNetworkResource = {
             kind: "ClusterNetwork",
-            apiVersion: "v1",
+            apiVersion: configuration.apiVersion,
             metadata: {
                 name: "default",
             },
@@ -22,7 +23,7 @@ export class OpenShiftApiAdm extends OpenShiftApiElement {
 
         const netNamespaceResource = {
             kind: "NetNamespace",
-            apiVersion: "v1",
+            apiVersion: configuration.apiVersion,
             metadata: {
                 name: projectToJoin,
             },

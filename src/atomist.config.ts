@@ -177,6 +177,7 @@ export const configuration: any = {
     ws: {
         timeout: 20000,
     },
+    apiVersion: "v1",
 };
 
 if (QMConfig.proMetrics.enabled) {

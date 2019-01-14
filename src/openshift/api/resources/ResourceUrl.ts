@@ -1,6 +1,7 @@
 import _ = require("lodash");
 import {OpenshiftApiBaseRoute} from "../base/OpenshiftApiBaseRoute";
 import {OpenshiftResource} from "./OpenshiftResource";
+import {configuration} from "@atomist/lifecycle-automation";
 
 export class ResourceUrl {
 
@@ -48,63 +49,63 @@ export class ResourceUrl {
     private static urlMap: UrlMap = {
         user: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "users",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         imagestream: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "imagestreams",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         imagestreamtag: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "imagestreamtags",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         buildconfig: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "buildconfigs",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         deploymentconfig: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "deploymentconfigs",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         route: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "routes",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         endpoints: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "endpoints",
                 api: OpenshiftApiBaseRoute.API,
             },
         ],
         template: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "templates",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         rolebinding: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "rolebindings",
                 api: OpenshiftApiBaseRoute.OAPI,
             }, {
@@ -115,49 +116,49 @@ export class ResourceUrl {
         ],
         clusternetwork: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "clusternetworks",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         netnamespace: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "netnamespaces",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         project: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "projects",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         processedtemplate: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "processedtemplates",
                 api: OpenshiftApiBaseRoute.OAPI,
             },
         ],
         persistentvolumeclaim: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "persistentvolumeclaims",
                 api: OpenshiftApiBaseRoute.API,
             },
         ],
         service: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "services",
                 api: OpenshiftApiBaseRoute.API,
             },
         ],
         secret: [
             {
-                apiVersion: "v1",
+                apiVersion: configuration.apiVersion,
                 url: "secrets",
                 api: OpenshiftApiBaseRoute.API,
             },

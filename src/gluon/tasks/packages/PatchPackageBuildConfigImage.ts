@@ -7,6 +7,7 @@ import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
+import {configuration} from "@atomist/lifecycle-automation";
 
 export class PatchPackageBuildConfigImage extends Task {
 
@@ -51,7 +52,7 @@ export class PatchPackageBuildConfigImage extends Task {
 
     private getBuildConfigData(appBuildName: string, baseS2IImage: string): OpenshiftResource {
         return {
-            apiVersion: "v1",
+            apiVersion: configuration.apiVersion,
             kind: "BuildConfig",
             metadata: {
                 name: appBuildName,

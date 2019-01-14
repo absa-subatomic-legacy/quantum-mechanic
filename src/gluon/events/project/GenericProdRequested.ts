@@ -25,6 +25,7 @@ import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
 import {QMTeam} from "../../util/team/Teams";
+import {configuration} from "@atomist/lifecycle-automation";
 
 @EventHandler("Receive GenericProdRequestedEvent events", `
 subscription GenericProdRequestedEvent {
@@ -97,7 +98,7 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
     private getRequestedProdResources(applicationProdRequest: any): OpenshiftListResource {
         const resources = {
             kind: "List",
-            apiVersion: "v1",
+            apiVersion: configuration.apiVersion,
             metadata: {},
             items: [],
         };
