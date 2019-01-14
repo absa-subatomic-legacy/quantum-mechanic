@@ -124,31 +124,28 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
     }
 
     private async addPermissionsForUserToTeams(team: QMTeam, projects: QMProject[], membersAddedToTeamEvent) {
-        try {
-            const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
-            const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
-            await this.ocService.setOpenShiftDetails(osEnv);
 
-            const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
-            await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
-            for (const project of projects) {
-                logger.info(`Configuring permissions for project: ${project}`);
-                // Add to bitbucket
-                await bitbucketConfiguration.addAllMembersToProject(
-                    project.bitbucketProject.key,
-                    membersAddedToTeamEvent.members.map(member => userFromDomainUser(member.domainUsername)));
-                await bitbucketConfiguration.addAllOwnersToProject(
-                    project.bitbucketProject.key,
-                    membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername)),
-                );
-                const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
-                // Add to openshift environments
-                for (const projectNamespace of getDeploymentEnvironmentNamespacesFromProject(tenant.name, project)) {
-                    await this.ocService.addTeamMembershipPermissionsToProject(projectNamespace, membersAddedToTeamEvent);
-                }
+        const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
+        const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
+        await this.ocService.setOpenShiftDetails(osEnv);
+
+        const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
+        await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
+        for (const project of projects) {
+            logger.info(`Configuring permissions for project: ${project}`);
+            // Add to bitbucket
+            await bitbucketConfiguration.addAllMembersToProject(
+                project.bitbucketProject.key,
+                membersAddedToTeamEvent.members.map(member => userFromDomainUser(member.domainUsername)));
+            await bitbucketConfiguration.addAllOwnersToProject(
+                project.bitbucketProject.key,
+                membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername)),
+            );
+            const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+            // Add to openshift environments
+            for (const projectNamespace of getDeploymentEnvironmentNamespacesFromProject(tenant.name, project)) {
+                await this.ocService.addTeamMembershipPermissionsToProject(projectNamespace, membersAddedToTeamEvent);
             }
-        } catch (error) {
-            throw new QMError(error, `Failed to add OpenShift team member permissions to the team projects.`);
         }
     }
 
