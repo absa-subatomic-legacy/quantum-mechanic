@@ -7,7 +7,6 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
-// import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -21,7 +20,6 @@ import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
     handleQMError, QMError,
-    // OCResultError,
 } from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
