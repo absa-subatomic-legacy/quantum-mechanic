@@ -8,7 +8,6 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
-import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -23,7 +22,6 @@ import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
     handleQMError,
-    OCResultError,
     QMError,
 } from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
@@ -126,34 +124,28 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
     }
 
     private async addPermissionsForUserToTeams(team: QMTeam, projects: QMProject[], membersAddedToTeamEvent) {
-        try {
-            const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
-            const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
-            await this.ocService.setOpenShiftDetails(osEnv);
 
-            const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
-            await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
-            for (const project of projects) {
-                logger.info(`Configuring permissions for project: ${project}`);
-                // Add to bitbucket
-                await bitbucketConfiguration.addAllMembersToProject(
-                    project.bitbucketProject.key,
-                    membersAddedToTeamEvent.members.map(member => userFromDomainUser(member.domainUsername)));
-                await bitbucketConfiguration.addAllOwnersToProject(
-                    project.bitbucketProject.key,
-                    membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername)),
-                );
-                const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
-                // Add to openshift environments
-                for (const projectNamespace of getDeploymentEnvironmentNamespacesFromProject(tenant.name, project)) {
-                    await this.ocService.addTeamMembershipPermissionsToProject(projectNamespace, membersAddedToTeamEvent);
-                }
+        const bitbucketConfiguration = new BitbucketConfigurationService(this.bitbucketService);
+        const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
+        await this.ocService.setOpenShiftDetails(osEnv);
+
+        const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
+        await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
+        for (const project of projects) {
+            logger.info(`Configuring permissions for project: ${project}`);
+            // Add to bitbucket
+            await bitbucketConfiguration.addAllMembersToProject(
+                project.bitbucketProject.key,
+                membersAddedToTeamEvent.members.map(member => userFromDomainUser(member.domainUsername)));
+            await bitbucketConfiguration.addAllOwnersToProject(
+                project.bitbucketProject.key,
+                membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername)),
+            );
+            const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+            // Add to openshift environments
+            for (const projectNamespace of getDeploymentEnvironmentNamespacesFromProject(tenant.name, project)) {
+                await this.ocService.addTeamMembershipPermissionsToProject(projectNamespace, membersAddedToTeamEvent);
             }
-        } catch (error) {
-            if (error instanceof OCCommandResult) {
-                throw new OCResultError(error, `Failed to add openshift team member permissions to the team projects.`);
-            }
-            throw error;
         }
     }
 
