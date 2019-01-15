@@ -7,7 +7,6 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
-import {OCCommandResult} from "../../../openshift/base/OCCommandResult";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -20,8 +19,7 @@ import {
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
-    handleQMError,
-    OCResultError,
+    handleQMError, QMError,
 } from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
@@ -95,37 +93,28 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
 
     private async removePermissionsForUserFromTeams(bitbucketConfiguration: BitbucketConfigurationService,
                                                     team: QMTeam, projects: QMProject[], memberRemovedFromTeam) {
-        try {
-            const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
-            await this.ocService.setOpenShiftDetails(osEnv);
+        const osEnv = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
+        await this.ocService.setOpenShiftDetails(osEnv);
 
-            const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
-            await this.ocService.removeTeamMembershipPermissionsFromProject(
-                devopsProject, memberRemovedFromTeam.memberRemoved.domainUsername);
+        const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
+        await this.ocService.removeTeamMembershipPermissionsFromProject(
+            devopsProject, memberRemovedFromTeam.memberRemoved.domainUsername);
 
-            for (const project of projects) {
-                logger.info(`Removing permissions for project: ${project}`);
+        for (const project of projects) {
+            logger.info(`Removing permissions for project: ${project}`);
 
-                // Remove from BitBucket
-                await bitbucketConfiguration.removeUserFromBitbucketProject(
-                    project.bitbucketProject.key,
-                    [memberRemovedFromTeam.memberRemoved.domainUsername]);
-                const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+            // Remove from BitBucket
+            await bitbucketConfiguration.removeUserFromBitbucketProject(
+                project.bitbucketProject.key,
+                [memberRemovedFromTeam.memberRemoved.domainUsername]);
+            const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
-                // Remove from OpenShift environments
-                for (const projectOpenShiftNamespace of getAllPipelineOpenshiftNamespacesForAllPipelines(tenant.name, project)) {
-                    await this.ocService.removeTeamMembershipPermissionsFromProject(
-                        projectOpenShiftNamespace.namespace,
-                        memberRemovedFromTeam.memberRemoved.domainUsername);
-                }
+            // Remove from OpenShift environments
+            for (const projectOpenShiftNamespace of getAllPipelineOpenshiftNamespacesForAllPipelines(tenant.name, project)) {
+                await this.ocService.removeTeamMembershipPermissionsFromProject(
+                    projectOpenShiftNamespace.namespace,
+                    memberRemovedFromTeam.memberRemoved.domainUsername);
             }
-        } catch (error) {
-            if (error instanceof OCCommandResult) {
-                throw new OCResultError(
-                    error,
-                    `Failed to remove OpenShift team member permissions from the team projects.`);
-            }
-            throw error;
         }
     }
 
