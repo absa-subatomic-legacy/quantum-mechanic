@@ -7,8 +7,14 @@ import {createMenuAttachment} from "../shared/GenericMenu";
 import {QMTenant} from "../shared/Tenants";
 import {QMTeam} from "../team/Teams";
 
+/**
+ * Returns the expected OpenShift namespace for a given project pipeline environment.
+ * @param tenant - Owning tenant for the project
+ * @param project - The name of the project
+ * @param pipelineTag - The tag of the pipeline the namespace is for
+ * @param environment - The environment postfix for the namespace
+ */
 export function getProjectOpenshiftNamespace(tenant: string, project: string, pipelineTag: string, environment: string): string {
-
     let postFix = `${_.kebabCase(pipelineTag)}-${environment.toLowerCase()}`;
     if (!_.isEmpty(pipelineTag)) {
         postFix = "-" + postFix;
@@ -17,15 +23,26 @@ export function getProjectOpenshiftNamespace(tenant: string, project: string, pi
     return `${_.kebabCase(tenant).toLowerCase()}-${_.kebabCase(project).toLowerCase()}${postFix}`;
 }
 
+/**
+ * Returns the DevOps OpenShift namespace for a given team
+ * @param team - The name of the team
+ */
 export function getProjectDevOpsId(team: string): string {
     return `${_.kebabCase(team).toLowerCase()}-devops`;
 }
 
-export function getProjectDisplayName(tenant: string, project: string, pipelineTag: string, environment: string) {
+/**
+ * Return the displayable or readable name for a given project pipeline environment
+ * @param tenant - Owning tenant for the project
+ * @param project - The name of the project
+ * @param pipelineDisplayName - The name of the pipeline the namespace is for
+ * @param environment - The environment description for the namespace
+ */
+export function getProjectDisplayName(tenant: string, project: string, pipelineDisplayName: string, environment: string): string {
     let displayName = environment;
 
-    if (!_.isEmpty(pipelineTag)) {
-        displayName = pipelineTag + " " + displayName;
+    if (!_.isEmpty(pipelineDisplayName) && pipelineDisplayName.toLowerCase() !== "default") {
+        displayName = pipelineDisplayName + " " + displayName;
     }
 
     displayName = project + " " + displayName;
@@ -37,7 +54,15 @@ export function getProjectDisplayName(tenant: string, project: string, pipelineT
     return displayName;
 }
 
-export function menuAttachmentForProjects(ctx: HandlerContext, projects: any[],
+/**
+ * Create Slack Menu attachment listing all selectable projects
+ * @param ctx - Atomist context
+ * @param projects - Projects to add as selectable options
+ * @param command - The Atomist Command Handler to reinvoke upon selection
+ * @param message - The prompt that will be displayed to the user above the menu
+ * @param projectNameVariable - The variable name in the *command* that the selected value will be injected into
+ */
+export function menuAttachmentForProjects(ctx: HandlerContext, projects: Array<{ name: string }>,
                                           command: HandleCommand, message: string = "Please select a project",
                                           projectNameVariable: string = "projectName") {
     return createMenuAttachment(
@@ -55,28 +80,14 @@ export function menuAttachmentForProjects(ctx: HandlerContext, projects: any[],
     );
 }
 
-export function getDeploymentEnvironmentNamespacesFromProject(tenantName: string, project: QMProject) {
-    const namespaces: string[] = getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName, project.name, project.devDeploymentPipeline);
-    namespaces.push(...getDeploymentEnvironmentNamespacesFromDeploymentPipelines(tenantName, project.name, project.releaseDeploymentPipelines));
-    return namespaces;
-}
-
-export function getDeploymentEnvironmentNamespacesFromDeploymentPipelines(tenantName: string, projectName: string, deploymentPipelines: QMDeploymentPipeline[]) {
-    const namespaces: string[] = [];
-    for (const pipeline of deploymentPipelines) {
-        namespaces.push(...getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName, projectName, pipeline));
-    }
-    return namespaces;
-}
-
-export function getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName: string, projectName: string, deploymentPipeline: QMDeploymentPipeline) {
-    const namespaces: string[] = [];
-    for (const environment of deploymentPipeline.environments) {
-        namespaces.push(getProjectOpenshiftNamespace(tenantName, projectName, deploymentPipeline.tag, environment.postfix));
-    }
-    return namespaces;
-}
-
+/**
+ * Return a list of project OpenShiftNamespaces using a particular deployment pipelines and the default environments specified for an OpenShiftCluster.
+ * The list of OpenShiftNamespaces contains details about the namespace and its various name components.
+ * @param tenantName - The project owning tenant
+ * @param project - The project to generate the OpenShiftNamespace list for
+ * @param deploymentPipeline - The deployment pipeline to build the OpenShiftNamespaces for.
+ * @param openShiftCluster - The OpenShift cluster OpenShiftConfig to use the default environments for.
+ */
 export function getPipelineOpenShiftNamespacesForOpenShiftCluster(tenantName: string, project: QMProject, deploymentPipeline: QMDeploymentPipeline, openShiftCluster: OpenShiftConfig): OpenShiftProjectNamespace[] {
     const environmentsForCreation: OpenShiftProjectNamespace[] = [];
 
@@ -88,7 +99,7 @@ export function getPipelineOpenShiftNamespacesForOpenShiftCluster(tenantName: st
         environmentsForCreation.push(
             {
                 namespace: getProjectOpenshiftNamespace(tenantName, project.name, deploymentPipeline.tag, environment.id),
-                displayName: getProjectDisplayName(tenantName, project.name, deploymentPipeline.tag, environment.description),
+                displayName: getProjectDisplayName(tenantName, project.name, deploymentPipeline.name, environment.description),
                 postfix: postFix,
             },
         );
@@ -96,20 +107,12 @@ export function getPipelineOpenShiftNamespacesForOpenShiftCluster(tenantName: st
     return environmentsForCreation;
 }
 
-export function getAllProjectOpenshiftNamespaces(owningTenant: QMTenant, project: QMProject): OpenShiftProjectNamespace[] {
-    const pipelines: QMDeploymentPipeline[] = [project.devDeploymentPipeline];
-    pipelines.push(...project.releaseDeploymentPipelines);
-
-    const environmentsForCreation: OpenShiftProjectNamespace[] = [];
-    for (const pipeline of pipelines) {
-        environmentsForCreation.push(
-            ...getAllPipelineOpenshiftNamespaces(owningTenant.name, project.name, pipeline),
-        );
-    }
-
-    return environmentsForCreation;
-}
-
+/**
+ * Return a list of project OpenShiftNamespaces for all the deployment pipelines associated to a project.
+ * The list of OpenShiftNamespaces contains details about the namespace and its various name components.
+ * @param tenantName - The project owning tenant name
+ * @param project - The project to generate the OpenShiftNamespace list for
+ */
 export function getAllPipelineOpenshiftNamespacesForAllPipelines(tenantName: string, project: QMProject) {
     const namespaces: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespaces(tenantName, project.name, project.devDeploymentPipeline);
     for (const pipeline of project.releaseDeploymentPipelines) {
@@ -118,18 +121,25 @@ export function getAllPipelineOpenshiftNamespacesForAllPipelines(tenantName: str
     return namespaces;
 }
 
+/**
+ * Return a list of project OpenShiftNamespaces for a particular deployment pipeline.
+ * The list of OpenShiftNamespaces contains details about the namespace and its various name components.
+ * @param owningTenantName - The project owning tenant name
+ * @param projectName - The name of the project to generate the OpenShiftNamespace list for
+ * @param pipeline - The particular pipeline to generate the namespaces for
+ */
 export function getAllPipelineOpenshiftNamespaces(owningTenantName: string, projectName: string, pipeline: QMDeploymentPipeline): OpenShiftProjectNamespace[] {
     const environmentsForCreation: OpenShiftProjectNamespace[] = [];
     for (const environment of pipeline.environments) {
-        let postFix = `${_.kebabCase(pipeline.tag)}-${environment.postfix}`;
+        let postfix = `${_.kebabCase(pipeline.tag)}-${environment.postfix}`;
         if (_.isEmpty(pipeline.tag)) {
-            postFix = environment.postfix;
+            postfix = environment.postfix;
         }
         environmentsForCreation.push(
             {
                 namespace: getProjectOpenshiftNamespace(owningTenantName, projectName, pipeline.tag, environment.postfix),
-                displayName: getProjectDisplayName(owningTenantName, projectName, pipeline.tag, environment.displayName),
-                postfix: environment.postfix,
+                displayName: getProjectDisplayName(owningTenantName, projectName, pipeline.name, environment.displayName),
+                postfix,
             },
         );
     }

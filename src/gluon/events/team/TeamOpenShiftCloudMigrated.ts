@@ -21,7 +21,7 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToDevOpsEnvironment} from "../../tasks/team/AddJenkinsToDevOpsEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
 import {
-    getAllProjectOpenshiftNamespaces,
+    getAllPipelineOpenshiftNamespacesForAllPipelines,
     OpenshiftProjectEnvironmentRequest,
     OpenShiftProjectNamespace,
     QMProject,
@@ -126,7 +126,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[previousCloud].openshiftNonProd);
 
-        const environmentsForCreation: OpenShiftProjectNamespace[] = getAllProjectOpenshiftNamespaces(tenant, project);
+        const environmentsForCreation: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespacesForAllPipelines(tenant.name, project);
 
         const createOpenshiftEnvironmentsDetails: OpenshiftProjectEnvironmentRequest = {
             project,

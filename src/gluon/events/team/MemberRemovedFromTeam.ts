@@ -13,7 +13,7 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
 import {
-    getDeploymentEnvironmentNamespacesFromProject,
+    getAllPipelineOpenshiftNamespacesForAllPipelines,
     QMProject,
 } from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
@@ -110,9 +110,9 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
             const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
             // Remove from OpenShift environments
-            for (const projectNamespace of getDeploymentEnvironmentNamespacesFromProject(tenant.name, project)) {
+            for (const projectOpenShiftNamespace of getAllPipelineOpenshiftNamespacesForAllPipelines(tenant.name, project)) {
                 await this.ocService.removeTeamMembershipPermissionsFromProject(
-                    projectNamespace,
+                    projectOpenShiftNamespace.namespace,
                     memberRemovedFromTeam.memberRemoved.domainUsername);
             }
         }
