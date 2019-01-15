@@ -81,46 +81,6 @@ export function menuAttachmentForProjects(ctx: HandlerContext, projects: Array<{
 }
 
 /**
- * Returns a list of all OpenShift environment namespace names for a given project.
- * This includes all devDipeline environments and releasePipeline environments.
- * @param tenantName - Project owning tenant
- * @param project - The project to build the namespace names for.
- */
-export function getDeploymentEnvironmentNamespacesFromProject(tenantName: string, project: QMProject): string[] {
-    const namespaces: string[] = getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName, project.name, project.devDeploymentPipeline);
-    namespaces.push(...getDeploymentEnvironmentNamespacesFromDeploymentPipelines(tenantName, project.name, project.releaseDeploymentPipelines));
-    return namespaces;
-}
-
-/**
- * Returns a list of all OpenShift environment namespace names for a given project and a specified list of pipelines.
- * @param tenantName - Project owning tenant
- * @param projectName - Name of the project the environments are part of.
- * @param deploymentPipelines - The deployment pipelines list to build the namespace names for.
- */
-export function getDeploymentEnvironmentNamespacesFromDeploymentPipelines(tenantName: string, projectName: string, deploymentPipelines: QMDeploymentPipeline[]): string[] {
-    const namespaces: string[] = [];
-    for (const pipeline of deploymentPipelines) {
-        namespaces.push(...getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName, projectName, pipeline));
-    }
-    return namespaces;
-}
-
-/**
- * Returns a list of all OpenShift environment namespace names for a given project and a specified pipeline.
- * @param tenantName - Project owning tenant
- * @param projectName - Name of the project the environments are part of.
- * @param deploymentPipeline - The deployment pipeline to build the namespace names for.
- */
-export function getDeploymentEnvironmentNamespacesFromDeploymentPipeline(tenantName: string, projectName: string, deploymentPipeline: QMDeploymentPipeline): string[] {
-    const namespaces: string[] = [];
-    for (const environment of deploymentPipeline.environments) {
-        namespaces.push(getProjectOpenshiftNamespace(tenantName, projectName, deploymentPipeline.tag, environment.postfix));
-    }
-    return namespaces;
-}
-
-/**
  * Return a list of project OpenShiftNamespaces using a particular deployment pipelines and the default environments specified for an OpenShiftCluster.
  * The list of OpenShiftNamespaces contains details about the namespace and its various name components.
  * @param tenantName - The project owning tenant

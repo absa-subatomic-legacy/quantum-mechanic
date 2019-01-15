@@ -17,7 +17,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
-    getDeploymentEnvironmentNamespacesFromProject,
+    getAllPipelineOpenshiftNamespacesForAllPipelines,
     QMProject,
 } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
@@ -86,8 +86,8 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
 
             if (this.openShiftProjectNames === "all") {
                 this.openShiftProjectNames = "";
-                for (const projectNamespace of getDeploymentEnvironmentNamespacesFromProject(qmTenant.name, qmProject)) {
-                    this.openShiftProjectNames += projectNamespace + ",";
+                for (const opensShiftNamespace of getAllPipelineOpenshiftNamespacesForAllPipelines(qmTenant.name, qmProject)) {
+                    this.openShiftProjectNames += opensShiftNamespace.namespace + ",";
                 }
                 this.openShiftProjectNames.substr(0, this.openShiftProjectNames.length - 1);
             }
@@ -151,11 +151,11 @@ async function setOpenShiftNamespaceForPvc(ctx: HandlerContext, commandHandler: 
 
     const options = [{value: "all", text: "All environments"}];
 
-    for (const environmentNamespace of getDeploymentEnvironmentNamespacesFromProject(qmTenant.name, qmProject)) {
+    for (const openShiftNamespace of getAllPipelineOpenshiftNamespacesForAllPipelines(qmTenant.name, qmProject)) {
         options.push(
             {
-                value: environmentNamespace,
-                text: environmentNamespace,
+                value: openShiftNamespace.namespace,
+                text: openShiftNamespace.namespace,
             },
         );
     }
