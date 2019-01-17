@@ -1,0 +1,4 @@
+type ProjectJenkinsJobRequestedEvent @rootType {
+    project: Project
+    requestedBy: ActionedBy
+}
