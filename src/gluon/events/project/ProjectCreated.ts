@@ -59,15 +59,14 @@ export class ProjectCreated extends BaseQMEvent implements HandleEvent<any> {
             const destination = await addressSlackChannelsFromContext(ctx, projectCreatedEvent.team.slackIdentity.teamChannel);
             this.succeedEvent();
             return await ctx.messageClient.send({
-                text: `The *${projectCreatedEvent.project.name}* project has been created successfully.`,
+                text: `The *${projectCreatedEvent.project.name}* Subatomic project has been created successfully.`,
                 attachments: [{
                     text: `
-A Subatomic project is linked to a Bitbucket project. \
-This can be a new Bitbucket project that will be created and configured according to best practice or you can choose to link an existing project. The existing project will also be configured accordingly.`,
-                    fallback: "Create or link Bitbucket project",
+The new Subatomic project needs to be linked to an existing Bitbucket project.`,
+                    fallback: "Link  an existing Bitbucket project",
                     footer: `For more information, please read the ${this.docs("create-bitbucket-project")}`,
                     color:  QMColours.stdGreenyMcAppleStroodle.hex,
-                    thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/atlassian-bitbucket-logo.png",
+                    thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/bitbucket-logo.png",
                     actions: [
                         buttonForCommand(
                             {text: "Link existing Bitbucket project"},
@@ -78,7 +77,7 @@ This can be a new Bitbucket project that will be created and configured accordin
                 }, {
                     text: `
 Projects can be associated with multiple teams. \
-If you would like to associate more teams to the *${projectCreatedEvent.project.name}* project, please use the \`@atomist sub associate team\` command`,
+If you would like to associate more teams to the *${projectCreatedEvent.project.name}* Subatomic project, please use the \`@atomist sub associate team\` command`,
                     fallback: "Associate multiple teams to this project",
                     footer: `For more information, please read the ${this.docs("associate-team")}`,
                     color:  QMColours.stdShySkyBlue.hex,
