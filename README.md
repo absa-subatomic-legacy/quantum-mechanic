@@ -4,7 +4,7 @@ An Atomist [automation client](https://github.com/atomist/automation-client-ts)
 with command and event handlers for integration between various external infrastructure components.
 
 Quantum Mechanic extends on the Atomist Automation Client for Slack. It contains command and event handlers for 
-OpenShift and leverages of the Gluon project for auditing, context awareness as well as queing.
+OpenShift and leverages of the Gluon project for auditing and context awareness.
 
 Therefore, follow read the instructions for [Running the Automation Client](https://github.com/atomist/automation-client-ts#running-the-automation-client)
 from the [`automation-client-ts`](https://github.com/atomist/automation-client-ts) GitHub repository to gain a better
@@ -30,8 +30,8 @@ Navigate to the folder you have cloned and use the following node package manage
 
 ### 4. Local configuration
 
-The configuration is drawn from the `atomist.config.ts` file by default, however provision for local development has 
-been made with the use of a local.json.
+The Atomist Automation Client configuration is drawn from the `atomist.config.ts` file, however the Quantum Mechanic 
+specific configuration can be added to a `local.json` file.
 
 You will need to create a new `config/local.json` file. This file can provide local configuration values over and above
 the default configurations. 
@@ -234,7 +234,6 @@ Next run with:
 $ npm run test
 ```
 
--- new eg
 ## Contributing
 Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
 
@@ -242,12 +241,11 @@ Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c
 No versioning is in place at the time of creating this documentation
 
 ## Authors
-A bunch of dudes, at a time, in a place.
+A bunch of dudes, at a time, in a place. Sub-Atomic team
 
 ## License
 This project is licensed under the Apache License v2.0 - see the LICENSE file for details
 
 ## Acknowledgements
-Hat tips to anyone 
-inspiration
+Hat tips to anyone inspiration
 etc
