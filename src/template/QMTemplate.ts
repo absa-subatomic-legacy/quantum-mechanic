@@ -12,6 +12,7 @@ export class QMTemplate {
         Handlebars.registerHelper("toCamelCase", str => _.camelCase(str));
         Handlebars.registerHelper("toPascalCase", str => _.capitalize(_.camelCase(str)));
         Handlebars.registerHelper("toUpperSnakeCase", str => _.snakeCase(str).toUpperCase());
+        Handlebars.registerHelper("ifCond", ifCond);
         this.template = Handlebars.compile(rawTemplateString);
     }
 
@@ -31,6 +32,44 @@ export class QMTemplate {
                 }
             }
         }
+    }
+
+}
+
+function ifCond(v1, operator, v2, options) {
+    // A function that adds equality and logical checks helper functions to
+    // the handlebars templating.
+    // See https://stackoverflow.com/a/16315366/1630111
+    switch (operator) {
+        case "==":
+        case "===":
+            // @ts-ignore
+            return (v1 === v2) ? options.fn(this) : options.inverse(this);
+        case "!=":
+        case "!==":
+            // @ts-ignore
+            return (v1 !== v2) ? options.fn(this) : options.inverse(this);
+        case "<":
+            // @ts-ignore
+            return (v1 < v2) ? options.fn(this) : options.inverse(this);
+        case "<=":
+            // @ts-ignore
+            return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+        case ">":
+            // @ts-ignore
+            return (v1 > v2) ? options.fn(this) : options.inverse(this);
+        case ">=":
+            // @ts-ignore
+            return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+        case "&&":
+            // @ts-ignore
+            return (v1 && v2) ? options.fn(this) : options.inverse(this);
+        case "||":
+            // @ts-ignore
+            return (v1 || v2) ? options.fn(this) : options.inverse(this);
+        default:
+            // @ts-ignore
+            return options.inverse(this);
     }
 }
 
