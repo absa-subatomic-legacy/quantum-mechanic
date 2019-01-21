@@ -4,7 +4,7 @@ An Atomist [automation client](https://github.com/atomist/automation-client-ts)
 with command and event handlers for integration between various external infrastructure components.
 
 Quantum Mechanic extends on the Atomist Automation Client for Slack. It contains command and event handlers for 
-OpenShift and leverages of the Gluon project for auditing and context awareness.
+OpenShift and leverages the Gluon project for auditing and context awareness.
 
 Therefore, follow the instructions for [Running the Automation Client](https://github.com/atomist/automation-client-ts#running-the-automation-client)
 from the [`automation-client-ts`](https://github.com/atomist/automation-client-ts) GitHub repository to gain a better
