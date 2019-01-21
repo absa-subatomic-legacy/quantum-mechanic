@@ -6,7 +6,7 @@
   },
   "deploymentConfig": {
     "envVariables": {
-      "SPRING_CLOUD_CONFIG_LABEL": "{{openShiftNamespaceDetails.postfix}}",
+      "SPRING_CLOUD_CONFIG_LABEL": "{{#ifCond openShiftNamespaceDetails.postfix '==' 'dev'}}master{{else}}{{openShiftNamespaceDetails.postfix}}{{/ifCond}}",
       "SPRING_APPLICATION_NAME": "{{applicationName}}",
       "SPRING_PROFILES_ACTIVE": "{{openShiftNamespaceDetails.postfix}},logging"
     }
