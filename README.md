@@ -6,7 +6,7 @@ with command and event handlers for integration between various external infrast
 Quantum Mechanic extends on the Atomist Automation Client for Slack. It contains command and event handlers for 
 OpenShift and leverages of the Gluon project for auditing and context awareness.
 
-Therefore, follow read the instructions for [Running the Automation Client](https://github.com/atomist/automation-client-ts#running-the-automation-client)
+Therefore, follow the instructions for [Running the Automation Client](https://github.com/atomist/automation-client-ts#running-the-automation-client)
 from the [`automation-client-ts`](https://github.com/atomist/automation-client-ts) GitHub repository to gain a better
 understanding of the library.
 
@@ -30,10 +30,10 @@ Navigate to the folder you have cloned and use the following node package manage
 
 ### 4. Local configuration
 
-The Atomist Automation Client configuration is drawn from the `atomist.config.ts` file, however the Quantum Mechanic 
+The Atomist Automation Client configuration is read from the `atomist.config.ts` file, however the Quantum Mechanic 
 specific configuration can be added to a `local.json` file.
 
-You will need to create a new `config/local.json` file. This file can provide local configuration values over and above
+You will need to create a new `config/local.json` file. This file provides local configuration values over and above
 the default configurations. 
 
 >Key value pairs stated in angle brackets, "<" or ">" are explained below and must be changed
@@ -241,11 +241,16 @@ Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c
 No versioning is in place at the time of creating this documentation
 
 ## Authors
-A bunch of dudes, at a time, in a place. Sub-Atomic team
+[Kieran Bristow](https://github.com/kbristow), 
+[Kieran Bester](https://github.com/KieranHons),
+[Donovan Muller](https://github.com/donovanmuller),
+[Andre de Jager](https://github.com/andrejonathan),
+[Chris Kieser](https://github.com/chriskieser),
+[Bilal Jooma](https://github.com/Buzzglo),
+[Christian Dupuis](https://github.com/cdupuis)
 
 ## License
 This project is licensed under the Apache License v2.0 - see the LICENSE file for details
 
-## Acknowledgements
-Hat tips to anyone inspiration
-etc
+<!-- ## Acknowledgements
+Hat tips to anyone inspiration. -->
