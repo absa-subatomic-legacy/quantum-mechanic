@@ -247,7 +247,6 @@ No versioning is in place at the time of creating this documentation
 [Andre de Jager](https://github.com/andrejonathan),
 [Chris Kieser](https://github.com/chriskieser),
 [Bilal Jooma](https://github.com/Buzzglo),
-[Christian Dupuis](https://github.com/cdupuis)
 
 ## License
 This project is licensed under the Apache License v2.0 - see the LICENSE file for details
