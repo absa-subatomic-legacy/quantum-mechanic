@@ -66,12 +66,14 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                                           screenName: string,
                                           slackName: string) {
         const destination = await addressSlackChannelsFromContext(ctx, channelName);
+
         try {
-            logger.info(`Added team member! Inviting to channel [${channelName}] -> member [${screenName}]`);
+            logger.info(`Inviting member [${screenName}] to channel [${channelName}]`);
             const channelId = await loadChannelIdByChannelName(ctx, channelName);
             logger.info("Channel ID: " + channelId);
+
             await inviteUserToSlackChannel(ctx,
-                ctx.workspaceId,
+                destination.team, // NOTE: this is the Slack Workspace ID not the Atomist Workspace ID (they used to be the same)
                 channelId,
                 screenName);
 
@@ -98,7 +100,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
             const channelId = await loadChannelIdByChannelName(ctx, channelName);
             logger.info("Channel ID: " + channelId);
             await inviteUserToSlackChannel(ctx,
-                ctx.workspaceId,
+                destination.team, // NOTE: this is the Slack Workspace ID not the Atomist Workspace ID (they used to be the same)
                 channelId,
                 screenName);
 

@@ -75,6 +75,8 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
         try {
             await this.inviteMembersToChannel(ctx, membersAddedToTeamEvent);
 
+            await this.inviteMembersToSecondarySlackChannels(ctx, membersAddedToTeamEvent);
+
             const team = membersAddedToTeamEvent.team;
 
             const projects = await this.getListOfTeamProjects(team.name);
@@ -122,14 +124,31 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
                 owner.slackIdentity.screenName);
         }
 
-        for (const member of addMembersToTeamEvent.members) {
-            await this.addMemberToTeamService.inviteUserToCustomSlackChannel(
-                ctx,
-                member.firstName,
-                addMembersToTeamEvent.team.name,
-                "sub-community",
-                member.slackIdentity.userId,
-                member.slackIdentity.screenName);
+    }
+
+    private async inviteMembersToSecondarySlackChannels(ctx: HandlerContext, addMembersToTeamEvent) {
+
+        for (const secondarySlackChannel of QMConfig.secondarySlackChannels) {
+
+            for (const member of addMembersToTeamEvent.members) {
+                await this.addMemberToTeamService.inviteUserToCustomSlackChannel(
+                    ctx,
+                    member.firstName,
+                    addMembersToTeamEvent.team.name,
+                    secondarySlackChannel,
+                    member.slackIdentity.userId,
+                    member.slackIdentity.screenName);
+            }
+
+            for (const owner of addMembersToTeamEvent.owners) {
+                await this.addMemberToTeamService.inviteUserToCustomSlackChannel(
+                    ctx,
+                    owner.firstName,
+                    addMembersToTeamEvent.team.name,
+                    secondarySlackChannel,
+                    owner.slackIdentity.userId,
+                    owner.slackIdentity.screenName);
+            }
         }
     }
 
