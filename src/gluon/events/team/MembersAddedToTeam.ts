@@ -121,6 +121,16 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
                 owner.slackIdentity.userId,
                 owner.slackIdentity.screenName);
         }
+
+        for (const member of addMembersToTeamEvent.members) {
+            await this.addMemberToTeamService.inviteUserToSlackChannel(
+                ctx,
+                member.firstName,
+                addMembersToTeamEvent.team.name,
+                "sub-community",
+                member.slackIdentity.userId,
+                member.slackIdentity.screenName);
+        }
     }
 
     private async addPermissionsForUserToTeams(team: QMTeam, projects: QMProject[], membersAddedToTeamEvent) {
