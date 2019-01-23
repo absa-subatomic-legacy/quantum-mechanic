@@ -79,7 +79,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
 
             return await ctx.messageClient.send(message, destination);
         } catch (error) {
-            logger.warn(error);
+            logger.warn(`inviteUserToSlackChannel error: ${error}`);
             return await ctx.messageClient.send(`User ${slackName} successfully added to your team.` +
                 ` Private channels do not currently support automatic user invitation.` +
                 ` Please invite the user to this slack channel manually.`, destination);
@@ -102,12 +102,12 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                 channelId,
                 screenName);
 
-            const message = `User invited to ${channelName} OK`;
+            const message = `Success: User invited to ${channelName} OK`;
 
             return await ctx.messageClient.send(message, destination);
         } catch (error) {
-            logger.warn(error);
-            return await ctx.messageClient.send(`Error: User invited to ${channelName}| ${error}`, destination);
+            logger.warn(`inviteUserToCustomSlackChannel error: ${error}`);
+            return await ctx.messageClient.send(`Error: User invited to ${channelName} FAILED| ${error}`, destination);
         }
     }
 
