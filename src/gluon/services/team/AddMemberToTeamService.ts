@@ -86,6 +86,31 @@ They have been sent a request to onboard, once they've successfully onboarded yo
         }
     }
 
+    public async inviteUserToCustomSlackChannel(ctx: HandlerContext,
+                                                newMemberFirstName: string,
+                                                gluonTeamName: string,
+                                                channelName: string,
+                                                screenName: string,
+                                                slackName: string) {
+        const destination = await addressSlackChannelsFromContext(ctx, channelName);
+        try {
+            logger.info(`Added team member! Inviting to channel [${channelName}] -> member [${screenName}]`);
+            const channelId = await loadChannelIdByChannelName(ctx, channelName);
+            logger.info("Channel ID: " + channelId);
+            await inviteUserToSlackChannel(ctx,
+                ctx.workspaceId,
+                channelId,
+                screenName);
+
+            const message = `User invited to ${channelName} OK`;
+
+            return await ctx.messageClient.send(message, destination);
+        } catch (error) {
+            logger.warn(error);
+            return await ctx.messageClient.send(`Error: User invited to ${channelName}| ${error}`, destination);
+        }
+    }
+
     public async addUserToGluonTeam(newMemberId: string, actioningMemberId: string, gluonTeamId: string, memberRole: MemberRole = MemberRole.member) {
         logger.info(`Adding member [${newMemberId}] to team ${gluonTeamId}`);
 
