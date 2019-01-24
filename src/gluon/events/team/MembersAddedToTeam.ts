@@ -73,19 +73,20 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
         const membersAddedToTeamEvent = event.data.MembersAddedToTeamEvent[0];
 
         try {
-            await this.inviteMembersToChannel(ctx, membersAddedToTeamEvent);
+            const team = membersAddedToTeamEvent.team;
+            const destination = await addressSlackChannelsFromContext(ctx, team.slackIdentity.teamChannel);
+
+            await this.inviteMembersToTeamChannel(ctx, membersAddedToTeamEvent);
+            await ctx.messageClient.send("User invited to team channel", destination);
 
             await this.inviteMembersToSecondarySlackChannels(ctx, membersAddedToTeamEvent);
-
-            const team = membersAddedToTeamEvent.team;
+            await ctx.messageClient.send("User invited to Subatomic channels", destination);
 
             const projects = await this.getListOfTeamProjects(team.name);
-
             await this.addPermissionsForUserToTeams(EventToGluon.gluonTeam(team), projects, membersAddedToTeamEvent);
 
-            const destination = await addressSlackChannelsFromContext(ctx, team.slackIdentity.teamChannel);
             this.succeedEvent();
-            return await ctx.messageClient.send("New user permissions successfully added to associated projects.", destination);
+            return await ctx.messageClient.send("New user permissions successfully added to associated OpenShift and Bitbucket projects.", destination);
         } catch (error) {
             this.failEvent();
             return await this.handleError(ctx, error, membersAddedToTeamEvent.team.slackIdentity.teamChannel);
@@ -102,7 +103,7 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
         return projects;
     }
 
-    private async inviteMembersToChannel(ctx: HandlerContext, addMembersToTeamEvent) {
+    private async inviteMembersToTeamChannel(ctx: HandlerContext, addMembersToTeamEvent) {
 
         for (const member of addMembersToTeamEvent.members) {
             await this.addMemberToTeamService.inviteUserToSlackChannel(
@@ -123,13 +124,11 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
                 owner.slackIdentity.userId,
                 owner.slackIdentity.screenName);
         }
-
     }
 
     private async inviteMembersToSecondarySlackChannels(ctx: HandlerContext, addMembersToTeamEvent) {
 
         for (const secondarySlackChannel of QMConfig.secondarySlackChannels) {
-
             for (const member of addMembersToTeamEvent.members) {
                 await this.addMemberToTeamService.inviteUserToCustomSlackChannel(
                     ctx,
@@ -161,6 +160,7 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
         await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
         for (const project of projects) {
             logger.info(`Configuring permissions for project: ${project}`);
+
             // Add to bitbucket
             await bitbucketConfiguration.addAllMembersToProject(
                 project.bitbucketProject.key,
@@ -170,6 +170,7 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
                 membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername)),
             );
             const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+
             // Add to openshift environments
             for (const openShiftNamespace of getAllPipelineOpenshiftNamespacesForAllPipelines(tenant.name, project)) {
                 await this.ocService.addTeamMembershipPermissionsToProject(openShiftNamespace.namespace, membersAddedToTeamEvent);

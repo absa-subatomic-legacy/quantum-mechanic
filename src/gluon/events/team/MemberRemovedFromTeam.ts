@@ -81,8 +81,7 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
 
             this.succeedEvent();
             return await ctx.messageClient.addressChannels(
-                "User permissions successfully removed from associated projects.",
-                team.slackIdentity.teamChannel);
+                `Permissions successfully removed from associated OpenShift and Bitbucket projects.`, team.slackIdentity.teamChannel);
         } catch (error) {
             this.failEvent();
             return await handleQMError(new ChannelMessageClient(ctx).addDestination(

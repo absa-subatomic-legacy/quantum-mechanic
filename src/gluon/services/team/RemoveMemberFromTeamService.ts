@@ -74,10 +74,10 @@ export class RemoveMemberFromTeamService {
             }
 
             if (!found) {
-                throw new QMError(`${newMember.slack.screenName} is not a member of this team`);
+                throw new QMError(`*${newMember.slack.screenName}* is not a member of this team`);
             }
         } else {
-            throw new QMError(`${newMember.slack.screenName} is an owner of this team and cannot be removed.`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
+            throw new QMError(`*${newMember.slack.screenName}* is an owner of this team and cannot be removed.`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
         }
     }
 
@@ -97,11 +97,11 @@ export class RemoveMemberFromTeamService {
             const userId = screenName;
             await kickUserFromSlackChannel(ctx, chatTeamId, channelId, userId);
 
-            const message = `${slackName} has been removed from the Slack channel: ${channelName}`;
+            const message = `${slackName} has been removed from the Slack channel: *${channelName}*`;
             return await ctx.messageClient.send(message, destination);
         } catch (error) {
             throw new QMError(error,
-                `Failed to remove ${slackName} from ${channelName}. The user might already have been removed or has already left. Please double check and remove the user manually if required.`);
+                `Failed to remove *${slackName}* from *${channelName}*. The user might already have been removed or has already left. Please double check and remove the user manually if required.`);
         }
     }
 }

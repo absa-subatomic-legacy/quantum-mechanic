@@ -111,8 +111,8 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
             "jude",
         );
 
-        assert.equal(fakeContext.messageClient.textMsg[0], "User jude successfully added to your team." +
-            " Private channels do not currently support automatic user invitation." +
+        assert.equal(fakeContext.messageClient.textMsg[0], "User *jude* successfully added to your team." +
+            " Invitation to the team channel failed. Private channels do not currently support automatic user invitation." +
             " Please invite the user to this slack channel manually.");
 
     });
