@@ -81,7 +81,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
             return await ctx.messageClient.send(message, destination);
         } catch (error) {
             logger.warn(`inviteUserToSlackChannel error: ${JSON.stringify(error)}`);
-            if (error.statusCode === "400") {
+            if (error.networkError.statusCode === 400) {
                 return await ctx.messageClient.send(`User *${slackName}* successfully added to your Subatomic team.` +
                     ` Invitation to the team channel failed. Private channels do not currently support automatic user invitation.` +
                     ` Please invite the user to this slack channel manually.`, destination);
@@ -114,9 +114,9 @@ They have been sent a request to onboard, once they've successfully onboarded yo
             return await ctx.messageClient.send(message, destination);
         } catch (error) {
             logger.warn(`inviteUserToCustomSlackChannel error: ${JSON.stringify(error)}`);
-            if (error.statusCode === "400") {
+            if (error.networkError.statusCode === 400) {
                 return await ctx.messageClient.send(`User *${slackName}* successfully added to your Subatomic team.` +
-                    ` Invitation to team the channel failed. Private channels do not currently support automatic user invitation.` +
+                    ` Invitation to this channel failed. Private channels do not currently support automatic user invitation.` +
                     ` Please invite the user to this slack channel manually.`, destination);
             } else {
                 return await ctx.messageClient.send(`User *${slackName}* successfully added to your Subatomic team.` +
