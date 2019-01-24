@@ -29,8 +29,7 @@ Click the button below to become familiar with the projects this team is involve
 
     public welcomeMemberToSlackCustomChannel(newMemberFirstName: string, teamSlackChannelName: string): SlackMessage {
         return {
-            text: `
-Welcome to the *${teamSlackChannelName}* channel!`,
+            text: `Welcome to the *${teamSlackChannelName}* channel!`,
             attachments: [{
                 text: `Welcome *${newMemberFirstName}*, you have been added to the *${teamSlackChannelName}* channel.`,
                 color: QMColours.stdGreenyMcAppleStroodle.hex,

@@ -194,7 +194,7 @@ describe("AddMemberToTeamService inviteUserToCustomSlackChannel", () => {
             returnValue: {ChatTeam: [{id: "1234"}]},
         });
 
-        await service.inviteUserToSlackChannel(fakeContext,
+        await service.inviteUserToCustomSlackChannel(fakeContext,
             "Jude",
             "channel1",
             "channe1id",
@@ -202,7 +202,7 @@ describe("AddMemberToTeamService inviteUserToCustomSlackChannel", () => {
             "jude",
         );
 
-        assert.equal(fakeContext.messageClient.textMsg[0].text, "Welcome to the team *Jude*!");
+        assert.equal(fakeContext.messageClient.textMsg[0].text, "Welcome to the *channel1* channel!");
 
     });
 });
