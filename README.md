@@ -158,6 +158,12 @@ Here is an example `local.json`:
       }
     }
   }
+  ,
+    "cluster": {
+      "enabled": false,
+      "workers": 1
+    },
+    "secondarySlackChannels": ["subatomic-discussion","sub-community"]
 }
 ```
 
