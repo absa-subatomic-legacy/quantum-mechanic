@@ -16,6 +16,7 @@ import {
     getAllPipelineOpenshiftNamespacesForAllPipelines,
     QMProject,
 } from "../../util/project/Project";
+import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
@@ -24,7 +25,6 @@ import {
 import {QMTenant} from "../../util/shared/Tenants";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
-import {QMColours} from "../../util/QMColour";
 
 @EventHandler("Receive MemberRemovedFromTeam events", `
 subscription MemberRemovedFromTeamEvent {
