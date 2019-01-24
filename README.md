@@ -235,6 +235,12 @@ $ npm run test
 ```
 
 ## Contributing
+We have enabled git's pre-push hook which runs both our lint and test script. In order to over-ride simply add the `--no-verify` flag to your push command.
+
+Example:
+```
+git push --no-verify origin some-branch
+```
 Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Versioning
