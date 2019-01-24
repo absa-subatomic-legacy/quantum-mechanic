@@ -84,7 +84,7 @@ describe("AddMemberToTeamService addUserToGluonTeam", () => {
 });
 
 describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
-    it("should fail to invite user to private channel (non private channel reason)", async () => {
+    it("should fail to invite user to channel (non private channel reason)", async () => {
 
         const service = new AddMemberToTeamService();
 
@@ -96,7 +96,7 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
             graphClient: new TestGraphClient(),
         };
 
-        // Force invite to fail
+        // Force invite to fail (NOTE: this does not simulate the correct http code ( a 400 is a private channel error a 403 is an unknown reason why type error)
         fakeContext.graphClient.executeQueryResults.push({
             result: true,
             returnValue: {ChatTeam: [{id: "1234"}]},
@@ -112,7 +112,69 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
         );
 
         assert.equal(fakeContext.messageClient.textMsg[0], "User *jude* successfully added to your Subatomic team." +
-            " The invitation failed for some reason. Please try to invite the user to this slack channel manually.");
+            " The invitation to the team Slack Channel failed for some reason. Please try to invite the user to this slack channel manually.");
+    });
+
+    it("should successfully invite user to channel", async () => {
+
+        const service = new AddMemberToTeamService();
+
+        const fakeContext = {
+            teamId: "TEST",
+            correlationId: "1231343234234",
+            workspaceId: "2341234123",
+            messageClient: new TestMessageClient(),
+            graphClient: new TestGraphClient(),
+        };
+
+        fakeContext.graphClient.executeQueryResults.push({
+            result: true,
+            returnValue: {ChatTeam: [{id: "1234"}]},
+        });
+
+        await service.inviteUserToSlackChannel(fakeContext,
+            "Jude",
+            "channel1",
+            "channe1id",
+            "Howard",
+            "jude",
+        );
+
+        assert.equal(fakeContext.messageClient.textMsg[0].text, "Welcome to the team *Jude*!");
+
+    });
+});
+
+describe("AddMemberToTeamService inviteUserToCustomSlackChannel", () => {
+    it("should fail to invite user to channel (non private channel reason)", async () => {
+
+        const service = new AddMemberToTeamService();
+
+        const fakeContext = {
+            teamId: "TEST",
+            correlationId: "1231343234234",
+            workspaceId: "2341234123",
+            messageClient: new TestMessageClient(),
+            graphClient: new TestGraphClient(),
+        };
+
+        // Force invite to fail (NOTE: this does not simulate the correct http code ( a 400 is a private channel error a 403 is an unknown reason why type error)
+        fakeContext.graphClient.executeQueryResults.push({
+            result: true,
+            returnValue: {ChatTeam: [{id: "1234"}]},
+        });
+        fakeContext.graphClient.executeMutationResults.push({result: false});
+
+        await service.inviteUserToCustomSlackChannel(fakeContext,
+            "Jude",
+            "channel1",
+            "channe1id",
+            "Howard",
+            "jude",
+        );
+
+        assert.equal(fakeContext.messageClient.textMsg[0], `User *jude* successfully added to your Subatomic team.` +
+            ` The invitation to the custom Slack channels failed for some reason. Please try to invite the user to this slack channel manually.`);
     });
 
     it("should successfully invite user to channel", async () => {

@@ -24,6 +24,7 @@ import {
 import {QMTenant} from "../../util/shared/Tenants";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
+import {QMColours} from "../../util/QMColour";
 
 @EventHandler("Receive MemberRemovedFromTeam events", `
 subscription MemberRemovedFromTeamEvent {
@@ -80,8 +81,17 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
                 bitbucketConfiguration, EventToGluon.gluonTeam(team), projects, memberRemovedFromTeam);
 
             this.succeedEvent();
+
             return await ctx.messageClient.addressChannels(
-                `Permissions successfully removed from associated OpenShift and Bitbucket projects.`, team.slackIdentity.teamChannel);
+                {
+                    text: `Permissions successfully removed from associated OpenShift and Bitbucket projects.`,
+                    attachments: [{
+                        text: `Please remove the user manually from the custom Slack channels as/if required.`,
+                        color: QMColours.stdGreenyMcAppleStroodle.hex,
+                        fallback: `Please remove the user manually from the custom Slack channels as/if required.`,
+                        mrkdwn_in: ["text"],
+                    }],
+                }, team.slackIdentity.teamChannel);
         } catch (error) {
             this.failEvent();
             return await handleQMError(new ChannelMessageClient(ctx).addDestination(

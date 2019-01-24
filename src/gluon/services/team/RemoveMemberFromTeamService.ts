@@ -97,8 +97,17 @@ export class RemoveMemberFromTeamService {
             const userId = screenName;
             await kickUserFromSlackChannel(ctx, chatTeamId, channelId, userId);
 
-            const message = `${slackName} has been removed from the Slack channel: *${channelName}*`;
-            return await ctx.messageClient.send(message, destination);
+            const message = `Remove User From Team Slack Channel`;
+            const slackMessage = {
+                text: message,
+                attachments: [{
+                    text: `${slackName} has been removed from the Slack channel: *${channelName}*`,
+                    color: QMColours.stdGreenyMcAppleStroodle.hex,
+                    fallback: `${slackName} has been removed from the Slack channel: *${channelName}*`,
+                    mrkdwn_in: ["text"],
+                }],
+            };
+            return await ctx.messageClient.send(slackMessage, destination);
         } catch (error) {
             throw new QMError(error,
                 `Failed to remove *${slackName}* from *${channelName}*. The user might already have been removed or has already left. Please double check and remove the user manually if required.`);

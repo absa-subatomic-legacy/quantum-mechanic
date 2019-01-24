@@ -87,7 +87,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                     ` Please invite the user to this slack channel manually.`, destination);
             } else {
                 return await ctx.messageClient.send(`User *${slackName}* successfully added to your Subatomic team.` +
-                    ` The invitation failed for some reason. Please try to invite the user to this slack channel manually.`, destination);
+                    ` The invitation to the team Slack Channel failed for some reason. Please try to invite the user to this slack channel manually.`, destination);
             }
         }
     }
@@ -98,6 +98,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                                                 channelName: string,
                                                 screenName: string,
                                                 slackName: string) {
+
         const destination = await addressSlackChannelsFromContext(ctx, channelName);
         try {
             logger.info(`Added team member! Inviting to channel [${channelName}] -> member [${screenName}]`);
@@ -108,7 +109,8 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                 channelId,
                 screenName);
 
-            const message = `User invited to *${channelName}*`;
+            const message = this.addMemberToTeamMessages.welcomeMemberToSlackCustomChannel(newMemberFirstName, gluonTeamName);
+
             return await ctx.messageClient.send(message, destination);
         } catch (error) {
             logger.warn(`inviteUserToCustomSlackChannel error: ${JSON.stringify(error)}`);
@@ -118,7 +120,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                     ` Please invite the user to this slack channel manually.`, destination);
             } else {
                 return await ctx.messageClient.send(`User *${slackName}* successfully added to your Subatomic team.` +
-                    ` The invitation failed for some reason. Please try to invite the user to this slack channel manually. `, destination);
+                    ` The invitation to the custom Slack channels failed for some reason. Please try to invite the user to this slack channel manually.`, destination);
             }
         }
     }
