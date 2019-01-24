@@ -3,7 +3,6 @@ import {QMConfig} from "../../../config/QMConfig";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
-
 import {
     getJenkinsBitbucketProjectCredential,
     getJenkinsDockerCredential,
