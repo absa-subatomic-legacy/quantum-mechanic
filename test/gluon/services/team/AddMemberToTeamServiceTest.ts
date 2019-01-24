@@ -84,7 +84,7 @@ describe("AddMemberToTeamService addUserToGluonTeam", () => {
 });
 
 describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
-    it("should fail to invite user to private channel", async () => {
+    it("should fail to invite user to private channel (non private channel reason)", async () => {
 
         const service = new AddMemberToTeamService();
 
@@ -111,10 +111,8 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
             "jude",
         );
 
-        assert.equal(fakeContext.messageClient.textMsg[0], "User *jude* successfully added to your team." +
-            " Invitation to the team channel failed. Private channels do not currently support automatic user invitation." +
-            " Please invite the user to this slack channel manually.");
-
+        assert.equal(fakeContext.messageClient.textMsg[0], "User *jude* successfully added to your Subatomic team." +
+            " The invitation failed for some reason. Please try to invite the user to this slack channel manually.");
     });
 
     it("should successfully invite user to channel", async () => {

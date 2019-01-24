@@ -87,7 +87,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
                     ` Please invite the user to this slack channel manually.`, destination);
             } else {
                 return await ctx.messageClient.send(`User *${slackName}* successfully added to your Subatomic team.` +
-                    ` The invitation failed for some reason. Please try to invite the user to this slack channel manually. `, destination);
+                    ` The invitation failed for some reason. Please try to invite the user to this slack channel manually.`, destination);
             }
         }
     }
