@@ -94,6 +94,7 @@
     "npm": "5.x.x"
   },
   "pre-push": [
-    "lint"
+    "lint",
+    "test"
   ]
 }
