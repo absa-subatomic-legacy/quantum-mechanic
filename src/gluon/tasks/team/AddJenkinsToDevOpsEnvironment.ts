@@ -1,8 +1,9 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
-import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
+import {JenkinsService} from "../../services/jenkins/JenkinsService";
+
 import {
     getJenkinsBitbucketProjectCredential,
     getJenkinsDockerCredential,
