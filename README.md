@@ -163,7 +163,7 @@ Here is an example `local.json`:
       "enabled": false,
       "workers": 1
     },
-    "secondarySlackChannels": ["subatomic-discussion","sub-community"]
+    "secondarySlackChannels": ["my-slack-channel","yet-another-slack-channel"]
 }
 ```
 
