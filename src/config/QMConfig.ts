@@ -22,6 +22,8 @@ export class QMConfig {
 
     public static proMetrics: ProMetrics;
 
+    public static secondarySlackChannels: string[];
+
     public static publicConfig() {
         return new PublicQMConfig();
     }
@@ -33,6 +35,7 @@ export class QMConfig {
         QMConfig.teamId = config.teamId;
         QMConfig.apiKey = config.apiKey;
         QMConfig.http = config.http;
+        QMConfig.secondarySlackChannels = config.secondarySlackChannels;
         QMConfig.proMetrics = config.proMetrics || {
             enabled: true,
         };
