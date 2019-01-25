@@ -1,3 +1,4 @@
+import {logger} from "@atomist/automation-client";
 import {url} from "@atomist/slack-messages";
 import assert = require("power-assert");
 import {anything, instance, mock, when} from "ts-mockito";
@@ -10,7 +11,6 @@ import {MemberRole} from "../../../../src/gluon/util/member/Members";
 import {QMError} from "../../../../src/gluon/util/shared/Error";
 import {TestGraphClient} from "../../TestGraphClient";
 import {TestMessageClient} from "../../TestMessageClient";
-import {logger} from "@atomist/automation-client";
 
 describe("AddMemberToTeamService getNewMemberGluonDetails", () => {
     it("should return member details", async () => {
@@ -183,7 +183,7 @@ describe("AddMemberToTeamService inviteUserToSlackChannel", () => {
 
 describe("AddMemberToTeamService inviteUserToCustomSlackChannel", () => {
 
-    it("should fail to invite user to custom slack channelcchannel 400 (private channel type error)", async () => {
+    it("should fail to invite user to custom slack channel 400 (private channel type error)", async () => {
 
         const service = new AddMemberToTeamService();
 
