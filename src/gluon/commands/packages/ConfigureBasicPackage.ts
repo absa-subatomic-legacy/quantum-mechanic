@@ -160,7 +160,12 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
                     } else {
                         this.currentEnvironmentVariablesJSON = JSON.stringify(currentEnvVarValues);
                         const optionsSetterFunction = await new SetterLoader(requiredVariable.setter).getLoader();
-                        const menuOptions = optionsSetterFunction(this);
+                        const menuOptions = [
+                            {
+                                value: "Prime.Api/Prime.Api.csproj",
+                                text: "Prime.Api/Prime.Api.csproj",
+                            },
+                        ]; // optionsSetterFunction(this);
                         const displayMessage = this.getDisplayMessage();
 
                         const variablePromptAttachment = createMenuAttachment(
