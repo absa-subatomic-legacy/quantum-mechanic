@@ -82,12 +82,13 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
     })
     public currentEnvironmentVariablesJSON: string;
 
+    @Parameter({
+        description: "Restore sources for .Net, if your package is not .Net simply enter `Jerry`. Otherwise enter the urls separated by a space",
+    })
+    public restoreSources: string;
+
     constructor(public gluonService = new GluonService()) {
         super();
-    }
-
-    protected initialise() {
-        this.displayResultMenu = ParameterDisplayType.showInitial;
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
@@ -107,6 +108,10 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
+    }
+
+    protected initialise() {
+        this.displayResultMenu = ParameterDisplayType.showInitial;
     }
 
     private async callPackageConfiguration(ctx: HandlerContext, definition: PackageDefinition): Promise<HandlerResult> {
@@ -160,7 +165,7 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
                     } else {
                         this.currentEnvironmentVariablesJSON = JSON.stringify(currentEnvVarValues);
                         const optionsSetterFunction = await new SetterLoader(requiredVariable.setter).getLoader();
-                        const menuOptions = optionsSetterFunction(this);
+                        const menuOptions = await optionsSetterFunction(this);
                         const displayMessage = this.getDisplayMessage();
 
                         const variablePromptAttachment = createMenuAttachment(
