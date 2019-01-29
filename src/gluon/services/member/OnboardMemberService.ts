@@ -3,7 +3,6 @@ import {
     addressSlackChannelsFromContext,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/lib/handlers/command/slack/AssociateRepo";
-import {QMError} from "../../util/shared/Error";
 import {loadChannelIdByChannelName} from "../../util/team/Teams";
 
 export class OnboardMemberService {
@@ -30,7 +29,7 @@ export class OnboardMemberService {
             logger.warn(`inviteUserToCustomSlackChannel warning: ${JSON.stringify(error)}`);
             const msg = `Invitation to channel *${channelName}* failed for *${slackScreenName}*.\n Note, private channels do not currently support automatic user invitation.\n` +
                 `Please invite the user to this slack channel manually.`;
-            throw new QMError(msg);
+            return await ctx.messageClient.send(msg, destination);
         }
     }
 }

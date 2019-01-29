@@ -11,6 +11,7 @@ import {
     Tags,
 } from "@atomist/automation-client/lib/decorators";
 import {addressSlackUsersFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {continueStatement} from "babel-types";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OnboardMemberMessages} from "../../messages/member/OnboardMemberMessages";
