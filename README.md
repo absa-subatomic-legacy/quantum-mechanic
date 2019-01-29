@@ -157,7 +157,12 @@ Here is an example `local.json`:
         "enabled": false
       }
     }
-  }
+  },
+  "cluster": {
+    "enabled": false,
+    "workers": 1
+  },
+  "secondarySlackChannels": ["my-slack-channel","yet-another-slack-channel"]
 }
 ```
 

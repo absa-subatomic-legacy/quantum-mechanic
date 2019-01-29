@@ -5,11 +5,12 @@ import {CreateTeam} from "../../commands/team/CreateTeam";
 import {JoinTeam} from "../../commands/team/JoinTeam";
 
 export class OnboardMemberMessages {
-    public presentTeamCreationAndApplicationOptions(firstName: string): SlackMessage {
-        const text: string = `
-Welcome to the Subatomic environment *${firstName}*!
-Next steps are to either join an existing team or create a new one.
-                `;
+
+    public presentTeamCreationAndApplicationOptions(firstName: string, secondarySlackChannels: string[]): SlackMessage {
+
+        const text: string = `🚀 Welcome to the Subatomic environment *${firstName}*!\n\n` +
+            `${secondarySlackChannels.length > 0 ? `You have been added to the Subatomic community channel/s:\n *${secondarySlackChannels.join("*\n*")}*\n\n` : "\n\n"}` +
+            `Next steps are to either join an existing team or create a new one.`;
 
         return {
             text,

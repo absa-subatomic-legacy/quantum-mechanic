@@ -11,10 +11,12 @@ import {
     Tags,
 } from "@atomist/automation-client/lib/decorators";
 import {addressSlackUsersFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {continueStatement} from "babel-types";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OnboardMemberMessages} from "../../messages/member/OnboardMemberMessages";
 import {GluonService} from "../../services/gluon/GluonService";
+import {OnboardMemberService} from "../../services/member/OnboardMemberService";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
@@ -53,13 +55,15 @@ export class OnboardMember extends BaseQMComand {
 
     public onboardMessages: OnboardMemberMessages = new OnboardMemberMessages();
 
-    constructor(private gluonService = new GluonService()) {
+    constructor(private gluonService = new GluonService(),
+                private onboardMemberService = new OnboardMemberService()) {
         super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             logger.info("Requesting new Gluon user");
+
             await this.createGluonTeamMember(
                 {
                     firstName: this.firstName,
@@ -71,15 +75,35 @@ export class OnboardMember extends BaseQMComand {
                         userId: this.userId,
                     },
                 });
-            const message = this.onboardMessages.presentTeamCreationAndApplicationOptions(this.firstName);
+
+            const secondaryChannelsInvited = await this.inviteMembersToSecondarySlackChannels(ctx);
+
+            const message = this.onboardMessages.presentTeamCreationAndApplicationOptions(this.firstName, secondaryChannelsInvited);
             const destination = await addressSlackUsersFromContext(ctx, this.userId);
             const result = await ctx.messageClient.send(message, destination);
+
             this.succeedCommand();
             return result;
         } catch (error) {
             this.failCommand();
             return await this.handleError(ctx, error);
         }
+    }
+
+    private async inviteMembersToSecondarySlackChannels(ctx: HandlerContext): Promise<string[]> {
+
+        const secondaryChannelsInvited: string[] = [];
+
+        for (const channel of QMConfig.secondarySlackChannels) {
+            try {
+                secondaryChannelsInvited.push(await this.onboardMemberService.inviteUserToSecondarySlackChannel(
+                    ctx, this.firstName, channel, this.userId, this.screenName));
+            } catch (error) {
+                await this.handleError(ctx, error);
+            }
+        }
+
+        return secondaryChannelsInvited;
     }
 
     private async createGluonTeamMember(teamMemberDetails: any) {
