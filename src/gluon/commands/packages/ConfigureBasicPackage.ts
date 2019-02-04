@@ -91,6 +91,10 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         super();
     }
 
+    protected initialise() {
+        this.displayResultMenu = ParameterDisplayType.showInitial;
+    }
+
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             const jsonLoader = new JsonLoader();
@@ -108,10 +112,6 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
         }
-    }
-
-    protected initialise() {
-        this.displayResultMenu = ParameterDisplayType.showInitial;
     }
 
     private async callPackageConfiguration(ctx: HandlerContext, definition: PackageDefinition): Promise<HandlerResult> {
