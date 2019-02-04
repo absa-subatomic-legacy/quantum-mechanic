@@ -3,17 +3,43 @@
 An Atomist [automation client](https://github.com/atomist/automation-client-ts)
 with command and event handlers for integration between various external infrastructure components.
 
+Quantum Mechanic extends on the Atomist Automation Client for Slack. It contains command and event handlers for 
+OpenShift and leverages the Gluon project for auditing and context awareness.
+
+Therefore, follow the instructions for [Running the Automation Client](https://github.com/atomist/automation-client-ts#running-the-automation-client)
+from the [`automation-client-ts`](https://github.com/atomist/automation-client-ts) GitHub repository to gain a better
+understanding of the library.
+
 ## Development setup
 
-Quantum Mechanic is just an Atomist Automation Client.
-Therefore, follow the instructions for [Running the Automation Client](https://github.com/atomist/automation-client-ts#running-the-automation-client)
-from the [`automation-client-ts`](https://github.com/atomist/automation-client-ts) GitHub repository.
+### 1. Install Node and NPM 
 
-### Local configuration
+Download and install node - v8.12.0 and npm - v6.4.1 or higher from the [NodeJS](https://nodejs.org/en/) site
 
-Instead of editing the `atomist.config.ts` file for local development, you can create
-a new `config/local.json` file. This file can provide local configuration values over and above
-the default configurations.
+### 2. Clone the repo
+
+Use the following command in a terminal to clone the repository to the desired local directory.
+
+`git clone https://github.com/absa-subatomic/quantum-mechanic.git`
+
+### 3. Install the Node dependencies
+
+Navigate to the folder you have cloned and use the following node package manager command to install dependencies
+
+`npm install`
+
+### 4. Local configuration
+
+The Atomist Automation Client configuration is read from the `atomist.config.ts` file, however the Quantum Mechanic 
+specific configuration can be added to a `local.json` file.
+
+You will need to create a new `config/local.json` file. This file provides local configuration values over and above
+the default configurations. 
+
+>Key value pairs stated in angle brackets, "<" or ">" are explained below and must be changed
+to the relevant value for your local environment.
+
+> The `local.json` file is excluded in `.gitignore` and therefore will not be staged by Git.
 
 Here is an example `local.json`:
 
@@ -131,7 +157,12 @@ Here is an example `local.json`:
         "enabled": false
       }
     }
-  }
+  },
+  "cluster": {
+    "enabled": false,
+    "workers": 1
+  },
+  "secondarySlackChannels": ["my-slack-channel","yet-another-slack-channel"]
 }
 ```
 
@@ -151,7 +182,11 @@ Replace the relevant values above:
 
 Note that the settings should be change appropriately if using different environments for prod or multiple prod environments in the relative parts of the settings file.
 
-### Maven settings
+### 6. Maven settings
+
+You will need to create a config/settings.xml file. 
+
+> The `setting.xml` file is excluded in `.gitignore` and therefore will not be staged by Git.
 
 Below is an example Maven settings file (`settings.xml`) that will be used to build projects in Jenkins:
 
@@ -176,18 +211,22 @@ Below is an example Maven settings file (`settings.xml`) that will be used to bu
 </settings>
 ```
 
-> The `local.json` file is excluded in `.gitignore` and therefore will not be staged by Git.
+### 7. Test your config
 
 Next run with:
 
 ```console
 $ npm run compile start
+```
+
+The console will return
+``` console return
 ...
 xxx [m:15071] [info ] Opening WebSocket connection
 xxx [m:15071] [info ] WebSocket connection established. Listening for incoming messages
 ```
 
-### Testing
+## Testing
 
 In order for tests to run you'll need to have a running local hadron collider environment:
 https://github.com/absa-subatomic/local-hadron-collider
@@ -199,3 +238,29 @@ Next run with:
 ```console
 $ npm run test
 ```
+
+## Contributing
+We have enabled git's pre-push hook which runs both our lint and test script. In order to over-ride simply add the `--no-verify` flag to your push command.
+
+Example:
+```
+git push --no-verify origin some-branch
+```
+Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Versioning
+No versioning is in place at the time of creating this documentation
+
+## Authors
+[Kieran Bristow](https://github.com/kbristow), 
+[Kieran Bester](https://github.com/KieranHons),
+[Donovan Muller](https://github.com/donovanmuller),
+[Andre de Jager](https://github.com/andrejonathan),
+[Chris Kieser](https://github.com/chriskieser),
+[Bilal Jooma](https://github.com/Buzzglo)
+
+## License
+This project is licensed under the Apache License v2.0 - see the LICENSE file for details
+
+<!-- ## Acknowledgements
+Hat tips to anyone inspiration. -->

@@ -1,5 +1,6 @@
 import * as Handlebars from "handlebars";
 import _ = require("lodash");
+import SafeString = Handlebars.SafeString;
 
 export class QMTemplate {
 
@@ -12,6 +13,7 @@ export class QMTemplate {
         Handlebars.registerHelper("toCamelCase", str => _.camelCase(str));
         Handlebars.registerHelper("toPascalCase", str => _.capitalize(_.camelCase(str)));
         Handlebars.registerHelper("toUpperSnakeCase", str => _.snakeCase(str).toUpperCase());
+        Handlebars.registerHelper("ifCond", ifCond);
         this.template = Handlebars.compile(rawTemplateString);
     }
 
@@ -31,6 +33,52 @@ export class QMTemplate {
                 }
             }
         }
+    }
+
+}
+
+function ifCond(v1Input, operator, v2Input, options) {
+    // A function that adds equality and logical checks helper functions to
+    // the handlebars templating.
+    // See https://stackoverflow.com/a/16315366/1630111
+    let v1 = v1Input;
+    if (v1Input instanceof SafeString) {
+        v1 = v1Input.toString();
+    }
+
+    let v2 = v2Input;
+    if (v2Input instanceof SafeString) {
+        v2 = v2Input.toString();
+    }
+
+    switch (operator) {
+        case "==":
+            // @ts-ignore
+            return (v1 === v2) ? options.fn(this) : options.inverse(this);
+        case "!=":
+            // @ts-ignore
+            return (v1 !== v2) ? options.fn(this) : options.inverse(this);
+        case "<":
+            // @ts-ignore
+            return (v1 < v2) ? options.fn(this) : options.inverse(this);
+        case "<=":
+            // @ts-ignore
+            return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+        case ">":
+            // @ts-ignore
+            return (v1 > v2) ? options.fn(this) : options.inverse(this);
+        case ">=":
+            // @ts-ignore
+            return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+        case "&&":
+            // @ts-ignore
+            return (v1 && v2) ? options.fn(this) : options.inverse(this);
+        case "||":
+            // @ts-ignore
+            return (v1 || v2) ? options.fn(this) : options.inverse(this);
+        default:
+            // @ts-ignore
+            return options.inverse(this);
     }
 }
 

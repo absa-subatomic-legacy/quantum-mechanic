@@ -33,6 +33,8 @@ export class CreateTeam extends RecursiveParameterRequestCommand implements Gluo
 
     @Parameter({
         description: "team name",
+        pattern: /.{1,22}/,
+        validInput: "between 1->22 characters",
     })
     public teamName: string;
 
