@@ -32,6 +32,7 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
 
     @Parameter({
         description: "slack name (@User.Name) of the member to make a member",
+        displayable: false,
     })
     public slackName: string;
 
