@@ -32,6 +32,7 @@ export class AddOwnerToTeam extends RecursiveParameterRequestCommand implements 
 
     @Parameter({
         description: "slack name (@User.Name) of the member to make an owner",
+        displayable: false,
     })
     public slackName: string;
 

@@ -32,6 +32,7 @@ export class RemoveMemberFromTeam extends RecursiveParameterRequestCommand imple
 
     @Parameter({
         description: "slack name (@User.Name) of the member to remove from a team",
+        displayable: false,
     })
     public slackName: string;
 
