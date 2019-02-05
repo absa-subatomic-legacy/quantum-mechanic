@@ -80,7 +80,7 @@
     "git:info": "atm-git-info",
     "gql:copy": "copyfiles \"src/**/*.graphql\" build",
     "gql:gen": "atm-gql-gen",
-    "lint": "tslint --format verbose --project . --exclude \"{build,node_modules}/**\" \"**/*.ts\"",
+    "lint": "tslint --format verbose --project . --exclude \"{build,node_modules,plugins}/**\" \"**/*.ts\"",
     "lint:fix": "npm run lint -- --fix",
     "sendCodeCoverage": "nyc report --reporter=json && codecov -f coverage/*.json",
     "start": "atomist start --no-install --no-compile",
