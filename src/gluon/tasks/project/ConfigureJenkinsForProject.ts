@@ -124,12 +124,12 @@ export class ConfigureJenkinsForProject extends Task {
                 domain: this.jenkinsService.getProjectCredentialsDomain(projectName),
                 jobName: _.kebabCase(projectName),
             };
-            await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, teamDevOpsProjectId, environmentCredential, undefined, jenkinsCredentialsFolder);
+            await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, environmentCredential, undefined, jenkinsCredentialsFolder);
         }
 
         const jenkinsCredentials = getJenkinsBitbucketAccessCredential(teamDevOpsProjectId);
 
-        await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, teamDevOpsProjectId, jenkinsCredentials);
+        await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, jenkinsCredentials);
     }
 
 }

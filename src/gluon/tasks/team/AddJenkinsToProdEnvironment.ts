@@ -97,6 +97,6 @@ export class AddJenkinsToProdEnvironment extends Task {
             },
         };
 
-        await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, teamDevOpsProjectId, jenkinsCredentials);
+        await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, jenkinsCredentials);
     }
 }

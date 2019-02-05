@@ -1,8 +1,4 @@
-import Axios, {
-    AxiosInstance,
-    AxiosRequestConfig,
-    AxiosResponse,
-} from "axios";
+import Axios, {AxiosInstance, AxiosRequestConfig, AxiosResponse} from "axios";
 import * as https from "https";
 
 export class AwaitAxios {
@@ -18,6 +14,11 @@ export class AwaitAxios {
     }
 
     constructor(public axiosInstance: AxiosInstance = AwaitAxios.createAxiosInstance()) {
+    }
+
+    public setAxiosInstance(axiosInstance: AxiosInstance): AwaitAxios {
+        this.axiosInstance = axiosInstance;
+        return this;
     }
 
     public async post(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse> {

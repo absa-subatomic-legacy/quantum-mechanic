@@ -4,12 +4,16 @@ import * as https from "https";
 import * as _ from "lodash";
 import * as qs from "query-string";
 import * as util from "util";
+import {AwaitAxios} from "../../../http/AwaitAxios";
 import {addAxiosLogger} from "../../../http/AxiosLogger";
 import {isSuccessCode} from "../../../http/Http";
 import {QMError} from "../../util/shared/Error";
 import {retryFunction} from "../../util/shared/RetryFunction";
 
 export class JenkinsService {
+
+    constructor(private axiosInstance = new AwaitAxios().setAxiosInstance(jenkinsAxios())) {
+    }
 
     public async kickOffFirstBuild(jenkinsHost: string,
                                    token: string,
@@ -41,7 +45,7 @@ export class JenkinsService {
                                    jenkinsCredentials: any,
                                    credentialsFolder: JenkinsCredentialsFolder = {domain: "GLOBAL"}) {
         logger.debug(`Trying to create jenkins credentials. jenkinsHost: ${jenkinsHost}; token: ${token}, domain: ${credentialsFolder.domain}`);
-        const axios = jenkinsAxios();
+        const axios: AxiosInstance = jenkinsAxios();
         addXmlFormEncodedStringifyAxiosIntercepter(axios);
 
         const jenkinsCredentialDomainUrl = this.getCredentialDomainUrl(credentialsFolder, jenkinsHost);
@@ -76,12 +80,11 @@ export class JenkinsService {
 
     public async createCredentialsWithFile(jenkinsHost: string,
                                            token: string,
-                                           gluonProjectId: string,
                                            jenkinsCredentials: any,
                                            filePath: string,
                                            fileName: string,
                                            credentialsFolder: JenkinsCredentialsFolder = {domain: "GLOBAL"}) {
-        logger.debug(`Trying to create jenkins global credentials from file. jenkinsHost: ${jenkinsHost}; token: ${token}; gluonProjectId: ${gluonProjectId}; filePath: ${filePath}; fileName: ${fileName}, domain: ${credentialsFolder.domain}`);
+        logger.debug(`Trying to create jenkins global credentials from file. jenkinsHost: ${jenkinsHost}; token: ${token}; filePath: ${filePath}; fileName: ${fileName}, domain: ${credentialsFolder.domain}`);
         const FormData = require("form-data");
         const fs = require("fs");
 
@@ -120,7 +123,7 @@ export class JenkinsService {
     }
 
     public async createJenkinsCredentialsWithRetries(retryAttempts: number, intervalTime: number, jenkinsHost: string,
-                                                     token: string, gluonProjectId: string, jenkinsCredentials, fileDetails: { fileName: string, filePath: string } = null, credentialsFolder: JenkinsCredentialsFolder = {domain: "GLOBAL"}) {
+                                                     token: string, jenkinsCredentials, fileDetails: { fileName: string, filePath: string } = null, credentialsFolder: JenkinsCredentialsFolder = {domain: "GLOBAL"}) {
         const maxRetries = retryAttempts;
         const waitTime = intervalTime;
         const result = await retryFunction(maxRetries, waitTime, async (attemptNumber: number) => {
@@ -130,7 +133,7 @@ export class JenkinsService {
                 if (fileDetails === null) {
                     createCredentialsResult = await this.createCredentials(jenkinsHost, token, jenkinsCredentials, credentialsFolder);
                 } else {
-                    createCredentialsResult = await this.createCredentialsWithFile(jenkinsHost, token, gluonProjectId, jenkinsCredentials, fileDetails.filePath, fileDetails.fileName, credentialsFolder);
+                    createCredentialsResult = await this.createCredentialsWithFile(jenkinsHost, token, jenkinsCredentials, fileDetails.filePath, fileDetails.fileName, credentialsFolder);
                 }
 
                 if (!isSuccessCode(createCredentialsResult.status)) {
@@ -160,10 +163,11 @@ export class JenkinsService {
         return `${projectName} Credentials`;
     }
 
-    private async genericJenkinsPost(url: string, body: any, token: string, contentType?: string, axiosInstance?) {
-        let axios = axiosInstance;
-        if (axios === undefined) {
-            axios = jenkinsAxios();
+    private async genericJenkinsPost(url: string, body: any, token: string, contentType?: string, axiosInstance?: AxiosInstance) {
+        if (axiosInstance === undefined) {
+            this.axiosInstance.setAxiosInstance(jenkinsAxios());
+        } else {
+            this.axiosInstance.setAxiosInstance(axiosInstance);
         }
 
         const headers: { [key: string]: string } = {
@@ -174,7 +178,7 @@ export class JenkinsService {
             headers["Content-Type"] = contentType;
         }
 
-        return axios.post(url,
+        return this.axiosInstance.post(url,
             body,
             {
                 headers,
@@ -206,7 +210,7 @@ function jenkinsAxios(): AxiosInstance {
     return addAxiosLogger(instance, "Jenkins");
 }
 
-function addXmlFormEncodedStringifyAxiosIntercepter(axios) {
+function addXmlFormEncodedStringifyAxiosIntercepter(axios: AxiosInstance) {
     axios.interceptors.request.use(request => {
         if (request.data && (request.headers["Content-Type"].indexOf("application/x-www-form-urlencoded") !== -1)) {
             logger.debug(`Stringifying URL encoded data: ${qs.stringify(request.data)}`);

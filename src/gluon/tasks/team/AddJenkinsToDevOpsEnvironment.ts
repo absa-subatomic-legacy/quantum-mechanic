@@ -138,27 +138,27 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
         const bitbucketCredentials = getJenkinsBitbucketProjectCredential(projectId);
 
-        await this.createGlobalCredentialsFor("Bitbucket", jenkinsHost, token, projectId, bitbucketCredentials);
+        await this.createGlobalCredentialsFor("Bitbucket", jenkinsHost, token, bitbucketCredentials);
 
         const nexusCredentials = getJenkinsNexusCredential();
 
-        await this.createGlobalCredentialsFor("Nexus", jenkinsHost, token, projectId, nexusCredentials);
+        await this.createGlobalCredentialsFor("Nexus", jenkinsHost, token, nexusCredentials);
 
         const dockerRegistryCredentials = getJenkinsDockerCredential(openShiftCloud);
 
-        await this.createGlobalCredentialsFor("Docker", jenkinsHost, token, projectId, dockerRegistryCredentials);
+        await this.createGlobalCredentialsFor("Docker", jenkinsHost, token, dockerRegistryCredentials);
 
         const mavenCredentials = getJenkinsMavenCredential();
 
-        await this.createGlobalCredentialsFor("Maven", jenkinsHost, token, projectId, mavenCredentials, {
+        await this.createGlobalCredentialsFor("Maven", jenkinsHost, token, mavenCredentials, {
             filePath: QMConfig.subatomic.maven.settingsPath,
             fileName: "settings.xml",
         });
     }
 
-    private async createGlobalCredentialsFor(forName: string, jenkinsHost: string, token: string, projectId: string, credentials, fileDetails: { fileName: string, filePath: string } = null) {
+    private async createGlobalCredentialsFor(forName: string, jenkinsHost: string, token: string, credentials, fileDetails: { fileName: string, filePath: string } = null) {
         try {
-            await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, projectId, credentials, fileDetails);
+            await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, credentials, fileDetails);
         } catch (error) {
             throw new QMError(`Failed to create ${forName} Global Credentials in Jenkins`);
         }
