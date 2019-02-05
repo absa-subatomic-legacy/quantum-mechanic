@@ -18,7 +18,7 @@ export class QMTemplate {
     }
 
     public build(parameters: { [k: string]: any }): string {
-        const safeParameters: { [k: string]: any } = Object.assign([], parameters);
+        const safeParameters: { [k: string]: any } = Object.assign([], _.cloneDeep(parameters));
         this.toSafeStrings(safeParameters);
         return this.template(safeParameters);
     }

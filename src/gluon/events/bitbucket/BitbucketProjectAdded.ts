@@ -11,6 +11,7 @@ import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {BitbucketProjectRecommendedPracticesCommand} from "../../commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {AssociateTeam} from "../../commands/project/AssociateTeam";
+import {CreateProjectJenkinsJob} from "../../commands/project/CreateProjectJenkinsJob";
 import {NewProjectEnvironments} from "../../commands/project/NewProjectEnvironments";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {ConfigureBitbucketProjectAccess} from "../../tasks/bitbucket/ConfigureBitbucketProjectAccess";
@@ -127,9 +128,10 @@ Click here to view the project in Bitbucket: ${bitbucketAddedEvent.bitbucketProj
             attachments: [
                 {
                     text: `
-A Subatomic project is deployed into the OpenShift platform. \
-The platform consists of two clusters, a Non Prod and a Prod cluster. The project environments span both clusters and are the deployment targets for the applications managed by Subatomic.
-These environments are realised as OpenShift projects and need to be created or linked to existing projects. If you haven't done either, please do that now.`,
+Subatomic projects and applications are deployed into an OpenShift cloud. \
+An OpenShift cloud consists of a Non Prod cluster and multiple Prod clusters. The project environments span all clusters and are the deployment targets for the applications managed by Subatomic. \
+These environments are realised as OpenShift projects and need to be created or linked to existing Subatomic projects.
+If you want to create deployable applications in this project you need to create or link these OpenShift environments. This will also configure a jenkins build folder for the project.`,
                     fallback: "Create or link existing OpenShift environments",
                     footer: `For more information, please read the ${this.docs("request-project-environments")}`,
                     color: QMColours.stdGreenyMcAppleStroodle.hex,
@@ -138,6 +140,21 @@ These environments are realised as OpenShift projects and need to be created or 
                         buttonForCommand(
                             {text: "Create OpenShift environments"},
                             new NewProjectEnvironments(),
+                            {
+                                projectName: bitbucketAddedEvent.project.name,
+                            }),
+                    ],
+                },
+                {
+                    text: `
+If you plan on having only libraries in this project, it is not necessary to create the related OpenShift environments. In this case you only need to configure a Jenkins build folder for this project.`,
+                    fallback: "Configure project in Jenkins",
+                    footer: `For more information, please read the ${this.docs("project-request-jenkins-job")}`,
+                    color: QMColours.stdMuddyYellow.hex,
+                    actions: [
+                        buttonForCommand(
+                            {text: "Configure project in Jenkins"},
+                            new CreateProjectJenkinsJob(),
                             {
                                 projectName: bitbucketAddedEvent.project.name,
                             }),

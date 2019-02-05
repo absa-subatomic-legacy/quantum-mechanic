@@ -9,14 +9,14 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getJenkinsBitbucketAccessCredentialXML} from "../../util/jenkins/JenkinsCredentials";
 import {
     GluonTeamNameParam,
-    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
+    GluonTeamNameSetter,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
@@ -73,7 +73,7 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
 
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to kick off build`);
 
-        const kickOffBuildResult = await this.jenkinsService.updateGlobalCredential(
+        const kickOffBuildResult = await this.jenkinsService.updateCredential(
             jenkinsHost,
             token,
             getJenkinsBitbucketAccessCredentialXML(teamDevOpsProjectId),

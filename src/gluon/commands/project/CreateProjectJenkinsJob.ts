@@ -7,7 +7,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -20,7 +19,13 @@ import {
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {
+    handleQMError,
+    QMMessageClient,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
+import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
+import {GluonToEvent} from "../../util/transform/GluonToEvent";
 
 @CommandHandler("Create the jenkins build job a project", QMConfig.subatomic.commandPrefix + " project request jenkins job")
 @Tags("subatomic", "project", "jenkins", "other")
@@ -30,7 +35,6 @@ export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
     @GluonTeamNameParam({
         callOrder: 0,
         selectionMessage: "Please select a team associated with the project you wish to provision the environments for",
-        forceSet: false,
     })
     public teamName: string = null;
 
@@ -49,13 +53,21 @@ export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info("Requesting jenkins job creation...");
 
+        const messageClient: QMMessageClient = new ResponderMessageClient(ctx);
+
         try {
-            const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
-            await ctx.messageClient.send({
+            await messageClient.send({
                 text: `Requesting project *${this.projectName}* jenkins job creation...`,
-            }, destination);
+            });
 
             const member: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+
+            const team: QMTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
+
+            if (!isUserAMemberOfTheTeam(member, team)) {
+                this.failCommand();
+                return await messageClient.send(this.teamMembershipMessages.notAMemberOfTheTeam());
+            }
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
@@ -65,7 +77,7 @@ export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
             return await success();
         } catch (error) {
             this.failCommand();
-            return await this.handleError(ctx, error);
+            return await handleQMError(messageClient, error);
         }
     }
 
@@ -73,11 +85,9 @@ export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
         const event = {
             project,
             requestedBy: member,
+            owningTeam: GluonToEvent.team(project.owningTeam),
         };
         return await ctx.messageClient.send(event, addressEvent("ProjectJenkinsJobRequestedEvent"));
     }
 
-    private async handleError(ctx: HandlerContext, error) {
-        return await handleQMError(new ResponderMessageClient(ctx), error);
-    }
 }

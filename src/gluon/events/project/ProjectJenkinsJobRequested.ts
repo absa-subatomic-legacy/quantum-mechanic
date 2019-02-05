@@ -1,5 +1,4 @@
 import {
-    addressSlackChannelsFromContext,
     buttonForCommand,
     EventFired,
     HandlerContext,
@@ -15,10 +14,18 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsForProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {QMProject} from "../../util/project/Project";
+import {
+    OpenshiftProjectEnvironmentRequest,
+    QMProject,
+} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
-import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {
+    ChannelMessageClient,
+    handleQMError,
+    QMMessageClient,
+} from "../../util/shared/Error";
+import {QMTenant} from "../../util/shared/Tenants";
 import {QMTeam} from "../../util/team/Teams";
 
 @EventHandler("Receive ProjectJenkinsJobRequestedEvent events", `
@@ -29,6 +36,12 @@ subscription ProjectJenkinsJobRequestedEvent {
       projectId
       name
       description
+    }
+    owningTeam {
+        name
+        slackIdentity {
+            teamChannel
+        }
     }
     requestedBy {
       firstName
@@ -52,42 +65,41 @@ export class ProjectJenkinsJobRequested extends BaseQMEvent implements HandleEve
 
         const jenkinsJobRequestedEvent = event.data.ProjectJenkinsJobRequestedEvent[0];
 
-        this.qmMessageClient = this.createMessageClient(ctx, jenkinsJobRequestedEvent.teams);
+        this.qmMessageClient = new ChannelMessageClient(ctx).addDestination(jenkinsJobRequestedEvent.owningTeam.slackIdentity.teamChannel);
 
         try {
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(jenkinsJobRequestedEvent.project.name);
             const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+            const owningTenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Provisioning of jenkins job for project *${jenkinsJobRequestedEvent.project.name}* started:`,
                 this.qmMessageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             const openshiftNonProd = QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd;
 
+            const jenkinsProjectDetails: OpenshiftProjectEnvironmentRequest = {
+                project,
+                owningTenant,
+                teams: [jenkinsJobRequestedEvent.owningTeam],
+            };
+
             taskRunner.addTask(
-                new ConfigureJenkinsForProject(jenkinsJobRequestedEvent, project.devDeploymentPipeline, project.releaseDeploymentPipelines, openshiftNonProd),
+                new ConfigureJenkinsForProject(jenkinsProjectDetails, project.devDeploymentPipeline, project.releaseDeploymentPipelines, openshiftNonProd),
             );
 
             await taskRunner.execute(ctx);
             this.succeedEvent();
-            return await this.sendPackageUsageMessage(ctx, jenkinsJobRequestedEvent.project.name, jenkinsJobRequestedEvent.teams);
+            return await this.sendPackageUsageMessage(this.qmMessageClient, jenkinsJobRequestedEvent.project.name);
         } catch (error) {
             this.failEvent();
             return await handleQMError(this.qmMessageClient, error);
         }
     }
 
-    private createMessageClient(ctx: HandlerContext, teams) {
-        const messageClient = new ChannelMessageClient(ctx);
-        teams.map(team => {
-            messageClient.addDestination(team.slackIdentity.teamChannel);
-        });
-        return messageClient;
-    }
-
-    private async sendPackageUsageMessage(ctx: HandlerContext, projectName: string, teams) {
+    private async sendPackageUsageMessage(qmMessageClient: QMMessageClient, projectName: string) {
         const msg: SlackMessage = {
             text: `
-Since you have a project Jenkins Job ready, you can now add libraries to you project. Note that to add an application instead of a library, you need to have openshift environment environments created.`,
+Since you have a project Jenkins project folder ready, you can now add libraries to you project. Note that to add an application instead of a library, you need to have OpenShift environments created.`,
             attachments: [{
                 fallback: "Create or link existing package",
                 footer: `For more information, please read the ${this.docs()}`,
@@ -103,9 +115,7 @@ Since you have a project Jenkins Job ready, you can now add libraries to you pro
                 ],
             }],
         };
-        const destination = await addressSlackChannelsFromContext(ctx, ...teams.map(team =>
-            team.slackIdentity.teamChannel));
-        return await ctx.messageClient.send(msg, destination);
+        return await qmMessageClient.send(msg);
     }
 
     private docs(): string {

@@ -1,6 +1,8 @@
 import {logger} from "@atomist/automation-client";
+import _ = require("lodash");
 import * as XmlBuilder from "xmlbuilder";
 import {QMConfig} from "../../../config/QMConfig";
+import {OpenShiftProjectNamespace} from "../project/Project";
 
 export function getJenkinsBitbucketAccessCredential(teamDevOpsProjectId: string) {
     return {
@@ -80,6 +82,17 @@ export function getJenkinsMavenCredential() {
             fileName: "settings.xml",
             description: "Maven settings.xml",
             $class: "org.jenkinsci.plugins.plaincredentials.impl.FileCredentialsImpl",
+        },
+    };
+}
+
+export function getOpenshiftEnvironmentCredential(environment: OpenShiftProjectNamespace) {
+    return {
+        credentials: {
+            id: `${_.kebabCase(environment.postfix)}-project`,
+            secret: environment.namespace,
+            description: `${environment.displayName} OpenShift project Id`,
+            $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
         },
     };
 }
