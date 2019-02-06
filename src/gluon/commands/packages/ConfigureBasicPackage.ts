@@ -82,6 +82,11 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
     })
     public currentEnvironmentVariablesJSON: string;
 
+    @Parameter({
+        description: "Restore sources for .Net, if your package is not .Net simply enter `Jerry`. Otherwise enter the urls separated by a space",
+    })
+    public restoreSources: string;
+
     constructor(public gluonService = new GluonService()) {
         super();
     }
@@ -160,12 +165,7 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
                     } else {
                         this.currentEnvironmentVariablesJSON = JSON.stringify(currentEnvVarValues);
                         const optionsSetterFunction = await new SetterLoader(requiredVariable.setter).getLoader();
-                        const menuOptions = [
-                            {
-                                value: "Prime.Api/Prime.Api.csproj",
-                                text: "Prime.Api/Prime.Api.csproj",
-                            },
-                        ]; // optionsSetterFunction(this);
+                        const menuOptions = await optionsSetterFunction(this);
                         const displayMessage = this.getDisplayMessage();
 
                         const variablePromptAttachment = createMenuAttachment(
