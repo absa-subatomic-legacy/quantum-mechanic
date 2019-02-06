@@ -27,7 +27,7 @@ import {
 import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
 
-@CommandHandler("Create the jenkins build job a project", QMConfig.subatomic.commandPrefix + " project request jenkins job")
+@CommandHandler("Creates a jenkins build job for a given project", QMConfig.subatomic.commandPrefix + " project request jenkins job")
 @Tags("subatomic", "project", "jenkins", "other")
 export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {

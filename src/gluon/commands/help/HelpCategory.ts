@@ -18,6 +18,7 @@ import {AssociateTeam} from "../project/AssociateTeam";
 import {CreateGenericProd} from "../project/CreateGenericProd";
 import {CreateOpenShiftPvc} from "../project/CreateOpenShiftPvc";
 import {CreateProject} from "../project/CreateProject";
+import {CreateProjectJenkinsJob} from "../project/CreateProjectJenkinsJob";
 import {CreateProjectProdEnvironments} from "../project/CreateProjectProdEnvironments";
 import {NewProjectEnvironments} from "../project/NewProjectEnvironments";
 import {ListProjectDetails, ListTeamProjects} from "../project/ProjectDetails";
@@ -58,6 +59,7 @@ export class HelpCategory {
         CreateMembershipRequestToTeam,
         CreateOpenShiftPvc,
         CreateProject,
+        CreateProjectJenkinsJob,
         CreateProjectProdEnvironments,
         CreateTeam,
         JoinTeam,
