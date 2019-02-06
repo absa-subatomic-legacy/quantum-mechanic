@@ -54,10 +54,11 @@ export class RemoveMemberFromTeamService {
     public async removeUserFromGluonTeam(memberId: string, actioningMemberId: string, gluonTeamId: string, memberRole: MemberRole = MemberRole.member) {
         const updateTeamResult = await this.gluonService.teams.removeMemberFromTeam(gluonTeamId, memberId, actioningMemberId);
         if (!isSuccessCode(updateTeamResult.status)) {
-            let message = `Failed to remove member to the team. ${updateTeamResult.data}`;
-            logger.error(message);
+            let message = `Failed to remove member from the team.`;
+            logger.error(`${message} | data: ${JSON.stringify(updateTeamResult.data)}`);
+            updateTeamResult.status = 403;
             if (updateTeamResult.status === 403) {
-                message = `Unauthorized: Sorry only a team owner can remove members from a team.`;
+                message = `Unauthorized: ${message} Sorry only a team owner can remove members from a team.`;
             }
             throw new QMError(message);
         }
