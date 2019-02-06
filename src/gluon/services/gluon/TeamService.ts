@@ -81,7 +81,7 @@ export class TeamService {
 
         if (rawResult) {
             return teamQueryResult;
-        } else if (!isSuccessCode(teamQueryResult.status)) {
+        } else if (!isSuccessCode(teamQueryResult.status) || _.isEmpty(teamQueryResult.data._embedded.teamResources)) {
             logger.error(`Failed to find team ${teamName}. Error: ${inspect(teamQueryResult)}`);
             throw new QMError(`Team ${teamName} does not appear to be a valid SubAtomic team.`);
         }

@@ -19,6 +19,7 @@ import {AssociateTeam} from "./gluon/commands/project/AssociateTeam";
 import {CreateGenericProd} from "./gluon/commands/project/CreateGenericProd";
 import {CreateOpenShiftPvc} from "./gluon/commands/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/commands/project/CreateProject";
+import {CreateProjectJenkinsJob} from "./gluon/commands/project/CreateProjectJenkinsJob";
 import {CreateProjectProdEnvironments} from "./gluon/commands/project/CreateProjectProdEnvironments";
 import {NewProjectEnvironments} from "./gluon/commands/project/NewProjectEnvironments";
 import {
@@ -49,6 +50,7 @@ import {ApplicationProdRequested} from "./gluon/events/packages/ApplicationProdR
 import {GenericProdRequested} from "./gluon/events/project/GenericProdRequested";
 import {ProjectCreated} from "./gluon/events/project/ProjectCreated";
 import {ProjectEnvironmentsRequested} from "./gluon/events/project/ProjectEnvironmentsRequested";
+import {ProjectJenkinsJobRequested} from "./gluon/events/project/ProjectJenkinsJobRequested";
 import {ProjectProductionEnvironmentsRequestClosed} from "./gluon/events/project/ProjectProductionEnvironmentsRequestClosed";
 import {ProjectProductionEnvironmentsRequested} from "./gluon/events/project/ProjectProductionEnvironmentsRequested";
 import {TeamsLinkedToProject} from "./gluon/events/project/TeamAssociated";
@@ -86,6 +88,7 @@ export const configuration: any = {
         CreateMembershipRequestToTeam,
         CreateOpenShiftPvc,
         CreateProject,
+        CreateProjectJenkinsJob,
         CreateProjectProdEnvironments,
         CreateTeam,
         Help,
@@ -125,6 +128,7 @@ export const configuration: any = {
         MembershipRequestCreated,
         ProjectCreated,
         ProjectEnvironmentsRequested,
+        ProjectJenkinsJobRequested,
         ProjectProductionEnvironmentsRequestClosed,
         ProjectProductionEnvironmentsRequested,
         TeamCreated,
@@ -136,6 +140,7 @@ export const configuration: any = {
         ingester("TeamDevOpsDetails"),
         ingester("ProjectCreatedEvent"),
         ingester("ProjectEnvironmentsRequestedEvent"),
+        ingester("ProjectJenkinsJobRequestedEvent"),
         ingester("TeamsLinkedToProjectEvent"),
         ingester("SlackIdentity"),
         ingester("DeploymentEnvironment"),

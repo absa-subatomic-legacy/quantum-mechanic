@@ -1,0 +1,5 @@
+type ProjectJenkinsJobRequestedEvent @rootType {
+    project: Project
+    owningTeam: GluonTeam
+    requestedBy: ActionedBy
+}
