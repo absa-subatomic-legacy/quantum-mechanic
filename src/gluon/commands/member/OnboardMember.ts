@@ -96,8 +96,8 @@ export class OnboardMember extends BaseQMComand {
 
         for (const channel of QMConfig.secondarySlackChannels) {
             try {
-                secondaryChannelsInvited.push(await this.onboardMemberService.inviteUserToSecondarySlackChannel(
-                    ctx, this.firstName, channel, this.userId, this.screenName));
+                await this.onboardMemberService.inviteUserToSecondarySlackChannel(ctx, this.firstName, channel, this.userId, this.screenName);
+                secondaryChannelsInvited.push(channel);
             } catch (error) {
                 await this.handleError(ctx, error);
             }
