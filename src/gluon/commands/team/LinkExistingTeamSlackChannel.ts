@@ -14,7 +14,7 @@ import {
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Link existing team channel", QMConfig.subatomic.commandPrefix + " link team channel")
 @Tags("subatomic", "slack", "channel", "team")
@@ -33,7 +33,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
     @Parameter({
         required: true,
         displayName: "Team Slack Channel",
-        description: "The slack channel to link to your team.",
+        description: "The slack channel to link to your team (excluding the #)",
     })
     public newTeamChannel: string;
 
@@ -44,9 +44,13 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, "link-team-channel", false);
-            this.succeedCommand();
-            return result;
+            if (this.newTeamChannel.indexOf("#") === -1) {
+                const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, "link-team-channel", false);
+                this.succeedCommand();
+                return result;
+            } else {
+                throw new QMError(`Validation error: Please enter the channel name without the leading #\n   e.g *subatomic-discussion* instead of *#subatomic-discussion*.`);
+            }
         } catch (error) {
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
