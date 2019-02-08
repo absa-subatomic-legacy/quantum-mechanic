@@ -14,7 +14,7 @@ import {
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Link existing team channel", QMConfig.subatomic.commandPrefix + " link team channel")
 @Tags("subatomic", "slack", "channel", "team")
@@ -33,7 +33,9 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
     @Parameter({
         required: true,
         displayName: "Team Slack Channel",
-        description: "The slack channel to link to your team.",
+        description: "The slack channel to link to your team (excluding the #)",
+        pattern: /^(?!#)/,
+        validInput: "a slack channel name without the #",
     })
     public newTeamChannel: string;
 
