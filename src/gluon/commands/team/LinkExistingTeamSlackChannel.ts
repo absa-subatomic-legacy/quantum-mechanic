@@ -34,6 +34,8 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
         required: true,
         displayName: "Team Slack Channel",
         description: "The slack channel to link to your team (excluding the #)",
+        pattern: /^(?!#)/,
+        validInput: "Please enter slack channel name without the #",
     })
     public newTeamChannel: string;
 
@@ -44,13 +46,9 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            if (this.newTeamChannel.indexOf("#") === -1) {
-                const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, "link-team-channel", false);
-                this.succeedCommand();
-                return result;
-            } else {
-                throw new QMError(`Validation error: Please enter the channel name without the leading #\n   e.g *subatomic-discussion* instead of *#subatomic-discussion*.`);
-            }
+            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, "link-team-channel", false);
+            this.succeedCommand();
+            return result;
         } catch (error) {
             this.failCommand();
             return await handleQMError(new ResponderMessageClient(ctx), error);
