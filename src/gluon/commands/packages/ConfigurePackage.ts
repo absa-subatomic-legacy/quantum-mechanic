@@ -2,11 +2,9 @@ import {
     buttonForCommand,
     HandlerContext,
     HandlerResult,
-    SlackDestination,
     success,
 } from "@atomist/automation-client";
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {QMApplication} from "../../services/gluon/ApplicationService";
@@ -41,7 +39,11 @@ import {
     ParameterDisplayType,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {
+    ChannelMessageClient,
+    handleQMError,
+    QMMessageClient,
+} from "../../util/shared/Error";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 
 @CommandHandler("Configure an existing application/library", QMConfig.subatomic.commandPrefix + " configure custom package")
@@ -101,30 +103,31 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
+        const messageClient: QMMessageClient = new ChannelMessageClient(ctx).addDestination(this.teamChannel);
         try {
-            const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
-            await ctx.messageClient.send({
+            await messageClient.send({
                 text: "Preparing to configure your package...",
-            }, destination);
+            });
 
             const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName, false);
 
-            await this.configurePackage(ctx);
+            await this.configurePackage(ctx, messageClient);
 
             this.succeedCommand();
-            return this.sendPackageProvisionedMessage(ctx, this.applicationName, this.projectName, destination, ApplicationType[application.applicationType]);
+
+            return messageClient.send(this.getDefaultSuccessMessage(this.applicationName, this.projectName, ApplicationType[application.applicationType]));
         } catch (error) {
             this.failCommand();
-            return await handleQMError(new ResponderMessageClient(ctx), error);
+            return await handleQMError(messageClient, error);
         }
     }
 
-    private async configurePackage(ctx: HandlerContext): Promise<HandlerResult> {
+    private async configurePackage(ctx: HandlerContext, messageClient: QMMessageClient): Promise<HandlerResult> {
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
         const application = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
 
-        const taskListMessage = new TaskListMessage(":rocket: Configuring package...", new ResponderMessageClient(ctx));
+        const taskListMessage = new TaskListMessage(":rocket: Configuring package...", messageClient);
         const taskRunner = new TaskRunner(taskListMessage);
         if (application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
             taskRunner.addTask(
@@ -156,13 +159,6 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
         await taskRunner.execute(ctx);
 
         return success();
-    }
-
-    private async sendPackageProvisionedMessage(ctx: HandlerContext, applicationName: string, projectName: string, slackChannel: SlackDestination, applicationType: ApplicationType) {
-
-        const returnableSuccessMessage = this.getDefaultSuccessMessage(applicationName, projectName, applicationType);
-
-        return await ctx.messageClient.send(returnableSuccessMessage, slackChannel);
     }
 
     private getDefaultSuccessMessage(applicationName: string, projectName: string, applicationType: ApplicationType): SlackMessage {

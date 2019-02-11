@@ -18,5 +18,5 @@ export interface DeploymentConfig {
 export interface RequiredEnvironmentVariable {
     name: string;
     description: string;
-    setter: string;
+    setter?: string;
 }

@@ -8,8 +8,7 @@
     },
     {
       "name": "DOTNET_RESTORE_SOURCES",
-      "description": "restore sources",
-      "setter": "DotNet/setRestoreSources"
+      "description": "restore sources"
     }
   ],
   "buildConfig": {
