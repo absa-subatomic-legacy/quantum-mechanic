@@ -8,7 +8,7 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
-import {GenericProdRequestMessages} from "../../messages/project/GenericProdRequestMessages";
+import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -85,7 +85,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
     })
     public openShiftResourcesJSON: string;
 
-    private genericProdRequestMessages = new GenericProdRequestMessages();
+    private genericProdRequestMessages = new ProdRequestMessages();
 
     constructor(public gluonService = new GluonService(), public ocService = new OCService()) {
         super();
@@ -150,7 +150,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         await this.findAndListResources(qmMessageClient);
 
-        const message = this.genericProdRequestMessages.confirmProdRequest(this);
+        const message = this.genericProdRequestMessages.confirmGenericProdRequest(this);
 
         return await qmMessageClient.send(message, {id: this.correlationId});
     }

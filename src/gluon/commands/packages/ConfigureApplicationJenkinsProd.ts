@@ -12,6 +12,7 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {getDefaultProdJenkinsFileName} from "../../util/jenkins/Jenkins";
 import {ProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
 import {QMMemberBase} from "../../util/member/Members";
 import {QMProject} from "../../util/project/Project";
@@ -37,8 +38,6 @@ import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
 @Tags("subatomic", "package", "jenkins")
 export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, DeploymentPipelineIdSetter {
-
-    private static PROD_JENKINSFILE = "jenkinsfile.prod";
 
     @GluonTeamNameParam({
         callOrder: 0,
@@ -94,7 +93,7 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
             taskRunner.addTask(
-                new ConfigurePackageInJenkins(application, project, ConfigureApplicationJenkinsProd.PROD_JENKINSFILE, ProdDefaultJenkinsJobTemplate),
+                new ConfigurePackageInJenkins(application, project, getDefaultProdJenkinsFileName(), ProdDefaultJenkinsJobTemplate),
             );
 
             await taskRunner.execute(ctx);
