@@ -11,17 +11,24 @@ import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
+import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
 import {ConfigurePackageInOpenshift} from "../../tasks/packages/ConfigurePackageInOpenshift";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {QMMemberBase} from "../../util/member/Members";
 import {ApplicationType} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
 import {ParameterDisplayType} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
-import {ChannelMessageClient, QMMessageClient} from "../../util/shared/Error";
+import {
+    ChannelMessageClient,
+    QMError,
+    QMMessageClient,
+} from "../../util/shared/Error";
+import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
 import {ActionedByEvent} from "../../util/transform/types/event/ActionedByEvent";
 import {GluonApplicationEvent} from "../../util/transform/types/event/GluonApplicationEvent";
 import {KeyValuePairEvent} from "../../util/transform/types/event/KeyValuePairEvent";
@@ -59,6 +66,8 @@ subscription PackageConfigurationRequestedEvent {
 `)
 export class PackageConfigurationRequested extends BaseQMEvent implements HandleEvent<any> {
 
+    private membershipMessages: TeamMembershipMessages = new TeamMembershipMessages();
+
     constructor(private gluonService: GluonService = new GluonService()) {
         super();
     }
@@ -82,6 +91,14 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(packageConfigurationEvent.project.name);
 
         const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(packageConfigurationEvent.application.name, project.name);
+
+        const member: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(packageConfigurationEvent.actionedBy.slackIdentity.screenName);
+
+        const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+
+        if (!isUserAMemberOfTheTeam(member, owningTeam)) {
+            throw new QMError("Actioning member is not a member of the team", this.membershipMessages.notAMemberOfTheTeam());
+        }
 
         const taskListMessage = new TaskListMessage(`:rocket: Configuring package *${application.name}*...`, messageClient);
         const taskRunner = new TaskRunner(taskListMessage);

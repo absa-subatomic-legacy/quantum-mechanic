@@ -71,7 +71,7 @@ export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-            await this.requestJenkinsJob(ctx, project, member);
+            await this.requestJenkinsJob(ctx, project, member, team);
 
             this.succeedCommand();
             return await success();
@@ -81,11 +81,11 @@ export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
         }
     }
 
-    private async requestJenkinsJob(ctx: HandlerContext, project: QMProject, member: QMMemberBase) {
+    private async requestJenkinsJob(ctx: HandlerContext, project: QMProject, member: QMMemberBase, owningTeam: QMTeam) {
         const event = {
             project,
             requestedBy: member,
-            owningTeam: GluonToEvent.team(project.owningTeam),
+            owningTeam: GluonToEvent.team(owningTeam),
         };
         return await ctx.messageClient.send(event, addressEvent("ProjectJenkinsJobRequestedEvent"));
     }
