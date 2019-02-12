@@ -77,8 +77,7 @@ export class ProdRequestMessages {
 
     public getProjectProdRequestAttachment(projectName: string): Attachment {
         return {
-            text: `
-To move your applications into prod, the first step is to approve the owning project for production. \
+            text: `To move your applications into prod, the first step is to approve the owning project for production. \
 When requesting to move a project to production, your team needs to jointly approve and certify that you want to do so. \
 Once a project prod request is approved, Subatomic will create your production DevOps and project environments on all prod clusters. \
 Applications can then be promoted into these production environments. To create a project production request please click the button below.
