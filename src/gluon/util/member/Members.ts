@@ -39,6 +39,9 @@ export interface QMMemberSlack {
 
 export interface QMMemberBase {
     memberId: string;
+    firstName: string;
+    lastName: string;
+    email: string;
     domainUsername: string;
     slack: QMMemberSlack;
 }

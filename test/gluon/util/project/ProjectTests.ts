@@ -63,6 +63,7 @@ describe("getPipelineOpenShiftNamespacesForOpenShiftCluster", () => {
     it("should return all cluster environment namespaces for specified pipeline", async () => {
         const project: QMProject = {
             projectId: "",
+            description: "",
             bitbucketProject: null,
             owningTeam: null,
             owningTenant: "default",
@@ -106,6 +107,7 @@ describe("getAllPipelineOpenshiftNamespacesForAllPipelines", () => {
             owningTeam: null,
             owningTenant: "default",
             name: "Project",
+            description: "",
             devDeploymentPipeline: {
                 name: "Default",
                 tag: "",

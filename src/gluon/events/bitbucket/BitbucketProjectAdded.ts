@@ -91,6 +91,7 @@ export class BitbucketProjectAdded extends BaseQMEvent implements HandleEvent<an
 
             const qmProject: QMProjectBase = {
                 projectId: project.projectId,
+                description: project.description,
                 name: project.name,
                 bitbucketProject: bitbucketProjectAddedEvent.bitbucketProject,
                 owningTenant: project.owningTenant,

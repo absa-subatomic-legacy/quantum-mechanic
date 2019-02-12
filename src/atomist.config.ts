@@ -47,6 +47,10 @@ import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAd
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
 import {ApplicationProdRequested} from "./gluon/events/packages/ApplicationProdRequested";
+import {
+    PackageConfigurationRequested,
+    PackageConfigurationRequestedEvent,
+} from "./gluon/events/packages/PackageConfigurationRequested";
 import {GenericProdRequested} from "./gluon/events/project/GenericProdRequested";
 import {ProjectCreated} from "./gluon/events/project/ProjectCreated";
 import {ProjectEnvironmentsRequested} from "./gluon/events/project/ProjectEnvironmentsRequested";
@@ -126,6 +130,7 @@ export const configuration: any = {
         MemberRemovedFromTeam,
         MembersAddedToTeam,
         MembershipRequestCreated,
+        PackageConfigurationRequested,
         ProjectCreated,
         ProjectEnvironmentsRequested,
         ProjectJenkinsJobRequested,
@@ -137,6 +142,7 @@ export const configuration: any = {
         TeamOpenShiftCloudMigrated,
     ],
     ingesters: [
+        ingester("KeyValuePair"),
         ingester("TeamDevOpsDetails"),
         ingester("ProjectCreatedEvent"),
         ingester("ProjectEnvironmentsRequestedEvent"),
@@ -170,6 +176,7 @@ export const configuration: any = {
         ingester("BitbucketProjectAddedEvent"),
         ingester("ProjectProductionEnvironmentsRequestedEvent"),
         ingester("ProjectProductionEnvironmentsRequestClosedEvent"),
+        ingester("PackageConfigurationRequestedEvent"),
     ],
     apiKey,
     http,

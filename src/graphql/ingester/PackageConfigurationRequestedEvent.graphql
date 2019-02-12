@@ -1,0 +1,10 @@
+type PackageConfigurationRequestedEvent @rootType {
+	project: Project
+	application: GluonApplication
+	imageName: String
+	openshiftTemplate: String
+	jenkinsfileName: String
+	buildEnvironmentVariables: [KeyValuePair]
+	deploymentEnvironmentVariables: [KeyValuePair]
+	actionedBy: ActionedBy
+}

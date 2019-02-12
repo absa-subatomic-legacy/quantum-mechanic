@@ -164,6 +164,7 @@ export interface QMProjectBase {
     name: string;
     bitbucketProject: QMBitbucketProject;
     owningTenant: string;
+    description: string;
 }
 
 export interface QMProject extends QMProjectBase {
