@@ -4,6 +4,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {ConfigureApplicationJenkinsProd} from "../../commands/packages/ConfigureApplicationJenkinsProd";
 import {CreateApplicationProd} from "../../commands/packages/CreateApplicationProd";
 import {CreateGenericProd} from "../../commands/project/CreateGenericProd";
+import {CreateProjectProdEnvironments} from "../../commands/project/CreateProjectProdEnvironments";
 import {QMColours} from "../../util/QMColour";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 
@@ -74,6 +75,32 @@ export class ProdRequestMessages {
         };
     }
 
+    public getProjectProdRequestAttachment(projectName: string): Attachment {
+        return {
+            text: `
+To move your applications into prod, the first step is to approve the owning project for production. \
+When requesting to move a project to production, your team needs to jointly approve and certify that you want to do so. \
+Once a project prod request is approved, Subatomic will create your production DevOps and project environments on all prod clusters. \
+Applications can then be promoted into these production environments. To create a project production request please click the button below.
+            `,
+            fallback: "Create project prod request",
+            footer: `For more information, please read the ${this.docs()}`,
+            color: QMColours.stdMuddyYellow.hex,
+            actions: [
+                buttonForCommand(
+                    {
+                        text: "Create Prod Request",
+                        style: "primary",
+                    },
+                    new CreateProjectProdEnvironments(),
+                    {
+                        projectName,
+                    },
+                ),
+            ],
+        };
+    }
+
     public getProjectProdCompleteMessage(projectName: string): SlackMessage {
 
         const text: string = `
@@ -97,7 +124,7 @@ Contact your system admin for help if necessary.`;
             text: `
 Creating a generic prod request will search the highest Non Prod environment in the project for all OpenShift resources. \
 These resources will be recreated in all project associated Production environments. \
-This will copy subatomic created and non subatomic resources making it the recommended initial prod request you should run. \
+This will copy Subatomic created and non Subatomic resources making it the recommended initial prod request you should run. \
 This is only a direct resource copy and does not configure any Jenkins jobs.
             `,
             fallback: "Create generic prod request",
@@ -106,7 +133,7 @@ This is only a direct resource copy and does not configure any Jenkins jobs.
             actions: [
                 buttonForCommand(
                     {
-                        text: "Create Prod Request",
+                        text: "Generic Prod Request",
                         style: "primary",
                     },
                     new CreateGenericProd(),
@@ -142,7 +169,7 @@ No Jenkins jobs have been configured for any applications. It is recommended tha
         return {
             text: `
 Creating an application prod request will search the highest Non Prod environment in the project for all OpenShift resources directly associated to an application. \
-The resources found are identified by traversing the resource relationships defined in the application deployment config.\
+The resources found are identified by traversing the resource relationships defined in the application deployment config. \
 These resources will be recreated in all project associated Production environments. \
 This will also configure the application Jenkins job.
             `,
@@ -152,10 +179,10 @@ This will also configure the application Jenkins job.
             actions: [
                 buttonForCommand(
                     {
-                        text: "Create Prod Request",
+                        text: "Application Prod Request",
                         style: "primary",
                     },
-                    new CreateGenericProd(),
+                    new CreateApplicationProd(),
                     {
                         projectName,
                     },
@@ -167,9 +194,9 @@ This will also configure the application Jenkins job.
     private getApplicationJenkinsProdCommandAttachment(projectName: string): Attachment {
         return {
             text: `
-To deploy an application into you need to create an appropriate Jenkins job. \
+To deploy an application into your production environments need to create an appropriate Jenkins job. \
 All application resources should have been moved into the necessary production environments so this can be done now. \
-You should run this command for all applications that need to be deployed in prod now.
+You should run this command for all applications that need to be deployed in production now.
             `,
             fallback: "Configure Application Jenkins Prod",
             footer: `For more information, please read the ${this.docs()}`,

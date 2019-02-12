@@ -69,12 +69,17 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
     public addRecursiveParameterProperty(parameterDetails: RecursiveParameterDetails, propertyKey: string) {
         this.recursiveParameterList = this.recursiveParameterList !== undefined ? this.recursiveParameterList : [];
         let insertedParameter = false;
+        let showInParameterDisplay = true;
+        if (parameterDetails.showInParameterDisplay !== undefined) {
+            showInParameterDisplay = parameterDetails.showInParameterDisplay;
+        }
         const newRecursiveParameter = {
             propertyName: propertyKey,
             parameterSetter: parameterDetails.setter,
             selectionMessage: parameterDetails.selectionMessage,
             forceSet: parameterDetails.forceSet,
             callOrder: parameterDetails.callOrder,
+            showInParameterDisplay,
         };
         for (let i = 0; i < this.recursiveParameterList.length; i++) {
             if (parameterDetails.callOrder < this.recursiveParameterList[i].callOrder) {
@@ -159,7 +164,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
             const propertyValue = dynamicClassInstance[propertyKey];
 
             if (!(_.isEmpty(propertyValue))) {
-                this.parameterStatusDisplay.setParam(propertyKey, propertyValue);
+                this.parameterStatusDisplay.setParam(propertyKey, propertyValue, parameter.showInParameterDisplay);
             }
         }
     }
@@ -200,6 +205,7 @@ export interface RecursiveParameterDetails extends BaseParameter {
     forceSet?: boolean;
     selectionMessage?: string;
     callOrder: number;
+    showInParameterDisplay?: boolean;
 }
 
 interface RecursiveParameterMapping {
@@ -208,6 +214,7 @@ interface RecursiveParameterMapping {
     selectionMessage: string;
     callOrder: number;
     forceSet: boolean;
+    showInParameterDisplay: boolean;
 }
 
 export enum ParameterDisplayType {

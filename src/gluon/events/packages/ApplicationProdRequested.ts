@@ -124,11 +124,13 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
                     .addTask(
                         new CreateOpenshiftResourcesInProject(environmentsForCreation, preProdNamespace, resources, openshiftProd),
                         undefined,
-                        1)
-                    .addTask(
-                        new ConfigurePackageInJenkins(application, project, getDefaultProdJenkinsFileName(), ProdDefaultJenkinsJobTemplate),
+                        0,
                     );
             }
+            taskRunner.addTask(
+                new ConfigurePackageInJenkins(application, qmProject, getDefaultProdJenkinsFileName(), ProdDefaultJenkinsJobTemplate),
+                "Configure application Jenkins prod job",
+            );
 
             await taskRunner.execute(ctx);
             this.succeedEvent();

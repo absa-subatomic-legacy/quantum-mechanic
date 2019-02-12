@@ -15,6 +15,7 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {getDefaultProdJenkinsFileName} from "../../util/jenkins/Jenkins";
 import {ProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
 import {QMMemberBase} from "../../util/member/Members";
+import {assertApplicationJenkinsProdCanBeRequested} from "../../util/prod/ProdAssertions";
 import {QMProject} from "../../util/project/Project";
 import {
     DeploymentPipelineIdParam,
@@ -85,7 +86,8 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-            await this.gluonService.prod.project.assertProjectProdIsApproved(project.projectId, this.deploymentPipelineId);
+            // Ensure that the owning project has been prod approved before proceeding
+            await assertApplicationJenkinsProdCanBeRequested(this.applicationName, this.projectName, this.deploymentPipelineId, this.gluonService);
 
             const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
 

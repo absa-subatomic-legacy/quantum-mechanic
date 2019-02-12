@@ -27,6 +27,7 @@ import {
     QMProject,
 } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
+import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetailsProd} from "../../util/team/Teams";
@@ -61,7 +62,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
         const qmMessageClient = this.createMessageClient(ctx, associatedTeams);
 
         try {
-            if (projectProdRequest.approvalStatus === "APPROVED") {
+            if (projectProdRequest.approvalStatus === ApprovalEnum.APPROVED.valueOf()) {
                 await qmMessageClient.send(`Prod request for project ${projectProdRequest.project.name} was approved.`);
 
                 const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectProdRequest.project.name);

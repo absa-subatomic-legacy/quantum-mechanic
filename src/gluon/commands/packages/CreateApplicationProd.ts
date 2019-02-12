@@ -16,6 +16,7 @@ import {
     getHighestPreProdEnvironment,
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
+import {assertApplicationProdCanBeRequested} from "../../util/prod/ProdAssertions";
 import {
     getProjectOpenshiftNamespace,
     QMDeploymentPipeline,
@@ -94,7 +95,7 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
     })
     public openShiftResourcesJSON: string;
 
-    private applicationProdRequestMessages = new ProdRequestMessages();
+    private prodRequestMessages = new ProdRequestMessages();
 
     constructor(public gluonService = new GluonService(), public ocService = new OCService(), public packageOpenshiftResourceService = new PackageOpenshiftResourceService()) {
         super();
@@ -106,6 +107,9 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
             const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
             if (this.approval === ApprovalEnum.CONFIRM) {
+                // Ensure the owning project is prod approved before proceeding
+                await assertApplicationProdCanBeRequested(this.projectName, this.deploymentPipelineId, this.gluonService);
+
                 this.correlationId = uuid();
                 const result = await this.getRequestConfirmation(qmMessageClient);
                 this.succeedCommand();
@@ -158,7 +162,7 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
 
         await this.findAndListResources(qmMessageClient);
 
-        const message = this.applicationProdRequestMessages.confirmApplicationProdRequest(this);
+        const message = this.prodRequestMessages.confirmApplicationProdRequest(this);
 
         return await qmMessageClient.send(message, {id: this.correlationId});
     }
