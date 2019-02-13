@@ -90,6 +90,7 @@ export interface QMTeamBase {
     teamId: string;
     name: string;
     openShiftCloud: string;
+    description: string;
     slack?: QMTeamSlack;
 }
 

@@ -29,9 +29,9 @@ import {
     QMMessageClient,
 } from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
-import {ActionedByEvent} from "../../util/transform/types/event/ActionedByEvent";
 import {GluonApplicationEvent} from "../../util/transform/types/event/GluonApplicationEvent";
 import {KeyValuePairEvent} from "../../util/transform/types/event/KeyValuePairEvent";
+import {MemberEvent} from "../../util/transform/types/event/MemberEvent";
 import {ProjectEvent} from "../../util/transform/types/event/ProjectEvent";
 
 @EventHandler("Receive PackageConfigurationRequested events", `
@@ -191,5 +191,5 @@ export interface PackageConfigurationRequestedEvent {
     jenkinsfileName: string;
     buildEnvironmentVariables: KeyValuePairEvent[];
     deploymentEnvironmentVariables: KeyValuePairEvent[];
-    actionedBy: ActionedByEvent;
+    actionedBy: MemberEvent;
 }

@@ -59,6 +59,10 @@ import {ProjectProductionEnvironmentsRequestClosed} from "./gluon/events/project
 import {ProjectProductionEnvironmentsRequested} from "./gluon/events/project/ProjectProductionEnvironmentsRequested";
 import {TeamsLinkedToProject} from "./gluon/events/project/TeamAssociated";
 import {BotJoinedChannel} from "./gluon/events/team/BotJoinedChannel";
+import {
+    ConfigServerRequested,
+    ConfigServerRequestedEvent,
+} from "./gluon/events/team/ConfigServerRequested";
 import {DevOpsEnvironmentRequested} from "./gluon/events/team/DevOpsEnvironmentRequested";
 import {MemberRemovedFromTeam} from "./gluon/events/team/MemberRemovedFromTeam";
 import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
@@ -125,6 +129,7 @@ export const configuration: any = {
         ApplicationProdRequested,
         BitbucketProjectAdded,
         BotJoinedChannel,
+        ConfigServerRequested,
         DevOpsEnvironmentRequested,
         GenericProdRequested,
         MemberRemovedFromTeam,
@@ -177,6 +182,7 @@ export const configuration: any = {
         ingester("ProjectProductionEnvironmentsRequestedEvent"),
         ingester("ProjectProductionEnvironmentsRequestClosedEvent"),
         ingester("PackageConfigurationRequestedEvent"),
+        ingester("ConfigServerRequestedEvent"),
     ],
     apiKey,
     http,

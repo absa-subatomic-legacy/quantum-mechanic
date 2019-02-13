@@ -2,10 +2,11 @@ import {QMApplication} from "../../services/gluon/ApplicationService";
 import {QMMemberBase} from "../member/Members";
 import {QMProject} from "../project/Project";
 import {QMTeam, QMTeamBase} from "../team/Teams";
-import {ActionedByEvent} from "./types/event/ActionedByEvent";
 import {GluonApplicationEvent} from "./types/event/GluonApplicationEvent";
 import {KeyValuePairEvent} from "./types/event/KeyValuePairEvent";
+import {MemberEvent} from "./types/event/MemberEvent";
 import {ProjectEvent} from "./types/event/ProjectEvent";
+import {SlackIdentityTeamEvent} from "./types/event/SlackIdentityTeamEvent";
 
 export class GluonToEvent {
 
@@ -51,6 +52,8 @@ export class GluonToEvent {
             teamId: gluonTeam.teamId,
             name: gluonTeam.name,
             slackIdentity: gluonTeam.slack,
+            openShiftCloud: gluonTeam.openShiftCloud,
+            description: gluonTeam.description,
         };
     }
 
@@ -58,13 +61,15 @@ export class GluonToEvent {
         return {
             teamId: gluonTeamFull.teamId,
             name: gluonTeamFull.name,
-            slackIdentity: gluonTeamFull.slack,
+            slackIdentity: gluonTeamFull.slack as SlackIdentityTeamEvent,
             owners: gluonTeamFull.owners,
             members: gluonTeamFull.members,
+            openShiftCloud: gluonTeamFull.openShiftCloud,
+            description: gluonTeamFull.description,
         };
     }
 
-    public static member(gluonMember: QMMemberBase): ActionedByEvent {
+    public static member(gluonMember: QMMemberBase): MemberEvent {
         return {
             memberId: gluonMember.memberId,
             firstName: gluonMember.firstName,

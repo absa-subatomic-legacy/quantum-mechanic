@@ -1,6 +1,6 @@
 import {SlackIdentityMemberEvent} from "./SlackIdentityMemberEvent";
 
-export interface ActionedByEvent {
+export interface MemberEvent {
     memberId?: string;
     firstName?: string;
     lastName?: string;
