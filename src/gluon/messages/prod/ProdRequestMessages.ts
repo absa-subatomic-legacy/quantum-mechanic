@@ -193,7 +193,7 @@ This will also configure the application Jenkins job.
     private getApplicationJenkinsProdCommandAttachment(projectName: string): Attachment {
         return {
             text: `
-To deploy an application into your production environments need to create an appropriate Jenkins job. \
+To deploy an application into your production environments you'll need to create an appropriate Jenkins job. \
 All application resources should have been moved into the necessary production environments so this can be done now. \
 You should run this command for all applications that need to be deployed in production now.
             `,
