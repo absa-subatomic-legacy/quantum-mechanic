@@ -54,31 +54,32 @@ export class RemoveMemberFromTeamService {
     public async removeUserFromGluonTeam(memberId: string, actioningMemberId: string, gluonTeamId: string, memberRole: MemberRole = MemberRole.member) {
         const updateTeamResult = await this.gluonService.teams.removeMemberFromTeam(gluonTeamId, memberId, actioningMemberId);
         if (!isSuccessCode(updateTeamResult.status)) {
-            let message = `Failed to remove member from the team.`;
+            let message = `❗Failed to remove member from the team.`;
             logger.error(`${message} | data: ${JSON.stringify(updateTeamResult.data)}`);
-            updateTeamResult.status = 403;
             if (updateTeamResult.status === 403) {
-                message = `Unauthorized: ${message} Sorry only a team owner can remove members from a team.`;
+                message = `❗Unauthorized: ${message} Sorry only a team owner can remove members from a team.`;
             }
             throw new QMError(message);
         }
     }
 
-    public verifyCanRemoveMemberRequest(newMember: { memberId: string, slack: { screenName: string } }, team: { owners: Array<{ memberId: string }>, members: Array<{ memberId: string }> }, memberRole: MemberRole) {
+    public verifyCanRemoveMemberRequest(memberToRemove: { memberId: string, slack: { screenName: string } }, team: { owners: Array<{ memberId: string }>, members: Array<{ memberId: string }> }, memberRole: MemberRole) {
         if (memberRole !== MemberRole.owner) {
             let found: boolean = false;
             for (const member of team.members) {
-                if (member.memberId === newMember.memberId) {
+                if (member.memberId === memberToRemove.memberId) {
                     found = true;
                     break;
                 }
             }
 
             if (!found) {
-                throw new QMError(`${newMember.slack.screenName} is not a member of this team`);
+                throw new QMError(`❗${memberToRemove.slack.screenName} is not a member of this team`);
             }
         } else {
-            throw new QMError(`${newMember.slack.screenName} is an owner of this team and cannot be removed.`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
+            if (team.owners.length === 1 ) {
+                throw new QMError(`❗${memberToRemove.slack.screenName} is the only owner of this team and cannot be removed.`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
+            }
         }
     }
 

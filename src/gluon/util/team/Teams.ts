@@ -130,3 +130,27 @@ export function kickUserFromSlackChannel(
         },
     });
 }
+
+export function isOwner(
+    team: { owners: Array<{ memberId: string }> },
+    memberId: string,
+) {
+    const indexOfOwnwerArray = team.owners.findIndex(member => member.memberId === memberId); // findIndex returns -1 if not in array
+    if (indexOfOwnwerArray !== -1) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+export function isMember(
+    team: any,
+    memberId: string,
+) {
+    const indexOfMemberArray = team.members.findIndex(member => member.memberId === memberId); // findIndex returns -1 if not in array
+    if (indexOfMemberArray !== -1) {
+        return true;
+    } else {
+        return false;
+    }
+}
