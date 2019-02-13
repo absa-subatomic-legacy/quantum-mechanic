@@ -44,7 +44,7 @@ export class ProdRequestMessages {
 
     public confirmApplicationProdRequest(prodRequestCommand: CreateApplicationProd): SlackMessage {
 
-        const text: string = `By clicking Approve below you confirm that you sign off on the above resources being moved to production. Your user will be logged at the approver for this change.`;
+        const text: string = `By clicking Approve below you confirm that you sign off on the above resources being moved to production. Your user will be logged as the approver for this change.`;
 
         return {
             text,
