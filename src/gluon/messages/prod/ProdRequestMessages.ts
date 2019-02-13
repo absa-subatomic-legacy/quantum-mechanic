@@ -11,7 +11,7 @@ import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 export class ProdRequestMessages {
     public confirmGenericProdRequest(prodRequestCommand: CreateGenericProd): SlackMessage {
 
-        const text: string = `By clicking Approve below you confirm that you sign off on the above resources being moved to production. Your user will be logged at the approver for this change.`;
+        const text: string = `By clicking Approve below you confirm that you sign off on the above resources being moved to production. Your user will be logged as the approver for this change.`;
 
         return {
             text,
