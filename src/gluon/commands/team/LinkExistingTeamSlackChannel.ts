@@ -34,7 +34,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
         required: true,
         displayName: "Team Slack Channel",
         description: "The slack channel to link to your team (excluding the #)",
-        pattern: /^(?!#)/,
+        pattern: /^(?!<#).*/,
         validInput: "a slack channel name without the #",
     })
     public newTeamChannel: string;

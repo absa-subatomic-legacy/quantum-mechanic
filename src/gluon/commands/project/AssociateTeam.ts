@@ -27,14 +27,14 @@ import {menuAttachmentForTeams} from "../../util/team/Teams";
 export class AssociateTeam extends RecursiveParameterRequestCommand {
 
     @RecursiveParameter({
-        callOrder: 0,
+        callOrder: 1,
         selectionMessage: `Please select a team you would like to associate to the project`,
         setter: setGluonTeamFromUnassociatedTeams,
     })
     public teamName: string;
 
     @RecursiveParameter({
-        callOrder: 1,
+        callOrder: 0,
         selectionMessage: `Please select a project you would like to associate this team to.`,
         setter: setGluonProjectNameFromList,
     })
