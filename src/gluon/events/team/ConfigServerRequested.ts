@@ -7,10 +7,10 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage, url} from "@atomist/slack-messages";
-import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
-import {GluonService} from "../../services/gluon/GluonService";
-import {OCService} from "../../services/openshift/OCService";
+import {TaskListMessage} from "../../tasks/TaskListMessage";
+import {TaskRunner} from "../../tasks/TaskRunner";
+import {CreateConfigServer} from "../../tasks/team/CreateConfigServer";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
@@ -44,8 +44,7 @@ subscription ConfigServerRequestedEvent {
 `)
 export class ConfigServerRequested extends BaseQMEvent implements HandleEvent<any> {
 
-    constructor(private gluonService: GluonService = new GluonService(),
-                private ocService = new OCService()) {
+    constructor() {
         super();
     }
 
@@ -56,96 +55,17 @@ export class ConfigServerRequested extends BaseQMEvent implements HandleEvent<an
         const messageClient: QMMessageClient = new ChannelMessageClient(ctx).addDestination(configServerRequestedEvent.team.slackIdentity.teamChannel);
 
         try {
-            await this.addConfigServer(configServerRequestedEvent.team.name, configServerRequestedEvent.team.openShiftCloud, configServerRequestedEvent.configRepositoryGitURI);
+            const taskListMessage = new TaskListMessage(`:rocket: Deploying config server into *${configServerRequestedEvent.team.name}* team DevOps...`, messageClient);
+            const taskRunner = new TaskRunner(taskListMessage);
+
+            taskRunner.addTask(new CreateConfigServer(configServerRequestedEvent.team.name, configServerRequestedEvent.team.openShiftCloud, configServerRequestedEvent.configRepositoryGitURI));
+
+            await taskRunner.execute(ctx);
             this.succeedEvent();
             return await this.sendSuccessResponse(messageClient, configServerRequestedEvent.team.name);
         } catch (error) {
             this.failEvent();
             return await handleQMError(messageClient, error);
-        }
-    }
-
-    private async addConfigServer(gluonTeamName: string,
-                                  openShiftCloud: string,
-                                  gitUri: string): Promise<any> {
-        await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd);
-        const devOpsProjectId = getDevOpsEnvironmentDetails(gluonTeamName).openshiftProjectId;
-        await this.addConfigServerSecretToDevOpsEnvironment(devOpsProjectId);
-
-        await this.createConfigServerConfigurationMap(devOpsProjectId);
-
-        await this.tagConfigServerImageToDevOpsEnvironment(devOpsProjectId);
-
-        await this.addViewRoleToDevOpsEnvironmentDefaultServiceAccount(devOpsProjectId);
-
-        await this.createConfigServerDeploymentConfig(gitUri, devOpsProjectId);
-    }
-
-    private async addConfigServerSecretToDevOpsEnvironment(devOpsProjectId: string) {
-        try {
-            await this.ocService.createConfigServerSecret(devOpsProjectId);
-        } catch (error) {
-            logger.warn("Secret subatomic-config-server probably already exists");
-        }
-    }
-
-    private async createConfigServerConfigurationMap(devOpsProjectId: string) {
-        const configurationMapDefintion = {
-            apiVersion: "v1",
-            kind: "ConfigMap",
-            metadata: {
-                name: "subatomic-config-server",
-            },
-            data: {
-                "application.yml": `
-spring:
-  cloud:
-    config:
-      server:
-        git:
-          ignoreLocalSshSettings: true
-          strictHostKeyChecking: false
-          hostKeyAlgorithm: ssh-rsa
-`,
-            },
-        };
-        return await this.ocService.applyResourceFromDataInNamespace(configurationMapDefintion, devOpsProjectId);
-    }
-
-    private async tagConfigServerImageToDevOpsEnvironment(devOpsProjectId: string) {
-        return await this.ocService.tagSubatomicImageToNamespace(
-            "subatomic-config-server:3.0",
-            devOpsProjectId,
-            "subatomic-config-server:3.0");
-    }
-
-    private async addViewRoleToDevOpsEnvironmentDefaultServiceAccount(devOpsProjectId: string) {
-        return await this.ocService.addRoleToUserInNamespace(
-            `system:serviceaccount:${devOpsProjectId}:default`,
-            "view",
-            devOpsProjectId);
-    }
-
-    private async createConfigServerDeploymentConfig(gitUri: string, devOpsProjectId: string) {
-        try {
-            await this.ocService.getDeploymentConfigInNamespace("subatomic-config-server", devOpsProjectId);
-            logger.warn(`Subatomic Config Server Template has already been processed, deployment exists`);
-        } catch (error) {
-            const saneGitUri = _.replace(gitUri, /(<)|>/g, "");
-
-            const templateParameters = [
-                {key: "GIT_URI", value: saneGitUri},
-                {key: "IMAGE_STREAM_PROJECT", value: devOpsProjectId},
-            ];
-
-            const appTemplate = await this.ocService.findAndProcessOpenshiftTemplate(
-                "subatomic-config-server-template",
-                "subatomic",
-                templateParameters);
-
-            logger.debug(`Processed Subatomic Config Server Template: ${JSON.stringify(appTemplate)}`);
-
-            await this.ocService.applyResourceFromDataInNamespace(appTemplate, devOpsProjectId);
         }
     }
 
