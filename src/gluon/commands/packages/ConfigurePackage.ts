@@ -1,22 +1,14 @@
 import {
-    buttonForCommand,
+    addressEvent,
     HandlerContext,
     HandlerResult,
-    SlackDestination,
     success,
 } from "@atomist/automation-client";
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {QMApplication} from "../../services/gluon/ApplicationService";
+import {PackageConfigurationRequestedEvent} from "../../events/packages/PackageConfigurationRequested";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
-import {ConfigurePackageInOpenshift} from "../../tasks/packages/ConfigurePackageInOpenshift";
-import {TaskListMessage} from "../../tasks/TaskListMessage";
-import {TaskRunner} from "../../tasks/TaskRunner";
-import {ApplicationType} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
 import {
     GluonApplicationNameParam,
@@ -37,12 +29,13 @@ import {
     OpenShiftTemplateParam,
     OpenshiftTemplateSetter,
 } from "../../util/recursiveparam/OpenshiftParameterSetters";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
-    ParameterDisplayType,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
-import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
+    handleQMError,
+    QMMessageClient,
+    ResponderMessageClient,
+} from "../../util/shared/Error";
+import {GluonToEvent} from "../../util/transform/GluonToEvent";
 
 @CommandHandler("Configure an existing application/library", QMConfig.subatomic.commandPrefix + " configure custom package")
 @Tags("subatomic", "package")
@@ -101,104 +94,38 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
+        const messageClient: QMMessageClient = new ResponderMessageClient(ctx);
         try {
-            const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
-            await ctx.messageClient.send({
-                text: "Preparing to configure your package...",
-            }, destination);
-
-            const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName, false);
-
-            await this.configurePackage(ctx);
-
+            await this.requestPackageConfiguration(ctx);
             this.succeedCommand();
-            return this.sendPackageProvisionedMessage(ctx, this.applicationName, this.projectName, destination, ApplicationType[application.applicationType]);
+            return await messageClient.send("Requesting package configuration...");
         } catch (error) {
             this.failCommand();
-            return await handleQMError(new ResponderMessageClient(ctx), error);
+            return await handleQMError(messageClient, error);
         }
     }
 
-    private async configurePackage(ctx: HandlerContext): Promise<HandlerResult> {
+    private async requestPackageConfiguration(ctx: HandlerContext): Promise<HandlerResult> {
+
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
         const application = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
 
-        const taskListMessage = new TaskListMessage(":rocket: Configuring package...", new ResponderMessageClient(ctx));
-        const taskRunner = new TaskRunner(taskListMessage);
-        if (application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
-            taskRunner.addTask(
-                new ConfigurePackageInOpenshift(
-                    {
-                        buildEnvironmentVariables: this.buildEnvironmentVariables,
-                        openshiftTemplate: this.openshiftTemplate,
-                        baseS2IImage: this.imageName,
-                        deploymentEnvironmentVariables: this.deploymentEnvironmentVariables,
-                    },
-                    {
-                        teamName: this.teamName,
-                        projectName: this.projectName,
-                        packageName: application.name,
-                        packageType: application.applicationType,
-                        bitbucketRepoRemoteUrl: application.bitbucketRepository.remoteUrl,
-                        owningTeamName: project.owningTeam.name,
-                    }),
-            );
-        }
+        const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-        taskRunner.addTask(
-            new ConfigurePackageInJenkins(
-                application,
-                project,
-                this.jenkinsfileName),
-        );
+        const configurePackageRequest: PackageConfigurationRequestedEvent = {
+            project: GluonToEvent.project(project),
+            application: GluonToEvent.application(application),
+            actionedBy: GluonToEvent.member(member),
+            imageName: this.imageName,
+            jenkinsfileName: this.jenkinsfileName,
+            openshiftTemplate: this.openshiftTemplate,
+            buildEnvironmentVariables: GluonToEvent.keyValueList(this.buildEnvironmentVariables),
+            deploymentEnvironmentVariables: GluonToEvent.keyValueList(this.deploymentEnvironmentVariables),
+        };
 
-        await taskRunner.execute(ctx);
+        await ctx.messageClient.send(configurePackageRequest, addressEvent("PackageConfigurationRequestedEvent"));
 
         return success();
-    }
-
-    private async sendPackageProvisionedMessage(ctx: HandlerContext, applicationName: string, projectName: string, slackChannel: SlackDestination, applicationType: ApplicationType) {
-
-        const returnableSuccessMessage = this.getDefaultSuccessMessage(applicationName, projectName, applicationType);
-
-        return await ctx.messageClient.send(returnableSuccessMessage, slackChannel);
-    }
-
-    private getDefaultSuccessMessage(applicationName: string, projectName: string, applicationType: ApplicationType): SlackMessage {
-        let packageTypeString = "application";
-        if (applicationType === ApplicationType.LIBRARY) {
-            packageTypeString = "library";
-        }
-
-        return {
-            text: `Your ${packageTypeString} *${applicationName}*, in project *${projectName}*, has been provisioned successfully ` +
-                "and is ready to build/deploy",
-            attachments: [{
-                fallback: `Your ${packageTypeString} has been provisioned successfully`,
-                footer: `For more information, please read the ${this.docs() + "#jenkins-build"}`,
-                text: `
-You can kick off the build pipeline for your ${packageTypeString} by clicking the button below or pushing changes to your ${packageTypeString}'s repository`,
-                mrkdwn_in: ["text"],
-                actions: [
-                    buttonForCommand(
-                        {
-                            text: "Start build",
-                            style: "primary",
-                        },
-                        new KickOffJenkinsBuild(),
-                        {
-                            projectName,
-                            applicationName,
-                            displayResultMenu: ParameterDisplayType.hide,
-                        }),
-                ],
-            }],
-        };
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference`,
-            "documentation")}`;
     }
 }

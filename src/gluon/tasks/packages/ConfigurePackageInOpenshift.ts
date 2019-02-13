@@ -24,6 +24,7 @@ import {
 } from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
+import {KeyValuePairEvent} from "../../util/transform/types/event/KeyValuePairEvent";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -145,11 +146,11 @@ export class ConfigurePackageInOpenshift extends Task {
         logger.info(`Using Git URI: ${bitbucketRepoRemoteUrl}`);
         const buildConfig: OpenshiftResource = this.getBuildConfigData(bitbucketRepoRemoteUrl, appBuildName, baseS2IImage);
 
-        for (const envVariableName of Object.keys(this.deploymentDetails.buildEnvironmentVariables)) {
+        for (const envVariableName of this.deploymentDetails.buildEnvironmentVariables) {
             buildConfig.spec.strategy.sourceStrategy.env.push(
                 {
-                    name: envVariableName,
-                    value: this.deploymentDetails.buildEnvironmentVariables[envVariableName],
+                    name: envVariableName.key,
+                    value: this.deploymentDetails.buildEnvironmentVariables[envVariableName.value],
                 },
             );
         }
@@ -208,14 +209,14 @@ export class ConfigurePackageInOpenshift extends Task {
         return await success();
     }
 
-    private addDeploymentEnvironmentVariablesToDeploymentConfigs(processedTemplate: OpenshiftListResource, deploymentEnvironmentVariables: { [key: string]: string }, parameters: { [key: string]: any }) {
+    private addDeploymentEnvironmentVariablesToDeploymentConfigs(processedTemplate: OpenshiftListResource, deploymentEnvironmentVariables: KeyValuePairEvent[], parameters: { [key: string]: any }) {
         for (const resource of processedTemplate.items) {
             if (resource.kind === "DeploymentConfig") {
                 for (const container of resource.spec.template.spec.containers) {
-                    for (const dcEnvVar of Object.keys(deploymentEnvironmentVariables)) {
+                    for (const dcEnvVar of deploymentEnvironmentVariables) {
                         container.env.push({
-                            name: dcEnvVar,
-                            value: new QMTemplate(deploymentEnvironmentVariables[dcEnvVar]).build(parameters),
+                            name: dcEnvVar.key,
+                            value: new QMTemplate(dcEnvVar.value).build(parameters),
                         });
                     }
                 }
@@ -225,8 +226,8 @@ export class ConfigurePackageInOpenshift extends Task {
 }
 
 export interface PackageDeploymentDetails {
-    buildEnvironmentVariables: { [key: string]: string };
-    deploymentEnvironmentVariables: { [key: string]: string };
+    buildEnvironmentVariables: KeyValuePairEvent[];
+    deploymentEnvironmentVariables: KeyValuePairEvent[];
     openshiftTemplate: string;
     baseS2IImage: string;
 }

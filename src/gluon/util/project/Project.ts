@@ -5,7 +5,7 @@ import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMBitbucketProject} from "../bitbucket/Bitbucket";
 import {createMenuAttachment} from "../shared/GenericMenu";
 import {QMTenant} from "../shared/Tenants";
-import {QMTeam} from "../team/Teams";
+import {QMTeam, QMTeamBase} from "../team/Teams";
 
 /**
  * Returns the expected OpenShift namespace for a given project pipeline environment.
@@ -164,10 +164,11 @@ export interface QMProjectBase {
     name: string;
     bitbucketProject: QMBitbucketProject;
     owningTenant: string;
+    description: string;
 }
 
 export interface QMProject extends QMProjectBase {
-    owningTeam: QMTeam;
+    owningTeam: QMTeamBase;
     devDeploymentPipeline: QMDeploymentPipeline;
     releaseDeploymentPipelines: QMDeploymentPipeline[];
 }
