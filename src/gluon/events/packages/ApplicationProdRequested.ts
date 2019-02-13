@@ -9,12 +9,16 @@ import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
 import {OpenshiftListResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {QMApplicationProdRequest} from "../../services/gluon/ApplicationProdRequestService";
+import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {GenericOpenshiftResourceService} from "../../services/projects/GenericOpenshiftResourceService";
+import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {getDefaultProdJenkinsFileName} from "../../util/jenkins/Jenkins";
+import {ProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
 import {getHighestPreProdEnvironment} from "../../util/openshift/Helpers";
 import {
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
@@ -95,6 +99,8 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
 
             const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.tenant.tenantId);
 
+            const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(applicationProdRequestedEvent.application.name, qmProject.name, false);
+
             const applicationProdRequest: QMApplicationProdRequest = await this.gluonService.prod.application.getApplicationProdRequestById(applicationProdRequestedEvent.applicationProdRequest.applicationProdRequestId);
 
             logger.debug("List of requested prod resources: " + JSON.stringify(applicationProdRequest));
@@ -114,11 +120,17 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             for (const openshiftProd of QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd) {
                 const environmentsForCreation: OpenShiftProjectNamespace[] = getPipelineOpenShiftNamespacesForOpenShiftCluster(tenant.name, qmProject, applicationProdRequest.deploymentPipeline, openshiftProd);
-                taskRunner.addTask(
-                    new CreateOpenshiftResourcesInProject(environmentsForCreation, preProdNamespace, resources, openshiftProd),
-                    undefined,
-                    1);
+                taskRunner
+                    .addTask(
+                        new CreateOpenshiftResourcesInProject(environmentsForCreation, preProdNamespace, resources, openshiftProd),
+                        undefined,
+                        0,
+                    );
             }
+            taskRunner.addTask(
+                new ConfigurePackageInJenkins(application, qmProject, getDefaultProdJenkinsFileName(), ProdDefaultJenkinsJobTemplate),
+                "Configure application Jenkins prod job",
+            );
 
             await taskRunner.execute(ctx);
             this.succeedEvent();

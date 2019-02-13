@@ -270,6 +270,7 @@ export async function setDeploymentPipelineId(
 
 export function DeploymentPipelineIdParam(details: RecursiveParameterDetails) {
     details.setter = setDeploymentPipelineId;
+    details.showInParameterDisplay = false;
     return RecursiveParameter(details);
 }
 

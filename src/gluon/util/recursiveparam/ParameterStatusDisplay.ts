@@ -4,7 +4,7 @@ import {ParameterDisplayType} from "./RecursiveParameterRequestCommand";
 
 export class ParameterStatusDisplay {
 
-    private readonly setParameters: { [key: string]: string };
+    private readonly setParameters: { [key: string]: { value: string, displayable: boolean } };
     private readonly paramOrder: string[];
 
     constructor() {
@@ -12,8 +12,8 @@ export class ParameterStatusDisplay {
         this.paramOrder = [];
     }
 
-    public setParam(paramName: string, paramValue: string) {
-        this.setParameters[paramName] = paramValue;
+    public setParam(paramName: string, paramValue: string, displayable: boolean) {
+        this.setParameters[paramName] = {value: paramValue, displayable};
         this.paramOrder.push(paramName);
     }
 
@@ -23,7 +23,9 @@ export class ParameterStatusDisplay {
             let textDisplay = `Preparing command *${commandName}*: \n`;
 
             for (const parameter of this.paramOrder) {
-                textDisplay += `*${parameter}*\n${this.setParameters[parameter]}\n\n`;
+                if (this.setParameters[parameter].displayable) {
+                    textDisplay += `*${parameter}*\n${this.setParameters[parameter].value}\n\n`;
+                }
             }
             attachments.push(
                 {

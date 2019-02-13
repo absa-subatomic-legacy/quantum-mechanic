@@ -12,6 +12,7 @@ import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
+import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMProjectProdRequest} from "../../services/gluon/ProjectProdRequestService";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
@@ -26,6 +27,7 @@ import {
     QMProject,
 } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
+import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetailsProd} from "../../util/team/Teams";
@@ -39,6 +41,8 @@ subscription ProjectProductionEnvironmentsRequestClosedEvent {
 }
 `)
 export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent implements HandleEvent<any> {
+
+    private prodMessages: ProdRequestMessages = new ProdRequestMessages();
 
     constructor(public gluonService = new GluonService()) {
         super();
@@ -58,7 +62,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
         const qmMessageClient = this.createMessageClient(ctx, associatedTeams);
 
         try {
-            if (projectProdRequest.approvalStatus === "APPROVED") {
+            if (projectProdRequest.approvalStatus === ApprovalEnum.APPROVED.valueOf()) {
                 await qmMessageClient.send(`Prod request for project ${projectProdRequest.project.name} was approved.`);
 
                 const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectProdRequest.project.name);
@@ -92,7 +96,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
 
                 await taskRunner.execute(ctx);
                 this.succeedEvent();
-                await qmMessageClient.send("Successfully created requested project environments.");
+                await qmMessageClient.send(this.prodMessages.getProjectProdCompleteMessage(project.name));
             } else {
                 logger.info(`Closed prod request: ${JSON.stringify(projectProdRequest, null, 2)}`);
                 await qmMessageClient.send(`Prod request for project ${projectProdRequest.project.name} was rejected and closed by @${projectProdRequest.rejectingMember.slack.screenName}`);

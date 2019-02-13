@@ -37,7 +37,7 @@ export async function handleQMError(messageClient: QMMessageClient, error) {
 }
 
 export class QMError extends Error {
-    constructor(message: string, protected slackMessage: SlackMessage | string = null, public errorType: QMErrorType = QMErrorType.generic) {
+    constructor(message: string, protected slackMessage: SlackMessage | string = null, public errorType: QMErrorType = QMErrorType.generic, private linkToFAQ: boolean = true) {
         super(message);
     }
 
@@ -61,7 +61,9 @@ export class QMError extends Error {
             displayMessage = displayMessage + ".";
         }
 
-        displayMessage = displayMessage + ` Consulting the ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")} may be useful.`;
+        if (this.linkToFAQ) {
+            displayMessage = displayMessage + ` Consulting the ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")} may be useful.`;
+        }
         let result: SlackMessage = {
             text: displayMessage,
         };
@@ -70,9 +72,7 @@ export class QMError extends Error {
             result.text = displayMessage;
         }
 
-        return {
-            text: displayMessage,
-        };
+        return result;
     }
 }
 
