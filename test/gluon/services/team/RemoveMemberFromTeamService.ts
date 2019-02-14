@@ -120,7 +120,7 @@ describe("AddMemberToTeamService removeUserFromGluonTeam", () => {
             errorThrown = error;
         }
 
-        assert.equal(errorThrown.getSlackMessage().text, `❗Failed to remove member from the team. Consulting the <http://subatomic.bison.ninja/FAQ|FAQ> may be useful.`);
+        assert.equal(errorThrown.getSlackMessage().text, `❗Failed to remove member from the team. Consulting the ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")} may be useful.`);
 
     });
 
