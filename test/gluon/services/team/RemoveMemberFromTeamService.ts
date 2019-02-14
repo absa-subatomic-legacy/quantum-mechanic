@@ -6,11 +6,11 @@ import {GluonService} from "../../../../src/gluon/services/gluon/GluonService";
 import {MemberService} from "../../../../src/gluon/services/gluon/MemberService";
 import {TeamService} from "../../../../src/gluon/services/gluon/TeamService";
 import {AddMemberToTeamService} from "../../../../src/gluon/services/team/AddMemberToTeamService";
+import {RemoveMemberFromTeamService} from "../../../../src/gluon/services/team/RemoveMemberFromTeamService";
 import {MemberRole} from "../../../../src/gluon/util/member/Members";
 import {QMError} from "../../../../src/gluon/util/shared/Error";
 import {TestGraphClient} from "../../TestGraphClient";
 import {TestMessageClient} from "../../TestMessageClient";
-import {RemoveMemberFromTeamService} from "../../../../src/gluon/services/team/RemoveMemberFromTeamService";
 
 describe("RemoveMemberFromTeamService getMemberGluonDetails", () => {
     it("should return existing member details", async () => {
@@ -104,7 +104,7 @@ const team = {
 const ownerId = "3acaa1ea-94e6-4b34-a0cd-a84447909de1";
 const memeberId = "6ca0e380-eb36-4c86-b883-d8f1c7946930";
 
-xdescribe("AddMemberToTeamService removeUserFromGluonTeam", () => {
+describe("AddMemberToTeamService removeUserFromGluonTeam", () => {
     it("should fail to remove a member to gluon team", async () => {
         const mockedTeamService = mock(TeamService);
         when(mockedTeamService.removeMemberFromTeam(team.teamId, memeberId, ownerId)).thenReturn(Promise.resolve({
@@ -115,12 +115,12 @@ xdescribe("AddMemberToTeamService removeUserFromGluonTeam", () => {
 
         let errorThrown: QMError = null;
         try {
-            await service.removeUserFromGluonTeam(team.teamId, memeberId, ownerId);
+            await service.removeUserFromGluonTeam(memeberId, ownerId, team.teamId);
         } catch (error) {
             errorThrown = error;
         }
 
-        assert.equal(errorThrown.getSlackMessage().text, `❗Failed to remove member from the team.`);
+        assert.equal(errorThrown.getSlackMessage().text, `❗Failed to remove member from the team. Consulting the <http://subatomic.bison.ninja/FAQ|FAQ> may be useful.`);
 
     });
 
@@ -134,7 +134,7 @@ xdescribe("AddMemberToTeamService removeUserFromGluonTeam", () => {
 
         let errorThrown: boolean = false;
         try {
-            await service.removeUserFromGluonTeam(team.teamId, memeberId, ownerId);
+            await service.removeUserFromGluonTeam(memeberId, ownerId, team.teamId);
         } catch (error) {
             errorThrown = true;
         }
