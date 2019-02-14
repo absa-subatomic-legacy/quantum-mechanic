@@ -1,11 +1,11 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {GluonService} from "../../services/gluon/GluonService";
 import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
-import {getScreenName, loadScreenNameByUserId, MemberRole,} from "../../util/member/Members";
+import {getScreenName, loadScreenNameByUserId, MemberRole} from "../../util/member/Members";
+import {QMError} from "../../util/shared/Error";
 import {getTeamSlackChannel, isMember, isOwner} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
-import {QMError} from "../../util/shared/Error";
 
 export class RemoveMemberFromTeamTask extends Task {
 
