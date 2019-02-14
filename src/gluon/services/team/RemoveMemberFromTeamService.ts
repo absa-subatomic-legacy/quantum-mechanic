@@ -7,10 +7,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
-import {MemberRole} from "../../util/member/Members";
+import {MemberRole, QMMemberBase} from "../../util/member/Members";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
-import {kickUserFromSlackChannel, loadChannelIdByChannelName} from "../../util/team/Teams";
+import {kickUserFromSlackChannel, loadChannelIdByChannelName, QMTeam} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";
 
 export class RemoveMemberFromTeamService {
@@ -63,7 +63,7 @@ export class RemoveMemberFromTeamService {
         }
     }
 
-    public verifyCanRemoveMemberRequest(memberToRemove: { memberId: string, slack: { screenName: string } }, team: { owners: Array<{ memberId: string }>, members: Array<{ memberId: string }> }, memberRole: MemberRole) {
+    public verifyCanRemoveMemberRequest(memberToRemove: QMMemberBase, team: QMTeam, memberRole: MemberRole) {
         if (memberRole !== MemberRole.owner) {
             let found: boolean = false;
             for (const member of team.members) {
@@ -74,11 +74,11 @@ export class RemoveMemberFromTeamService {
             }
 
             if (!found) {
-                throw new QMError(`❗${memberToRemove.slack.screenName} is not a member of this team`);
+                throw new QMError(`${memberToRemove.slack.screenName} is not a member of this team`);
             }
         } else {
             if (team.owners.length === 1 ) {
-                throw new QMError(`❗${memberToRemove.slack.screenName} is the only owner of this team and cannot be removed.`); // Unable to remove a team owner from a team as of yet. https://github.com/absa-subatomic/quantum-mechanic/issues/464
+                throw new QMError(`${memberToRemove.slack.screenName} is the only owner of this team and cannot be removed.`);
             }
         }
     }

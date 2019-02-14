@@ -59,7 +59,7 @@ const team = {
 };
 
 const ownerId = "3acaa1ea-94e6-4b34-a0cd-a84447909de1";
-const memeberId = "6ca0e380-eb36-4c86-b883-d8f1c7946930";
+const memberId = "6ca0e380-eb36-4c86-b883-d8f1c7946930";
 
 describe("isOwner", () => {
 
@@ -69,8 +69,8 @@ describe("isOwner", () => {
         assert.equal(result, true);
     });
 
-    it("should return flase when the memberId used", async () => {
-        const result = isOwner(team, memeberId);
+    it("should return false when the memberId used", async () => {
+        const result = isOwner(team, memberId);
 
         assert.equal(result, false);
     });
@@ -79,12 +79,12 @@ describe("isOwner", () => {
 describe("isMember", () => {
 
     it("should return true when memberId is used", async () => {
-        const result = isMember(team, memeberId);
+        const result = isMember(team, memberId);
 
         assert.equal(result, true);
     });
 
-    it("should return flase when the member is not the owner", async () => {
+    it("should return false when the member is not the owner", async () => {
         const result = isMember(team, ownerId);
 
         assert.equal(result, false);
