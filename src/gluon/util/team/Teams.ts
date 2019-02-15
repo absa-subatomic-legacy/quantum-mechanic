@@ -130,3 +130,17 @@ export function kickUserFromSlackChannel(
         },
     });
 }
+
+export function isOwner(
+    team: QMTeam,
+    memberId: string,
+) {
+    return team.owners.some(owner => owner.memberId === memberId);
+}
+
+export function isMember(
+    team: QMTeam,
+    memberId: string,
+) {
+    return team.members.some(member => member.memberId === memberId);
+}
