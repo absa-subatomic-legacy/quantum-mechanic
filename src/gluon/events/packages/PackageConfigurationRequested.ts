@@ -18,6 +18,7 @@ import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageIn
 import {ConfigurePackageInOpenshift} from "../../tasks/packages/ConfigurePackageInOpenshift";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
+import {NonProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
 import {QMMemberBase} from "../../util/member/Members";
 import {ApplicationType} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
@@ -124,11 +125,14 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
             );
         }
 
+        const jenkinsJobTemplate = NonProdDefaultJenkinsJobTemplate;
+        jenkinsJobTemplate.sourceJenkinsFile = packageConfigurationEvent.jenkinsfileName;
+
         taskRunner.addTask(
             new ConfigurePackageInJenkins(
                 application,
                 project,
-                packageConfigurationEvent.jenkinsfileName),
+                jenkinsJobTemplate),
             "Configure Package in Jenkins",
         );
 

@@ -1,4 +1,5 @@
 export interface JenkinsJobTemplate {
+    sourceJenkinsFile?: string;
     templateFilename: string;
     expectedJenkinsfile: string;
     jobNamePostfix: string;
@@ -14,4 +15,10 @@ export const ProdDefaultJenkinsJobTemplate: JenkinsJobTemplate = {
     templateFilename: "jenkins-prod-project.xml",
     expectedJenkinsfile: "Jenkinsfile.prod",
     jobNamePostfix: "-prod",
+};
+
+export const EmptyJenkinsJobTemplate: JenkinsJobTemplate = {
+    templateFilename: "",
+    expectedJenkinsfile: "",
+    jobNamePostfix: "",
 };

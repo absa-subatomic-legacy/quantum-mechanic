@@ -127,8 +127,12 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
                         0,
                     );
             }
+
+            const jenkinsJobTemplate = ProdDefaultJenkinsJobTemplate;
+            jenkinsJobTemplate.sourceJenkinsFile = getDefaultProdJenkinsFileName();
+
             taskRunner.addTask(
-                new ConfigurePackageInJenkins(application, qmProject, getDefaultProdJenkinsFileName(), ProdDefaultJenkinsJobTemplate),
+                new ConfigurePackageInJenkins(application, qmProject, jenkinsJobTemplate),
                 "Configure application Jenkins prod job",
             );
 

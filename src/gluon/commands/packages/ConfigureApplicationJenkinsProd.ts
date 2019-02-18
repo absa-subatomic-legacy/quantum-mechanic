@@ -94,8 +94,11 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             const taskListMessage: TaskListMessage = new TaskListMessage(":rocket: Configuring Application Prod Jenkins...", messageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
+            const jenkinsJobTemplate = ProdDefaultJenkinsJobTemplate;
+            jenkinsJobTemplate.sourceJenkinsFile = getDefaultProdJenkinsFileName();
+
             taskRunner.addTask(
-                new ConfigurePackageInJenkins(application, project, getDefaultProdJenkinsFileName(), ProdDefaultJenkinsJobTemplate),
+                new ConfigurePackageInJenkins(application, project, jenkinsJobTemplate),
             );
 
             await taskRunner.execute(ctx);

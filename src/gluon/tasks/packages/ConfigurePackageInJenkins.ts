@@ -16,8 +16,8 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {
+    EmptyJenkinsJobTemplate,
     JenkinsJobTemplate,
-    NonProdDefaultJenkinsJobTemplate,
 } from "../../util/jenkins/JenkinsJobTemplates";
 import {QMProject} from "../../util/project/Project";
 import {GitError, QMError} from "../../util/shared/Error";
@@ -36,8 +36,7 @@ export class ConfigurePackageInJenkins extends Task {
 
     constructor(private application: QMApplication,
                 private project: QMProject,
-                private jenkinsFile: string = "",
-                private jenkinsJobTemplate: JenkinsJobTemplate = NonProdDefaultJenkinsJobTemplate,
+                private jenkinsJobTemplate: JenkinsJobTemplate = EmptyJenkinsJobTemplate,
                 private ocService = new OCService(),
                 private gluonService = new GluonService(),
                 private jenkinsService = new JenkinsService()) {
@@ -45,7 +44,7 @@ export class ConfigurePackageInJenkins extends Task {
     }
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
-        if (!_.isEmpty(this.jenkinsFile)) {
+        if (!_.isEmpty(this.jenkinsJobTemplate.sourceJenkinsFile)) {
             this.taskListMessage.addTask(this.TASK_ADD_JENKINS_FILE, "Add Jenkinsfile");
         }
         this.taskListMessage.addTask(this.TASK_CREATE_JENKINS_JOB, "Create Jenkins Job");
@@ -55,9 +54,9 @@ export class ConfigurePackageInJenkins extends Task {
         const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(this.project.owningTeam.teamId);
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
 
-        if (!_.isEmpty(this.jenkinsFile)) {
+        if (!_.isEmpty(this.jenkinsJobTemplate.sourceJenkinsFile)) {
             await this.addJenkinsFile(
-                this.jenkinsFile,
+                this.jenkinsJobTemplate.sourceJenkinsFile,
                 this.project.bitbucketProject.key,
                 this.application.bitbucketRepository.slug,
                 this.jenkinsJobTemplate.expectedJenkinsfile,
