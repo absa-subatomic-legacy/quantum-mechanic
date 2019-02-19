@@ -21,13 +21,13 @@ export class NewOrUseTeamSlackChannel extends BaseQMComand implements HandleComm
         description: "team channel name",
         required: false,
     })
-    public teamChannel: string;
+    public newTeamChannel: string;
 
     public teamSlackChannelMessages = new TeamSlackChannelMessages();
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const result =  await ctx.messageClient.respond(this.teamSlackChannelMessages.createNewOrUseExistingSlackChannel(this.teamChannel, this.teamName));
+            const result =  await ctx.messageClient.respond(this.teamSlackChannelMessages.createNewOrUseExistingSlackChannel(this.newTeamChannel, this.teamName));
             this.succeedCommand();
             return result;
         } catch (error) {

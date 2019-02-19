@@ -47,7 +47,7 @@ rather use that instead?\
                         new NewTeamSlackChannel(),
                         {
                             teamName,
-                            teamChannel,
+                            newTeamChannel: teamChannel,
                         }),
                     buttonForCommand(
                         {text: "Use an existing channel"},

@@ -57,7 +57,7 @@ Next you should configure your team Slack channel and OpenShift DevOps environme
                         new NewOrUseTeamSlackChannel(),
                         {
                             teamName: teamCreatedEvent.team.name,
-                            teamChannel: _.kebabCase(teamCreatedEvent.team.name),
+                            newTeamChannel: _.kebabCase(teamCreatedEvent.team.name),
                         }),
                 ],
             }],
