@@ -1,27 +1,29 @@
 import {
-    BitBucketServerRepoRef,
     HandlerContext,
     HandlerResult,
     logger,
     success,
 } from "@atomist/automation-client";
-import {GitCommandGitProject} from "@atomist/automation-client/lib/project/git/GitCommandGitProject";
-import {GitProject} from "@atomist/automation-client/lib/project/git/GitProject";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
-import {isSuccessCode} from "../../../http/Http";
 import {QMFileTemplate} from "../../../template/QMTemplate";
+import {
+    BitbucketFileService,
+    SourceControlledFileRequest,
+} from "../../services/bitbucket/BitbucketFileService";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
-import {getPathFromJenkinsfileName} from "../../util/jenkins/Jenkins";
+import {ConfigurePackageInJenkinsService} from "../../services/packages/ConfigurePackageInJenkinsService";
+import {
+    getApplicationJenkinsJobDisplayName,
+    getPathFromJenkinsfileName,
+} from "../../util/jenkins/Jenkins";
 import {
     EmptyJenkinsJobTemplate,
     JenkinsJobTemplate,
 } from "../../util/jenkins/JenkinsJobTemplates";
 import {QMProject} from "../../util/project/Project";
-import {GitError, QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -38,7 +40,8 @@ export class ConfigurePackageBuildPipelineInJenkins extends Task {
                 private jenkinsJobTemplate: JenkinsJobTemplate = EmptyJenkinsJobTemplate,
                 private ocService = new OCService(),
                 private gluonService = new GluonService(),
-                private jenkinsService = new JenkinsService()) {
+                private bitbucketFileService = new BitbucketFileService(),
+                private configurePackageInJenkinsService = new ConfigurePackageInJenkinsService()) {
         super();
     }
 
@@ -82,9 +85,6 @@ export class ConfigurePackageBuildPipelineInJenkins extends Task {
                                    project: QMProject,
                                    application: QMApplication,
                                    jenkinsJobTemplate: JenkinsJobTemplate): Promise<HandlerResult> {
-        const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
-        const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
-        logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
 
         const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(`resources/templates/jenkins/${jenkinsJobTemplate.jobTemplateFilename}`);
         const builtTemplate: string = jenkinsTemplate.build(
@@ -99,67 +99,39 @@ export class ConfigurePackageBuildPipelineInJenkins extends Task {
             },
         );
 
-        const createJenkinsJobResponse = await this.jenkinsService.createJenkinsJob(
+        const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
+        const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
+
+        return await this.configurePackageInJenkinsService.createJenkinsJobAndAddToView(
             jenkinsHost,
             token,
             project.name,
-            application.name + jenkinsJobTemplate.jobNamePostfix,
+            application.name,
+            getApplicationJenkinsJobDisplayName(application.name, jenkinsJobTemplate.jobNamePostfix),
             builtTemplate);
 
-        if (!isSuccessCode(createJenkinsJobResponse.status)) {
-            if (createJenkinsJobResponse.status === 400) {
-                logger.warn(`Multibranch job for [${application.name}] probably already created`);
-            } else {
-                logger.error(`Unable to create jenkinsJob`);
-                throw new QMError("Failed to create jenkins job. Network request failed.");
-            }
-        }
-        return await success();
     }
 
     private async addJenkinsFile(jenkinsfileName: string, bitbucketProjectKey, bitbucketRepositorySlug, destinationJenkinsfileName: string = "Jenkinsfile"): Promise<HandlerResult> {
 
         if (jenkinsfileName !== this.JENKINSFILE_EXISTS_FLAG) {
-            const username = QMConfig.subatomic.bitbucket.auth.username;
-            const password = QMConfig.subatomic.bitbucket.auth.password;
-            const project: GitProject = await GitCommandGitProject.cloned({
-                    username,
-                    password,
+            const jenkinsfilesToAddToRepository: SourceControlledFileRequest[] = [];
+
+            const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(getPathFromJenkinsfileName(jenkinsfileName));
+            const content = jenkinsTemplate.build({
+                devDeploymentEnvironments: this.project.devDeploymentPipeline.environments,
+                releaseDeploymentEnvironments: this.project.releaseDeploymentPipelines[0].environments,
+            });
+            const commitMessage = `Added ${destinationJenkinsfileName}`;
+
+            jenkinsfilesToAddToRepository.push(
+                {
+                    filename: destinationJenkinsfileName,
+                    content,
+                    commitMessage,
                 },
-                new BitBucketServerRepoRef(
-                    QMConfig.subatomic.bitbucket.baseUrl,
-                    bitbucketProjectKey,
-                    bitbucketRepositorySlug));
-            try {
-                await project.findFile(destinationJenkinsfileName);
-            } catch (error) {
-                logger.info("Jenkinsfile doesnt exist. Adding it!");
-                const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(getPathFromJenkinsfileName(jenkinsfileName));
-                await project.addFile(destinationJenkinsfileName,
-                    jenkinsTemplate.build({
-                        devDeploymentEnvironments: this.project.devDeploymentPipeline.environments,
-                        releaseDeploymentEnvironments: this.project.releaseDeploymentPipelines[0].environments,
-                    }));
-            }
-
-            const clean = await project.isClean();
-            logger.debug(`Jenkinsfile has been added: ${clean}`);
-
-            if (!clean) {
-                await project.setUserConfig(
-                    QMConfig.subatomic.bitbucket.auth.username,
-                    QMConfig.subatomic.bitbucket.auth.email,
-                );
-                await project.commit(`Added Jenkinsfile`);
-                try {
-                    await project.push();
-                } catch (error) {
-                    logger.debug(`Error pushing Jenkins file to repository`);
-                    throw new GitError(error.message);
-                }
-            } else {
-                logger.debug("Jenkinsfile already exists");
-            }
+            );
+            await this.bitbucketFileService.addFilesToBitbucketRepository(bitbucketProjectKey, bitbucketRepositorySlug, jenkinsfilesToAddToRepository);
         }
 
         return await success();

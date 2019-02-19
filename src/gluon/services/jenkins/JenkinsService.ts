@@ -21,7 +21,7 @@ export class JenkinsService {
                                    gluonApplicationName: string) {
         logger.debug(`Trying to kick of first jenkins build. jenkinsHost: ${jenkinsHost}; token: ${token}; gluonProjectName: ${gluonProjectName}; gluonApplicationName: ${gluonApplicationName} `);
         return await this.genericJenkinsPost(
-            `https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/job/${_.kebabCase(gluonApplicationName).toLowerCase()}/build?delay=0sec`,
+            `https://${jenkinsHost}/job/${gluonProjectNameToJobName(gluonProjectName)}/job/${gluonApplicationNameToBuildJobName(gluonApplicationName)}/build?delay=0sec`,
             "",
             token,
         );
@@ -34,7 +34,7 @@ export class JenkinsService {
         logger.debug(`Trying to kick of a jenkins build. jenkinsHost: ${jenkinsHost}; token: ${token}; gluonProjectName: ${gluonProjectName}; gluonApplicationName: ${gluonApplicationName} `);
 
         return await this.genericJenkinsPost(
-            `https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/job/${_.kebabCase(gluonApplicationName).toLowerCase()}/job/master/build?delay=0sec`,
+            `https://${jenkinsHost}/job/${gluonProjectNameToJobName(gluonProjectName)}/job/${gluonApplicationNameToBuildJobName(gluonApplicationName)}/job/master/build?delay=0sec`,
             "",
             token,
         );
@@ -102,10 +102,10 @@ export class JenkinsService {
         );
     }
 
-    public async createJenkinsJob(jenkinsHost: string, token: string, gluonProjectName: string, gluonApplicationName, jobConfig: string): Promise<any> {
-        logger.debug(`Trying to create jenkins job. jenkinsHost: ${jenkinsHost}; token: ${token}; gluonProjectName: ${gluonProjectName}; gluonApplicationName: ${gluonApplicationName}`);
+    public async createJenkinsJobWithName(jenkinsHost: string, token: string, gluonProjectName: string, jenkinsJobName: string, jobConfig: string): Promise<any> {
+        logger.debug(`Trying to create jenkins job. jenkinsHost: ${jenkinsHost}; token: ${token}; gluonProjectName: ${gluonProjectName}; gluonApplicationName: ${jenkinsJobName}`);
         return await this.genericJenkinsPost(
-            `https://${jenkinsHost}/job/${_.kebabCase(gluonProjectName).toLowerCase()}/createItem?name=${_.kebabCase(gluonApplicationName).toLowerCase()}`,
+            `https://${jenkinsHost}/job/${gluonProjectNameToJobName(gluonProjectName)}/createItem?name=${gluonApplicationNameToBuildJobName(jenkinsJobName)}`,
             jobConfig,
             token,
             "application/xml",
@@ -159,8 +159,67 @@ export class JenkinsService {
         }
     }
 
+    public async createBuildViewForApplication(jenkinsHost: string,
+                                               token: string,
+                                               gluonProjectName: string,
+                                               gluonApplicationName: string) {
+        logger.debug(`Trying to create jenkins view. jenkinsHost: ${jenkinsHost}; token: ${token}, gluonProjectName: ${gluonProjectName}, gluonApplicationName: ${gluonApplicationName}`);
+
+        const owningJob = gluonProjectNameToJobName(gluonProjectName);
+        const viewName = gluonApplicationNameToBuildViewName(gluonApplicationName);
+
+        const viewExistsRequest = await this.genericJenkinsGet(`https://${jenkinsHost}/job/${owningJob}/view/${viewName}`, token);
+
+        if (isSuccessCode(viewExistsRequest.status)) {
+            // View exists, don't proceed
+            return viewExistsRequest;
+        }
+
+        const axios: AxiosInstance = jenkinsAxios();
+
+        addXmlFormEncodedStringifyAxiosIntercepter(axios);
+
+        const viewMode = "hudson.model.ListView";
+
+        return await this.genericJenkinsPost(
+            `https://${jenkinsHost}/job/${owningJob}/createView`,
+            {
+                name: viewName,
+                mode: viewMode,
+                json: `${JSON.stringify({mode: viewMode, name: viewName})}`,
+            },
+            token,
+            "application/x-www-form-urlencoded;charset=UTF-8",
+            axios,
+        );
+
+    }
+
+    public async addBuildJobToApplicationView(jenkinsHost: string, token: string, gluonProjectName: string, gluonApplicationName: string, jobDisplayName: string) {
+        const owningJob = gluonProjectNameToJobName(gluonProjectName);
+        const viewName = gluonApplicationNameToBuildViewName(gluonApplicationName);
+
+        return await this.genericJenkinsPost(
+            `https://${jenkinsHost}/job/${owningJob}/view/${viewName}/addJobToView?name=${gluonApplicationNameToBuildJobName(jobDisplayName)}`,
+            {},
+            token,
+        );
+    }
+
     public getProjectCredentialsDomain(projectName: string) {
         return `${projectName} Credentials`;
+    }
+
+    private async genericJenkinsGet(url: string, token: string) {
+
+        const headers: { [key: string]: string } = {
+            Authorization: `Bearer ${token}`,
+        };
+
+        return this.axiosInstance.get(url,
+            {
+                headers,
+            });
     }
 
     private async genericJenkinsPost(url: string, body: any, token: string, contentType?: string, axiosInstance?: AxiosInstance) {
@@ -218,4 +277,16 @@ function addXmlFormEncodedStringifyAxiosIntercepter(axios: AxiosInstance) {
         }
         return request;
     });
+}
+
+function gluonApplicationNameToBuildViewName(gluonApplicationName: string) {
+    return _.startCase(gluonApplicationName);
+}
+
+function gluonApplicationNameToBuildJobName(gluonApplicationName: string) {
+    return _.kebabCase(gluonApplicationName).toLowerCase();
+}
+
+function gluonProjectNameToJobName(gluonProjectName: string) {
+    return _.kebabCase(gluonProjectName).toLowerCase();
 }

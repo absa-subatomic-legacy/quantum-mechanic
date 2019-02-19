@@ -115,6 +115,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
             throw new QMError("Actioning member is not a member of the team", this.membershipMessages.notAMemberOfTheTeam());
         }
 
+        // Add OpenShift Configuration Jobs
         const taskListMessage = new TaskListMessage(`:rocket: Configuring package *${application.name}*...`, messageClient);
         const taskRunner = new TaskRunner(taskListMessage);
         if (application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
@@ -139,6 +140,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
             );
         }
 
+        // Add Jenkins build jobs
         const jenkinsJobTemplate = NonProdDefaultJenkinsJobTemplate;
         jenkinsJobTemplate.sourceJenkinsfile = packageConfigurationEvent.jenkinsfileName;
 
@@ -147,12 +149,15 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
                 application,
                 project,
                 jenkinsJobTemplate),
-            "Configure Package in Jenkins",
+            "Configure Package Build Jobs in Jenkins",
         );
 
-        const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = this.getJenkinsDeploymentJobTemplates(project.devDeploymentPipeline, project.releaseDeploymentPipelines);
+        // Add Additional Jenkins Deployment jobs
+        if (application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
+            const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = this.getJenkinsDeploymentJobTemplates(project.devDeploymentPipeline, project.releaseDeploymentPipelines);
 
-        taskRunner.addTask(new ConfigurePackageDeploymentPipelineInJenkins(application, project, jenkinsDeploymentJobTemplates));
+            taskRunner.addTask(new ConfigurePackageDeploymentPipelineInJenkins(application, project, jenkinsDeploymentJobTemplates), "Configure Package Deployment Jobs in Jenkins");
+        }
 
         await taskRunner.execute(ctx);
 

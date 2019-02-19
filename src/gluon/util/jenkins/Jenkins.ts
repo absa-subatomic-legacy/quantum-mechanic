@@ -32,5 +32,5 @@ export function getEnvironmentDeploymentJenkinsJobPostfix(pipeline: QMDeployment
 }
 
 export function getApplicationJenkinsJobDisplayName(applicationName: string, jobPostfix: string) {
-    return `${applicationName} ${_.camelCase(jobPostfix)}`;
+    return `${applicationName} ${_.startCase(jobPostfix)}`;
 }
