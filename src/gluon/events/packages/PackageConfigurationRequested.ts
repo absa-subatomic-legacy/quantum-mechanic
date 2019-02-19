@@ -14,14 +14,28 @@ import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
+import {ConfigurePackageBuildPipelineInJenkins} from "../../tasks/packages/ConfigurePackageBuildPipelineInJenkins";
+import {ConfigurePackageDeploymentPipelineInJenkins} from "../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
 import {ConfigurePackageInOpenshift} from "../../tasks/packages/ConfigurePackageInOpenshift";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {NonProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
+import {
+    getEnvironmentDeploymentJenkinsfileNamePostfix,
+    getEnvironmentDeploymentJenkinsJobPostfix,
+} from "../../util/jenkins/Jenkins";
+import {
+    getJenkinsMultiBranchDeploymentJobTemplate,
+    JenkinsDeploymentJobTemplate,
+    NonProdDefaultJenkinsJobTemplate,
+} from "../../util/jenkins/JenkinsJobTemplates";
 import {QMMemberBase} from "../../util/member/Members";
+import {getHighestPreProdEnvironment} from "../../util/openshift/Helpers";
 import {ApplicationType} from "../../util/packages/Applications";
-import {QMProject} from "../../util/project/Project";
+import {
+    QMDeploymentEnvironment,
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/project/Project";
 import {ParameterDisplayType} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
@@ -126,15 +140,19 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
         }
 
         const jenkinsJobTemplate = NonProdDefaultJenkinsJobTemplate;
-        jenkinsJobTemplate.sourceJenkinsFile = packageConfigurationEvent.jenkinsfileName;
+        jenkinsJobTemplate.sourceJenkinsfile = packageConfigurationEvent.jenkinsfileName;
 
         taskRunner.addTask(
-            new ConfigurePackageInJenkins(
+            new ConfigurePackageBuildPipelineInJenkins(
                 application,
                 project,
                 jenkinsJobTemplate),
             "Configure Package in Jenkins",
         );
+
+        const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = this.getJenkinsDeploymentJobTemplates(project.devDeploymentPipeline, project.releaseDeploymentPipelines);
+
+        taskRunner.addTask(new ConfigurePackageDeploymentPipelineInJenkins(application, project, jenkinsDeploymentJobTemplates));
 
         await taskRunner.execute(ctx);
 
@@ -179,6 +197,31 @@ You can kick off the build pipeline for your ${packageTypeString} by clicking th
                 ],
             }],
         };
+    }
+
+    private getJenkinsDeploymentJobTemplates(devDeploymentPipeline: QMDeploymentPipeline, releaseDeploymentPipelines: QMDeploymentPipeline[]) {
+        let lastDeploymentEnvironment: QMDeploymentEnvironment = getHighestPreProdEnvironment(devDeploymentPipeline);
+        const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = [];
+        for (const releasePipeline of releaseDeploymentPipelines) {
+            for (const deploymentEnvironment of releasePipeline.environments) {
+                const sourceJenkinsfile = "jenkinsfile.deployment";
+                const expectedJenkinsfile = `Jenkinsfile${getEnvironmentDeploymentJenkinsfileNamePostfix(releasePipeline, deploymentEnvironment)}`;
+                const jobNamePostfix = getEnvironmentDeploymentJenkinsJobPostfix(releasePipeline, deploymentEnvironment);
+                const jobTemplateFilename = getJenkinsMultiBranchDeploymentJobTemplate();
+                jenkinsDeploymentJobTemplates.push(
+                    {
+                        sourceJenkinsfile,
+                        expectedJenkinsfile,
+                        sourceEnvironment: lastDeploymentEnvironment,
+                        deploymentEnvironment,
+                        jobNamePostfix,
+                        jobTemplateFilename,
+                    },
+                );
+                lastDeploymentEnvironment = deploymentEnvironment;
+            }
+        }
+        return jenkinsDeploymentJobTemplates;
     }
 
     private docs(): string {

@@ -9,7 +9,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
+import {ConfigurePackageBuildPipelineInJenkins} from "../../tasks/packages/ConfigurePackageBuildPipelineInJenkins";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {getDefaultProdJenkinsFileName} from "../../util/jenkins/Jenkins";
@@ -95,10 +95,10 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
             const jenkinsJobTemplate = ProdDefaultJenkinsJobTemplate;
-            jenkinsJobTemplate.sourceJenkinsFile = getDefaultProdJenkinsFileName();
+            jenkinsJobTemplate.sourceJenkinsfile = getDefaultProdJenkinsFileName();
 
             taskRunner.addTask(
-                new ConfigurePackageInJenkins(application, project, jenkinsJobTemplate),
+                new ConfigurePackageBuildPipelineInJenkins(application, project, jenkinsJobTemplate),
             );
 
             await taskRunner.execute(ctx);

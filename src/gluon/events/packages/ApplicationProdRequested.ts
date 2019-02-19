@@ -13,7 +13,7 @@ import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {GenericOpenshiftResourceService} from "../../services/projects/GenericOpenshiftResourceService";
-import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
+import {ConfigurePackageBuildPipelineInJenkins} from "../../tasks/packages/ConfigurePackageBuildPipelineInJenkins";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
@@ -129,10 +129,10 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
             }
 
             const jenkinsJobTemplate = ProdDefaultJenkinsJobTemplate;
-            jenkinsJobTemplate.sourceJenkinsFile = getDefaultProdJenkinsFileName();
+            jenkinsJobTemplate.sourceJenkinsfile = getDefaultProdJenkinsFileName();
 
             taskRunner.addTask(
-                new ConfigurePackageInJenkins(application, qmProject, jenkinsJobTemplate),
+                new ConfigurePackageBuildPipelineInJenkins(application, qmProject, jenkinsJobTemplate),
                 "Configure application Jenkins prod job",
             );
 

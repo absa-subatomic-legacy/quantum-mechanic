@@ -15,6 +15,7 @@ import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
+import {getPathFromJenkinsfileName} from "../../util/jenkins/Jenkins";
 import {
     EmptyJenkinsJobTemplate,
     JenkinsJobTemplate,
@@ -25,14 +26,12 @@ import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
-export class ConfigurePackageInJenkins extends Task {
+export class ConfigurePackageBuildPipelineInJenkins extends Task {
 
     private readonly JENKINSFILE_EXISTS_FLAG = "JENKINS_FILE_EXISTS";
-    private readonly JENKINSFILE_FOLDER = "resources/templates/jenkins/jenkinsfile-repo/";
-    private readonly JENKINSFILE_EXTENSION = ".groovy";
 
-    private readonly TASK_ADD_JENKINS_FILE = "AddJenkinsfile";
-    private readonly TASK_CREATE_JENKINS_JOB = "CreateJenkinsJob";
+    private readonly TASK_ADD_JENKINS_FILE = TaskListMessage.createUniqueTaskName("AddJenkinsfile");
+    private readonly TASK_CREATE_JENKINS_JOB = TaskListMessage.createUniqueTaskName("CreateJenkinsJob");
 
     constructor(private application: QMApplication,
                 private project: QMProject,
@@ -44,7 +43,7 @@ export class ConfigurePackageInJenkins extends Task {
     }
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
-        if (!_.isEmpty(this.jenkinsJobTemplate.sourceJenkinsFile)) {
+        if (!_.isEmpty(this.jenkinsJobTemplate.sourceJenkinsfile)) {
             this.taskListMessage.addTask(this.TASK_ADD_JENKINS_FILE, "Add Jenkinsfile");
         }
         this.taskListMessage.addTask(this.TASK_CREATE_JENKINS_JOB, "Create Jenkins Job");
@@ -54,9 +53,9 @@ export class ConfigurePackageInJenkins extends Task {
         const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(this.project.owningTeam.teamId);
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
 
-        if (!_.isEmpty(this.jenkinsJobTemplate.sourceJenkinsFile)) {
+        if (!_.isEmpty(this.jenkinsJobTemplate.sourceJenkinsfile)) {
             await this.addJenkinsFile(
-                this.jenkinsJobTemplate.sourceJenkinsFile,
+                this.jenkinsJobTemplate.sourceJenkinsfile,
                 this.project.bitbucketProject.key,
                 this.application.bitbucketRepository.slug,
                 this.jenkinsJobTemplate.expectedJenkinsfile,
@@ -87,7 +86,7 @@ export class ConfigurePackageInJenkins extends Task {
         const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
 
-        const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(`resources/templates/jenkins/${jenkinsJobTemplate.templateFilename}`);
+        const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(`resources/templates/jenkins/${jenkinsJobTemplate.jobTemplateFilename}`);
         const builtTemplate: string = jenkinsTemplate.build(
             {
                 gluonApplicationName: application.name,
@@ -118,7 +117,7 @@ export class ConfigurePackageInJenkins extends Task {
         return await success();
     }
 
-    private async addJenkinsFile(jenkinsfileName, bitbucketProjectKey, bitbucketRepositorySlug, destinationJenkinsfileName: string = "Jenkinsfile"): Promise<HandlerResult> {
+    private async addJenkinsFile(jenkinsfileName: string, bitbucketProjectKey, bitbucketRepositorySlug, destinationJenkinsfileName: string = "Jenkinsfile"): Promise<HandlerResult> {
 
         if (jenkinsfileName !== this.JENKINSFILE_EXISTS_FLAG) {
             const username = QMConfig.subatomic.bitbucket.auth.username;
@@ -135,7 +134,7 @@ export class ConfigurePackageInJenkins extends Task {
                 await project.findFile(destinationJenkinsfileName);
             } catch (error) {
                 logger.info("Jenkinsfile doesnt exist. Adding it!");
-                const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(this.getPathFromJenkinsfileName(jenkinsfileName as string));
+                const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(getPathFromJenkinsfileName(jenkinsfileName));
                 await project.addFile(destinationJenkinsfileName,
                     jenkinsTemplate.build({
                         devDeploymentEnvironments: this.project.devDeploymentPipeline.environments,
@@ -164,10 +163,6 @@ export class ConfigurePackageInJenkins extends Task {
         }
 
         return await success();
-    }
-
-    private getPathFromJenkinsfileName(jenkinsfileName: string): string {
-        return this.JENKINSFILE_FOLDER + jenkinsfileName + this.JENKINSFILE_EXTENSION;
     }
 
 }
