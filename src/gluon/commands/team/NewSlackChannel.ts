@@ -31,7 +31,7 @@ export class NewTeamSlackChannel extends BaseQMComand implements HandleCommand {
         required: false,
         displayable: false,
     })
-    public teamChannel: string;
+    public newTeamChannel: string;
 
     constructor(private teamSlackChannelService = new TeamSlackChannelService()) {
         super();
@@ -39,8 +39,8 @@ export class NewTeamSlackChannel extends BaseQMComand implements HandleCommand {
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            this.teamChannel = _.isEmpty(this.teamChannel) ? this.teamName : this.teamChannel;
-            const result =  await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.teamChannel, "create-team-channel", true);
+            this.newTeamChannel = _.isEmpty(this.newTeamChannel) ? this.teamName : this.newTeamChannel;
+            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, "create-team-channel", true);
             this.succeedCommand();
             return result;
         } catch (error) {
