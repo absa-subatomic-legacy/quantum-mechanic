@@ -35,7 +35,7 @@ def tagImageStream(sourceProject, destinationProject, imageStreamName, tag) {
 }
 
 def getTag(projectId, imageStreamName, tag){
-    if (tag == "latest" || tag == null){
+    if (tag == "latest" || tag == "null"){
         echo "Requesting latest tag"
         openshift.withProject(projectId) {
             def imageStream = openshift.selector('imagestream', imageStreamName)

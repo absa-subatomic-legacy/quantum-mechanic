@@ -11,7 +11,7 @@ export class QMTemplate {
         Handlebars.registerHelper("toUpperCase", str => str.toUpperCase());
         Handlebars.registerHelper("toKebabCase", str => _.kebabCase(str));
         Handlebars.registerHelper("toCamelCase", str => _.camelCase(str));
-        Handlebars.registerHelper("toPascalCase", str => _.capitalize(_.camelCase(str)));
+        Handlebars.registerHelper("toPascalCase", str => _.upperFirst(_.camelCase(str)));
         Handlebars.registerHelper("toUpperSnakeCase", str => _.snakeCase(str).toUpperCase());
         Handlebars.registerHelper("ifCond", ifCond);
         this.template = Handlebars.compile(rawTemplateString);

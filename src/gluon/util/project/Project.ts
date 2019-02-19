@@ -92,15 +92,13 @@ export function getPipelineOpenShiftNamespacesForOpenShiftCluster(tenantName: st
     const environmentsForCreation: OpenShiftProjectNamespace[] = [];
 
     for (const environment of openShiftCluster.defaultEnvironments) {
-        let postFix = `${_.kebabCase(deploymentPipeline.tag)}-${environment.id}`;
-        if (_.isEmpty(deploymentPipeline.tag)) {
-            postFix = environment.id;
-        }
+        const postfix = getDeploymentEnvironmentFullPostfix(deploymentPipeline.tag, environment.id);
+
         environmentsForCreation.push(
             {
                 namespace: getProjectOpenshiftNamespace(tenantName, project.name, deploymentPipeline.tag, environment.id),
                 displayName: getProjectDisplayName(tenantName, project.name, deploymentPipeline.name, environment.description),
-                postfix: postFix,
+                postfix,
             },
         );
     }
@@ -131,10 +129,8 @@ export function getAllPipelineOpenshiftNamespacesForAllPipelines(tenantName: str
 export function getAllPipelineOpenshiftNamespaces(owningTenantName: string, projectName: string, pipeline: QMDeploymentPipeline): OpenShiftProjectNamespace[] {
     const environmentsForCreation: OpenShiftProjectNamespace[] = [];
     for (const environment of pipeline.environments) {
-        let postfix = `${_.kebabCase(pipeline.tag)}-${environment.postfix}`;
-        if (_.isEmpty(pipeline.tag)) {
-            postfix = environment.postfix;
-        }
+        const postfix = getDeploymentEnvironmentFullPostfix(pipeline.tag, environment.postfix);
+
         environmentsForCreation.push(
             {
                 namespace: getProjectOpenshiftNamespace(owningTenantName, projectName, pipeline.tag, environment.postfix),
@@ -147,6 +143,21 @@ export function getAllPipelineOpenshiftNamespaces(owningTenantName: string, proj
     return environmentsForCreation;
 }
 
+export function getDeploymentEnvironmentJenkinsMetadata(tenantName: string, projectName: string, pipeline: QMDeploymentPipeline, environment: QMDeploymentEnvironment): JenkinsProjectMetadata {
+    return {
+        displayName: getProjectDisplayName(tenantName, projectName, pipeline.name, environment.displayName),
+        postfix: getDeploymentEnvironmentFullPostfix(pipeline.tag, environment.postfix),
+    };
+}
+
+function getDeploymentEnvironmentFullPostfix(owningPipelineTag: string, deploymentEnvironmentPostfix: string) {
+    let postfix = `${_.kebabCase(owningPipelineTag)}-${deploymentEnvironmentPostfix}`;
+    if (_.isEmpty(owningPipelineTag)) {
+        postfix = deploymentEnvironmentPostfix;
+    }
+    return postfix;
+}
+
 export interface OpenshiftProjectEnvironmentRequest {
     teams: QMTeam[];
     project: QMProject;
@@ -155,6 +166,11 @@ export interface OpenshiftProjectEnvironmentRequest {
 
 export interface OpenShiftProjectNamespace {
     namespace: string;
+    displayName: string;
+    postfix: string;
+}
+
+export interface JenkinsProjectMetadata {
     displayName: string;
     postfix: string;
 }

@@ -1,4 +1,4 @@
-import {QMDeploymentEnvironment} from "../project/Project";
+import {JenkinsProjectMetadata} from "../project/Project";
 
 export interface JenkinsJobTemplate {
     sourceJenkinsfile?: string;
@@ -26,8 +26,8 @@ export const EmptyJenkinsJobTemplate: JenkinsJobTemplate = {
 };
 
 export interface JenkinsDeploymentJobTemplate extends JenkinsJobTemplate {
-    sourceEnvironment: QMDeploymentEnvironment;
-    deploymentEnvironment: QMDeploymentEnvironment;
+    sourceEnvironment: JenkinsProjectMetadata;
+    deploymentEnvironment: JenkinsProjectMetadata;
 }
 
 export function getJenkinsMultiBranchProjectJobTemplate() {
