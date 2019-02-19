@@ -1,26 +1,28 @@
 def deploy(project, app, tag) {
     openshift.withProject(project) {
+        echo "Trying to patch DC ImageStream"
         def dc = openshift.selector('dc', app);
         for (trigger in dc.object().spec.triggers) {
             if (trigger.type == "ImageChange") {
                 def dcImageStreamPatch = "\'{ \"spec\": { \"triggers\": [{ \"type\": \"ImageChange\", \"imageChangeParams\": { \"automatic\": false, \"containerNames\": [\"${app}\"], \"from\": { \"kind\": \"ImageStreamTag\", \"name\": \"${app}:${tag}\" } } }] } }\'"
                 openshift.selector('dc', app).patch(dcImageStreamPatch)
             }
-            openshift.selector('dc', app).rollout().latest()
+        }
 
-            timeout(10) {
-                def deploymentObject = openshift.selector('dc', "${app}").object()
-                if (deploymentObject.spec.replicas > 0) {
-                    def latestDeploymentVersion = deploymentObject.status.latestVersion
-                    def replicationController = openshift.selector('rc', "${app}-${latestDeploymentVersion}")
-                    replicationController.untilEach(1) {
-                        def replicationControllerMap = it.object()
-                        echo "Replicas: ${replicationControllerMap.status.readyReplicas}"
-                        return (replicationControllerMap.status.replicas.equals(replicationControllerMap.status.readyReplicas))
-                    }
-                } else {
-                    echo "Deployment has a replica count of 0. Not waiting for Pods to become healthy..."
+        echo "Rollout deployment of DC"
+        openshift.selector('dc', app).rollout().latest()
+        timeout(10) {
+            def deploymentObject = openshift.selector('dc', "${app}").object()
+            if (deploymentObject.spec.replicas > 0) {
+                def latestDeploymentVersion = deploymentObject.status.latestVersion
+                def replicationController = openshift.selector('rc', "${app}-${latestDeploymentVersion}")
+                replicationController.untilEach(1) {
+                    def replicationControllerMap = it.object()
+                    echo "Replicas: ${replicationControllerMap.status.readyReplicas}"
+                    return (replicationControllerMap.status.replicas.equals(replicationControllerMap.status.readyReplicas))
                 }
+            } else {
+                echo "Deployment has a replica count of 0. Not waiting for Pods to become healthy..."
             }
         }
     }
@@ -33,7 +35,7 @@ def tagImageStream(sourceProject, destinationProject, imageStreamName, tag) {
 }
 
 def getTag(projectId, imageStreamName, tag){
-    if (tag == "latest"){
+    if (tag == "latest" || tag == null){
         echo "Requesting latest tag"
         openshift.withProject(projectId) {
             def imageStream = openshift.selector('imagestream', imageStreamName)
@@ -42,7 +44,7 @@ def getTag(projectId, imageStreamName, tag){
             return newTag
         }
     }else {
-        echo "Requesting tag: $tag"
+        echo "Using tag: $tag"
         return tag
     }
 }
@@ -84,6 +86,7 @@ pipeline{
         }
         stage('Deploy Application') {
             steps{
+                echo "Patching DC ImageStream and rolling out a new deployment"
                 deploy(project{{toPascalCase deploymentEnvironment.postfix}}Project, imageStreamName, tag)
             }
         }
