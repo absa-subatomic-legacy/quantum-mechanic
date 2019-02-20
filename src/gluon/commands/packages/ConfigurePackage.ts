@@ -6,7 +6,7 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
-import {PackageConfigurationRequestedEvent} from "../../events/packages/PackageConfigurationRequested";
+import {PackageConfigurationRequestedEvent} from "../../events/packages/package-configuration-request/PackageConfigurationRequestedEvent";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {QMProject} from "../../util/project/Project";

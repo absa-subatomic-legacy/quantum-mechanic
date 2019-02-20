@@ -9,47 +9,34 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage, url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
-import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
-import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
-import {QMApplication} from "../../services/gluon/ApplicationService";
-import {GluonService} from "../../services/gluon/GluonService";
-import {ConfigurePackageBuildPipelineInJenkins} from "../../tasks/packages/ConfigurePackageBuildPipelineInJenkins";
-import {ConfigurePackageDeploymentPipelineInJenkins} from "../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
-import {ConfigurePackageInOpenshift} from "../../tasks/packages/ConfigurePackageInOpenshift";
-import {TaskListMessage} from "../../tasks/TaskListMessage";
-import {TaskRunner} from "../../tasks/TaskRunner";
+import {QMConfig} from "../../../../config/QMConfig";
+import {KickOffJenkinsBuild} from "../../../commands/jenkins/JenkinsBuild";
+import {TeamMembershipMessages} from "../../../messages/member/TeamMembershipMessages";
+import {QMApplication} from "../../../services/gluon/ApplicationService";
+import {GluonService} from "../../../services/gluon/GluonService";
+import {ConfigurePackageBuildPipelineInJenkins} from "../../../tasks/packages/ConfigurePackageBuildPipelineInJenkins";
+import {ConfigurePackageDeploymentPipelineInJenkins} from "../../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
+import {ConfigurePackageInOpenshift} from "../../../tasks/packages/ConfigurePackageInOpenshift";
+import {TaskListMessage} from "../../../tasks/TaskListMessage";
+import {TaskRunner} from "../../../tasks/TaskRunner";
 import {
-    getEnvironmentDeploymentJenkinsfileNamePostfix,
-    getEnvironmentDeploymentJenkinsJobPostfix,
-} from "../../util/jenkins/Jenkins";
-import {
-    getJenkinsMultiBranchDeploymentJobTemplate,
     JenkinsDeploymentJobTemplate,
     NonProdDefaultJenkinsJobTemplate,
-} from "../../util/jenkins/JenkinsJobTemplates";
-import {QMMemberBase} from "../../util/member/Members";
-import {getHighestPreProdEnvironment} from "../../util/openshift/Helpers";
-import {ApplicationType} from "../../util/packages/Applications";
-import {
-    getDeploymentEnvironmentJenkinsMetadata,
-    JenkinsProjectMetadata,
-    QMDeploymentPipeline,
-    QMProject,
-} from "../../util/project/Project";
-import {ParameterDisplayType} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
+} from "../../../util/jenkins/JenkinsJobTemplates";
+import {QMMemberBase} from "../../../util/member/Members";
+import {ApplicationType} from "../../../util/packages/Applications";
+import {QMProject} from "../../../util/project/Project";
+import {ParameterDisplayType} from "../../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {BaseQMEvent} from "../../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
     QMError,
     QMMessageClient,
-} from "../../util/shared/Error";
-import {QMTenant} from "../../util/shared/Tenants";
-import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
-import {GluonApplicationEvent} from "../../util/transform/types/event/GluonApplicationEvent";
-import {KeyValuePairEvent} from "../../util/transform/types/event/KeyValuePairEvent";
-import {MemberEvent} from "../../util/transform/types/event/MemberEvent";
-import {ProjectEvent} from "../../util/transform/types/event/ProjectEvent";
+} from "../../../util/shared/Error";
+import {QMTenant} from "../../../util/shared/Tenants";
+import {isUserAMemberOfTheTeam, QMTeam} from "../../../util/team/Teams";
+import {buildJenkinsDeploymentJobTemplates} from "./JenkinsDeploymentJobTemplateBuilder";
+import {PackageConfigurationRequestedEvent} from "./PackageConfigurationRequestedEvent";
 
 @EventHandler("Receive PackageConfigurationRequested events", `
 subscription PackageConfigurationRequestedEvent {
@@ -158,7 +145,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
 
         // Add Additional Jenkins Deployment jobs
         if (application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
-            const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = this.getJenkinsDeploymentJobTemplates(tenant.name, project.name, project.devDeploymentPipeline, project.releaseDeploymentPipelines);
+            const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = buildJenkinsDeploymentJobTemplates(tenant.name, project.name, project.devDeploymentPipeline, project.releaseDeploymentPipelines);
 
             taskRunner.addTask(new ConfigurePackageDeploymentPipelineInJenkins(application, project, jenkinsDeploymentJobTemplates), "Configure Package Deployment Jobs in Jenkins");
         }
@@ -208,45 +195,8 @@ You can kick off the build pipeline for your ${packageTypeString} by clicking th
         };
     }
 
-    private getJenkinsDeploymentJobTemplates(tenantName: string, projectName: string, devDeploymentPipeline: QMDeploymentPipeline, releaseDeploymentPipelines: QMDeploymentPipeline[]) {
-        const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = [];
-        for (const releasePipeline of releaseDeploymentPipelines) {
-            let lastDeploymentEnvironmentMetadata: JenkinsProjectMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, devDeploymentPipeline, getHighestPreProdEnvironment(devDeploymentPipeline));
-            for (const deploymentEnvironment of releasePipeline.environments) {
-                const deploymentEnvironmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releasePipeline, deploymentEnvironment);
-                const sourceJenkinsfile = "jenkinsfile.deployment";
-                const expectedJenkinsfile = `Jenkinsfile${getEnvironmentDeploymentJenkinsfileNamePostfix(releasePipeline, deploymentEnvironment)}`;
-                const jobNamePostfix = getEnvironmentDeploymentJenkinsJobPostfix(releasePipeline, deploymentEnvironment);
-                const jobTemplateFilename = getJenkinsMultiBranchDeploymentJobTemplate();
-                jenkinsDeploymentJobTemplates.push(
-                    {
-                        sourceJenkinsfile,
-                        expectedJenkinsfile,
-                        sourceEnvironment: lastDeploymentEnvironmentMetadata,
-                        deploymentEnvironment: deploymentEnvironmentJenkinsMetadata,
-                        jobNamePostfix,
-                        jobTemplateFilename,
-                    },
-                );
-                lastDeploymentEnvironmentMetadata = deploymentEnvironmentJenkinsMetadata;
-            }
-        }
-        return jenkinsDeploymentJobTemplates;
-    }
-
     private docs(): string {
         return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference`,
             "documentation")}`;
     }
-}
-
-export interface PackageConfigurationRequestedEvent {
-    application: GluonApplicationEvent;
-    project: ProjectEvent;
-    imageName: string;
-    openshiftTemplate: string;
-    jenkinsfileName: string;
-    buildEnvironmentVariables: KeyValuePairEvent[];
-    deploymentEnvironmentVariables: KeyValuePairEvent[];
-    actionedBy: MemberEvent;
 }
