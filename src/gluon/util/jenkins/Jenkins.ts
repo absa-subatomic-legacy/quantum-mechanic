@@ -23,7 +23,7 @@ function getKebabCaseEnvironmentPostfixWithSeperator(pipeline: QMDeploymentPipel
     return postfix;
 }
 
-export function getEnvironmentDeploymentJenkinsfileNamePostfix(pipeline: QMDeploymentPipeline, environment: QMDeploymentEnvironment) {
+export function getEnvironmentDeploymentJenkinsfilePostfix(pipeline: QMDeploymentPipeline, environment: QMDeploymentEnvironment) {
     return getKebabCaseEnvironmentPostfixWithSeperator(pipeline, environment, ".");
 }
 

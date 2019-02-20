@@ -1,5 +1,5 @@
 import {
-    getEnvironmentDeploymentJenkinsfileNamePostfix,
+    getEnvironmentDeploymentJenkinsfilePostfix,
     getEnvironmentDeploymentJenkinsJobPostfix,
 } from "../../../util/jenkins/Jenkins";
 import {
@@ -20,7 +20,7 @@ export function buildJenkinsDeploymentJobTemplates(tenantName: string, projectNa
         for (const deploymentEnvironment of releasePipeline.environments) {
             const deploymentEnvironmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releasePipeline, deploymentEnvironment);
             const sourceJenkinsfile = "jenkinsfile.deployment";
-            const expectedJenkinsfile = `Jenkinsfile${getEnvironmentDeploymentJenkinsfileNamePostfix(releasePipeline, deploymentEnvironment)}`;
+            const expectedJenkinsfile = `Jenkinsfile${getEnvironmentDeploymentJenkinsfilePostfix(releasePipeline, deploymentEnvironment)}`;
             const jobNamePostfix = getEnvironmentDeploymentJenkinsJobPostfix(releasePipeline, deploymentEnvironment);
             const jobTemplateFilename = getJenkinsMultiBranchDeploymentJobTemplate();
             jenkinsDeploymentJobTemplates.push(

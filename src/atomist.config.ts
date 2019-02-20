@@ -47,10 +47,7 @@ import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAd
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
 import {ApplicationProdRequested} from "./gluon/events/packages/ApplicationProdRequested";
-import {
-    PackageConfigurationRequested,
-    PackageConfigurationRequestedEvent,
-} from "./gluon/events/packages/package-configuration-request/PackageConfigurationRequested";
+import {PackageConfigurationRequested} from "./gluon/events/packages/package-configuration-request/PackageConfigurationRequested";
 import {GenericProdRequested} from "./gluon/events/project/GenericProdRequested";
 import {ProjectCreated} from "./gluon/events/project/ProjectCreated";
 import {ProjectEnvironmentsRequested} from "./gluon/events/project/ProjectEnvironmentsRequested";
