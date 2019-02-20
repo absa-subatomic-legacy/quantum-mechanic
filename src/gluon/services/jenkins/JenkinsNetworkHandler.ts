@@ -63,9 +63,17 @@ function jenkinsAxios(): AxiosInstance {
 
 function addXmlFormEncodedStringifyAxiosIntercepter(axios: AxiosInstance) {
     axios.interceptors.request.use(request => {
-        if (request.data && (request.headers["Content-Type"].indexOf("application/x-www-form-urlencoded") !== -1)) {
-            logger.debug(`Stringifying URL encoded data: ${qs.stringify(request.data)}`);
-            request.data = qs.stringify(request.data);
+        try {
+            let contentType = "";
+            if (request.headers !== undefined && request.headers.hasOwnProperty("Content-Type")) {
+                contentType = request.headers["Content-Type"];
+            }
+            if (request.data && contentType.indexOf("application/x-www-form-urlencoded") !== -1) {
+                logger.debug(`Stringifying URL encoded data: ${qs.stringify(request.data)}`);
+                request.data = qs.stringify(request.data);
+            }
+        } catch {
+            logger.warn("Axios interceptor failed to interpret response.");
         }
         return request;
     });

@@ -31,7 +31,7 @@ export class ConfigurePackageInJenkinsService {
         const createViewResponse = await this.jenkinsService.createBuildViewForApplication(jenkinsHost, token, projectName, applicationName);
 
         if (!isSuccessCode(createViewResponse.status)) {
-            throw new QMError(`Unable to create build view for application *${applicationName}*. This is likely caused connectivity issues to your Jenkins.`);
+            throw new QMError(`Unable to create build view for application *${applicationName}*. This is likely caused by connectivity issues to your Jenkins.`);
         }
 
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add create Jenkins Job`);
@@ -56,7 +56,7 @@ export class ConfigurePackageInJenkinsService {
 
             const addJobToViewResponse = await this.jenkinsService.addBuildJobToApplicationView(jenkinsHost, token, projectName, applicationName, jenkinsJob.jenkinsJobDisplayName);
             if (!isSuccessCode(addJobToViewResponse.status)) {
-                throw new QMError(`Unable to add build to view for build job *${jenkinsJob.jenkinsJobDisplayName}*. This is likely caused connectivity issues to your Jenkins.`);
+                throw new QMError(`Unable to add build to view for build job *${jenkinsJob.jenkinsJobDisplayName}*. This is likely caused by connectivity issues to your Jenkins.`);
             }
         }
 

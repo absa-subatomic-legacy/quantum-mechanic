@@ -3,7 +3,7 @@ import {
     getEnvironmentDeploymentJenkinsJobPostfix,
 } from "../../../util/jenkins/Jenkins";
 import {
-    getJenkinsMultiBranchDeploymentJobTemplate,
+    getJenkinsMultiBranchDeploymentJobTemplateFile,
     JenkinsDeploymentJobTemplate,
 } from "../../../util/jenkins/JenkinsJobTemplates";
 import {getHighestPreProdEnvironment} from "../../../util/openshift/Helpers";
@@ -20,9 +20,9 @@ export function buildJenkinsDeploymentJobTemplates(tenantName: string, projectNa
         for (const deploymentEnvironment of releasePipeline.environments) {
             const deploymentEnvironmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releasePipeline, deploymentEnvironment);
             const sourceJenkinsfile = "jenkinsfile.deployment";
-            const expectedJenkinsfile = `Jenkinsfile${getEnvironmentDeploymentJenkinsfilePostfix(releasePipeline, deploymentEnvironment)}`;
-            const jobNamePostfix = getEnvironmentDeploymentJenkinsJobPostfix(releasePipeline, deploymentEnvironment);
-            const jobTemplateFilename = getJenkinsMultiBranchDeploymentJobTemplate();
+            const expectedJenkinsfile = `Jenkinsfile${getEnvironmentDeploymentJenkinsfilePostfix(releasePipeline.tag, deploymentEnvironment.postfix)}`;
+            const jobNamePostfix = getEnvironmentDeploymentJenkinsJobPostfix(releasePipeline.tag, deploymentEnvironment.postfix);
+            const jobTemplateFilename = getJenkinsMultiBranchDeploymentJobTemplateFile();
             jenkinsDeploymentJobTemplates.push(
                 {
                     sourceJenkinsfile,

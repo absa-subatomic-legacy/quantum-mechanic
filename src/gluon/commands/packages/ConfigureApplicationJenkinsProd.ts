@@ -9,14 +9,25 @@ import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {ConfigurePackageBuildPipelineInJenkins} from "../../tasks/packages/ConfigurePackageBuildPipelineInJenkins";
+import {ConfigurePackagePipelineInJenkins} from "../../tasks/packages/ConfigurePackagePipelineInJenkins";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {getDefaultProdJenkinsFileName} from "../../util/jenkins/Jenkins";
-import {ProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
+import {
+    getDefaultProdJenkinsFileName,
+    getEnvironmentDeploymentJenkinsfilePostfix,
+    getEnvironmentDeploymentJenkinsJobPostfix,
+} from "../../util/jenkins/Jenkins";
+import {
+    getJenkinsProdJobTemplateFile,
+    JenkinsJobTemplate,
+} from "../../util/jenkins/JenkinsJobTemplates";
 import {QMMemberBase} from "../../util/member/Members";
 import {assertApplicationJenkinsProdCanBeRequested} from "../../util/prod/ProdAssertions";
-import {QMProject} from "../../util/project/Project";
+import {
+    getProjectDeploymentPipelineFromPipelineId,
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/project/Project";
 import {
     DeploymentPipelineIdParam,
     DeploymentPipelineIdSetter,
@@ -86,6 +97,8 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
+            const deploymentPipeline: QMDeploymentPipeline = getProjectDeploymentPipelineFromPipelineId(project, this.deploymentPipelineId);
+
             // Ensure that the owning project has been prod approved before proceeding
             await assertApplicationJenkinsProdCanBeRequested(this.applicationName, this.projectName, this.deploymentPipelineId, this.gluonService);
 
@@ -94,11 +107,15 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             const taskListMessage: TaskListMessage = new TaskListMessage(":rocket: Configuring Application Prod Jenkins...", messageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            const jenkinsJobTemplate = ProdDefaultJenkinsJobTemplate;
-            jenkinsJobTemplate.sourceJenkinsfile = getDefaultProdJenkinsFileName();
+            const jenkinsJobTemplate: JenkinsJobTemplate = {
+                sourceJenkinsfile: getDefaultProdJenkinsFileName(),
+                jobTemplateFilename: getJenkinsProdJobTemplateFile(),
+                expectedJenkinsfile: `Jenkinsfile${getEnvironmentDeploymentJenkinsfilePostfix(deploymentPipeline.tag, "prod")}`,
+                jobNamePostfix: getEnvironmentDeploymentJenkinsJobPostfix(deploymentPipeline.tag, "prod"),
+            };
 
             taskRunner.addTask(
-                new ConfigurePackageBuildPipelineInJenkins(application, project, jenkinsJobTemplate),
+                new ConfigurePackagePipelineInJenkins(application, project, jenkinsJobTemplate),
             );
 
             await taskRunner.execute(ctx);

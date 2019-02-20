@@ -1,8 +1,4 @@
 import _ = require("lodash");
-import {
-    QMDeploymentEnvironment,
-    QMDeploymentPipeline,
-} from "../project/Project";
 
 const JENKINSFILE_FOLDER = "resources/templates/jenkins/jenkinsfile-repo/";
 const JENKINSFILE_EXTENSION = ".groovy";
@@ -15,20 +11,20 @@ export function getPathFromJenkinsfileName(jenkinsfileName: string): string {
     return JENKINSFILE_FOLDER + jenkinsfileName + JENKINSFILE_EXTENSION;
 }
 
-function getKebabCaseEnvironmentPostfixWithSeperator(pipeline: QMDeploymentPipeline, environment: QMDeploymentEnvironment, seperatorCharactor: string) {
-    let postfix = `${seperatorCharactor}${_.kebabCase(pipeline.tag)}${seperatorCharactor}${_.kebabCase(environment.postfix)}`;
-    if (_.isEmpty(pipeline.tag)) {
-        postfix = `${seperatorCharactor}${_.kebabCase(environment.postfix)}`;
+function getKebabCaseEnvironmentPostfixWithSeperator(pipelineTag: string, environmentPostfix: string, seperatorCharactor: string) {
+    let postfix = `${seperatorCharactor}${_.kebabCase(pipelineTag)}${seperatorCharactor}${_.kebabCase(environmentPostfix)}`;
+    if (_.isEmpty(pipelineTag)) {
+        postfix = `${seperatorCharactor}${_.kebabCase(environmentPostfix)}`;
     }
     return postfix;
 }
 
-export function getEnvironmentDeploymentJenkinsfilePostfix(pipeline: QMDeploymentPipeline, environment: QMDeploymentEnvironment) {
-    return getKebabCaseEnvironmentPostfixWithSeperator(pipeline, environment, ".");
+export function getEnvironmentDeploymentJenkinsfilePostfix(pipelineTag: string, environmentPostfix: string) {
+    return getKebabCaseEnvironmentPostfixWithSeperator(pipelineTag, environmentPostfix, ".");
 }
 
-export function getEnvironmentDeploymentJenkinsJobPostfix(pipeline: QMDeploymentPipeline, environment: QMDeploymentEnvironment) {
-    return getKebabCaseEnvironmentPostfixWithSeperator(pipeline, environment, "-");
+export function getEnvironmentDeploymentJenkinsJobPostfix(pipelineTag: string, environmentPostfix: string) {
+    return getKebabCaseEnvironmentPostfixWithSeperator(pipelineTag, environmentPostfix, "-");
 }
 
 export function getApplicationJenkinsJobDisplayName(applicationName: string, jobPostfix: string) {

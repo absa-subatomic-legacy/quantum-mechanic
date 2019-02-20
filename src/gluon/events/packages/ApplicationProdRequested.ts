@@ -13,12 +13,19 @@ import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {GenericOpenshiftResourceService} from "../../services/projects/GenericOpenshiftResourceService";
-import {ConfigurePackageBuildPipelineInJenkins} from "../../tasks/packages/ConfigurePackageBuildPipelineInJenkins";
+import {ConfigurePackagePipelineInJenkins} from "../../tasks/packages/ConfigurePackagePipelineInJenkins";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {getDefaultProdJenkinsFileName} from "../../util/jenkins/Jenkins";
-import {ProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
+import {
+    getDefaultProdJenkinsFileName,
+    getEnvironmentDeploymentJenkinsfilePostfix,
+    getEnvironmentDeploymentJenkinsJobPostfix,
+} from "../../util/jenkins/Jenkins";
+import {
+    getJenkinsProdJobTemplateFile,
+    JenkinsJobTemplate,
+} from "../../util/jenkins/JenkinsJobTemplates";
 import {getHighestPreProdEnvironment} from "../../util/openshift/Helpers";
 import {
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
@@ -128,11 +135,15 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
                     );
             }
 
-            const jenkinsJobTemplate = ProdDefaultJenkinsJobTemplate;
-            jenkinsJobTemplate.sourceJenkinsfile = getDefaultProdJenkinsFileName();
+            const jenkinsJobTemplate: JenkinsJobTemplate = {
+                sourceJenkinsfile: getDefaultProdJenkinsFileName(),
+                jobTemplateFilename: getJenkinsProdJobTemplateFile(),
+                expectedJenkinsfile: `Jenkinsfile${getEnvironmentDeploymentJenkinsfilePostfix(applicationProdRequest.deploymentPipeline.tag, "prod")}`,
+                jobNamePostfix: getEnvironmentDeploymentJenkinsJobPostfix(applicationProdRequest.deploymentPipeline.tag, "prod"),
+            };
 
             taskRunner.addTask(
-                new ConfigurePackageBuildPipelineInJenkins(application, qmProject, jenkinsJobTemplate),
+                new ConfigurePackagePipelineInJenkins(application, qmProject, jenkinsJobTemplate),
                 "Configure application Jenkins prod job",
             );
 

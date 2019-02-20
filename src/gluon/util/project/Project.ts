@@ -157,6 +157,10 @@ export function getDeploymentEnvironmentJenkinsMetadata(tenantName: string, proj
     };
 }
 
+export function getProjectDeploymentPipelineFromPipelineId(project: QMProject, pipelineId: string) {
+    return project.releaseDeploymentPipelines.filter(pipeline => pipeline.pipelineId === pipelineId)[0];
+}
+
 function getDeploymentEnvironmentFullPostfix(owningPipelineTag: string, deploymentEnvironmentPostfix: string) {
     let postfix = `${_.kebabCase(owningPipelineTag)}-${deploymentEnvironmentPostfix}`;
     if (_.isEmpty(owningPipelineTag)) {

@@ -5,7 +5,6 @@ import {
     getEnvironmentDeploymentJenkinsJobPostfix,
     getPathFromJenkinsfileName,
 } from "../../../../src/gluon/util/jenkins/Jenkins";
-import {QMDeploymentPipeline} from "../../../../src/gluon/util/project/Project";
 
 describe("Jenkins getPathFromJenkinsfileName", () => {
 
@@ -21,20 +20,7 @@ describe("Jenkins getEnvironmentDeploymentJenkinsfilePostfix", () => {
 
     it("with simple inputs should return a correctly formatted jenkinsfile postfix", async () => {
 
-        const deploymentPipeline: QMDeploymentPipeline = {
-            name: "Pipeline",
-            tag: "pipeline",
-            pipelineId: "1",
-            environments: [
-                {
-                    postfix: "dev",
-                    displayName: "Dev",
-                    positionInPipeline: 0,
-                },
-            ],
-        };
-
-        const jenkinsfilePostfix = getEnvironmentDeploymentJenkinsfilePostfix(deploymentPipeline, deploymentPipeline.environments[0]);
+        const jenkinsfilePostfix = getEnvironmentDeploymentJenkinsfilePostfix("pipeline", "dev");
 
         assert.equal(jenkinsfilePostfix, ".pipeline.dev");
     });
@@ -44,20 +30,7 @@ describe("Jenkins getEnvironmentDeploymentJenkinsJobPostfix", () => {
 
     it("with simple inputs should return a correctly formatted jenkins deployment job name postfix", async () => {
 
-        const deploymentPipeline: QMDeploymentPipeline = {
-            name: "Pipeline",
-            tag: "pipeline",
-            pipelineId: "1",
-            environments: [
-                {
-                    postfix: "dev",
-                    displayName: "Dev",
-                    positionInPipeline: 0,
-                },
-            ],
-        };
-
-        const jenkinsfilePostfix = getEnvironmentDeploymentJenkinsJobPostfix(deploymentPipeline, deploymentPipeline.environments[0]);
+        const jenkinsfilePostfix = getEnvironmentDeploymentJenkinsJobPostfix("pipeline", "dev");
 
         assert.equal(jenkinsfilePostfix, "-pipeline-dev");
     });

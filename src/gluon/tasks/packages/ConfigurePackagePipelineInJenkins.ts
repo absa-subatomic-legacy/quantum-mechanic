@@ -28,7 +28,7 @@ import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
-export class ConfigurePackageBuildPipelineInJenkins extends Task {
+export class ConfigurePackagePipelineInJenkins extends Task {
 
     private readonly JENKINSFILE_EXISTS_FLAG = "JENKINS_FILE_EXISTS";
 
@@ -90,12 +90,14 @@ export class ConfigurePackageBuildPipelineInJenkins extends Task {
         const builtTemplate: string = jenkinsTemplate.build(
             {
                 gluonApplicationName: application.name,
+                jobDisplayName: getApplicationJenkinsJobDisplayName(application.name, jenkinsJobTemplate.jobNamePostfix),
                 gluonBaseUrl: QMConfig.subatomic.gluon.baseUrl,
                 gluonProjectId: project.projectId,
                 bitbucketBaseUrl: QMConfig.subatomic.bitbucket.baseUrl,
                 teamDevOpsProjectId,
                 bitbucketProjectKey: project.bitbucketProject.key,
                 bitbucketRepositoryName: application.bitbucketRepository.name,
+                jenkinsfileName: jenkinsJobTemplate.expectedJenkinsfile,
             },
         );
 

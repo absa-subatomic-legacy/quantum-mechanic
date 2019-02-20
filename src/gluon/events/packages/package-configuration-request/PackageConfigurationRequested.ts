@@ -14,9 +14,9 @@ import {KickOffJenkinsBuild} from "../../../commands/jenkins/JenkinsBuild";
 import {TeamMembershipMessages} from "../../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../../services/gluon/ApplicationService";
 import {GluonService} from "../../../services/gluon/GluonService";
-import {ConfigurePackageBuildPipelineInJenkins} from "../../../tasks/packages/ConfigurePackageBuildPipelineInJenkins";
 import {ConfigurePackageDeploymentPipelineInJenkins} from "../../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
 import {ConfigurePackageInOpenshift} from "../../../tasks/packages/ConfigurePackageInOpenshift";
+import {ConfigurePackagePipelineInJenkins} from "../../../tasks/packages/ConfigurePackagePipelineInJenkins";
 import {TaskListMessage} from "../../../tasks/TaskListMessage";
 import {TaskRunner} from "../../../tasks/TaskRunner";
 import {
@@ -136,7 +136,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
         jenkinsJobTemplate.sourceJenkinsfile = packageConfigurationEvent.jenkinsfileName;
 
         taskRunner.addTask(
-            new ConfigurePackageBuildPipelineInJenkins(
+            new ConfigurePackagePipelineInJenkins(
                 application,
                 project,
                 jenkinsJobTemplate),

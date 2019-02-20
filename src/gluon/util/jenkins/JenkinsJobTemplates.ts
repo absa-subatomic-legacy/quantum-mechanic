@@ -8,7 +8,7 @@ export interface JenkinsJobTemplate {
 }
 
 export const NonProdDefaultJenkinsJobTemplate: JenkinsJobTemplate = {
-    jobTemplateFilename: getJenkinsMultiBranchProjectJobTemplate(),
+    jobTemplateFilename: getJenkinsMultiBranchProjectJobTemplateFile(),
     expectedJenkinsfile: "Jenkinsfile",
     jobNamePostfix: "",
 };
@@ -30,10 +30,14 @@ export interface JenkinsDeploymentJobTemplate extends JenkinsJobTemplate {
     deploymentEnvironment: JenkinsProjectMetadata;
 }
 
-export function getJenkinsMultiBranchProjectJobTemplate() {
+export function getJenkinsProdJobTemplateFile() {
+    return "jenkins-prod-project.xml";
+}
+
+export function getJenkinsMultiBranchProjectJobTemplateFile() {
     return "jenkins-multi-branch-project.xml";
 }
 
-export function getJenkinsMultiBranchDeploymentJobTemplate() {
+export function getJenkinsMultiBranchDeploymentJobTemplateFile() {
     return "jenkins-multi-branch-deployment-project.xml";
 }

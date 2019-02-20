@@ -17,6 +17,7 @@ import {
 } from "../../util/openshift/Helpers";
 import {assertGenericProdCanBeRequested} from "../../util/prod/ProdAssertions";
 import {
+    getProjectDeploymentPipelineFromPipelineId,
     getProjectOpenshiftNamespace,
     QMDeploymentPipeline,
     QMProject,
@@ -167,7 +168,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
-        const deploymentPipeline: QMDeploymentPipeline = project.releaseDeploymentPipelines.filter(pipeline => pipeline.pipelineId === this.deploymentPipelineId)[0];
+        const deploymentPipeline: QMDeploymentPipeline = getProjectDeploymentPipelineFromPipelineId(project, this.deploymentPipelineId);
 
         const projectNamespace = getProjectOpenshiftNamespace(tenant.name, project.name, deploymentPipeline.tag, getHighestPreProdEnvironment(deploymentPipeline).postfix);
         const allResources = await this.ocService.exportAllResources(projectNamespace);
