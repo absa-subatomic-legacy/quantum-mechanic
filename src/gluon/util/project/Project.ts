@@ -143,6 +143,13 @@ export function getAllPipelineOpenshiftNamespaces(owningTenantName: string, proj
     return environmentsForCreation;
 }
 
+/**
+ * Returns the metadata required by a jenkins file for environment name credential identification and display information
+ * @param tenantName - The project owning tenant name
+ * @param projectName - The name of the project to generate the meta data for
+ * @param pipeline - The particular pipeline to generate the metadata for
+ * @param environment - The particular deployment environment to generate the metadata for
+ */
 export function getDeploymentEnvironmentJenkinsMetadata(tenantName: string, projectName: string, pipeline: QMDeploymentPipeline, environment: QMDeploymentEnvironment): JenkinsProjectMetadata {
     return {
         displayName: getProjectDisplayName(tenantName, projectName, pipeline.name, environment.displayName),
