@@ -21,11 +21,12 @@ import {CreateOpenShiftPvc} from "./gluon/commands/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/commands/project/CreateProject";
 import {CreateProjectJenkinsJob} from "./gluon/commands/project/CreateProjectJenkinsJob";
 import {CreateProjectProdEnvironments} from "./gluon/commands/project/CreateProjectProdEnvironments";
-import {NewProjectEnvironments} from "./gluon/commands/project/NewProjectEnvironments";
+import {DefineNewProjectEnvironments} from "./gluon/commands/project/DefineNewProjectEnvironments";
 import {
     ListProjectDetails,
     ListTeamProjects,
 } from "./gluon/commands/project/ProjectDetails";
+import {RequestProjectEnvironments} from "./gluon/commands/project/request-project-environments/RequestProjectEnvironments";
 import {ReRunProjectProdRequest} from "./gluon/commands/project/ReRunProjectProdRequest";
 import {UpdateProjectProdRequest} from "./gluon/commands/project/UpdateProjectProdRequest";
 import {AddConfigServer} from "./gluon/commands/team/AddConfigServer";
@@ -96,6 +97,7 @@ export const configuration: any = {
         CreateProjectJenkinsJob,
         CreateProjectProdEnvironments,
         CreateTeam,
+        DefineNewProjectEnvironments,
         Help,
         JoinTeam,
         JenkinsCredentialsRecreate,
@@ -111,7 +113,7 @@ export const configuration: any = {
         MigrateTeamCloud,
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,
-        NewProjectEnvironments,
+        RequestProjectEnvironments,
         NewTeamSlackChannel,
         OnboardMember,
         PatchBuildConfigBaseImage,
