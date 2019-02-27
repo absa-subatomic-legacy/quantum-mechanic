@@ -8,9 +8,6 @@
  {{#each devDeploymentEnvironments}}
  * Secret text   | {{toKebabCase postfix}}-project       | The OpenShift project Id of the project's {{displayName}} environment
  {{/each}}
- {{#each releaseDeploymentEnvironments}}
- * Secret text   | {{toKebabCase postfix}}-project       | The OpenShift project Id of the project's {{displayName}} environment
- {{/each}}
  *
  */
 
@@ -53,24 +50,15 @@ node('maven') {
     {{#each devDeploymentEnvironments}}
     def project{{toPascalCase postfix}}Project
     {{/each}}
-    {{#each releaseDeploymentEnvironments}}
-    def project{{toPascalCase postfix}}Project
-    {{/each}}
 
     withCredentials([
             {{#each devDeploymentEnvironments}}
-                string(credentialsId: '{{toKebabCase postfix}}-project', variable: '{{toUpperSnakeCase postfix}}_PROJECT_ID'),
-            {{/each}}
-            {{#each releaseDeploymentEnvironments}}
                 string(credentialsId: '{{toKebabCase postfix}}-project', variable: '{{toUpperSnakeCase postfix}}_PROJECT_ID'),
             {{/each}}
             string(credentialsId: 'devops-project', variable: 'DEVOPS_PROJECT_ID')
     ]) {
         teamDevOpsProject = "${env.DEVOPS_PROJECT_ID}"
         {{#each devDeploymentEnvironments}}
-        project{{toPascalCase postfix}}Project = "${env.{{toUpperSnakeCase postfix}}_PROJECT_ID}"
-        {{/each}}
-        {{#each releaseDeploymentEnvironments}}
         project{{toPascalCase postfix}}Project = "${env.{{toUpperSnakeCase postfix}}_PROJECT_ID}"
         {{/each}}
     }
@@ -133,20 +121,6 @@ node('maven') {
         {{#each devDeploymentEnvironments}}
         stage('Deploy to {{displayName}}') {
             sh ': Deploying to {{displayName}}...'
-
-            openshift.withProject(teamDevOpsProject) {
-                openshift.tag("${teamDevOpsProject}/${appBuildConfig}:${tag}", "${project{{toPascalCase postfix}}Project}/${app}:${tag}")
-            }
-
-            deploy(project{{toPascalCase postfix}}Project, app, tag);
-        }
-        {{/each}}
-
-        {{#each releaseDeploymentEnvironments}}
-        stage('Deploy to {{displayName}}') {
-            sh ': Deploying to {{displayName}}...'
-
-            input "Confirm deployment to {{displayName}}"
 
             openshift.withProject(teamDevOpsProject) {
                 openshift.tag("${teamDevOpsProject}/${appBuildConfig}:${tag}", "${project{{toPascalCase postfix}}Project}/${app}:${tag}")

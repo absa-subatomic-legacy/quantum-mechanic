@@ -100,7 +100,7 @@ Applications can then be promoted into these production environments. To create 
         };
     }
 
-    public getProjectProdCompleteMessage(projectName: string): SlackMessage {
+    public getProjectProdCompleteMessage(projectName: string, deploymentPipelineId: string): SlackMessage {
 
         const text: string = `
 The *${projectName}* project has successfully been moved to production. \
@@ -112,13 +112,13 @@ Contact your system admin for help if necessary.`;
         return {
             text,
             attachments: [
-                this.getGenericProdCommandAttachment(projectName),
-                this.getApplicationProdCommandAttachment(projectName),
+                this.getGenericProdCommandAttachment(projectName, deploymentPipelineId),
+                this.getApplicationProdCommandAttachment(projectName, deploymentPipelineId),
             ],
         };
     }
 
-    public getGenericProdCommandAttachment(projectName: string): Attachment {
+    public getGenericProdCommandAttachment(projectName: string, deploymentPipelineId: string): Attachment {
         return {
             text: `
 Creating a generic prod request will search the highest Non Prod environment in the project for all OpenShift resources. \
@@ -138,13 +138,14 @@ This is only a direct resource copy and does not configure any Jenkins jobs.
                     new CreateGenericProd(),
                     {
                         projectName,
+                        deploymentPipelineId,
                     },
                 ),
             ],
         };
     }
 
-    public getGenericProdRequestCompleteMessage(projectName: string): SlackMessage {
+    public getGenericProdRequestCompleteMessage(projectName: string, deploymentPipelineId: string): SlackMessage {
 
         const text: string = `
 All OpenShift resources from the *${projectName}* project have successfully been moved to production. \
@@ -154,7 +155,7 @@ No Jenkins jobs have been configured for any applications. It is recommended tha
         return {
             text,
             attachments: [
-                this.getApplicationJenkinsProdCommandAttachment(projectName),
+                this.getApplicationJenkinsProdCommandAttachment(projectName, deploymentPipelineId),
             ],
         };
     }
@@ -164,7 +165,7 @@ No Jenkins jobs have been configured for any applications. It is recommended tha
             "documentation")}`;
     }
 
-    private getApplicationProdCommandAttachment(projectName: string): Attachment {
+    private getApplicationProdCommandAttachment(projectName: string, deploymentPipelineId: string): Attachment {
         return {
             text: `
 Creating an application prod request will search the highest Non Prod environment in the project for all OpenShift resources directly associated to an application. \
@@ -184,13 +185,14 @@ This will also configure the application Jenkins job.
                     new CreateApplicationProd(),
                     {
                         projectName,
+                        deploymentPipelineId,
                     },
                 ),
             ],
         };
     }
 
-    private getApplicationJenkinsProdCommandAttachment(projectName: string): Attachment {
+    private getApplicationJenkinsProdCommandAttachment(projectName: string, deploymentPipelineId: string): Attachment {
         return {
             text: `
 To deploy an application into your production environments you'll need to create an appropriate Jenkins job. \
@@ -209,6 +211,7 @@ You should run this command for all applications that need to be deployed in pro
                     new ConfigureApplicationJenkinsProd(),
                     {
                         projectName,
+                        deploymentPipelineId,
                     },
                 ),
             ],

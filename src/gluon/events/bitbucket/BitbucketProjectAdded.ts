@@ -12,7 +12,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {BitbucketProjectRecommendedPracticesCommand} from "../../commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {AssociateTeam} from "../../commands/project/AssociateTeam";
 import {CreateProjectJenkinsJob} from "../../commands/project/CreateProjectJenkinsJob";
-import {NewProjectEnvironments} from "../../commands/project/NewProjectEnvironments";
+import {RequestProjectEnvironments} from "../../commands/project/request-project-environments/RequestProjectEnvironments";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {ConfigureBitbucketProjectAccess} from "../../tasks/bitbucket/ConfigureBitbucketProjectAccess";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
@@ -140,7 +140,7 @@ If you want to create deployable applications in this project you need to create
                     actions: [
                         buttonForCommand(
                             {text: "Create OpenShift environments"},
-                            new NewProjectEnvironments(),
+                            new RequestProjectEnvironments(),
                             {
                                 projectName: bitbucketAddedEvent.project.name,
                             }),

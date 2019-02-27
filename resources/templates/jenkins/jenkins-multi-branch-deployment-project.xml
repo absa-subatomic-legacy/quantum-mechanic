@@ -21,7 +21,7 @@
                             <trust class="com.cloudbees.jenkins.plugins.bitbucket.ForkPullRequestDiscoveryTrait$TrustTeamForks" />
                         </com.cloudbees.jenkins.plugins.bitbucket.ForkPullRequestDiscoveryTrait>
                         <jenkins.scm.impl.trait.WildcardSCMHeadFilterTrait plugin="scm-api@2.2.6">
-                            <includes>master</includes>
+                            <includes>master release* PR-*</includes>
                             <excludes />
                         </jenkins.scm.impl.trait.WildcardSCMHeadFilterTrait>
                         <org.jenkinsci.plugins.scm__filter.BitbucketCommitSkipTrait plugin="bitbucket-scm-trait-commit-skip@0.1.1"/>

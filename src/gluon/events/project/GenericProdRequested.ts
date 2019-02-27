@@ -90,7 +90,7 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
             await taskRunner.execute(ctx);
 
             this.succeedEvent();
-            return await qmMessageClient.send(this.prodMessages.getGenericProdRequestCompleteMessage(qmProject.name));
+            return await qmMessageClient.send(this.prodMessages.getGenericProdRequestCompleteMessage(qmProject.name, genericProdRequest.deploymentPipeline.pipelineId));
         } catch (error) {
             this.failEvent();
             return await handleQMError(qmMessageClient, error);

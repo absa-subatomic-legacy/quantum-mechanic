@@ -9,30 +9,34 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage, url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
-import {KickOffJenkinsBuild} from "../../commands/jenkins/JenkinsBuild";
-import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
-import {QMApplication} from "../../services/gluon/ApplicationService";
-import {GluonService} from "../../services/gluon/GluonService";
-import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
-import {ConfigurePackageInOpenshift} from "../../tasks/packages/ConfigurePackageInOpenshift";
-import {TaskListMessage} from "../../tasks/TaskListMessage";
-import {TaskRunner} from "../../tasks/TaskRunner";
-import {QMMemberBase} from "../../util/member/Members";
-import {ApplicationType} from "../../util/packages/Applications";
-import {QMProject} from "../../util/project/Project";
-import {ParameterDisplayType} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
+import {QMConfig} from "../../../../config/QMConfig";
+import {KickOffJenkinsBuild} from "../../../commands/jenkins/JenkinsBuild";
+import {TeamMembershipMessages} from "../../../messages/member/TeamMembershipMessages";
+import {QMApplication} from "../../../services/gluon/ApplicationService";
+import {GluonService} from "../../../services/gluon/GluonService";
+import {ConfigurePackageDeploymentPipelineInJenkins} from "../../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
+import {ConfigurePackageInOpenshift} from "../../../tasks/packages/ConfigurePackageInOpenshift";
+import {ConfigurePackagePipelineInJenkins} from "../../../tasks/packages/ConfigurePackagePipelineInJenkins";
+import {TaskListMessage} from "../../../tasks/TaskListMessage";
+import {TaskRunner} from "../../../tasks/TaskRunner";
+import {
+    JenkinsDeploymentJobTemplate,
+    NonProdDefaultJenkinsJobTemplate,
+} from "../../../util/jenkins/JenkinsJobTemplates";
+import {QMMemberBase} from "../../../util/member/Members";
+import {ApplicationType} from "../../../util/packages/Applications";
+import {QMProject} from "../../../util/project/Project";
+import {ParameterDisplayType} from "../../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {BaseQMEvent} from "../../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
     QMError,
     QMMessageClient,
-} from "../../util/shared/Error";
-import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
-import {GluonApplicationEvent} from "../../util/transform/types/event/GluonApplicationEvent";
-import {KeyValuePairEvent} from "../../util/transform/types/event/KeyValuePairEvent";
-import {MemberEvent} from "../../util/transform/types/event/MemberEvent";
-import {ProjectEvent} from "../../util/transform/types/event/ProjectEvent";
+} from "../../../util/shared/Error";
+import {QMTenant} from "../../../util/shared/Tenants";
+import {isUserAMemberOfTheTeam, QMTeam} from "../../../util/team/Teams";
+import {buildJenkinsDeploymentJobTemplates} from "./JenkinsDeploymentJobTemplateBuilder";
+import {PackageConfigurationRequestedEvent} from "./PackageConfigurationRequestedEvent";
 
 @EventHandler("Receive PackageConfigurationRequested events", `
 subscription PackageConfigurationRequestedEvent {
@@ -96,10 +100,13 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
 
         const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
 
+        const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+
         if (!isUserAMemberOfTheTeam(member, owningTeam)) {
             throw new QMError("Actioning member is not a member of the team", this.membershipMessages.notAMemberOfTheTeam());
         }
 
+        // Add OpenShift Configuration Jobs
         const taskListMessage = new TaskListMessage(`:rocket: Configuring package *${application.name}*...`, messageClient);
         const taskRunner = new TaskRunner(taskListMessage);
         if (application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
@@ -124,13 +131,24 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
             );
         }
 
+        // Add Jenkins build jobs
+        const jenkinsJobTemplate = NonProdDefaultJenkinsJobTemplate;
+        jenkinsJobTemplate.sourceJenkinsfile = packageConfigurationEvent.jenkinsfileName;
+
         taskRunner.addTask(
-            new ConfigurePackageInJenkins(
+            new ConfigurePackagePipelineInJenkins(
                 application,
                 project,
-                packageConfigurationEvent.jenkinsfileName),
-            "Configure Package in Jenkins",
+                jenkinsJobTemplate),
+            "Configure Package Build Jobs in Jenkins",
         );
+
+        // Add Additional Jenkins Deployment jobs
+        if (application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
+            const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = buildJenkinsDeploymentJobTemplates(tenant.name, project.name, project.devDeploymentPipeline, project.releaseDeploymentPipelines);
+
+            taskRunner.addTask(new ConfigurePackageDeploymentPipelineInJenkins(application, project, jenkinsDeploymentJobTemplates), "Configure Package Deployment Jobs in Jenkins");
+        }
 
         await taskRunner.execute(ctx);
 
@@ -181,15 +199,4 @@ You can kick off the build pipeline for your ${packageTypeString} by clicking th
         return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference`,
             "documentation")}`;
     }
-}
-
-export interface PackageConfigurationRequestedEvent {
-    application: GluonApplicationEvent;
-    project: ProjectEvent;
-    imageName: string;
-    openshiftTemplate: string;
-    jenkinsfileName: string;
-    buildEnvironmentVariables: KeyValuePairEvent[];
-    deploymentEnvironmentVariables: KeyValuePairEvent[];
-    actionedBy: MemberEvent;
 }

@@ -3,6 +3,7 @@ import {OpenShiftConfig} from "../../../../src/config/OpenShiftConfig";
 import {
     getAllPipelineOpenshiftNamespaces,
     getAllPipelineOpenshiftNamespacesForAllPipelines,
+    getDeploymentEnvironmentJenkinsMetadata,
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
     getProjectDevOpsId,
     getProjectDisplayName,
@@ -201,4 +202,62 @@ describe("getAllPipelineOpenshiftNamespacesForAllPipelines", () => {
         assert.equal(deploymentEnvironmentNamespaces[1].postfix, "sit");
     });
 
+});
+
+describe("getDeploymentEnvironmentJenkinsMetadata", () => {
+    it("should return correct meta data for default tenant", async () => {
+        const pipeline: QMDeploymentPipeline = {
+            name: "Pipeline",
+            tag: "pipeline",
+            pipelineId: "1",
+            environments: [
+                {
+                    postfix: "dev",
+                    displayName: "Dev",
+                    positionInPipeline: 0,
+                },
+            ],
+        };
+
+        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("default", "Project", pipeline, pipeline.environments[0]);
+        assert.equal(environmentJenkinsMetadata.displayName, "Project Pipeline Dev");
+        assert.equal(environmentJenkinsMetadata.postfix, "pipeline-dev");
+    });
+    it("should return correct meta data for non default tenant", async () => {
+        const pipeline: QMDeploymentPipeline = {
+            name: "Pipeline",
+            tag: "pipeline",
+            pipelineId: "1",
+            environments: [
+                {
+                    postfix: "dev",
+                    displayName: "Dev",
+                    positionInPipeline: 0,
+                },
+            ],
+        };
+
+        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("something", "Project", pipeline, pipeline.environments[0]);
+        assert.equal(environmentJenkinsMetadata.displayName, "something Project Pipeline Dev");
+        assert.equal(environmentJenkinsMetadata.postfix, "pipeline-dev");
+    });
+
+    it("should return correct meta data for default pipeline with no tag", async () => {
+        const pipeline: QMDeploymentPipeline = {
+            name: "Default",
+            tag: "",
+            pipelineId: "1",
+            environments: [
+                {
+                    postfix: "dev",
+                    displayName: "Dev",
+                    positionInPipeline: 0,
+                },
+            ],
+        };
+
+        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("something", "Project", pipeline, pipeline.environments[0]);
+        assert.equal(environmentJenkinsMetadata.displayName, "something Project Dev");
+        assert.equal(environmentJenkinsMetadata.postfix, "dev");
+    });
 });
