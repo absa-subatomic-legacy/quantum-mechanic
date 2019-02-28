@@ -8,9 +8,10 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {SlackMessage, url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../../config/QMConfig";
+import {SlackMessage} from "@atomist/slack-messages";
 import {KickOffJenkinsBuild} from "../../../commands/jenkins/JenkinsBuild";
+import {CommandDocumentationLink} from "../../../messages/documentation/CommandDocumentationLink";
+import {DocumentationUrlBuilder} from "../../../messages/documentation/DocumentationUrlBuilder";
 import {TeamMembershipMessages} from "../../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../../services/gluon/ApplicationService";
 import {GluonService} from "../../../services/gluon/GluonService";
@@ -174,7 +175,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
                 "and is ready to build/deploy",
             attachments: [{
                 fallback: `Your ${packageTypeString} has been provisioned successfully`,
-                footer: `For more information, please read the ${this.docs() + "#jenkins-build"}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.KickOffJenkinsBuild)}`,
                 text: `
 You can kick off the build pipeline for your ${packageTypeString} by clicking the button below or pushing changes to your ${packageTypeString}'s repository`,
                 mrkdwn_in: ["text"],
@@ -193,10 +194,5 @@ You can kick off the build pipeline for your ${packageTypeString} by clicking th
                 ],
             }],
         };
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference`,
-            "documentation")}`;
     }
 }

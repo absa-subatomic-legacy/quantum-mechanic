@@ -17,7 +17,7 @@ describe("TeamSlackChannelService getGluonTeam", () => {
 
         let thrownError = null;
         try {
-            await service.getGluonTeam("Team1", "something");
+            await service.getGluonTeam("Team1");
         } catch (error) {
             thrownError = error;
         }
@@ -36,7 +36,7 @@ describe("TeamSlackChannelService getGluonTeam", () => {
         const gluonService = new GluonService(undefined, instance(mockedTeamService));
         const service = new TeamSlackChannelService(gluonService);
 
-        const result = await service.getGluonTeam("Team1", "something");
+        const result = await service.getGluonTeam("Team1");
 
         assert.equal(result.id, `Team1Id`);
     });

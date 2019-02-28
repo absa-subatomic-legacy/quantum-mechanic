@@ -10,10 +10,12 @@ import {
     addressSlackChannelsFromContext,
     menuForCommand,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
+import {SlackMessage} from "@atomist/slack-messages";
 import {Attachment} from "@atomist/slack-messages/SlackMessages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
+import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -125,20 +127,15 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
             attachments: pvcAttachments.concat({
                 fallback: `Using PVCs`,
                 text: `
-Now that your PVCs have been created, you can add this PVC as storage to an application. Follow the Subatomic documentation for more details on how to add storage.`,
+Now that your PVCs have been created, you can add this PVC as storage to an application.`,
                 color: QMColours.stdShySkyBlue.hex,
                 mrkdwn_in: ["text"],
                 thumb_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/OpenShift-LogoType.svg/959px-OpenShift-LogoType.svg.png",
-                footer: `For more information, please read the ${this.docs()}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateOpenShiftPvc)}`,
             } as Attachment),
         };
 
         return await ctx.messageClient.send(msg, destination);
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/storage`,
-            "documentation")}`;
     }
 
 }

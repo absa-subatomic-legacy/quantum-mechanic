@@ -10,6 +10,8 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
+import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {QMMemberBase} from "../../util/member/Members";
@@ -125,7 +127,7 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
             text,
             attachments: [{
                 fallback: "Please confirm that the above resources should be moved to Prod",
-                footer: `For more information, please read the docs.`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.MigrateTeamCloud)}.`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(

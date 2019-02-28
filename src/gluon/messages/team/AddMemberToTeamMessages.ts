@@ -1,7 +1,8 @@
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
+import {SlackMessage} from "@atomist/slack-messages";
 import {ListTeamProjects} from "../../commands/project/ProjectDetails";
+import {CommandDocumentationLink} from "../documentation/CommandDocumentationLink";
+import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
 
 export class AddMemberToTeamMessages {
     public welcomeMemberToTeam(newMemberFirstName: string, teamSlackChannelName: string): SlackMessage {
@@ -13,7 +14,7 @@ Welcome *${newMemberFirstName}*, you have been added to the *${teamSlackChannelN
 Click the button below to become familiar with the projects this team is involved in.
                                                                               `,
                 fallback: `Welcome to the team ${newMemberFirstName}`,
-                footer: `For more information, please read the ${this.docs("list-projects")}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.ListTeamProjects)}`,
                 mrkdwn_in: ["text"],
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
@@ -23,10 +24,5 @@ Click the button below to become familiar with the projects this team is involve
                 ],
             }],
         };
-    }
-
-    private docs(extension): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
-            "documentation")}`;
     }
 }

@@ -1,11 +1,13 @@
 import {logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
+import {SlackMessage} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
+import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {QMMemberBase} from "../../util/member/Members";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
@@ -34,6 +36,7 @@ export class ApplicationService {
                 attachments: [{
                     text: "Would you like to link an existing application?",
                     fallback: "Would you like to link an existing application?",
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.LinkExistingApplication)}`,
                     actions: [
                         buttonForCommand(
                             {
@@ -69,8 +72,7 @@ Unfortunately Subatomic does not manage this application.
 Consider linking an existing application called ${applicationName}. Click the button below to do that now.
                             `,
                         fallback: "Application not managed by Subatomic",
-                        footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-bitbucket-project`,
-                            "documentation")}`,
+                        footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.LinkExistingApplication)}`,
                         color: QMColours.stdMuddyYellow.hex,
                         mrkdwn_in: ["text"],
                         actions: [

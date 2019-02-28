@@ -1,10 +1,11 @@
 import {buttonForCommand} from "@atomist/automation-client";
-import {Attachment, SlackMessage, url} from "@atomist/slack-messages";
+import {Attachment, SlackMessage} from "@atomist/slack-messages";
 import {
     OpenShiftConfig,
     OpenshiftProjectEnvironment,
 } from "../../../../config/OpenShiftConfig";
-import {QMConfig} from "../../../../config/QMConfig";
+import {CommandDocumentationLink} from "../../../messages/documentation/CommandDocumentationLink";
+import {DocumentationUrlBuilder} from "../../../messages/documentation/DocumentationUrlBuilder";
 import {QMColours} from "../../../util/QMColour";
 import {DefineNewProjectEnvironments} from "../DefineNewProjectEnvironments";
 
@@ -30,7 +31,7 @@ export class DefinePipelineMessages {
         return {
             text,
             fallback: "Create default pipeline.",
-            footer: `For more information, please read the ${this.docs()}`,
+            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.RequestProjectEnvironments)}`,
             color: QMColours.stdGreenyMcAppleStroodle.hex,
             actions: [
                 buttonForCommand(
@@ -62,11 +63,6 @@ export class DefinePipelineMessages {
         newPipelinesCommand.teamName = teamName;
         newPipelinesCommand.projectName = projectName;
         return newPipelinesCommand;
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#sub-request-project-environments`,
-            "documentation")}`;
     }
 
 }
