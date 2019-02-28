@@ -261,7 +261,7 @@ export async function setDeploymentPipelineId(
                 commandHandler,
                 selectionMessage,
                 selectionMessage,
-                "Select Application/Library",
+                "Select Deployment Pipeline",
                 "deploymentPipelineId",
             ),
         };

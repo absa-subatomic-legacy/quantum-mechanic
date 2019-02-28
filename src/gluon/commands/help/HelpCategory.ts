@@ -20,8 +20,8 @@ import {CreateOpenShiftPvc} from "../project/CreateOpenShiftPvc";
 import {CreateProject} from "../project/CreateProject";
 import {CreateProjectJenkinsJob} from "../project/CreateProjectJenkinsJob";
 import {CreateProjectProdEnvironments} from "../project/CreateProjectProdEnvironments";
-import {NewProjectEnvironments} from "../project/NewProjectEnvironments";
 import {ListProjectDetails, ListTeamProjects} from "../project/ProjectDetails";
+import {RequestProjectEnvironments} from "../project/request-project-environments/RequestProjectEnvironments";
 import {ReRunProjectProdRequest} from "../project/ReRunProjectProdRequest";
 import {UpdateProjectProdRequest} from "../project/UpdateProjectProdRequest";
 import {AddConfigServer} from "../team/AddConfigServer";
@@ -76,7 +76,7 @@ export class HelpCategory {
         MigrateTeamCloud,
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,
-        NewProjectEnvironments,
+        RequestProjectEnvironments,
         NewTeamSlackChannel,
         OnboardMember,
         PatchBuildConfigBaseImage,

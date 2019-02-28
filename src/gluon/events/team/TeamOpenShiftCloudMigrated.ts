@@ -12,7 +12,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
+import {ConfigurePackagePipelineInJenkins} from "../../tasks/packages/ConfigurePackagePipelineInJenkins";
 import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsForProject";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
@@ -156,7 +156,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         const applications: QMApplication[] = await this.gluonService.applications.gluonApplicationsLinkedToGluonProject(project.name, false);
 
         for (const application of applications) {
-            taskRunner.addTask(new ConfigurePackageInJenkins(application, project), `*Create ${application.name} application Jenkins job*`);
+            taskRunner.addTask(new ConfigurePackagePipelineInJenkins(application, project), `*Create ${application.name} application Jenkins job*`);
         }
     }
 
