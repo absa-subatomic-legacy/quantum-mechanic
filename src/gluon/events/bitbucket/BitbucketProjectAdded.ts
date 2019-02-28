@@ -8,10 +8,10 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {BitbucketProjectRecommendedPracticesCommand} from "../../commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {AssociateTeam} from "../../commands/project/AssociateTeam";
 import {CreateProjectJenkinsJob} from "../../commands/project/CreateProjectJenkinsJob";
 import {RequestProjectEnvironments} from "../../commands/project/request-project-environments/RequestProjectEnvironments";
-import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {ConfigureBitbucketProjectAccess} from "../../tasks/bitbucket/ConfigureBitbucketProjectAccess";
@@ -134,7 +134,7 @@ An OpenShift cloud consists of a Non Prod cluster and multiple Prod clusters. Th
 These environments are realised as OpenShift projects and need to be created or linked to existing Subatomic projects.
 If you want to create deployable applications in this project you need to create or link these OpenShift environments. This will also configure a jenkins build folder for the project.`,
                     fallback: "Create or link existing OpenShift environments",
-                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.RequestProjectEnvironments)}`,
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.RequestProjectEnvironments)}`,
                     color: QMColours.stdGreenyMcAppleStroodle.hex,
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/openshift-logo.png",
                     actions: [
@@ -150,7 +150,7 @@ If you want to create deployable applications in this project you need to create
                     text: `
 If you plan on having only libraries in this project, it is not necessary to create the related OpenShift environments. In this case you only need to configure a Jenkins build folder for this project.`,
                     fallback: "Configure project in Jenkins",
-                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateProjectJenkinsJob)}`,
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateProjectJenkinsJob)}`,
                     color: QMColours.stdMuddyYellow.hex,
                     actions: [
                         buttonForCommand(
@@ -168,7 +168,7 @@ This includes setting team owners as default reviewers, adding pre-merge hooks, 
 These can be manually changed if you wish to change the settings after applying them.\
 If you would like to configure the Bitbucket Project associated to the *${bitbucketAddedEvent.project.name}* project, please click the button below.`,
                     fallback: "Apply recommended practices to this bitbucket project",
-                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.BitbucketProjectRecommendedPracticesCommand)}`,
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.BitbucketProjectRecommendedPracticesCommand)}`,
                     color: QMColours.stdShySkyBlue.hex,
                     actions: [
                         buttonForCommand(
@@ -186,7 +186,7 @@ If you would like to configure the Bitbucket Project associated to the *${bitbuc
 Projects can be associated with multiple teams. \
 If you would like to associate more teams to the *${bitbucketAddedEvent.project.name}* project, please click the button below`,
                     fallback: "Associate multiple teams to this project",
-                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.BitbucketProjectRecommendedPracticesCommand)}`,
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.BitbucketProjectRecommendedPracticesCommand)}`,
                     color: QMColours.stdShySkyBlue.hex,
                     actions: [
                         buttonForCommand(

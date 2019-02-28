@@ -11,7 +11,6 @@ import {
     Tags,
 } from "@atomist/automation-client/lib/decorators";
 import {addressSlackUsersFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {continueStatement} from "babel-types";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OnboardMemberMessages} from "../../messages/member/OnboardMemberMessages";
@@ -23,8 +22,9 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Onboard a new team member", QMConfig.subatomic.commandPrefix + " onboard me")
+@CommandHandler("Onboard a new team member", atomistIntent(CommandIntent.OnboardMember))
 @Tags("subatomic", "slack", "member")
 export class OnboardMember extends BaseQMComand {
     @MappedParameter(MappedParameters.SlackUser)

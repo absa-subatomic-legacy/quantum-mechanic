@@ -7,7 +7,7 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage} from "@atomist/slack-messages";
-import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
@@ -76,7 +76,7 @@ export class ConfigServerRequested extends BaseQMEvent implements HandleEvent<an
             text: `Your Subatomic Config Server has been added to your *${devOpsProjectId}* OpenShift project successfully`,
             attachments: [{
                 fallback: `Your Subatomic Config Server has been added successfully`,
-                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.AddConfigServer)}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.AddConfigServer)}`,
             }],
         };
 

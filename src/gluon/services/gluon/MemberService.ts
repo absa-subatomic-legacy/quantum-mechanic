@@ -6,8 +6,8 @@ import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {OnboardMember} from "../../commands/member/OnboardMember";
-import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
@@ -39,7 +39,7 @@ Unfortunately you do not seem to have been onboarded to Subatomic.
 To create a team you must first onboard yourself. Click the button below to do that now.
                             `,
                         fallback: "You are not onboarded to Subatomic",
-                        footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.OnboardMember)}`,
+                        footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.OnboardMember)}`,
                         color: QMColours.stdMuddyYellow.hex,
                         mrkdwn_in: ["text"],
                         thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",

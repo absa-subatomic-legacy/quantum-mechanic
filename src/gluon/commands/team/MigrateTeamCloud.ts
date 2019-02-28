@@ -9,8 +9,6 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
-import {QMConfig} from "../../../config/QMConfig";
-import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -33,8 +31,9 @@ import {
     ResponderMessageClient,
 } from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Move all Openshift resources belonging to a team to a different cloud", QMConfig.subatomic.commandPrefix + " team migrate cloud")
+@CommandHandler("Move all Openshift resources belonging to a team to a different cloud", atomistIntent(CommandIntent.MigrateTeamCloud))
 @Tags("subatomic", "team", "other")
 export class MigrateTeamCloud extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonTeamOpenShiftCloudBaseSetter {
@@ -127,7 +126,7 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
             text,
             attachments: [{
                 fallback: "Please confirm that the above resources should be moved to Prod",
-                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.MigrateTeamCloud)}.`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.MigrateTeamCloud)}.`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(

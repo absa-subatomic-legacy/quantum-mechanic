@@ -12,7 +12,8 @@ import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
+    GluonTeamNameSetter,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
     ImageNameFromDevOpsParam,
@@ -20,8 +21,9 @@ import {
 } from "../../util/recursiveparam/OpenshiftParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Patch the s2i image used to build a package", QMConfig.subatomic.commandPrefix + " patch package s2i image")
+@CommandHandler("Patch the s2i image used to build a package", atomistIntent(CommandIntent.PatchBuildConfigBaseImage))
 @Tags("subatomic", "package")
 export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, ImageNameSetter {

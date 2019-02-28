@@ -29,12 +29,13 @@ import {RecursiveSetterResult} from "../../util/recursiveparam/RecursiveSetterRe
 import {JsonLoader} from "../../util/resources/JsonLoader";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {createMenuAttachment} from "../../util/shared/GenericMenu";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 import {ConfigurePackage} from "./ConfigurePackage";
 
 const PACKAGE_DEFINITION_EXTENSION = ".json";
 const PACKAGE_DEFINITION_FOLDER = "resources/package-definitions/";
 
-@CommandHandler("Configure an existing application/library using a predefined template", QMConfig.subatomic.commandPrefix + " configure package")
+@CommandHandler("Configure an existing application/library using a predefined template", atomistIntent(CommandIntent.ConfigureBasicPackage))
 @Tags("subatomic", "package")
 export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {

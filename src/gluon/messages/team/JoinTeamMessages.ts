@@ -3,8 +3,8 @@ import {
     menuForCommand,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {CreateTeam} from "../../commands/team/CreateTeam";
-import {CommandDocumentationLink} from "../documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
 
 export class JoinTeamMessages {
@@ -35,7 +35,7 @@ export class JoinTeamMessages {
             text: `❗Unfortunately no teams have been created.`,
             attachments: [{
                 fallback: "❗Unfortunately no teams have been created.",
-                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateTeam)}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateTeam)}`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(

@@ -9,8 +9,8 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {LinkExistingBitbucketProject} from "../../commands/bitbucket/BitbucketProject";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {AssociateTeam} from "../../commands/project/AssociateTeam";
-import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
@@ -64,7 +64,7 @@ export class ProjectCreated extends BaseQMEvent implements HandleEvent<any> {
                     text: `
 The new Subatomic project needs to be linked to an existing Bitbucket project.`,
                     fallback: "Link  an existing Bitbucket project",
-                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.LinkExistingBitbucketProject)}`,
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.LinkExistingBitbucketProject)}`,
                     color: QMColours.stdGreenyMcAppleStroodle.hex,
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/bitbucket-logo.png",
                     actions: [
@@ -79,7 +79,7 @@ The new Subatomic project needs to be linked to an existing Bitbucket project.`,
 Projects can be associated with multiple teams. \
 If you would like to associate more teams to the *${projectCreatedEvent.project.name}* Subatomic project, please use the \`@atomist sub associate team\` command`,
                     fallback: "Associate multiple teams to this project",
-                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.AssociateTeam)}`,
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.AssociateTeam)}`,
                     color: QMColours.stdShySkyBlue.hex,
                     actions: [
                         buttonForCommand(

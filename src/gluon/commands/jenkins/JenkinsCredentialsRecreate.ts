@@ -25,8 +25,9 @@ import {
     ResponderMessageClient,
 } from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Recreate the Jenkins Bitbucket Credentials", QMConfig.subatomic.commandPrefix + " create jenkins bitbucket credentials")
+@CommandHandler("Recreate the Jenkins Bitbucket Credentials", atomistIntent(CommandIntent.JenkinsCredentialsRecreate))
 @Tags("subatomic", "bitbucket", "jenkins")
 export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {

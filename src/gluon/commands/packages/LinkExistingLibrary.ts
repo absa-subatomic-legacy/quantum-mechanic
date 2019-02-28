@@ -6,7 +6,6 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {QMConfig} from "../../../config/QMConfig";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {PackageCommandService} from "../../services/packages/PackageCommandService";
@@ -23,8 +22,9 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Link an existing library", QMConfig.subatomic.commandPrefix + " link library")
+@CommandHandler("Link an existing library", atomistIntent(CommandIntent.LinkExistingLibrary))
 @Tags("subatomic", "package", "project")
 export class LinkExistingLibrary extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, BitbucketRepoSetter {

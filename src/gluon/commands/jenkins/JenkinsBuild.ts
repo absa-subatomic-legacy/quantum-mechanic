@@ -28,8 +28,9 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Kick off a Jenkins build", QMConfig.subatomic.commandPrefix + " jenkins build")
+@CommandHandler("Kick off a Jenkins build", atomistIntent(CommandIntent.KickOffJenkinsBuild))
 @Tags("subatomic", "jenkins", "package")
 export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, GluonTeamNameSetter {

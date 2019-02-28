@@ -7,7 +7,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
@@ -20,8 +19,9 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Create a new team", QMConfig.subatomic.commandPrefix + " create team")
+@CommandHandler("Create a new team", atomistIntent(CommandIntent.CreateTeam))
 @Tags("subatomic", "team")
 export class CreateTeam extends RecursiveParameterRequestCommand implements GluonTeamOpenShiftCloudSetter {
 

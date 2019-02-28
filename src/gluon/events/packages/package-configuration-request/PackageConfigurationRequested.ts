@@ -9,8 +9,8 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage} from "@atomist/slack-messages";
+import {CommandIntent} from "../../../commands/CommandIntent";
 import {KickOffJenkinsBuild} from "../../../commands/jenkins/JenkinsBuild";
-import {CommandDocumentationLink} from "../../../messages/documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../../../messages/documentation/DocumentationUrlBuilder";
 import {TeamMembershipMessages} from "../../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../../services/gluon/ApplicationService";
@@ -175,7 +175,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
                 "and is ready to build/deploy",
             attachments: [{
                 fallback: `Your ${packageTypeString} has been provisioned successfully`,
-                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.KickOffJenkinsBuild)}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.KickOffJenkinsBuild)}`,
                 text: `
 You can kick off the build pipeline for your ${packageTypeString} by clicking the button below or pushing changes to your ${packageTypeString}'s repository`,
                 mrkdwn_in: ["text"],

@@ -6,7 +6,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {QMConfig} from "../../../config/QMConfig";
 import {ConfigServerRequestedEvent} from "../../events/team/ConfigServerRequested";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMMemberBase} from "../../util/member/Members";
@@ -19,8 +18,9 @@ import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/Recurs
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Add a new Subatomic Config Server", QMConfig.subatomic.commandPrefix + " add config server")
+@CommandHandler("Add a new Subatomic Config Server", atomistIntent(CommandIntent.AddConfigServer))
 @Tags("subatomic", "team")
 export class AddConfigServer extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {

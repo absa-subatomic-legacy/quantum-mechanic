@@ -5,8 +5,8 @@ import {
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import {isSuccessCode} from "../../../http/Http";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
-import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {MemberRole, QMMemberBase} from "../../util/member/Members";
 import {QMColours} from "../../util/QMColour";
@@ -40,7 +40,7 @@ export class RemoveMemberFromTeamService {
                      the command or click the button below.
                             `,
                     fallback: "Failed to get member details.",
-                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.AddMemberToTeam)}`,
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.AddMemberToTeam)}`,
                     color: QMColours.stdMuddyYellow.hex,
                     mrkdwn_in: ["text"],
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",

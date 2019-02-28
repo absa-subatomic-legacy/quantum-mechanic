@@ -4,9 +4,9 @@ import {
     OpenShiftConfig,
     OpenshiftProjectEnvironment,
 } from "../../../../config/OpenShiftConfig";
-import {CommandDocumentationLink} from "../../../messages/documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../../../messages/documentation/DocumentationUrlBuilder";
 import {QMColours} from "../../../util/QMColour";
+import {CommandIntent} from "../../CommandIntent";
 import {DefineNewProjectEnvironments} from "../DefineNewProjectEnvironments";
 
 export class DefinePipelineMessages {
@@ -31,7 +31,7 @@ export class DefinePipelineMessages {
         return {
             text,
             fallback: "Create default pipeline.",
-            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.RequestProjectEnvironments)}`,
+            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.RequestProjectEnvironments)}`,
             color: QMColours.stdGreenyMcAppleStroodle.hex,
             actions: [
                 buttonForCommand(

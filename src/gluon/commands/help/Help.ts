@@ -12,9 +12,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 import {HelpCategory} from "./HelpCategory";
 
-@CommandHandler("Help regarding subatomic commands", QMConfig.subatomic.commandPrefix + " help")
+@CommandHandler("Help regarding subatomic commands", atomistIntent(CommandIntent.Help))
 export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {
 
     @Parameter({

@@ -5,7 +5,6 @@ import {BitbucketProjectAccessCommand} from "../bitbucket/BitbucketProjectAccess
 import {BitbucketProjectRecommendedPracticesCommand} from "../bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "../jenkins/JenkinsCredentialsRecreate";
-import {AddSlackDetails} from "../member/AddSlackDetails";
 import {OnboardMember} from "../member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "../packages/ConfigureApplicationJenkinsProd";
 import {ConfigureBasicPackage} from "../packages/ConfigureBasicPackage";
@@ -47,7 +46,6 @@ export class HelpCategory {
         AddConfigServer,
         AddMemberToTeam,
         AddOwnerToTeam,
-        AddSlackDetails,
         AssociateTeam,
         BitbucketProjectAccessCommand,
         BitbucketProjectRecommendedPracticesCommand,

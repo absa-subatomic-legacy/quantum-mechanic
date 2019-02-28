@@ -10,9 +10,9 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
 import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
-import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsForProject";
@@ -130,7 +130,7 @@ Since you have Subatomic project environments ready, you can now add packages.
 A package is either an application or a library, click the button below to create an application now.`,
             attachments: [{
                 fallback: "Create or link existing package",
-                footer: `For more information, please read the ${DocumentationUrlBuilder.generalCommandReference(CommandDocumentationLink.ConfigureBasicPackage)}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.generalCommandReference(CommandIntent.ConfigureBasicPackage)}`,
                 color: QMColours.stdGreenyMcAppleStroodle.hex,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [

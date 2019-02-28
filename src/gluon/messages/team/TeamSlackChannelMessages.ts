@@ -1,10 +1,10 @@
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {CreateTeam} from "../../commands/team/CreateTeam";
 import {LinkExistingTeamSlackChannel} from "../../commands/team/LinkExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "../../commands/team/NewSlackChannel";
 import {QMColours} from "../../util/QMColour";
-import {CommandDocumentationLink} from "../documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
 
 export class TeamSlackChannelMessages {
@@ -17,7 +17,7 @@ Unfortunately this team does not seem to exist on Subatomic.
 To create a team channel you must first create a team. Click the button below to do that now.
                                                   `,
                 fallback: "Team does not exist on Subatomic",
-                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateTeam)}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateTeam)}`,
                 color: QMColours.stdReddyMcRedFace.hex,
                 mrkdwn_in: ["text"],
                 actions: [

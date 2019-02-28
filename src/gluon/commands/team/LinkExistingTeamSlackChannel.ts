@@ -6,7 +6,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TeamSlackChannelService} from "../../services/team/TeamSlackChannelService";
 import {
@@ -15,8 +14,9 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Link existing team channel", QMConfig.subatomic.commandPrefix + " link team channel")
+@CommandHandler("Link existing team channel", atomistIntent(CommandIntent.LinkExistingTeamSlackChannel))
 @Tags("subatomic", "slack", "channel", "team")
 export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {

@@ -1,7 +1,7 @@
 import {url} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
-import {CommandDocumentationLink} from "./CommandDocumentationLink";
+import {CommandIntent} from "../../commands/CommandIntent";
 
 export class DocumentationUrlBuilder {
 
@@ -10,7 +10,7 @@ export class DocumentationUrlBuilder {
      * @param commandIntent - command intent without the subatomic prefix
      * @param urlLabel - user friendly display name for the url hyper link
      */
-    public static commandReference(commandIntent: CommandDocumentationLink, urlLabel = "documentation") {
+    public static commandReference(commandIntent: CommandIntent, urlLabel = "documentation") {
         return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference/#sub-${_.kebabCase(commandIntent.toString())}`,
             urlLabel)}`;
     }

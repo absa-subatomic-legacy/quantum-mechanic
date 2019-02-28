@@ -6,7 +6,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -23,8 +22,9 @@ import {
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam} from "../../util/team/Teams";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Reconfigure user and system access to Bitbucket for an existing project", QMConfig.subatomic.commandPrefix + " configure project bitbucket access")
+@CommandHandler("Reconfigure user and system access to Bitbucket for an existing project", atomistIntent(CommandIntent.BitbucketProjectAccessCommand))
 @Tags("bitbucket", "project")
 export class BitbucketProjectAccessCommand extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {

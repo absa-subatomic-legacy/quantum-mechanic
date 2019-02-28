@@ -1,7 +1,7 @@
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {JoinTeam} from "../../commands/team/JoinTeam";
-import {CommandDocumentationLink} from "../documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
 
 export class TeamMembershipMessages {
@@ -12,7 +12,7 @@ export class TeamMembershipMessages {
             text,
             attachments: [{
                 fallback: "You are not a member of this team.",
-                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.JoinTeam)}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.JoinTeam)}`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(

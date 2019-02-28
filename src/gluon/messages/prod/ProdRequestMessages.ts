@@ -1,12 +1,12 @@
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {Attachment, SlackMessage} from "@atomist/slack-messages";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {ConfigureApplicationJenkinsProd} from "../../commands/packages/ConfigureApplicationJenkinsProd";
 import {CreateApplicationProd} from "../../commands/packages/CreateApplicationProd";
 import {CreateGenericProd} from "../../commands/project/CreateGenericProd";
 import {CreateProjectProdEnvironments} from "../../commands/project/CreateProjectProdEnvironments";
 import {QMColours} from "../../util/QMColour";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
-import {CommandDocumentationLink} from "../documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
 
 export class ProdRequestMessages {
@@ -18,7 +18,7 @@ export class ProdRequestMessages {
             text,
             attachments: [{
                 fallback: "Please confirm that the above resources should be moved to Prod",
-                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateProjectProdEnvironments)}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateProjectProdEnvironments)}`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(
@@ -51,7 +51,7 @@ export class ProdRequestMessages {
             text,
             attachments: [{
                 fallback: "Please confirm that the above resources should be moved to Prod",
-                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateApplicationProd)}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateApplicationProd)}`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(
@@ -84,7 +84,7 @@ Once a project prod request is approved, Subatomic will create your production D
 Applications can then be promoted into these production environments. To create a project production request please click the button below.
             `,
             fallback: "Create project prod request",
-            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateProjectProdEnvironments)}`,
+            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateProjectProdEnvironments)}`,
             color: QMColours.stdMuddyYellow.hex,
             actions: [
                 buttonForCommand(
@@ -128,7 +128,7 @@ This will copy Subatomic created and non Subatomic resources making it the recom
 This is only a direct resource copy and does not configure any Jenkins jobs.
             `,
             fallback: "Create generic prod request",
-            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateGenericProd)}`,
+            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateGenericProd)}`,
             color: QMColours.stdGreenyMcAppleStroodle.hex,
             actions: [
                 buttonForCommand(
@@ -170,7 +170,7 @@ These resources will be recreated in all project associated Production environme
 This will also configure the application Jenkins job.
             `,
             fallback: "Create application prod request",
-            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateApplicationProd)}`,
+            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateApplicationProd)}`,
             color: QMColours.stdShySkyBlue.hex,
             actions: [
                 buttonForCommand(
@@ -196,7 +196,7 @@ All application resources should have been moved into the necessary production e
 You should run this command for all applications that need to be deployed in production now.
             `,
             fallback: "Configure Application Jenkins Prod",
-            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.ConfigureApplicationJenkinsProd)}`,
+            footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.ConfigureApplicationJenkinsProd)}`,
             color: QMColours.stdGreenyMcAppleStroodle.hex,
             actions: [
                 buttonForCommand(

@@ -5,8 +5,8 @@ import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
-import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {QMMemberBase} from "../../util/member/Members";
 import {QMColours} from "../../util/QMColour";
@@ -36,7 +36,7 @@ export class ApplicationService {
                 attachments: [{
                     text: "Would you like to link an existing application?",
                     fallback: "Would you like to link an existing application?",
-                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.LinkExistingApplication)}`,
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.LinkExistingApplication)}`,
                     actions: [
                         buttonForCommand(
                             {
@@ -72,7 +72,7 @@ Unfortunately Subatomic does not manage this application.
 Consider linking an existing application called ${applicationName}. Click the button below to do that now.
                             `,
                         fallback: "Application not managed by Subatomic",
-                        footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.LinkExistingApplication)}`,
+                        footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.LinkExistingApplication)}`,
                         color: QMColours.stdMuddyYellow.hex,
                         mrkdwn_in: ["text"],
                         actions: [
