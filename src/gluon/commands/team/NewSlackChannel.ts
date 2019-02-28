@@ -40,7 +40,7 @@ export class NewTeamSlackChannel extends BaseQMComand implements HandleCommand {
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             this.newTeamChannel = _.isEmpty(this.newTeamChannel) ? this.teamName : this.newTeamChannel;
-            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, "create-team-channel", true);
+            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, true);
             this.succeedCommand();
             return result;
         } catch (error) {

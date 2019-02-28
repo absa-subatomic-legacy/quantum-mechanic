@@ -2,9 +2,10 @@ import {
     buttonForCommand,
     menuForCommand,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
+import {SlackMessage} from "@atomist/slack-messages";
 import {CreateTeam} from "../../commands/team/CreateTeam";
+import {CommandDocumentationLink} from "../documentation/CommandDocumentationLink";
+import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
 
 export class JoinTeamMessages {
     public presentMenuForTeamSelection(slackName: string, teams): SlackMessage {
@@ -34,7 +35,7 @@ export class JoinTeamMessages {
             text: `❗Unfortunately no teams have been created.`,
             attachments: [{
                 fallback: "❗Unfortunately no teams have been created.",
-                footer: `For more information, please read ${this.docs()}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateTeam)}`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(
@@ -43,10 +44,5 @@ export class JoinTeamMessages {
                 ],
             }],
         };
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-team`,
-            "documentation")}`;
     }
 }

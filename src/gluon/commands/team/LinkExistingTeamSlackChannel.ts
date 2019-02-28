@@ -14,7 +14,7 @@ import {
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, QMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 
 @CommandHandler("Link existing team channel", QMConfig.subatomic.commandPrefix + " link team channel")
 @Tags("subatomic", "slack", "channel", "team")
@@ -46,7 +46,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, "link-team-channel", false);
+            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, false);
             this.succeedCommand();
             return result;
         } catch (error) {

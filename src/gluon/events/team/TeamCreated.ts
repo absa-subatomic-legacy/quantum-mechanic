@@ -10,10 +10,10 @@ import {
     addressSlackUsersFromContext,
     buttonForCommand,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
+import {SlackMessage} from "@atomist/slack-messages";
 import * as _ from "lodash";
-import {QMConfig} from "../../../config/QMConfig";
 import {NewOrUseTeamSlackChannel} from "../../commands/team/NewOrExistingTeamSlackChannel";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 
 @EventHandler("Receive TeamCreated events", `
@@ -49,7 +49,7 @@ Next you should configure your team Slack channel and OpenShift DevOps environme
             text,
             attachments: [{
                 fallback: "Next you should configure your team Slack channel and OpenShift DevOps environment",
-                footer: `For more information, please read the ${this.docs()}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.userGuide()}`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(
@@ -64,10 +64,5 @@ Next you should configure your team Slack channel and OpenShift DevOps environme
         };
         return await ctx.messageClient.send(msg,
             destination);
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/user-guide/create-a-team#associate-a-slack-channel`,
-            "documentation")}`;
     }
 }

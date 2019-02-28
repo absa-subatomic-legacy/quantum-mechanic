@@ -1,8 +1,9 @@
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
 import {CreateProject} from "../../commands/project/CreateProject";
 import {AddConfigServer} from "../../commands/team/AddConfigServer";
+import {CommandDocumentationLink} from "../documentation/CommandDocumentationLink";
+import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
 
 export class DevOpsMessages {
     public jenkinsSuccessfullyProvisioned(jenkinsHost: string, teamName: string): SlackMessage {
@@ -10,7 +11,7 @@ export class DevOpsMessages {
             text: `Your Jenkins instance has been successfully provisioned in the DevOps environment: ${url(`https://${jenkinsHost}`)}`,
             attachments: [{
                 fallback: `Create a project`,
-                footer: `For more information, please read the ${this.docs("create-project")}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.CreateProject)}`,
                 text: `
 If you haven't already, you might want to create a Project for your team to work on.`,
                 mrkdwn_in: ["text"],
@@ -23,7 +24,7 @@ If you haven't already, you might want to create a Project for your team to work
                 ],
             }, {
                 fallback: `Add a Subatomic Config Server`,
-                footer: `For more information, please read the ${this.docs("add-config-server")}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.AddConfigServer)}`,
                 text: `
 If your applications will require a Spring Cloud Config Server, you can add a Subatomic Config Server to your DevOps project now`,
                 mrkdwn_in: ["text"],
@@ -36,10 +37,5 @@ If your applications will require a Spring Cloud Config Server, you can add a Su
                 ],
             }],
         };
-    }
-
-    private docs(extension): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
-            "documentation")}`;
     }
 }

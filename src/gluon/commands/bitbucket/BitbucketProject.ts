@@ -30,7 +30,7 @@ import {
 
 @CommandHandler("Link an existing Bitbucket project", QMConfig.subatomic.commandPrefix + " link bitbucket project")
 @Tags("subatomic", "bitbucket", "project")
-export class ListExistingBitbucketProject
+export class LinkExistingBitbucketProject
     extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 

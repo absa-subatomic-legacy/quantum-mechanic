@@ -1,6 +1,6 @@
 import * as _ from "lodash";
 import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
-import {ListExistingBitbucketProject} from "../bitbucket/BitbucketProject";
+import {LinkExistingBitbucketProject} from "../bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "../bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "../bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
@@ -68,7 +68,7 @@ export class HelpCategory {
         LinkExistingApplication,
         LinkExistingLibrary,
         LinkExistingTeamSlackChannel,
-        ListExistingBitbucketProject,
+        LinkExistingBitbucketProject,
         ListProjectDetails,
         ListTeamMembers,
         ListTeamProjects,

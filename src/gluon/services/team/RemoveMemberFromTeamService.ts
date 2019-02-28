@@ -1,16 +1,21 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
-import {inspect} from "util";
-import {QMConfig} from "../../../config/QMConfig";
+import {
+    addressSlackChannelsFromContext,
+    buttonForCommand,
+} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {SlackMessage} from "@atomist/slack-messages";
 import {isSuccessCode} from "../../../http/Http";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
-import {AddMemberToTeamMessages} from "../../messages/team/AddMemberToTeamMessages";
+import {CommandDocumentationLink} from "../../messages/documentation/CommandDocumentationLink";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {MemberRole, QMMemberBase} from "../../util/member/Members";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
-import {kickUserFromSlackChannel, loadChannelIdByChannelName, QMTeam} from "../../util/team/Teams";
+import {
+    kickUserFromSlackChannel,
+    loadChannelIdByChannelName,
+    QMTeam,
+} from "../../util/team/Teams";
 import {GluonService} from "../gluon/GluonService";
 
 export class RemoveMemberFromTeamService {
@@ -18,7 +23,7 @@ export class RemoveMemberFromTeamService {
     constructor(private gluonService = new GluonService()) {
     }
 
-    public async getMemberGluonDetails(ctx: HandlerContext, chatId: string, teamChannel: string) {
+    public async getMemberGluonDetails(ctx: HandlerContext, chatId: string) {
         try {
             return await this.gluonService.members.gluonMemberFromScreenName(chatId);
         } catch (error) {
@@ -35,9 +40,8 @@ export class RemoveMemberFromTeamService {
                      the command or click the button below.
                             `,
                     fallback: "Failed to get member details.",
-                    footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/teams`,
-                        "documentation")}`,
-                    color:  QMColours.stdMuddyYellow.hex,
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandDocumentationLink.AddMemberToTeam)}`,
+                    color: QMColours.stdMuddyYellow.hex,
                     mrkdwn_in: ["text"],
                     thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                     actions: [
@@ -51,7 +55,7 @@ export class RemoveMemberFromTeamService {
         }
     }
 
-    public async removeUserFromGluonTeam(memberId: string, actioningMemberId: string, gluonTeamId: string, memberRole: MemberRole = MemberRole.member) {
+    public async removeUserFromGluonTeam(memberId: string, actioningMemberId: string, gluonTeamId: string) {
         const updateTeamResult = await this.gluonService.teams.removeMemberFromTeam(gluonTeamId, memberId, actioningMemberId);
         if (!isSuccessCode(updateTeamResult.status)) {
             let message = `Failed to remove member from the team.`;
@@ -77,7 +81,7 @@ export class RemoveMemberFromTeamService {
                 throw new QMError(`${memberToRemove.slack.screenName} is not a member of this team`);
             }
         } else {
-            if (team.owners.length === 1 ) {
+            if (team.owners.length === 1) {
                 throw new QMError(`${memberToRemove.slack.screenName} is the only owner of this team and cannot be removed.`);
             }
         }
@@ -87,17 +91,16 @@ export class RemoveMemberFromTeamService {
                                             newMemberFirstName: string,
                                             gluonTeamName: string,
                                             channelName: string,
-                                            screenName: string,
+                                            slackUserId: string,
                                             slackName: string) {
         const destination = await addressSlackChannelsFromContext(ctx, channelName);
         try {
-            logger.info(`Removing user ${screenName} from channel ${channelName}...`);
+            logger.info(`Removing user ${slackUserId} from channel ${channelName}...`);
             const channelId = await loadChannelIdByChannelName(ctx, channelName);
             logger.info("Channel ID: " + channelId);
 
             const chatTeamId = destination.team;
-            const userId = screenName;
-            await kickUserFromSlackChannel(ctx, chatTeamId, channelId, userId);
+            await kickUserFromSlackChannel(ctx, chatTeamId, channelId, slackUserId);
 
             const message = `${slackName} has been removed from the Slack channel: ${channelName}`;
             return await ctx.messageClient.send(message, destination);
