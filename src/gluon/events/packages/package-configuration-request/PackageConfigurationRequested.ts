@@ -30,6 +30,7 @@ import {ParameterDisplayType} from "../../../util/recursiveparam/RecursiveParame
 import {BaseQMEvent} from "../../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
+    handleQMError,
     QMError,
     QMMessageClient,
 } from "../../../util/shared/Error";
@@ -86,8 +87,9 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
             await this.configurePackage(ctx, messageClient, packageConfigurationRequestedEvent);
             this.succeedEvent();
             return await success();
-        } catch {
+        } catch (error) {
             this.failEvent();
+            return await handleQMError(messageClient, error);
         }
     }
 
