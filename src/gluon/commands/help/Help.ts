@@ -153,7 +153,7 @@ export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {
                             text: "Run Command",
                             style: "primary",
                         },
-                        this.optionFolders[0].findCommandByName(this.commandClassName), {correlationId: this.correlationId}),
+                        this.optionFolders[0].findCommandByName(this.commandClassName).name, {correlationId: this.correlationId}),
                 ],
             },
         );

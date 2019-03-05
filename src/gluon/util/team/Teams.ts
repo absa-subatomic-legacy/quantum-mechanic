@@ -1,5 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {Attachment} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import * as graphql from "../../../typings/types";
 import {QMMemberBase} from "../member/Members";
@@ -7,7 +8,7 @@ import {createMenuAttachment} from "../shared/GenericMenu";
 
 export function menuAttachmentForTeams(ctx: HandlerContext, teams: any[],
                                        command: HandleCommand, message: string = "Please select a team",
-                                       projectNameVariable: string = "teamName") {
+                                       projectNameVariable: string = "teamName"): Attachment {
     return createMenuAttachment(
         teams.map(team => {
             return {

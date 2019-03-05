@@ -17,10 +17,7 @@ import {
     QMProject,
 } from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
-import {
-    ChannelMessageClient,
-    handleQMError, QMError,
-} from "../../util/shared/Error";
+import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";

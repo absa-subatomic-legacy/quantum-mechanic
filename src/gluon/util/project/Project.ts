@@ -1,5 +1,6 @@
 import {HandlerContext} from "@atomist/automation-client";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {Attachment} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMBitbucketProject} from "../bitbucket/Bitbucket";
@@ -64,7 +65,7 @@ export function getProjectDisplayName(tenant: string, project: string, pipelineD
  */
 export function menuAttachmentForProjects(ctx: HandlerContext, projects: Array<{ name: string }>,
                                           command: HandleCommand, message: string = "Please select a project",
-                                          projectNameVariable: string = "projectName") {
+                                          projectNameVariable: string = "projectName"): Attachment {
     return createMenuAttachment(
         projects.map(project => {
             return {

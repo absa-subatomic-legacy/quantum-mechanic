@@ -10,8 +10,7 @@ import {
     addressSlackChannelsFromContext,
     menuForCommand,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage} from "@atomist/slack-messages";
-import {Attachment} from "@atomist/slack-messages/SlackMessages";
+import {Attachment, SlackMessage} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";

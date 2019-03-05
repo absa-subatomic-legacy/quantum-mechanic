@@ -8,6 +8,7 @@ import {
     BaseParameter,
     declareParameter,
 } from "@atomist/automation-client/lib/internal/metadata/decoratorSupport";
+import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import uuid = require("uuid");
 import {QMColours} from "../QMColour";
@@ -111,7 +112,7 @@ export abstract class RecursiveParameterRequestCommand extends BaseQMComand {
 
     protected abstract runCommand(ctx: HandlerContext): Promise<HandlerResult>;
 
-    protected getDisplayMessage(displayResultMenu: ParameterDisplayType = this.displayResultMenu) {
+    protected getDisplayMessage(displayResultMenu: ParameterDisplayType = this.displayResultMenu): SlackMessage {
         return this.parameterStatusDisplay.getDisplayMessage(this.getIntent(), displayResultMenu);
     }
 
