@@ -7,7 +7,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMMemberBase} from "../../util/member/Members";
@@ -26,8 +25,9 @@ import {
 } from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Creates a jenkins build job for a given project", QMConfig.subatomic.commandPrefix + " project request jenkins job")
+@CommandHandler("Creates a jenkins build job for a given project", atomistIntent(CommandIntent.CreateProjectJenkinsJob))
 @Tags("subatomic", "project", "jenkins", "other")
 export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {

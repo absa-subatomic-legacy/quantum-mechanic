@@ -10,10 +10,11 @@ import {
     addressSlackChannelsFromContext,
     menuForCommand,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
+import {SlackMessage} from "@atomist/slack-messages";
 import {Attachment} from "@atomist/slack-messages/SlackMessages";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -34,8 +35,9 @@ import {
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Create a new OpenShift Persistent Volume Claim", QMConfig.subatomic.commandPrefix + " create openshift pvc")
+@CommandHandler("Create a new OpenShift Persistent Volume Claim", atomistIntent(CommandIntent.CreateOpenShiftPvc))
 @Tags("subatomic", "project", "other")
 export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
@@ -125,20 +127,15 @@ export class CreateOpenShiftPvc extends RecursiveParameterRequestCommand
             attachments: pvcAttachments.concat({
                 fallback: `Using PVCs`,
                 text: `
-Now that your PVCs have been created, you can add this PVC as storage to an application. Follow the Subatomic documentation for more details on how to add storage.`,
+Now that your PVCs have been created, you can add this PVC as storage to an application.`,
                 color: QMColours.stdShySkyBlue.hex,
                 mrkdwn_in: ["text"],
                 thumb_url: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/OpenShift-LogoType.svg/959px-OpenShift-LogoType.svg.png",
-                footer: `For more information, please read the ${this.docs()}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateOpenShiftPvc)}`,
             } as Attachment),
         };
 
         return await ctx.messageClient.send(msg, destination);
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/storage`,
-            "documentation")}`;
     }
 
 }

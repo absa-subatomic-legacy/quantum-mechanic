@@ -27,10 +27,14 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {
+    atomistIntent,
+    CommandIntent,
+} from "../CommandIntent";
 
-@CommandHandler("Link an existing Bitbucket project", QMConfig.subatomic.commandPrefix + " link bitbucket project")
+@CommandHandler("Link an existing Bitbucket project", atomistIntent(CommandIntent.LinkExistingBitbucketProject))
 @Tags("subatomic", "bitbucket", "project")
-export class ListExistingBitbucketProject
+export class LinkExistingBitbucketProject
     extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {
 

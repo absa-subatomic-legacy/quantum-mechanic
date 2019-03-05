@@ -1,11 +1,10 @@
 import * as _ from "lodash";
 import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
-import {ListExistingBitbucketProject} from "../bitbucket/BitbucketProject";
+import {LinkExistingBitbucketProject} from "../bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "../bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "../bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "../jenkins/JenkinsCredentialsRecreate";
-import {AddSlackDetails} from "../member/AddSlackDetails";
 import {OnboardMember} from "../member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "../packages/ConfigureApplicationJenkinsProd";
 import {ConfigureBasicPackage} from "../packages/ConfigureBasicPackage";
@@ -47,7 +46,6 @@ export class HelpCategory {
         AddConfigServer,
         AddMemberToTeam,
         AddOwnerToTeam,
-        AddSlackDetails,
         AssociateTeam,
         BitbucketProjectAccessCommand,
         BitbucketProjectRecommendedPracticesCommand,
@@ -68,7 +66,7 @@ export class HelpCategory {
         LinkExistingApplication,
         LinkExistingLibrary,
         LinkExistingTeamSlackChannel,
-        ListExistingBitbucketProject,
+        LinkExistingBitbucketProject,
         ListProjectDetails,
         ListTeamMembers,
         ListTeamProjects,

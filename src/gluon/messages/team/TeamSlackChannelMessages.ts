@@ -1,13 +1,14 @@
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
+import {SlackMessage} from "@atomist/slack-messages";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {CreateTeam} from "../../commands/team/CreateTeam";
 import {LinkExistingTeamSlackChannel} from "../../commands/team/LinkExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "../../commands/team/NewSlackChannel";
 import {QMColours} from "../../util/QMColour";
+import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
 
 export class TeamSlackChannelMessages {
-    public requestNonExistentTeamsCreation(gluonTeamName: string, commandReferenceDocsExtension: string): SlackMessage {
+    public requestNonExistentTeamsCreation(gluonTeamName: string): SlackMessage {
         return {
             text: `There was an error creating your *${gluonTeamName}* team channel`,
             attachments: [{
@@ -16,8 +17,8 @@ Unfortunately this team does not seem to exist on Subatomic.
 To create a team channel you must first create a team. Click the button below to do that now.
                                                   `,
                 fallback: "Team does not exist on Subatomic",
-                footer: `For more information, please read the ${this.docs(commandReferenceDocsExtension)}`,
-                color:  QMColours.stdReddyMcRedFace.hex,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateTeam)}`,
+                color: QMColours.stdReddyMcRedFace.hex,
                 mrkdwn_in: ["text"],
                 actions: [
                     buttonForCommand(
@@ -40,7 +41,7 @@ rather use that instead?\
             text,
             attachments: [{
                 fallback: `Do you want to create a new team channel (${teamChannel}) or link an existing one?`,
-                footer: `For more information, please read the ${this.docs()}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.userGuide()}`,
                 actions: [
                     buttonForCommand(
                         {text: `Create channel ${teamChannel}`},
@@ -58,13 +59,5 @@ rather use that instead?\
                 ],
             }],
         };
-    }
-
-    private docs(extension: string = ""): string {
-        if (extension.length !== 0) {
-            extension = "#" + extension;
-        }
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference${extension}`,
-            "documentation")}`;
     }
 }

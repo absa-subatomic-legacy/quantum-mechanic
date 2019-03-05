@@ -9,7 +9,8 @@ import {OCService} from "../../services/openshift/OCService";
 import {getProjectDevOpsId} from "../../util/project/Project";
 import {
     GluonTeamNameParam,
-    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
+    GluonTeamNameSetter,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {ImageNameParam} from "../../util/recursiveparam/OpenshiftParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
@@ -18,8 +19,9 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Tag an individual subatomic image to a devops environment ", QMConfig.subatomic.commandPrefix + " tag image")
+@CommandHandler("Tag an individual subatomic image to a devops environment ", atomistIntent(CommandIntent.TagLatestImage))
 @Tags("subatomic", "devops", "team", "images")
 export class TagLatestImage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {

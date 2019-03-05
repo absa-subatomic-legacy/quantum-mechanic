@@ -1,11 +1,13 @@
 import {logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
+import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {CreateProject} from "../../commands/project/CreateProject";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {QMDeploymentPipeline} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
@@ -34,8 +36,7 @@ Unfortunately Subatomic does not manage this project.
 Consider creating a new project called ${projectName}. Click the button below to do that now.
                             `,
                         fallback: "Project not managed by Subatomic",
-                        footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-project`,
-                            "documentation")}`,
+                        footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateProject)}`,
                         color: QMColours.stdMuddyYellow.hex,
                         mrkdwn_in: ["text"],
                         actions: [

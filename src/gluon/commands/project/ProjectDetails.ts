@@ -22,8 +22,9 @@ import {
     logErrorAndReturnSuccess,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("List projects belonging to a team", QMConfig.subatomic.commandPrefix + " list projects")
+@CommandHandler("List projects belonging to a team", atomistIntent(CommandIntent.ListTeamProjects))
 @Tags("subatomic", "project", "team")
 export class ListTeamProjects extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {
@@ -69,7 +70,7 @@ export class ListTeamProjects extends RecursiveParameterRequestCommand
                 attachments.push(
                     {
                         text: `*Project:* ${project.name}\n*Description:* ${project.description}`,
-                        color:  QMColours.stdGreenyMcAppleStroodle.hex,
+                        color: QMColours.stdGreenyMcAppleStroodle.hex,
                         actions: [
                             buttonForCommand(
                                 {
@@ -154,7 +155,7 @@ export class ListProjectDetails extends BaseQMComand implements HandleCommand<Ha
                 attachments.push(
                     {
                         text: `*Application:* ${application.name}\n*Description:* ${application.description}\n*Bitbucket URL:* ${applicationBitbucketUrl}`,
-                        color:  QMColours.stdGreenyMcAppleStroodle.hex,
+                        color: QMColours.stdGreenyMcAppleStroodle.hex,
                     },
                 );
             }

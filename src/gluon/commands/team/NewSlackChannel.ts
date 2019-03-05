@@ -9,12 +9,12 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import * as _ from "lodash";
-import {QMConfig} from "../../../config/QMConfig";
 import {TeamSlackChannelService} from "../../services/team/TeamSlackChannelService";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Create team channel", QMConfig.subatomic.commandPrefix + " create team channel")
+@CommandHandler("Create team channel", atomistIntent(CommandIntent.NewTeamSlackChannel))
 @Tags("subatomic", "slack", "channel", "team")
 export class NewTeamSlackChannel extends BaseQMComand implements HandleCommand {
 
@@ -40,7 +40,7 @@ export class NewTeamSlackChannel extends BaseQMComand implements HandleCommand {
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             this.newTeamChannel = _.isEmpty(this.newTeamChannel) ? this.teamName : this.newTeamChannel;
-            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, "create-team-channel", true);
+            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, true);
             this.succeedCommand();
             return result;
         } catch (error) {

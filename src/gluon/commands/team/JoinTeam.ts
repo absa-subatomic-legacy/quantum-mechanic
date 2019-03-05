@@ -8,7 +8,6 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
-import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {JoinTeamMessages} from "../../messages/team/JoinTeamMessages";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -18,8 +17,9 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Apply to join an existing team", QMConfig.subatomic.commandPrefix + " apply to team")
+@CommandHandler("Apply to join an existing team", atomistIntent(CommandIntent.JoinTeam))
 @Tags("subatomic", "team")
 export class JoinTeam extends BaseQMComand implements HandleCommand<HandlerResult> {
 

@@ -1,12 +1,11 @@
 import {ingester} from "@atomist/automation-client/lib/graph/graphQL";
 import {QMConfig} from "./config/QMConfig";
-import {ListExistingBitbucketProject} from "./gluon/commands/bitbucket/BitbucketProject";
+import {LinkExistingBitbucketProject} from "./gluon/commands/bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "./gluon/commands/bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "./gluon/commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {Help} from "./gluon/commands/help/Help";
 import {KickOffJenkinsBuild} from "./gluon/commands/jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsCredentialsRecreate";
-import {AddSlackDetails} from "./gluon/commands/member/AddSlackDetails";
 import {OnboardMember} from "./gluon/commands/member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "./gluon/commands/packages/ConfigureApplicationJenkinsProd";
 import {ConfigureBasicPackage} from "./gluon/commands/packages/ConfigureBasicPackage";
@@ -82,7 +81,6 @@ export const configuration: any = {
         AddConfigServer,
         AddMemberToTeam,
         AddOwnerToTeam,
-        AddSlackDetails,
         AssociateTeam,
         BitbucketProjectAccessCommand,
         BitbucketProjectRecommendedPracticesCommand,
@@ -105,7 +103,7 @@ export const configuration: any = {
         LinkExistingApplication,
         LinkExistingLibrary,
         LinkExistingTeamSlackChannel,
-        ListExistingBitbucketProject,
+        LinkExistingBitbucketProject,
         ListProjectDetails,
         ListTeamMembers,
         ListTeamProjects,

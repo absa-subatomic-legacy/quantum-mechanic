@@ -5,7 +5,6 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -45,8 +44,9 @@ import {
     ResponderMessageClient,
 } from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Add a prod deployment job to jenkins for an application", QMConfig.subatomic.commandPrefix + " configure application jenkins prod")
+@CommandHandler("Add a prod deployment job to jenkins for an application", atomistIntent(CommandIntent.ConfigureApplicationJenkinsProd))
 @Tags("subatomic", "package", "jenkins")
 export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, DeploymentPipelineIdSetter {

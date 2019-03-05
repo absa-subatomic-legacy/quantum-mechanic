@@ -40,8 +40,9 @@ import {
     QMMessageClient,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Move openshift resources to prod", QMConfig.subatomic.commandPrefix + " request generic prod")
+@CommandHandler("Move openshift resources to prod", atomistIntent(CommandIntent.CreateGenericProd))
 @Tags("subatomic", "project", "other")
 export class CreateGenericProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, DeploymentPipelineIdSetter {

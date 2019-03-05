@@ -7,7 +7,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
@@ -19,8 +18,9 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Remove a member from a team", QMConfig.subatomic.commandPrefix + " remove team member")
+@CommandHandler("Remove a member from a team", atomistIntent(CommandIntent.RemoveMemberFromTeam))
 @Tags("subatomic", "team", "member")
 export class RemoveMemberFromTeam extends RecursiveParameterRequestCommand implements GluonTeamNameSetter {
 

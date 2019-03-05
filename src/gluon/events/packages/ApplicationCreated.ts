@@ -11,9 +11,9 @@ import {
     addressSlackChannelsFromContext,
     buttonForCommand,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {ConfigureBasicPackage} from "../../commands/packages/ConfigureBasicPackage";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 
@@ -97,8 +97,8 @@ export class ApplicationCreated extends BaseQMEvent implements HandleEvent<any> 
             attachments: [{
                 text: attachmentText,
                 fallback: attachmentText,
-                footer: `For more information, please read the ${this.docs("configure-component")}`,
-                color:  QMColours.stdGreenyMcAppleStroodle.hex,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.AddMemberToTeam)}`,
+                color: QMColours.stdGreenyMcAppleStroodle.hex,
                 actions: [
                     buttonForCommand(
                         {text: "Configure Component"},
@@ -114,8 +114,4 @@ export class ApplicationCreated extends BaseQMEvent implements HandleEvent<any> 
         }, destination);
     }
 
-    private docs(extension): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#${extension}`,
-            "documentation")}`;
-    }
 }

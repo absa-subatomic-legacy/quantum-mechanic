@@ -8,10 +8,12 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {SlackMessage, url} from "@atomist/slack-messages";
+import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
 import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsForProject";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
@@ -128,7 +130,7 @@ Since you have Subatomic project environments ready, you can now add packages.
 A package is either an application or a library, click the button below to create an application now.`,
             attachments: [{
                 fallback: "Create or link existing package",
-                footer: `For more information, please read the ${this.docs()}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.generalCommandReference(CommandIntent.ConfigureBasicPackage)}`,
                 color: QMColours.stdGreenyMcAppleStroodle.hex,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
@@ -152,8 +154,4 @@ A package is either an application or a library, click the button below to creat
         return await ctx.messageClient.send(msg, destination);
     }
 
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#link-library`,
-            "documentation")}`;
-    }
 }

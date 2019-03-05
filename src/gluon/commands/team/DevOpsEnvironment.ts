@@ -6,7 +6,6 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
@@ -14,8 +13,9 @@ import {
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Check whether to create a new OpenShift DevOps environment or use an existing one", QMConfig.subatomic.commandPrefix + " request devops environment")
+@CommandHandler("Check whether to create a new OpenShift DevOps environment or use an existing one", atomistIntent(CommandIntent.NewDevOpsEnvironment))
 @Tags("subatomic", "slack", "team", "devops")
 export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter {

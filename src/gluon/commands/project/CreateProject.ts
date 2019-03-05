@@ -5,7 +5,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
@@ -21,8 +20,9 @@ import {
     ResponderMessageClient,
 } from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
+@CommandHandler("Create a new project", atomistIntent(CommandIntent.CreateProject))
 @Tags("subatomic", "project", "team")
 export class CreateProject extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonTenantNameSetter {

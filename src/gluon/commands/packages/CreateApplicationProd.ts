@@ -42,8 +42,9 @@ import {
     QMMessageClient,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Create application in prod", QMConfig.subatomic.commandPrefix + " request application prod")
+@CommandHandler("Create application in prod", atomistIntent(CommandIntent.CreateApplicationProd))
 @Tags("subatomic", "package")
 export class CreateApplicationProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, DeploymentPipelineIdSetter {

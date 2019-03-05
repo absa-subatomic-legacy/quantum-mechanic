@@ -1,15 +1,12 @@
 import {url} from "@atomist/slack-messages";
 import assert = require("power-assert");
-import {anything, instance, mock, when} from "ts-mockito";
+import {instance, mock, when} from "ts-mockito";
 import {QMConfig} from "../../../../src/config/QMConfig";
 import {GluonService} from "../../../../src/gluon/services/gluon/GluonService";
 import {MemberService} from "../../../../src/gluon/services/gluon/MemberService";
 import {TeamService} from "../../../../src/gluon/services/gluon/TeamService";
-import {AddMemberToTeamService} from "../../../../src/gluon/services/team/AddMemberToTeamService";
 import {RemoveMemberFromTeamService} from "../../../../src/gluon/services/team/RemoveMemberFromTeamService";
-import {MemberRole} from "../../../../src/gluon/util/member/Members";
 import {QMError} from "../../../../src/gluon/util/shared/Error";
-import {TestGraphClient} from "../../TestGraphClient";
 import {TestMessageClient} from "../../TestMessageClient";
 
 describe("RemoveMemberFromTeamService getMemberGluonDetails", () => {
@@ -37,7 +34,7 @@ describe("RemoveMemberFromTeamService getMemberGluonDetails", () => {
             messageClient: new TestMessageClient(),
         };
 
-        const result = await service.getMemberGluonDetails(fakeContext, "Dex", "Channel2");
+        const result = await service.getMemberGluonDetails(fakeContext, "Dex");
 
         assert.equal(result.id, "User1");
 
