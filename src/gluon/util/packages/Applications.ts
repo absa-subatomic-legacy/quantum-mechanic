@@ -1,5 +1,6 @@
 import {HandlerContext} from "@atomist/automation-client";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {Attachment} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {createMenuAttachment} from "../shared/GenericMenu";
 
@@ -11,7 +12,7 @@ export enum ApplicationType {
 
 export function menuAttachmentForApplications(ctx: HandlerContext, applications: any[],
                                               command: HandleCommand, message: string = "Please select an application/library",
-                                              applicationNameVariable: string = "applicationName") {
+                                              applicationNameVariable: string = "applicationName"): Attachment {
     return createMenuAttachment(
         applications.map(application => {
             return {

@@ -1,9 +1,10 @@
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {Attachment} from "@atomist/slack-messages";
 import {createMenuAttachment} from "./GenericMenu";
 
 export function menuAttachmentForTenants(tenants: any[],
                                          command: HandleCommand, message: string = "Please select a tenant",
-                                         tenantNameVariable: string = "tenantName") {
+                                         tenantNameVariable: string = "tenantName"): Attachment {
     return createMenuAttachment(
         tenants.map(tenant => {
             return {

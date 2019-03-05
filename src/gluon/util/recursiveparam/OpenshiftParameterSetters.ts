@@ -3,6 +3,7 @@ import {
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
+import {Attachment} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {OCService} from "../../services/openshift/OCService";
@@ -117,7 +118,7 @@ export function ImageNameFromDevOpsParam(details: RecursiveParameterDetails) {
 function presentImageMenu(ctx: HandlerContext,
                           commandHandler: ImageNameSetter,
                           selectionMessage: string,
-                          images: OpenshiftResource[]) {
+                          images: OpenshiftResource[]): Attachment {
     logger.info(JSON.stringify(images, null, 2));
     return createMenuAttachment(
         images.map(image => {
