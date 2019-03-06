@@ -6,10 +6,16 @@ import {ProjectEvent} from "../../../util/transform/types/event/ProjectEvent";
 export interface PackageConfigurationRequestedEvent {
     application: GluonApplicationEvent;
     project: ProjectEvent;
-    imageName: string;
+    s2iImage: ImageStream;
     openshiftTemplate: string;
     jenkinsfileName: string;
     buildEnvironmentVariables: KeyValuePairEvent[];
     deploymentEnvironmentVariables: KeyValuePairEvent[];
     actionedBy: MemberEvent;
+}
+
+export interface ImageStream {
+    imageName: string;
+    imageTag: string;
+    namespace?: string;
 }

@@ -11,6 +11,7 @@ import {
     OpenshiftResource,
 } from "../../../openshift/api/resources/OpenshiftResource";
 import {QMTemplate} from "../../../template/QMTemplate";
+import {ImageStream} from "../../events/packages/package-configuration-request/PackageConfigurationRequestedEvent";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -23,6 +24,7 @@ import {
     QMProject,
 } from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
+import {imageStreamToFullImageStreamTagString} from "../../util/shared/ImageStreamTranformers";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {KeyValuePairEvent} from "../../util/transform/types/event/KeyValuePairEvent";
 import {Task} from "../Task";
@@ -65,13 +67,17 @@ export class ConfigurePackageInOpenshift extends Task {
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.packageDetails.projectName);
             const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
 
+            if (this.deploymentDetails.baseS2IImage.namespace === undefined) {
+                this.deploymentDetails.baseS2IImage.namespace = QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].sharedResourceNamespace;
+            }
+
             await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
             const appBuildName = getBuildConfigName(this.packageDetails.projectName, this.packageDetails.packageName);
             await this.createApplicationImageStream(appBuildName, teamDevOpsProjectId);
 
             await this.taskListMessage.succeedTask(this.TASK_CREATE_IMAGE_STREAM);
 
-            await this.createApplicationBuildConfig(this.packageDetails.bitbucketRepoRemoteUrl, appBuildName, this.deploymentDetails.baseS2IImage, teamDevOpsProjectId, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].sharedResourceNamespace);
+            await this.createApplicationBuildConfig(this.packageDetails.bitbucketRepoRemoteUrl, appBuildName, this.deploymentDetails.baseS2IImage, teamDevOpsProjectId);
 
             await this.taskListMessage.succeedTask(this.TASK_CREATE_BUILD_CONFIG);
 
@@ -94,7 +100,7 @@ export class ConfigurePackageInOpenshift extends Task {
         }, teamDevOpsProjectId);
     }
 
-    private getBuildConfigData(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string, sharedResourceNamespace: string): OpenshiftResource {
+    private getBuildConfigData(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: ImageStream): OpenshiftResource {
         return {
             apiVersion: "v1",
             kind: "BuildConfig",
@@ -126,8 +132,8 @@ export class ConfigurePackageInOpenshift extends Task {
                     sourceStrategy: {
                         from: {
                             kind: "ImageStreamTag",
-                            name: baseS2IImage,
-                            namespace: sharedResourceNamespace,
+                            name: imageStreamToFullImageStreamTagString(baseS2IImage),
+                            namespace: baseS2IImage.namespace,
                         },
                         env: [],
                     },
@@ -142,10 +148,10 @@ export class ConfigurePackageInOpenshift extends Task {
         };
     }
 
-    private async createApplicationBuildConfig(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string, teamDevOpsProjectId: string, sharedResourceNamespace: string) {
+    private async createApplicationBuildConfig(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: ImageStream, teamDevOpsProjectId: string) {
 
         logger.info(`Using Git URI: ${bitbucketRepoRemoteUrl}`);
-        const buildConfig: OpenshiftResource = this.getBuildConfigData(bitbucketRepoRemoteUrl, appBuildName, baseS2IImage, sharedResourceNamespace);
+        const buildConfig: OpenshiftResource = this.getBuildConfigData(bitbucketRepoRemoteUrl, appBuildName, baseS2IImage);
 
         for (const envVariableName of this.deploymentDetails.buildEnvironmentVariables) {
             buildConfig.spec.strategy.sourceStrategy.env.push(
@@ -230,7 +236,7 @@ export interface PackageDeploymentDetails {
     buildEnvironmentVariables: KeyValuePairEvent[];
     deploymentEnvironmentVariables: KeyValuePairEvent[];
     openshiftTemplate: string;
-    baseS2IImage: string;
+    baseS2IImage: ImageStream;
 }
 
 export interface PackageDetails {

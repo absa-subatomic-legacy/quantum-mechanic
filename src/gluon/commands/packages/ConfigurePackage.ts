@@ -126,7 +126,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
             project: GluonToEvent.project(project),
             application: GluonToEvent.application(application),
             actionedBy: GluonToEvent.member(member),
-            imageName: `${this.imageName}:${this.imageTag}`,
+            s2iImage: {imageName: this.imageName, imageTag: this.imageTag},
             jenkinsfileName: this.jenkinsfileName,
             openshiftTemplate: this.openshiftTemplate,
             buildEnvironmentVariables: GluonToEvent.keyValueList(this.buildEnvironmentVariables),
