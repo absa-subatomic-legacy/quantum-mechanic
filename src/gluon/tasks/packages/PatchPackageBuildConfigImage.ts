@@ -13,6 +13,8 @@ export class PatchPackageBuildConfigImage extends Task {
     private readonly TASK_PATCH_BUILD_CONFIG: string = TaskListMessage.createUniqueTaskName("PatchPackageBuildConfigImage");
 
     constructor(private imageName: string,
+                private imageTag: string,
+                private imageNamespace: string,
                 private packageName: string,
                 private projectName: string,
                 private teamName: string,
@@ -42,14 +44,14 @@ export class PatchPackageBuildConfigImage extends Task {
 
         const buildConfigName = getBuildConfigName(this.projectName, this.packageName);
 
-        const buildConfigPatch = this.getBuildConfigData(buildConfigName, this.imageName);
+        const buildConfigPatch = this.getBuildConfigData(buildConfigName, `${this.imageName}:${this.imageTag}`, this.imageNamespace);
 
         await this.ocService.patchResourceInNamespace(buildConfigPatch, devopsProjectId);
 
         await this.taskListMessage.succeedTask(this.TASK_PATCH_BUILD_CONFIG);
     }
 
-    private getBuildConfigData(appBuildName: string, baseS2IImage: string): OpenshiftResource {
+    private getBuildConfigData(appBuildName: string, baseS2IImageTag: string, imageNamespace: string): OpenshiftResource {
         return {
             apiVersion: "v1",
             kind: "BuildConfig",
@@ -60,7 +62,8 @@ export class PatchPackageBuildConfigImage extends Task {
                 strategy: {
                     sourceStrategy: {
                         from: {
-                            name: baseS2IImage,
+                            name: baseS2IImageTag,
+                            namespace: imageNamespace,
                         },
                     },
                 },

@@ -41,8 +41,6 @@ import {MigrateTeamCloud} from "./gluon/commands/team/MigrateTeamCloud";
 import {NewOrUseTeamSlackChannel} from "./gluon/commands/team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "./gluon/commands/team/NewSlackChannel";
 import {RemoveMemberFromTeam} from "./gluon/commands/team/RemoveMemberFromTeam";
-import {TagAllLatestImages} from "./gluon/commands/team/TagAllLatestImages";
-import {TagLatestImage} from "./gluon/commands/team/TagLatestImage";
 import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAdded";
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
@@ -117,8 +115,6 @@ export const configuration: any = {
         PatchBuildConfigBaseImage,
         RemoveMemberFromTeam,
         ReRunProjectProdRequest,
-        TagAllLatestImages,
-        TagLatestImage,
         UpdateProjectProdRequest,
     ],
     events: [

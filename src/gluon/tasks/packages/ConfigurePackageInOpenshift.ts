@@ -71,14 +71,14 @@ export class ConfigurePackageInOpenshift extends Task {
 
             await this.taskListMessage.succeedTask(this.TASK_CREATE_IMAGE_STREAM);
 
-            await this.createApplicationBuildConfig(this.packageDetails.bitbucketRepoRemoteUrl, appBuildName, this.deploymentDetails.baseS2IImage, teamDevOpsProjectId);
+            await this.createApplicationBuildConfig(this.packageDetails.bitbucketRepoRemoteUrl, appBuildName, this.deploymentDetails.baseS2IImage, teamDevOpsProjectId, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].sharedResourceNamespace);
 
             await this.taskListMessage.succeedTask(this.TASK_CREATE_BUILD_CONFIG);
 
             logger.info(`Trying to find tenant: ${project.owningTenant}`);
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
             logger.info(`Found tenant: ${tenant}`);
-            await this.createApplicationOpenshiftResources(tenant.name, project, this.packageDetails.packageName);
+            await this.createApplicationOpenshiftResources(tenant.name, project, this.packageDetails.packageName, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].sharedResourceNamespace);
 
             await this.taskListMessage.succeedTask(this.TASK_ADD_RESOURCES_TO_ENVIRONMENTS);
         }
@@ -94,7 +94,7 @@ export class ConfigurePackageInOpenshift extends Task {
         }, teamDevOpsProjectId);
     }
 
-    private getBuildConfigData(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string): OpenshiftResource {
+    private getBuildConfigData(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string, sharedResourceNamespace: string): OpenshiftResource {
         return {
             apiVersion: "v1",
             kind: "BuildConfig",
@@ -127,6 +127,7 @@ export class ConfigurePackageInOpenshift extends Task {
                         from: {
                             kind: "ImageStreamTag",
                             name: baseS2IImage,
+                            namespace: sharedResourceNamespace,
                         },
                         env: [],
                     },
@@ -141,10 +142,10 @@ export class ConfigurePackageInOpenshift extends Task {
         };
     }
 
-    private async createApplicationBuildConfig(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string, teamDevOpsProjectId: string) {
+    private async createApplicationBuildConfig(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string, teamDevOpsProjectId: string, sharedResourceNamespace: string) {
 
         logger.info(`Using Git URI: ${bitbucketRepoRemoteUrl}`);
-        const buildConfig: OpenshiftResource = this.getBuildConfigData(bitbucketRepoRemoteUrl, appBuildName, baseS2IImage);
+        const buildConfig: OpenshiftResource = this.getBuildConfigData(bitbucketRepoRemoteUrl, appBuildName, baseS2IImage, sharedResourceNamespace);
 
         for (const envVariableName of this.deploymentDetails.buildEnvironmentVariables) {
             buildConfig.spec.strategy.sourceStrategy.env.push(
@@ -158,19 +159,19 @@ export class ConfigurePackageInOpenshift extends Task {
         await this.ocService.applyResourceFromDataInNamespace(
             buildConfig,
             teamDevOpsProjectId,
-            true);  // TODO clean up this hack - cannot be a boolean (magic)
+            true);
     }
 
-    private async createApplicationOpenshiftResources(tenantName: string, project: QMProject, applicationName: string): Promise<HandlerResult> {
+    private async createApplicationOpenshiftResources(tenantName: string, project: QMProject, applicationName: string, sharedResourceNamespace: string): Promise<HandlerResult> {
         for (const openShiftNamespaceDetails of getAllPipelineOpenshiftNamespacesForAllPipelines(tenantName, project)) {
             const deploymentNamespace = openShiftNamespaceDetails.namespace;
             const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);
             logger.info(`Processing app [${appName}] Template for: ${deploymentNamespace}`);
 
-            const appBaseTemplate = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate, devOpsProjectId);
+            const appBaseTemplate = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate, sharedResourceNamespace);
             appBaseTemplate.metadata.namespace = deploymentNamespace;
-            await this.ocService.applyResourceFromDataInNamespace(appBaseTemplate, deploymentNamespace);
+            // await this.ocService.applyResourceFromDataInNamespace(appBaseTemplate, deploymentNamespace);
 
             const templateParameters = [
                 {key: "APP_NAME", value: appName},
@@ -180,7 +181,7 @@ export class ConfigurePackageInOpenshift extends Task {
 
             const appProcessedTemplate: OpenshiftListResource = await this.ocService.findAndProcessOpenshiftTemplate(
                 this.deploymentDetails.openshiftTemplate,
-                deploymentNamespace,
+                sharedResourceNamespace,
                 templateParameters,
                 true);
 

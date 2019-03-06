@@ -1,6 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
-import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory";
+import {QMConfig} from "../../../config/QMConfig";
 import {OCService} from "../../services/openshift/OCService";
 import {QMError, QMErrorType} from "../../util/shared/Error";
 import {
@@ -16,7 +16,6 @@ export class CreateTeamDevOpsEnvironment extends Task {
     private readonly TASK_HEADER = TaskListMessage.createUniqueTaskName("CreateTeamDevOpsEnvironmentHeader");
     private readonly TASK_OPENSHIFT_ENV = TaskListMessage.createUniqueTaskName("OpenshiftEnv");
     private readonly TASK_OPENSHIFT_PERMISSIONS = TaskListMessage.createUniqueTaskName("OpenshiftPermissions");
-    private readonly TASK_OPENSHIFT_RESOURCES = TaskListMessage.createUniqueTaskName("Resources");
     private readonly TASK_SECRETS = TaskListMessage.createUniqueTaskName("ConfigSecrets");
 
     constructor(private team: QMTeam,
@@ -30,7 +29,6 @@ export class CreateTeamDevOpsEnvironment extends Task {
         taskListMessage.addTask(this.TASK_HEADER, `*Create DevOpsEnvironment on ${this.openshiftEnvironment.name}*`);
         taskListMessage.addTask(this.TASK_OPENSHIFT_ENV, `\tCreate DevOps Openshift Project`);
         taskListMessage.addTask(this.TASK_OPENSHIFT_PERMISSIONS, `\tAdd Openshift Permissions`);
-        taskListMessage.addTask(this.TASK_OPENSHIFT_RESOURCES, `\tCopy Subatomic resources to DevOps Project`);
         taskListMessage.addTask(this.TASK_SECRETS, `\tAdd Secrets`);
     }
 
@@ -47,12 +45,12 @@ export class CreateTeamDevOpsEnvironment extends Task {
         await this.ocService.addTeamMembershipPermissionsToProject(projectId,
             this.team);
 
+        await this.ocService.addRoleToUserInNamespace(
+            `system:serviceaccount:${this.devopsEnvironmentDetails.openshiftProjectId}:default`,
+            "system:image-pullers",
+            QMConfig.subatomic.openshiftClouds[this.team.openShiftCloud].sharedResourceNamespace);
+
         await this.taskListMessage.succeedTask(this.TASK_OPENSHIFT_PERMISSIONS);
-
-        await this.copySubatomicAppTemplatesToDevOpsEnvironment(projectId);
-        await this.ocService.tagAllSubatomicImageStreamsToDevOpsEnvironment(projectId);
-
-        await this.taskListMessage.succeedTask(this.TASK_OPENSHIFT_RESOURCES);
 
         await this.addBitbucketSSHSecret(projectId);
 
@@ -79,21 +77,6 @@ export class CreateTeamDevOpsEnvironment extends Task {
         await this.ocService.createDevOpsDefaultLimits(projectId);
 
         return {};
-    }
-
-    private async copySubatomicAppTemplatesToDevOpsEnvironment(projectId: string) {
-        logger.info(`Finding templates in subatomic namespace`);
-
-        const appTemplates = await this.ocService.getSubatomicAppTemplates();
-
-        for (const item of appTemplates) {
-            item.metadata.namespace = projectId;
-        }
-
-        const resourceList = ResourceFactory.resourceList();
-        resourceList.items.push(...appTemplates);
-
-        await this.ocService.applyResourceFromDataInNamespace(resourceList, projectId);
     }
 
     private async addBitbucketSSHSecret(projectId: string) {

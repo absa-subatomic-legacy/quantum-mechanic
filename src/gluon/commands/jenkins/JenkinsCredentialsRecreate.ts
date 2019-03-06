@@ -8,23 +8,21 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
-import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
+import {
+    JenkinsCredentialsAction,
+    JenkinsDevOpsCredentialsService,
+} from "../../services/jenkins/JenkinsDevOpsCredentialsService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
-import {getJenkinsBitbucketAccessCredentialXML} from "../../util/jenkins/JenkinsCredentials";
 import {
     GluonTeamNameParam,
     GluonTeamNameSetter,
     GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {
-    handleQMError,
-    QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
-import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Recreate the Jenkins Bitbucket Credentials", atomistIntent(CommandIntent.JenkinsCredentialsRecreate))
@@ -48,7 +46,8 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
 
     constructor(public gluonService = new GluonService(),
                 private jenkinsService = new JenkinsService(),
-                private ocService = new OCService()) {
+                private ocService = new OCService(),
+                private jenkinsDevOpsCredentialsService = new JenkinsDevOpsCredentialsService()) {
         super();
     }
 
@@ -56,6 +55,7 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
         try {
             await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
             const result = await this.recreateBitbucketJenkinsCredential(ctx, this.teamName);
+
             this.succeedCommand();
             return result;
         } catch (error) {
@@ -72,17 +72,12 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
 
         const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
 
+        const team: QMTeam = await this.gluonService.teams.gluonTeamByName(gluonTeamName);
+
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to kick off build`);
 
-        const kickOffBuildResult = await this.jenkinsService.updateCredential(
-            jenkinsHost,
-            token,
-            getJenkinsBitbucketAccessCredentialXML(teamDevOpsProjectId),
-            `${teamDevOpsProjectId}-bitbucket`,
-        );
-        if (!isSuccessCode(kickOffBuildResult.status)) {
-            throw new QMError("Failed to recreate the Jenkins Bitbucket Credential! Please ensure your Jenkins is running.");
-        }
+        await this.jenkinsDevOpsCredentialsService.createDevOpsJenkinsGlobalCredentials(teamDevOpsProjectId, jenkinsHost, token, team.openShiftCloud, JenkinsCredentialsAction.CREATE);
+
         return await ctx.messageClient.respond({
             text: `🚀 Successfully created the Jenkins Bitbucket Credentials for *${gluonTeamName}* DevOps.`,
         });

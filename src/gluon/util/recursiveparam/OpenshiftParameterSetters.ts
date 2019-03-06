@@ -26,13 +26,13 @@ export async function setOpenshiftTemplate(
         throw new QMError(`setOpenshiftTemplate commandHandler requires the ocService parameter to be defined`);
     }
 
-    if (commandHandler.teamName === undefined) {
-        throw new QMError(`setOpenshiftTemplate commandHandler requires the teamName parameter to be defined`);
+    if (commandHandler.openShiftCloud === undefined) {
+        throw new QMError(`setOpenshiftTemplate commandHandler requires the openShiftCloud parameter to be defined`);
     }
 
     await commandHandler.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].openshiftNonProd);
 
-    const namespace = getDevOpsEnvironmentDetails(commandHandler.teamName).openshiftProjectId;
+    const namespace = QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].sharedResourceNamespace;
     const templates = await commandHandler.ocService.getSubatomicAppTemplates(namespace);
     return {
         setterSuccess: false,
@@ -52,7 +52,6 @@ export async function setOpenshiftTemplate(
 
 export interface OpenshiftTemplateSetter {
     ocService: OCService;
-    teamName: string;
     openshiftTemplate: string;
     openShiftCloud: string;
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
@@ -83,6 +82,33 @@ export async function setImageName(
 
 export function ImageNameParam(details: RecursiveParameterDetails) {
     details.setter = setImageName;
+    return RecursiveParameter(details);
+}
+
+export async function setImageStreamTag(
+    ctx: HandlerContext,
+    commandHandler: ImageTagSetter,
+    selectionMessage: string = "Please select an image tag") {
+    if (commandHandler.ocService === undefined) {
+        throw new QMError(`setImageStreamTag commandHandler requires ocService parameter to be defined`);
+    }
+
+    if (commandHandler.imageName === undefined) {
+        throw new QMError(`setImageStreamTag commandHandler requires imageName parameter to be defined`);
+    }
+
+    await commandHandler.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].openshiftNonProd);
+
+    const image: OpenshiftResource = await commandHandler.ocService.getImageStream(commandHandler.imageName, QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].sharedResourceNamespace);
+
+    return {
+        setterSuccess: false,
+        messagePrompt: presentImageTagMenu(ctx, commandHandler, selectionMessage, image.status.tags),
+    };
+}
+
+export function ImageStreamTagParam(details: RecursiveParameterDetails) {
+    details.setter = setImageStreamTag;
     return RecursiveParameter(details);
 }
 
@@ -134,10 +160,37 @@ function presentImageMenu(ctx: HandlerContext,
         "imageName");
 }
 
+function presentImageTagMenu(ctx: HandlerContext,
+                             commandHandler: ImageNameSetter,
+                             selectionMessage: string,
+                             imageStreamTags: any[]): Attachment {
+    logger.info(JSON.stringify(imageStreamTags, null, 2));
+    return createMenuAttachment(
+        imageStreamTags.map(imageTag => {
+            return {
+                value: imageTag.tag,
+                text: imageTag.tag,
+            };
+        }),
+        commandHandler,
+        selectionMessage,
+        selectionMessage,
+        "Select Image Tag",
+        "imageTag");
+}
+
 export interface ImageNameSetter {
     ocService: OCService;
     imageName: string;
     teamName?: string;
+    openShiftCloud: string;
+    handle: (ctx: HandlerContext) => Promise<HandlerResult>;
+}
+
+export interface ImageTagSetter {
+    ocService: OCService;
+    imageName: string;
+    imageTag: string;
     openShiftCloud: string;
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }

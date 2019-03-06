@@ -23,8 +23,10 @@ import {
     JenkinsFileParam,
 } from "../../util/recursiveparam/JenkinsParameterSetters";
 import {
-    ImageNameFromDevOpsParam,
+    ImageNameParam,
     ImageNameSetter,
+    ImageStreamTagParam,
+    ImageTagSetter,
     OpenShiftTemplateParam,
     OpenshiftTemplateSetter,
 } from "../../util/recursiveparam/OpenshiftParameterSetters";
@@ -40,7 +42,8 @@ import {atomistIntent, CommandIntent} from "../CommandIntent";
 @CommandHandler("Configure an existing application/library", atomistIntent(CommandIntent.ConfigurePackage))
 @Tags("subatomic", "package")
 export class ConfigurePackage extends RecursiveParameterRequestCommand
-    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, JenkinsfileNameSetter, OpenshiftTemplateSetter, ImageNameSetter {
+    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter,
+        JenkinsfileNameSetter, OpenshiftTemplateSetter, ImageNameSetter, ImageTagSetter {
 
     @GluonTeamNameParam({
         callOrder: 0,
@@ -66,20 +69,26 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
     })
     public openShiftCloud: string;
 
-    @ImageNameFromDevOpsParam({
+    @ImageNameParam({
         callOrder: 4,
         description: "Please select the base image for the s2i build",
     })
     public imageName: string;
 
-    @OpenShiftTemplateParam({
+    @ImageStreamTagParam({
         callOrder: 5,
+        description: "Please select the base image tag for the s2i build",
+    })
+    public imageTag: string;
+
+    @OpenShiftTemplateParam({
+        callOrder: 6,
         selectionMessage: "Please select the correct openshift template for your package",
     })
     public openshiftTemplate: string;
 
     @JenkinsFileParam({
-        callOrder: 6,
+        callOrder: 7,
         selectionMessage: "Please select the correct jenkinsfile for your package",
     })
     public jenkinsfileName: string;
@@ -117,7 +126,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
             project: GluonToEvent.project(project),
             application: GluonToEvent.application(application),
             actionedBy: GluonToEvent.member(member),
-            imageName: this.imageName,
+            imageName: `${this.imageName}:${this.imageTag}`,
             jenkinsfileName: this.jenkinsfileName,
             openshiftTemplate: this.openshiftTemplate,
             buildEnvironmentVariables: GluonToEvent.keyValueList(this.buildEnvironmentVariables),

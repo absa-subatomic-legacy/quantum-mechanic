@@ -49,7 +49,7 @@ export async function setJenkinsfileName(
         new BitBucketServerRepoRef(
             QMConfig.subatomic.bitbucket.baseUrl,
             project.bitbucketProject.key,
-            application.bitbucketRepository.name));
+            application.bitbucketRepository.slug));
     try {
         await gitProject.findFile("Jenkinsfile");
         commandHandler.jenkinsfileName = JENKINSFILE_EXISTS_FLAG;

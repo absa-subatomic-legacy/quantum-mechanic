@@ -10,7 +10,6 @@ export class CreateConfigServer extends Task {
 
     private readonly TASK_CONFIG_SERVER_SECRET = TaskListMessage.createUniqueTaskName("ConfigServerSecret");
     private readonly TASK_CONFIG_SERVER_CONFIG_MAP = TaskListMessage.createUniqueTaskName("ConfigServerConfigMap");
-    private readonly TASK_TAG_CONFIG_SERVER_IMAGE = TaskListMessage.createUniqueTaskName("TagImage");
     private readonly TASK_SET_SERVICE_ACCOUNT_PERMISSIONS = TaskListMessage.createUniqueTaskName("ServiceAccountPermissions");
     private readonly TASK_CREATE_DEPLOYMENT_CONFIG = TaskListMessage.createUniqueTaskName("DeploymentConfig");
 
@@ -24,7 +23,6 @@ export class CreateConfigServer extends Task {
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
         taskListMessage.addTask(this.TASK_CONFIG_SERVER_SECRET, `\tCreate Config Server Secret`);
         taskListMessage.addTask(this.TASK_CONFIG_SERVER_CONFIG_MAP, `\tCreate Config Server Config Map`);
-        taskListMessage.addTask(this.TASK_TAG_CONFIG_SERVER_IMAGE, `\tTag Config Server image to DevOps`);
         taskListMessage.addTask(this.TASK_SET_SERVICE_ACCOUNT_PERMISSIONS, `\tGrant Service Account correct permissions`);
         taskListMessage.addTask(this.TASK_CREATE_DEPLOYMENT_CONFIG, `\tCreate Config Server Deployment Config`);
     }
@@ -41,15 +39,15 @@ export class CreateConfigServer extends Task {
 
         await this.taskListMessage.succeedTask(this.TASK_CONFIG_SERVER_CONFIG_MAP);
 
-        await this.tagConfigServerImageToDevOpsEnvironment(devOpsProjectId);
-
-        await this.taskListMessage.succeedTask(this.TASK_TAG_CONFIG_SERVER_IMAGE);
-
         await this.addViewRoleToDevOpsEnvironmentDefaultServiceAccount(devOpsProjectId);
 
         await this.taskListMessage.succeedTask(this.TASK_SET_SERVICE_ACCOUNT_PERMISSIONS);
 
-        await this.createConfigServerDeploymentConfig(this.gitRepoSSHURI, devOpsProjectId);
+        await this.createConfigServerDeploymentConfig(
+            this.gitRepoSSHURI,
+            QMConfig.subatomic.openshiftClouds[this.openShiftCloud].sharedResourceNamespace,
+            devOpsProjectId,
+        );
 
         await this.taskListMessage.succeedTask(this.TASK_CREATE_DEPLOYMENT_CONFIG);
 
@@ -87,13 +85,6 @@ spring:
         return await this.ocService.applyResourceFromDataInNamespace(configurationMapDefintion, devOpsProjectId);
     }
 
-    private async tagConfigServerImageToDevOpsEnvironment(devOpsProjectId: string) {
-        return await this.ocService.tagSubatomicImageToNamespace(
-            "subatomic-config-server:3.0",
-            devOpsProjectId,
-            "subatomic-config-server:3.0");
-    }
-
     private async addViewRoleToDevOpsEnvironmentDefaultServiceAccount(devOpsProjectId: string) {
         return await this.ocService.addRoleToUserInNamespace(
             `system:serviceaccount:${devOpsProjectId}:default`,
@@ -101,7 +92,7 @@ spring:
             devOpsProjectId);
     }
 
-    private async createConfigServerDeploymentConfig(gitUri: string, devOpsProjectId: string) {
+    private async createConfigServerDeploymentConfig(gitUri: string, imageStreamNamespace: string, devOpsProjectId: string) {
         try {
             await this.ocService.getDeploymentConfigInNamespace("subatomic-config-server", devOpsProjectId);
             logger.warn(`Subatomic Config Server Template has already been processed, deployment exists`);
@@ -110,7 +101,7 @@ spring:
 
             const templateParameters = [
                 {key: "GIT_URI", value: saneGitUri},
-                {key: "IMAGE_STREAM_PROJECT", value: devOpsProjectId},
+                {key: "IMAGE_STREAM_PROJECT", value: imageStreamNamespace},
             ];
 
             const appTemplate = await this.ocService.findAndProcessOpenshiftTemplate(

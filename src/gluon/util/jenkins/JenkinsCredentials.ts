@@ -32,10 +32,9 @@ export function getJenkinsBitbucketAccessCredentialXML(teamDevOpsProjectId) {
     return value;
 }
 
-export function getJenkinsBitbucketProjectCredential(projectId: string) {
+export function getJenkinsBitbucketProjectCredential(projectId: string): JenkinsCredentials {
     return {
-        "": "0",
-        "credentials": {
+        credentials: {
             scope: "GLOBAL",
             id: `${projectId}-bitbucket`,
             username: QMConfig.subatomic.bitbucket.auth.username,
@@ -46,10 +45,9 @@ export function getJenkinsBitbucketProjectCredential(projectId: string) {
     };
 }
 
-export function getJenkinsNexusCredential() {
+export function getJenkinsNexusCredential(): JenkinsCredentials {
     return {
-        "": "0",
-        "credentials": {
+        credentials: {
             scope: "GLOBAL",
             id: "nexus-base-url",
             secret: `${QMConfig.subatomic.nexus.baseUrl}/content/repositories/`,
@@ -59,10 +57,9 @@ export function getJenkinsNexusCredential() {
     };
 }
 
-export function getJenkinsDockerCredential(openShiftCloud: string) {
+export function getJenkinsDockerCredential(openShiftCloud: string): JenkinsCredentials {
     return {
-        "": "0",
-        "credentials": {
+        credentials: {
             scope: "GLOBAL",
             id: "docker-registry-ip",
             secret: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}`,
@@ -72,10 +69,21 @@ export function getJenkinsDockerCredential(openShiftCloud: string) {
     };
 }
 
-export function getJenkinsMavenCredential() {
+export function getJenkinsSubatomicSharedResourceNamespaceCredentials(openShiftCloud: string): JenkinsCredentials {
     return {
-        "": "0",
-        "credentials": {
+        credentials: {
+            scope: "GLOBAL",
+            id: "sub-shared-resource-namespace",
+            secret: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].sharedResourceNamespace}`,
+            description: "Openshift namespace where shared Subatomic resources are stored",
+            $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
+        },
+    };
+}
+
+export function getJenkinsMavenCredential(): JenkinsCredentials {
+    return {
+        credentials: {
             scope: "GLOBAL",
             id: "maven-settings",
             file: "file",
@@ -86,7 +94,7 @@ export function getJenkinsMavenCredential() {
     };
 }
 
-export function getOpenshiftEnvironmentCredential(environment: OpenShiftProjectNamespace) {
+export function getOpenshiftEnvironmentCredential(environment: OpenShiftProjectNamespace): JenkinsCredentials {
     return {
         credentials: {
             id: `${_.kebabCase(environment.postfix)}-project`,
@@ -95,4 +103,8 @@ export function getOpenshiftEnvironmentCredential(environment: OpenShiftProjectN
             $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
         },
     };
+}
+
+export interface JenkinsCredentials {
+    credentials: { id: string, [key: string]: any };
 }

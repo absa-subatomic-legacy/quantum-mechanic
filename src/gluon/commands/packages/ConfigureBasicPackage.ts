@@ -112,11 +112,14 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
 
     private async callPackageConfiguration(ctx: HandlerContext, definition: PackageDefinition): Promise<HandlerResult> {
         const configurePackage = new ConfigurePackage();
+        // TODO: probably want to modify all the package definitions to use this interface instead
+        const imageStream: ImageStream = fullImageStreamTagToParts(definition.buildConfig.imageStream);
         configurePackage.screenName = this.screenName;
         configurePackage.teamChannel = this.teamChannel;
         configurePackage.openshiftTemplate = definition.openshiftTemplate || "Default";
         configurePackage.jenkinsfileName = definition.jenkinsfile;
-        configurePackage.imageName = definition.buildConfig.imageStream;
+        configurePackage.imageName = imageStream.imageName;
+        configurePackage.imageTag = imageStream.imageStreamTag;
         if (!_.isEmpty(definition.buildConfig.envVariables)) {
             configurePackage.buildEnvironmentVariables = definition.buildConfig.envVariables;
         } else {
@@ -233,4 +236,18 @@ function getNameFromDefinitionPath(definitionPath: string): string {
     // Remove file extension
     name = name.substring(0, definitionPath.length - PACKAGE_DEFINITION_EXTENSION.length);
     return name;
+}
+
+function fullImageStreamTagToParts(fullImageStreamName: string): ImageStream {
+    const imageStreamParts = fullImageStreamName.split(":");
+
+    return {
+        imageName: imageStreamParts[0],
+        imageStreamTag: imageStreamParts[1],
+    };
+}
+
+interface ImageStream {
+    imageName: string;
+    imageStreamTag: string;
 }
