@@ -34,8 +34,6 @@ export enum CommandIntent {
     PatchBuildConfigBaseImage = "patch package s2i image",
     RequestProjectEnvironments = "request project environments",
     RemoveMemberFromTeam = "remove team member",
-    TagAllLatestImages = "tag all images",
-    TagLatestImage = "tag image",
 }
 
 export function atomistIntent(baseIntent: CommandIntent) {
