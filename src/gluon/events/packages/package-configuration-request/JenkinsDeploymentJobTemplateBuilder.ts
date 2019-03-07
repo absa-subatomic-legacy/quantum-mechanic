@@ -1,9 +1,13 @@
+import _ = require("lodash");
+import {QMConfig} from "../../../../config/QMConfig";
 import {
+    getDefaultProdJenkinsFileName,
     getEnvironmentDeploymentJenkinsfilePostfix,
     getEnvironmentDeploymentJenkinsJobPostfix,
 } from "../../../util/jenkins/Jenkins";
 import {
     getJenkinsMultiBranchDeploymentJobTemplateFile,
+    getJenkinsProdJobTemplateFile,
     JenkinsDeploymentJobTemplate,
 } from "../../../util/jenkins/JenkinsJobTemplates";
 import {getHighestPreProdEnvironment} from "../../../util/openshift/Helpers";
@@ -28,7 +32,7 @@ export function buildJenkinsDeploymentJobTemplates(tenantName: string, projectNa
                     sourceJenkinsfile,
                     expectedJenkinsfile,
                     sourceEnvironment: lastDeploymentEnvironmentMetadata,
-                    deploymentEnvironment: deploymentEnvironmentJenkinsMetadata,
+                    deploymentEnvironments: [deploymentEnvironmentJenkinsMetadata],
                     jobNamePostfix,
                     jobTemplateFilename,
                 },
@@ -36,5 +40,43 @@ export function buildJenkinsDeploymentJobTemplates(tenantName: string, projectNa
             lastDeploymentEnvironmentMetadata = deploymentEnvironmentJenkinsMetadata;
         }
     }
+    return jenkinsDeploymentJobTemplates;
+}
+
+export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, projectName: string, openShiftCloud: string, releaseDeploymentPipeline: QMDeploymentPipeline) {
+    const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = [];
+    const prepodEnvironment: JenkinsProjectMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releaseDeploymentPipeline, getHighestPreProdEnvironment(releaseDeploymentPipeline));
+
+    const prodPostfix = "prod";
+    const sourceJenkinsfile = getDefaultProdJenkinsFileName();
+    const expectedJenkinsfile = `Jenkinsfile${getEnvironmentDeploymentJenkinsfilePostfix(releaseDeploymentPipeline.tag, prodPostfix)}`;
+    const jobNamePostfix = getEnvironmentDeploymentJenkinsJobPostfix(releaseDeploymentPipeline.tag, prodPostfix);
+    const jobTemplateFilename = getJenkinsProdJobTemplateFile();
+    const deploymentEnvironments = [];
+    for (const prodEnvironment of QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftProd) {
+        deploymentEnvironments.push(
+            getDeploymentEnvironmentJenkinsMetadata(
+                tenantName,
+                projectName,
+                releaseDeploymentPipeline,
+                {
+                    displayName: prodEnvironment.name,
+                    postfix: _.kebabCase(prodEnvironment.name),
+                },
+            ),
+        );
+    }
+
+    jenkinsDeploymentJobTemplates.push(
+        {
+            sourceJenkinsfile,
+            expectedJenkinsfile,
+            sourceEnvironment: prepodEnvironment,
+            deploymentEnvironments,
+            jobNamePostfix,
+            jobTemplateFilename,
+        },
+    );
+
     return jenkinsDeploymentJobTemplates;
 }

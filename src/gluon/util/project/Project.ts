@@ -151,7 +151,7 @@ export function getAllPipelineOpenshiftNamespaces(owningTenantName: string, proj
  * @param pipeline - The particular pipeline to generate the metadata for
  * @param environment - The particular deployment environment to generate the metadata for
  */
-export function getDeploymentEnvironmentJenkinsMetadata(tenantName: string, projectName: string, pipeline: QMDeploymentPipeline, environment: QMDeploymentEnvironment): JenkinsProjectMetadata {
+export function getDeploymentEnvironmentJenkinsMetadata(tenantName: string, projectName: string, pipeline: { name: string, tag: string }, environment: { displayName: string, postfix: string }): JenkinsProjectMetadata {
     return {
         displayName: getProjectDisplayName(tenantName, projectName, pipeline.name, environment.displayName),
         postfix: getDeploymentEnvironmentFullPostfix(pipeline.tag, environment.postfix),
