@@ -54,7 +54,8 @@ Here is an example `local.json`:
       "ab-cloud": {
         "openshiftNonProd": {
           "name": "nonprod",
-          "dockerRepoUrl": "172.30.1.1:5000",
+          "internalDockerRegistryUrl": "172.30.1.1:5000",
+          "externalDockerRegistryUrl": "<external docker registry url>",
           "masterUrl": "<minishift ip>",
           "auth": {
             "token": "<subatomic service account token>"
@@ -77,7 +78,8 @@ Here is an example `local.json`:
         "openshiftProd": [
           {
             "name": "prod-a",
-            "dockerRepoUrl": "172.30.1.1:5000",
+            "internalDockerRegistryUrl": "172.30.1.1:5000",
+            "externalDockerRegistryUrl": "<external docker registry url>",
             "masterUrl": "<minishift ip>",
             "auth": {
               "token": "<subatomic service account token>"
@@ -179,6 +181,7 @@ Replace the relevant values above:
 | `<Atomist workspace ApiKey>` | Atomist ApiKey | See [Atomist documentation](https://docs.atomist.com/developer/prerequisites) |
 | `<bitbucket ssh port>` | Bitbucket SSH Port | Set this to the port used for ssh git commands on your Bitbucket instance. The default for Local Hadron Collider should be `30999` |
 | `<plugins directory>` | Pluging Directory | Set this to the directory which all available plugin modules will be dropped into |
+| `<external docker registry url>`| External Docker Registry Url | Url pointing to a docker registry. This is only passed as a templating parameter when creating jenkinsfiles so can be empty if your jenkinsfiles do not use these urls. |
 
 Note that the settings should be change appropriately if using different environments for prod or multiple prod environments in the relative parts of the settings file.
 
