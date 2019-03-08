@@ -3,6 +3,7 @@ import _ = require("lodash");
 import * as XmlBuilder from "xmlbuilder";
 import {QMConfig} from "../../../config/QMConfig";
 import {OpenShiftProjectNamespace} from "../project/Project";
+import {getDevOpsEnvironmentDetails} from "../team/Teams";
 
 export function getJenkinsBitbucketAccessCredential(teamDevOpsProjectId: string) {
     return {
@@ -100,6 +101,19 @@ export function getOpenshiftEnvironmentCredential(environment: OpenShiftProjectN
             id: `${_.kebabCase(environment.postfix)}-project`,
             secret: environment.namespace,
             description: `${environment.displayName} OpenShift project Id`,
+            $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
+        },
+    };
+}
+
+export function getOpenshiftProductionDevOpsJenkinsTokenCredential(teamName: string, prodEnvironmentName: string, productionToken: string) {
+    const nonProdDevOpsEnvironmentDetails = getDevOpsEnvironmentDetails(teamName);
+    return {
+        credentials: {
+            scope: "GLOBAL",
+            id: `${nonProdDevOpsEnvironmentDetails.openshiftProjectId}-${_.kebabCase(prodEnvironmentName)}`,
+            secret: productionToken,
+            description: `${nonProdDevOpsEnvironmentDetails.openshiftProjectId} ${prodEnvironmentName} token`,
             $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
         },
     };

@@ -3,6 +3,7 @@ import {QMConfig} from "../../../config/QMConfig";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {JenkinsDevOpsCredentialsService} from "../../services/jenkins/JenkinsDevOpsCredentialsService";
 import {OCService} from "../../services/openshift/OCService";
+import {getSubatomicJenkinsServiceAccountName} from "../../util/jenkins/Jenkins";
 import {
     roleBindingDefinition,
     serviceAccountDefinition,
@@ -61,7 +62,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         const jenkinsHost: string = await this.createJenkinsRoute(projectId);
 
-        const token: string = await this.ocService.getServiceAccountToken("subatomic-jenkins", projectId);
+        const token: string = await this.ocService.getServiceAccountToken(getSubatomicJenkinsServiceAccountName(), projectId);
 
         logger.info(`Using Service Account token: ${token}`);
 

@@ -1,3 +1,5 @@
+import {getSubatomicJenkinsServiceAccountName} from "./Jenkins";
+
 export function serviceAccountDefinition() {
     return {
         apiVersion: "v1",
@@ -7,7 +9,7 @@ export function serviceAccountDefinition() {
                 "subatomic.bison.co.za/managed": "true",
                 "serviceaccounts.openshift.io/oauth-redirectreference.jenkins": '{"kind":"OAuthRedirectReference", "apiVersion":"v1","reference":{"kind":"Route","name":"jenkins"}}',
             },
-            name: "subatomic-jenkins",
+            name: getSubatomicJenkinsServiceAccountName(),
         },
     };
 }
@@ -29,7 +31,7 @@ export function roleBindingDefinition() {
         },
         subjects: [{
             kind: "ServiceAccount",
-            name: "subatomic-jenkins",
+            name: getSubatomicJenkinsServiceAccountName(),
         }],
     };
 }

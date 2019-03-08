@@ -22,7 +22,7 @@ export class JenkinsDevOpsCredentialsService {
         token: string,
         openShiftCloud: string,
         createMethod: JenkinsCredentialsAction = JenkinsCredentialsAction.CREATE) {
-        logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
+        logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add credentials`);
         const bitbucketCredentials = getJenkinsBitbucketProjectCredential(projectId);
 
         await this.recreateGlobalCredentialsFor("Bitbucket", jenkinsHost, token, bitbucketCredentials, createMethod);
@@ -45,6 +45,19 @@ export class JenkinsDevOpsCredentialsService {
             filePath: QMConfig.subatomic.maven.settingsPath,
             fileName: "settings.xml",
         });
+    }
+
+    public async createDevOpsJenkinsGlobalCredentialsFromList(
+        projectId: string,
+        jenkinsHost: string,
+        token: string,
+        jenkinsCredentials: JenkinsCredentials[],
+        createMethod: JenkinsCredentialsAction = JenkinsCredentialsAction.CREATE) {
+        logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add credentials`);
+
+        for (const credential of jenkinsCredentials) {
+            await this.recreateGlobalCredentialsFor(credential.credentials.id, jenkinsHost, token, credential, createMethod);
+        }
     }
 
     private async recreateGlobalCredentialsFor(

@@ -9,6 +9,7 @@ import {
     JenkinsService,
 } from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
+import {getSubatomicJenkinsServiceAccountName} from "../../util/jenkins/Jenkins";
 import {
     getJenkinsBitbucketAccessCredential,
     getOpenshiftEnvironmentCredential,
@@ -63,7 +64,7 @@ export class ConfigureJenkinsForProject extends Task {
 
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_SA_RIGHTS);
 
-        const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
+        const token = await this.ocService.getServiceAccountToken(getSubatomicJenkinsServiceAccountName(), teamDevOpsProjectId);
         const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
 
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
