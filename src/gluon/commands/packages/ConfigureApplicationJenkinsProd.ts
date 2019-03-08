@@ -5,6 +5,7 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
+import {QMConfig} from "../../../config/QMConfig";
 import {buildJenkinsProdDeploymentJobTemplates} from "../../events/packages/package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../services/gluon/ApplicationService";
@@ -103,7 +104,7 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             const taskListMessage: TaskListMessage = new TaskListMessage(":rocket: Configuring Application Prod Jenkins...", messageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            const jenkinsJobTemplate: JenkinsDeploymentJobTemplate[] = buildJenkinsProdDeploymentJobTemplates(tenant.name, project.name, project.owningTeam.openShiftCloud, deploymentPipeline);
+            const jenkinsJobTemplate: JenkinsDeploymentJobTemplate[] = buildJenkinsProdDeploymentJobTemplates(tenant.name, project.name, QMConfig.subatomic.openshiftClouds[project.owningTeam.openShiftCloud].openshiftProd, deploymentPipeline);
 
             taskRunner.addTask(
                 new ConfigurePackageDeploymentPipelineInJenkins(application, project, jenkinsJobTemplate),

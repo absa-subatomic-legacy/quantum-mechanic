@@ -1,5 +1,5 @@
 import _ = require("lodash");
-import {QMConfig} from "../../../../config/QMConfig";
+import {OpenShiftConfig} from "../../../../config/OpenShiftConfig";
 import {
     getDefaultProdJenkinsFileName,
     getEnvironmentDeploymentJenkinsfilePostfix,
@@ -43,7 +43,7 @@ export function buildJenkinsDeploymentJobTemplates(tenantName: string, projectNa
     return jenkinsDeploymentJobTemplates;
 }
 
-export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, projectName: string, openShiftCloud: string, releaseDeploymentPipeline: QMDeploymentPipeline) {
+export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, projectName: string, openShiftProdEnvironmentDefintions: OpenShiftConfig[], releaseDeploymentPipeline: QMDeploymentPipeline) {
     const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = [];
     const prepodEnvironment: JenkinsProjectMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releaseDeploymentPipeline, getHighestPreProdEnvironment(releaseDeploymentPipeline));
 
@@ -53,7 +53,7 @@ export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, proje
     const jobNamePostfix = getEnvironmentDeploymentJenkinsJobPostfix(releaseDeploymentPipeline.tag, prodPostfix);
     const jobTemplateFilename = getJenkinsProdJobTemplateFile();
     const deploymentEnvironments = [];
-    for (const prodEnvironment of QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftProd) {
+    for (const prodEnvironment of openShiftProdEnvironmentDefintions) {
         deploymentEnvironments.push(
             getDeploymentEnvironmentJenkinsMetadata(
                 tenantName,
