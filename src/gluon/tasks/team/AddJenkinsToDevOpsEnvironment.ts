@@ -54,7 +54,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
             QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl,
         );
 
-        await this.createJenkinsServiceAccount(projectId);
+        await this.createSubatomicJenkinsServiceAccount(projectId);
 
         await this.rolloutJenkinsDeployment(projectId);
 
@@ -99,9 +99,15 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         } catch (error) {
             await this.ocService.applyResourceFromDataInNamespace(openShiftResourceList, projectId);
         }
+
+        // Give image-puller permissions to the created jenkins service account
+        await this.ocService.addRoleToUserInNamespace(
+            `system:serviceaccount:${projectId}:jenkins`,
+            "system:image-pullers",
+            QMConfig.subatomic.openshiftClouds[this.team.openShiftCloud].sharedResourceNamespace);
     }
 
-    private async createJenkinsServiceAccount(projectId: string) {
+    private async createSubatomicJenkinsServiceAccount(projectId: string) {
         await this.ocService.applyResourceFromDataInNamespace(serviceAccountDefinition(), projectId);
 
         await this.ocService.applyResourceFromDataInNamespace(roleBindingDefinition(), projectId, true);
