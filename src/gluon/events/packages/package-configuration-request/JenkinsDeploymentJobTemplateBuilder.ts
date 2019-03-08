@@ -17,12 +17,12 @@ import {
     QMDeploymentPipeline,
 } from "../../../util/project/Project";
 
-export function buildJenkinsDeploymentJobTemplates(tenantName: string, projectName: string, devDeploymentPipeline: QMDeploymentPipeline, releaseDeploymentPipelines: QMDeploymentPipeline[]) {
+export function buildJenkinsDeploymentJobTemplates(tenantName: string, projectName: string, devDeploymentPipeline: QMDeploymentPipeline, releaseDeploymentPipelines: QMDeploymentPipeline[], clusterDetails: { name: string, externalDockerRegistryUrl: string }) {
     const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = [];
     for (const releasePipeline of releaseDeploymentPipelines) {
-        let lastDeploymentEnvironmentMetadata: JenkinsProjectMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, devDeploymentPipeline, getHighestPreProdEnvironment(devDeploymentPipeline));
+        let lastDeploymentEnvironmentMetadata: JenkinsProjectMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, devDeploymentPipeline, getHighestPreProdEnvironment(devDeploymentPipeline), clusterDetails);
         for (const deploymentEnvironment of releasePipeline.environments) {
-            const deploymentEnvironmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releasePipeline, deploymentEnvironment);
+            const deploymentEnvironmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releasePipeline, deploymentEnvironment, clusterDetails);
             const sourceJenkinsfile = "jenkinsfile.deployment";
             const expectedJenkinsfile = `Jenkinsfile${getEnvironmentDeploymentJenkinsfilePostfix(releasePipeline.tag, deploymentEnvironment.postfix)}`;
             const jobNamePostfix = getEnvironmentDeploymentJenkinsJobPostfix(releasePipeline.tag, deploymentEnvironment.postfix);
@@ -43,9 +43,9 @@ export function buildJenkinsDeploymentJobTemplates(tenantName: string, projectNa
     return jenkinsDeploymentJobTemplates;
 }
 
-export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, projectName: string, openShiftProdEnvironmentDefintions: OpenShiftConfig[], releaseDeploymentPipeline: QMDeploymentPipeline) {
+export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, projectName: string, nonProdEnvironmentDefinition: OpenShiftConfig, openShiftProdEnvironmentDefinitions: OpenShiftConfig[], releaseDeploymentPipeline: QMDeploymentPipeline) {
     const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = [];
-    const prepodEnvironment: JenkinsProjectMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releaseDeploymentPipeline, getHighestPreProdEnvironment(releaseDeploymentPipeline));
+    const prepodEnvironment: JenkinsProjectMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releaseDeploymentPipeline, getHighestPreProdEnvironment(releaseDeploymentPipeline), nonProdEnvironmentDefinition);
 
     const prodPostfix = "prod";
     const sourceJenkinsfile = getDefaultProdJenkinsFileName();
@@ -53,17 +53,20 @@ export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, proje
     const jobNamePostfix = getEnvironmentDeploymentJenkinsJobPostfix(releaseDeploymentPipeline.tag, prodPostfix);
     const jobTemplateFilename = getJenkinsProdJobTemplateFile();
     const deploymentEnvironments = [];
-    for (const prodEnvironment of openShiftProdEnvironmentDefintions) {
+    for (const prodEnvironment of openShiftProdEnvironmentDefinitions) {
+        const projectMetadata = getDeploymentEnvironmentJenkinsMetadata(
+            tenantName,
+            projectName,
+            releaseDeploymentPipeline,
+            {
+                displayName: prodEnvironment.name,
+                postfix: _.kebabCase(prodEnvironment.name),
+            },
+            prodEnvironment,
+        );
+
         deploymentEnvironments.push(
-            getDeploymentEnvironmentJenkinsMetadata(
-                tenantName,
-                projectName,
-                releaseDeploymentPipeline,
-                {
-                    displayName: prodEnvironment.name,
-                    postfix: _.kebabCase(prodEnvironment.name),
-                },
-            ),
+            projectMetadata,
         );
     }
 

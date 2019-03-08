@@ -46,7 +46,23 @@ describe("buildJenkinsDeploymentJobTemplates", () => {
             },
         ];
 
-        const jenkinsDeploymentJobTemplates = buildJenkinsDeploymentJobTemplates("default", "Demo", devDeploymentPipeline, releaseDeploymentPipelines);
+        const openshiftNonprodDefinition: OpenShiftConfig = {
+            name: "a.nonprod.pretend",
+            internalDockerRegistryUrl: "172.30.1.1:5000",
+            externalDockerRegistryUrl: "registry.a.nonprod.com",
+            masterUrl: "https://192.168.64.2:8443",
+            auth: {
+                token: "token",
+            },
+            defaultEnvironments: [
+                {
+                    id: "dev",
+                    description: "DEV",
+                },
+            ],
+        };
+
+        const jenkinsDeploymentJobTemplates = buildJenkinsDeploymentJobTemplates("default", "Demo", devDeploymentPipeline, releaseDeploymentPipelines, openshiftNonprodDefinition);
 
         assert.equal(jenkinsDeploymentJobTemplates.length, 2);
         assert.equal(jenkinsDeploymentJobTemplates[0].sourceEnvironment.postfix, "sit");
@@ -119,7 +135,23 @@ describe("buildJenkinsDeploymentJobTemplates", () => {
             },
         ];
 
-        const jenkinsDeploymentJobTemplates = buildJenkinsDeploymentJobTemplates("default", "Demo", devDeploymentPipeline, releaseDeploymentPipelines);
+        const openshiftNonprodDefinition: OpenShiftConfig = {
+            name: "a.nonprod.pretend",
+            internalDockerRegistryUrl: "172.30.1.1:5000",
+            externalDockerRegistryUrl: "registry.a.nonprod.com",
+            masterUrl: "https://192.168.64.2:8443",
+            auth: {
+                token: "token",
+            },
+            defaultEnvironments: [
+                {
+                    id: "dev",
+                    description: "DEV",
+                },
+            ],
+        };
+
+        const jenkinsDeploymentJobTemplates = buildJenkinsDeploymentJobTemplates("default", "Demo", devDeploymentPipeline, releaseDeploymentPipelines, openshiftNonprodDefinition);
 
         assert.equal(jenkinsDeploymentJobTemplates.length, 3);
         assert.equal(jenkinsDeploymentJobTemplates[0].sourceEnvironment.postfix, "sit");
@@ -170,10 +202,27 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
             ],
         };
 
-        const openshiftEnvironmentDefintions: OpenShiftConfig [] = [
+        const openshiftNonprodDefinition: OpenShiftConfig = {
+            name: "a.nonprod.pretend",
+            internalDockerRegistryUrl: "172.30.1.1:5000",
+            externalDockerRegistryUrl: "registry.a.nonprod.com",
+            masterUrl: "https://192.168.64.2:8443",
+            auth: {
+                token: "token",
+            },
+            defaultEnvironments: [
+                {
+                    id: "dev",
+                    description: "DEV",
+                },
+            ],
+        };
+
+        const openshiftProdEnvironmentDefinitions: OpenShiftConfig [] = [
             {
                 name: "a.prod.pretend",
-                dockerRepoUrl: "172.30.1.1:5000",
+                internalDockerRegistryUrl: "172.30.1.1:5000",
+                externalDockerRegistryUrl: "registry.a.com",
                 masterUrl: "https://192.168.64.2:8443",
                 auth: {
                     token: "token",
@@ -187,7 +236,8 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
             },
             {
                 name: "b.prod.pretend",
-                dockerRepoUrl: "172.30.1.1:5000",
+                internalDockerRegistryUrl: "172.30.1.1:5000",
+                externalDockerRegistryUrl: "registry.b.com",
                 masterUrl: "https://192.168.64.2:8443",
                 auth: {
                     token: "token",
@@ -200,7 +250,7 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
                 ],
             },
         ];
-        const jenkinsDeploymentJobTemplates = buildJenkinsProdDeploymentJobTemplates("default", "Demo", openshiftEnvironmentDefintions, releaseDeploymentPipelines);
+        const jenkinsDeploymentJobTemplates = buildJenkinsProdDeploymentJobTemplates("default", "Demo", openshiftNonprodDefinition, openshiftProdEnvironmentDefinitions, releaseDeploymentPipelines);
 
         assert.equal(jenkinsDeploymentJobTemplates.length, 1);
         assert.equal(jenkinsDeploymentJobTemplates[0].sourceEnvironment.postfix, "preprod");

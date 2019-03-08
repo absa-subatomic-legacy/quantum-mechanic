@@ -301,7 +301,7 @@ export class OCService {
             {key: "JENKINS_ADMIN_EMAIL", value: "subatomic@local"},
             {
                 key: "DEVOPS_URL",
-                value: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}/${devopsNamespace}`,
+                value: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.internalDockerRegistryUrl}/${devopsNamespace}`,
             },
         ];
 

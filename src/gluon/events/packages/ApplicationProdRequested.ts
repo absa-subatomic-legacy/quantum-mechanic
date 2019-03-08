@@ -126,7 +126,13 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
                     );
             }
 
-            const jenkinsJobTemplate: JenkinsDeploymentJobTemplate[] = buildJenkinsProdDeploymentJobTemplates(tenant.name, qmProject.name, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd, applicationProdRequest.deploymentPipeline);
+            const jenkinsJobTemplate: JenkinsDeploymentJobTemplate[] = buildJenkinsProdDeploymentJobTemplates(
+                tenant.name,
+                qmProject.name,
+                QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd,
+                QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd,
+                applicationProdRequest.deploymentPipeline,
+            );
 
             taskRunner.addTask(
                 new ConfigurePackageDeploymentPipelineInJenkins(application, qmProject, jenkinsJobTemplate),

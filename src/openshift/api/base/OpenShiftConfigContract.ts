@@ -2,7 +2,7 @@ export interface OpenShiftConfigContract {
     name: string;
     masterUrl: string;
     auth: OpenShiftAuthContract;
-    dockerRepoUrl: string;
+    internalDockerRegistryUrl: string;
 }
 
 export interface OpenShiftAuthContract {

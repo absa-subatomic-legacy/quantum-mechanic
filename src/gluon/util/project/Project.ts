@@ -150,11 +150,14 @@ export function getAllPipelineOpenshiftNamespaces(owningTenantName: string, proj
  * @param projectName - The name of the project to generate the meta data for
  * @param pipeline - The particular pipeline to generate the metadata for
  * @param environment - The particular deployment environment to generate the metadata for
+ * @param clusterDetails - The details of the openshift cluster this deployment environment resides on
  */
-export function getDeploymentEnvironmentJenkinsMetadata(tenantName: string, projectName: string, pipeline: { name: string, tag: string }, environment: { displayName: string, postfix: string }): JenkinsProjectMetadata {
+export function getDeploymentEnvironmentJenkinsMetadata(tenantName: string, projectName: string, pipeline: { name: string, tag: string }, environment: { displayName: string, postfix: string }, clusterDetails: { name: string, externalDockerRegistryUrl: string }): JenkinsProjectMetadata {
     return {
         displayName: getProjectDisplayName(tenantName, projectName, pipeline.name, environment.displayName),
         postfix: getDeploymentEnvironmentFullPostfix(pipeline.tag, environment.postfix),
+        clusterName: clusterDetails.name,
+        clusterExternalDockerRegistryUrl: clusterDetails.externalDockerRegistryUrl,
     };
 }
 
@@ -185,6 +188,8 @@ export interface OpenShiftProjectNamespace {
 export interface JenkinsProjectMetadata {
     displayName: string;
     postfix: string;
+    clusterExternalDockerRegistryUrl: string;
+    clusterName: string;
 }
 
 export interface QMProjectBase {

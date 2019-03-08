@@ -104,7 +104,13 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
             const taskListMessage: TaskListMessage = new TaskListMessage(":rocket: Configuring Application Prod Jenkins...", messageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            const jenkinsJobTemplate: JenkinsDeploymentJobTemplate[] = buildJenkinsProdDeploymentJobTemplates(tenant.name, project.name, QMConfig.subatomic.openshiftClouds[project.owningTeam.openShiftCloud].openshiftProd, deploymentPipeline);
+            const jenkinsJobTemplate: JenkinsDeploymentJobTemplate[] = buildJenkinsProdDeploymentJobTemplates(
+                tenant.name,
+                project.name,
+                QMConfig.subatomic.openshiftClouds[project.owningTeam.openShiftCloud].openshiftNonProd,
+                QMConfig.subatomic.openshiftClouds[project.owningTeam.openShiftCloud].openshiftProd,
+                deploymentPipeline,
+            );
 
             taskRunner.addTask(
                 new ConfigurePackageDeploymentPipelineInJenkins(application, project, jenkinsJobTemplate),
