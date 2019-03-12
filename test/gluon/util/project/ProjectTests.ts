@@ -79,7 +79,8 @@ describe("getPipelineOpenShiftNamespacesForOpenShiftCluster", () => {
         };
 
         const cluster: OpenShiftConfig = {
-            dockerRepoUrl: "",
+            internalDockerRegistryUrl: "",
+            externalDockerRegistryUrl: "externalurl",
             auth: {token: ""},
             masterUrl: "",
             name: "",
@@ -219,9 +220,23 @@ describe("getDeploymentEnvironmentJenkinsMetadata", () => {
             ],
         };
 
-        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("default", "Project", pipeline, pipeline.environments[0]);
+        const cluster: OpenShiftConfig = {
+            internalDockerRegistryUrl: "internalUrl",
+            externalDockerRegistryUrl: "externalUrl",
+            auth: {token: "token"},
+            masterUrl: "masterIr;",
+            name: "clusterName",
+            defaultEnvironments: [
+                {description: "DEV", id: "dev"},
+                {description: "UAT", id: "uat"},
+            ],
+        };
+
+        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("default", "Project", pipeline, pipeline.environments[0], cluster);
         assert.equal(environmentJenkinsMetadata.displayName, "Project Pipeline Dev");
         assert.equal(environmentJenkinsMetadata.postfix, "pipeline-dev");
+        assert.equal(environmentJenkinsMetadata.clusterName, "clusterName");
+        assert.equal(environmentJenkinsMetadata.clusterExternalDockerRegistryUrl, "externalUrl");
     });
     it("should return correct meta data for non default tenant", async () => {
         const pipeline: QMDeploymentPipeline = {
@@ -237,9 +252,23 @@ describe("getDeploymentEnvironmentJenkinsMetadata", () => {
             ],
         };
 
-        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("something", "Project", pipeline, pipeline.environments[0]);
+        const cluster: OpenShiftConfig = {
+            internalDockerRegistryUrl: "internalUrl",
+            externalDockerRegistryUrl: "externalUrl",
+            auth: {token: "token"},
+            masterUrl: "masterIr;",
+            name: "clusterName",
+            defaultEnvironments: [
+                {description: "DEV", id: "dev"},
+                {description: "UAT", id: "uat"},
+            ],
+        };
+
+        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("something", "Project", pipeline, pipeline.environments[0], cluster);
         assert.equal(environmentJenkinsMetadata.displayName, "something Project Pipeline Dev");
         assert.equal(environmentJenkinsMetadata.postfix, "pipeline-dev");
+        assert.equal(environmentJenkinsMetadata.clusterName, "clusterName");
+        assert.equal(environmentJenkinsMetadata.clusterExternalDockerRegistryUrl, "externalUrl");
     });
 
     it("should return correct meta data for default pipeline with no tag", async () => {
@@ -256,8 +285,22 @@ describe("getDeploymentEnvironmentJenkinsMetadata", () => {
             ],
         };
 
-        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("something", "Project", pipeline, pipeline.environments[0]);
+        const cluster: OpenShiftConfig = {
+            internalDockerRegistryUrl: "internalUrl",
+            externalDockerRegistryUrl: "externalUrl",
+            auth: {token: "token"},
+            masterUrl: "masterIr;",
+            name: "clusterName",
+            defaultEnvironments: [
+                {description: "DEV", id: "dev"},
+                {description: "UAT", id: "uat"},
+            ],
+        };
+
+        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("something", "Project", pipeline, pipeline.environments[0], cluster);
         assert.equal(environmentJenkinsMetadata.displayName, "something Project Dev");
         assert.equal(environmentJenkinsMetadata.postfix, "dev");
+        assert.equal(environmentJenkinsMetadata.clusterName, "clusterName");
+        assert.equal(environmentJenkinsMetadata.clusterExternalDockerRegistryUrl, "externalUrl");
     });
 });

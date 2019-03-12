@@ -27,7 +27,7 @@ export const EmptyJenkinsJobTemplate: JenkinsJobTemplate = {
 
 export interface JenkinsDeploymentJobTemplate extends JenkinsJobTemplate {
     sourceEnvironment: JenkinsProjectMetadata;
-    deploymentEnvironment: JenkinsProjectMetadata;
+    deploymentEnvironments: JenkinsProjectMetadata[];
 }
 
 export function getJenkinsProdJobTemplateFile() {

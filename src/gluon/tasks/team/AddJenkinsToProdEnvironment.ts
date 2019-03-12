@@ -1,4 +1,5 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
+import _ = require("lodash");
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
@@ -90,9 +91,9 @@ export class AddJenkinsToProdEnvironment extends Task {
             "": "0",
             "credentials": {
                 scope: "GLOBAL",
-                id: `${teamDevOpsProjectId}-${prodName}`,
+                id: `${teamDevOpsProjectId}-${_.kebabCase(prodName)}`,
                 secret: secretValue,
-                description: `${teamDevOpsProjectId}-${prodName}`,
+                description: `${teamDevOpsProjectId} ${prodName} token`,
                 $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
             },
         };

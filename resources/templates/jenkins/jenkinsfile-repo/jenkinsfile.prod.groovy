@@ -1,11 +1,3 @@
-def project = "${env.JOB_NAME.split('/')[0]}"
-def app = "${env.JOB_NAME.split('/')[1].replace('-prod','')}"
-def sourceImageName
-def devOpsProjectId
-def imageStreamName
-def prodProjectId
-
-
 def copyAndDeploy(imageStreamName, devOpsProjectId, prodProjectId, app) {
     openshift.withProject(devOpsProjectId) {
         openshift.tag("$devOpsProjectId/$imageStreamName", "$prodProjectId/$imageStreamName")
@@ -42,9 +34,26 @@ def copyAndDeploy(imageStreamName, devOpsProjectId, prodProjectId, app) {
     }
 }
 
+def app = "{{toKebabCase application.name}}"
+def sourceImageName
+def devOpsProjectId
+def imageStreamName
+
+def project{{toPascalCase sourceEnvironment.postfix}}Project
+
+{{#each deploymentEnvironments}}
+def project{{toPascalCase postfix}}Project
+{{/each}}
+
 withCredentials([
+        {{#each deploymentEnvironments}}
+        string(credentialsId: '{{toKebabCase postfix}}-project', variable: '{{toUpperSnakeCase postfix}}_PROJECT_ID'),
+        {{/each}}
+        {{#each deploymentEnvironments}}
+        string(credentialsId: "$DEVOPS_PROJECT_ID-{{toKebabCase clusterName}}", variable: '{{toUpperSnakeCase clusterName}}_TOKEN'),
+        {{/each}}
         string(credentialsId: 'devops-project', variable: 'DEVOPS_PROJECT_ID'),
-        string(credentialsId: 'uat-project', variable: 'UAT_PROJECT_ID')
+        string(credentialsId: '{{toKebabCase sourceEnvironment.postfix}}-project', variable: '{{toUpperSnakeCase sourceEnvironment.postfix}}_PROJECT_ID')
 ]) {
-	// add prod deploy stuff here
+    // Add prod deployment details here
 }
