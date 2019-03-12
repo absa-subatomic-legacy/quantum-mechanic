@@ -39,9 +39,19 @@ def getTag(projectId, imageStreamName, tag){
         echo "Requesting latest tag"
         openshift.withProject(projectId) {
             def imageStream = openshift.selector('imagestream', imageStreamName)
-            def newTag = imageStream.object().spec.tags[0].name
-            echo "Most recent tag found: $newTag"
-            return newTag
+            def availableTags = imageStream.object().status.tags
+            def latestTag;
+            def latestDate="0";
+            for (currentTag in availableTags){
+                for (tagItem in currentTag.items){
+                    if (tagItem.created.compareTo(latestDate) > 0){
+                        latestDate = tagItem.created;
+                        latestTag = currentTag.tag;
+                    }
+                }
+            }
+            echo "Most recent tag found: $latestTag"
+            return latestTag
         }
     }else {
         echo "Using tag: $tag"
