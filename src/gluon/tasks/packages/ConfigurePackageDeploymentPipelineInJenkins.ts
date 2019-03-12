@@ -128,7 +128,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
             const content = jenkinsTemplate.build({
                 application,
                 sourceEnvironment: jenkinsDeploymentTemplate.sourceEnvironment,
-                deploymentEnvironment: jenkinsDeploymentTemplate.deploymentEnvironment,
+                deploymentEnvironments: jenkinsDeploymentTemplate.deploymentEnvironments,
             });
             const commitMessage = `Added ${jenkinsDeploymentTemplate.expectedJenkinsfile}`;
 

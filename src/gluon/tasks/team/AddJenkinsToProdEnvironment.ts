@@ -1,4 +1,5 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
+import _ = require("lodash");
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
@@ -86,9 +87,18 @@ export class AddJenkinsToProdEnvironment extends Task {
             destinationNamespace);
     }
 
-    private async createJenkinsCredentials(teamName: string, jenkinsHost: string, token: string, prodName: string, secretValue: string) {
+    private async createJenkinsCredentials(teamDevOpsProjectId: string, jenkinsHost: string, token: string, prodName: string, secretValue: string) {
 
-        const jenkinsCredentials = await getOpenshiftProductionDevOpsJenkinsTokenCredential(teamName, prodName, secretValue);
+        const jenkinsCredentials = {
+            "": "0",
+            "credentials": {
+                scope: "GLOBAL",
+                id: `${teamDevOpsProjectId}-${_.kebabCase(prodName)}`,
+                secret: secretValue,
+                description: `${teamDevOpsProjectId} ${prodName} token`,
+                $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
+            },
+        };
 
         await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, jenkinsCredentials);
     }

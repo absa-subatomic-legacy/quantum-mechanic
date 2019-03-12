@@ -9,6 +9,7 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage} from "@atomist/slack-messages";
+import {QMConfig} from "../../../../config/QMConfig";
 import {CommandIntent} from "../../../commands/CommandIntent";
 import {KickOffJenkinsBuild} from "../../../commands/jenkins/JenkinsBuild";
 import {DocumentationUrlBuilder} from "../../../messages/documentation/DocumentationUrlBuilder";
@@ -151,7 +152,13 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
 
         // Add Additional Jenkins Deployment jobs
         if (application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
-            const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = buildJenkinsDeploymentJobTemplates(tenant.name, project.name, project.devDeploymentPipeline, project.releaseDeploymentPipelines);
+            const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = buildJenkinsDeploymentJobTemplates(
+                tenant.name,
+                project.name,
+                project.devDeploymentPipeline,
+                project.releaseDeploymentPipelines,
+                QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd,
+            );
 
             taskRunner.addTask(new ConfigurePackageDeploymentPipelineInJenkins(application, project, jenkinsDeploymentJobTemplates), "Configure Package Deployment Jobs in Jenkins");
         }

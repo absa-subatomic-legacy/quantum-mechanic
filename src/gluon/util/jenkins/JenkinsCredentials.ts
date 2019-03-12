@@ -63,7 +63,7 @@ export function getJenkinsDockerCredential(openShiftCloud: string): JenkinsCrede
         credentials: {
             scope: "GLOBAL",
             id: "docker-registry-ip",
-            secret: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl}`,
+            secret: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.internalDockerRegistryUrl}`,
             description: "IP For internal docker registry",
             $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
         },

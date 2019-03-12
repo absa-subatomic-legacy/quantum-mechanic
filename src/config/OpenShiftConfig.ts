@@ -1,6 +1,7 @@
 export interface OpenShiftConfig {
     name: string;
-    dockerRepoUrl: string;
+    internalDockerRegistryUrl: string;
+    externalDockerRegistryUrl: string;
     masterUrl: string;
     auth: OpenShiftAuth;
     defaultEnvironments: OpenshiftProjectEnvironment[];

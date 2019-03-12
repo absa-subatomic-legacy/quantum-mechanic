@@ -39,9 +39,19 @@ def getTag(projectId, imageStreamName, tag){
         echo "Requesting latest tag"
         openshift.withProject(projectId) {
             def imageStream = openshift.selector('imagestream', imageStreamName)
-            def newTag = imageStream.object().spec.tags[0].name
-            echo "Most recent tag found: $newTag"
-            return newTag
+            def availableTags = imageStream.object().status.tags
+            def latestTag;
+            def latestDate="0";
+            for (currentTag in availableTags){
+                for (tagItem in currentTag.items){
+                    if (tagItem.created.compareTo(latestDate) > 0){
+                        latestDate = tagItem.created;
+                        latestTag = currentTag.tag;
+                    }
+                }
+            }
+            echo "Most recent tag found: $latestTag"
+            return latestTag
         }
     }else {
         echo "Using tag: $tag"
@@ -55,15 +65,22 @@ def tagParam = "${params.TAG}"
 
 def project{{toPascalCase sourceEnvironment.postfix}}Project
 
-def project{{toPascalCase deploymentEnvironment.postfix}}Project
+{{#each deploymentEnvironments}}
+def project{{toPascalCase postfix}}Project
+{{/each}}
 
 withCredentials([
-            string(credentialsId: '{{toKebabCase sourceEnvironment.postfix}}-project', variable: '{{toUpperSnakeCase sourceEnvironment.postfix}}_PROJECT_ID'),
-            string(credentialsId: '{{toKebabCase deploymentEnvironment.postfix}}-project', variable: '{{toUpperSnakeCase deploymentEnvironment.postfix}}_PROJECT_ID')
+            {{#each deploymentEnvironments}}
+            string(credentialsId: '{{toKebabCase postfix}}-project', variable: '{{toUpperSnakeCase postfix}}_PROJECT_ID'),
+            {{/each}}
+            string(credentialsId: '{{toKebabCase sourceEnvironment.postfix}}-project', variable: '{{toUpperSnakeCase sourceEnvironment.postfix}}_PROJECT_ID')
 ]) {
     echo "Getting project credentials"
     project{{toPascalCase sourceEnvironment.postfix}}Project = "${env.{{toUpperSnakeCase sourceEnvironment.postfix}}_PROJECT_ID}"
-    project{{toPascalCase deploymentEnvironment.postfix}}Project = "${env.{{toUpperSnakeCase deploymentEnvironment.postfix}}_PROJECT_ID}"
+    {{#each deploymentEnvironments}}
+    project{{toPascalCase postfix}}Project = "${env.{{toUpperSnakeCase postfix}}_PROJECT_ID}"
+    {{/each}}
+    
 }
 
 
@@ -78,17 +95,19 @@ pipeline{
         tag = getTag(project{{toPascalCase sourceEnvironment.postfix}}Project, imageStreamName, tagParam)
     }
     stages{
-        stage('Tag Image') {
-            steps{
-                echo "Tagging image with tag ${tag}"
-                tagImageStream(project{{toPascalCase sourceEnvironment.postfix}}Project, project{{toPascalCase deploymentEnvironment.postfix}}Project, imageStreamName, tag)
+        {{#each deploymentEnvironments}}
+            stage('Tag Image') {
+                steps{
+                    echo "Tagging image with tag ${tag}"
+                    tagImageStream(project{{toPascalCase ../sourceEnvironment.postfix}}Project, project{{toPascalCase postfix}}Project, imageStreamName, tag)
+                }
             }
-        }
-        stage('Deploy Application') {
-            steps{
-                echo "Patching DC ImageStream and rolling out a new deployment"
-                deploy(project{{toPascalCase deploymentEnvironment.postfix}}Project, imageStreamName, tag)
+            stage('Deploy Application') {
+                steps{
+                    echo "Patching DC ImageStream and rolling out a new deployment"
+                    deploy(project{{toPascalCase postfix}}Project, imageStreamName, tag)
+                }
             }
-        }
+        {{/each}}
     }
 }

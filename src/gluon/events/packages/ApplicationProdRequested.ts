@@ -12,20 +12,11 @@ import {QMApplicationProdRequest} from "../../services/gluon/ApplicationProdRequ
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {GenericOpenshiftResourceService} from "../../services/projects/GenericOpenshiftResourceService";
-import {ConfigurePackagePipelineInJenkins} from "../../tasks/packages/ConfigurePackagePipelineInJenkins";
+import {ConfigurePackageDeploymentPipelineInJenkins} from "../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {
-    getDefaultProdJenkinsFileName,
-    getEnvironmentDeploymentJenkinsfilePostfix,
-    getEnvironmentDeploymentJenkinsJobPostfix,
-} from "../../util/jenkins/Jenkins";
-import {
-    getJenkinsProdJobTemplateFile,
-    JenkinsJobTemplate,
-} from "../../util/jenkins/JenkinsJobTemplates";
+import {JenkinsDeploymentJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
 import {getHighestPreProdEnvironment} from "../../util/openshift/Helpers";
 import {
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
@@ -37,6 +28,7 @@ import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
 import {QMTeam} from "../../util/team/Teams";
+import {buildJenkinsProdDeploymentJobTemplates} from "./package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
 
 @EventHandler("Receive ApplicationProdRequestedEvent events", `
 subscription ApplicationProdRequestedEvent {
@@ -86,8 +78,7 @@ subscription ApplicationProdRequestedEvent {
 export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent<any> {
 
     constructor(public ocService = new OCService(),
-                public gluonService = new GluonService(),
-                public genericOpenshiftResourceService = new GenericOpenshiftResourceService()) {
+                public gluonService = new GluonService()) {
         super();
     }
 
@@ -135,15 +126,16 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
                     );
             }
 
-            const jenkinsJobTemplate: JenkinsJobTemplate = {
-                sourceJenkinsfile: getDefaultProdJenkinsFileName(),
-                jobTemplateFilename: getJenkinsProdJobTemplateFile(),
-                expectedJenkinsfile: `Jenkinsfile${getEnvironmentDeploymentJenkinsfilePostfix(applicationProdRequest.deploymentPipeline.tag, "prod")}`,
-                jobNamePostfix: getEnvironmentDeploymentJenkinsJobPostfix(applicationProdRequest.deploymentPipeline.tag, "prod"),
-            };
+            const jenkinsJobTemplate: JenkinsDeploymentJobTemplate[] = buildJenkinsProdDeploymentJobTemplates(
+                tenant.name,
+                qmProject.name,
+                QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd,
+                QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftProd,
+                applicationProdRequest.deploymentPipeline,
+            );
 
             taskRunner.addTask(
-                new ConfigurePackagePipelineInJenkins(application, qmProject, jenkinsJobTemplate),
+                new ConfigurePackageDeploymentPipelineInJenkins(application, qmProject, jenkinsJobTemplate),
                 "Configure application Jenkins prod job",
             );
 
