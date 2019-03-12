@@ -51,7 +51,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         await this.createJenkinsDeploymentConfig(
             projectId,
             QMConfig.subatomic.openshiftClouds[openShiftCloud].sharedResourceNamespace,
-            QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.dockerRepoUrl,
+            QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.internalDockerRegistryUrl,
         );
 
         await this.createSubatomicJenkinsServiceAccount(projectId);
