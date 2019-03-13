@@ -34,29 +34,43 @@ def tagImageStream(sourceProject, destinationProject, imageStreamName, tag) {
     }
 }
 
-def getTag(projectId, imageStreamName, tag){
-    if (tag == "latest" || tag == "null"){
-        echo "Requesting latest tag"
-        openshift.withProject(projectId) {
-            def imageStream = openshift.selector('imagestream', imageStreamName)
-            def availableTags = imageStream.object().status.tags
-            def latestTag;
+class Tag {
+    String tag;
+    String date;
+}
+
+def getAvailableTags(projectId, imageStreamName){
+    def tagDetails = [];
+    def tagListStr = "";
+
+    openshift.withProject(projectId) {
+        def imageStream = openshift.selector('imagestream', imageStreamName)
+        def availableTags = imageStream.object().status.tags
+        for (currentTag in availableTags){
+            def tag = currentTag.tag;
             def latestDate="0";
-            for (currentTag in availableTags){
-                for (tagItem in currentTag.items){
-                    if (tagItem.created.compareTo(latestDate) > 0){
-                        latestDate = tagItem.created;
-                        latestTag = currentTag.tag;
-                    }
+            for (tagItem in currentTag.items){
+                if (tagItem.created.compareTo(latestDate) > 0){
+                    latestDate = tagItem.created;
                 }
             }
-            echo "Most recent tag found: $latestTag"
-            return latestTag
+
+            def insertIndex = 0;
+            for (index = 0; index < tagDetails.size() ; index++) {
+                if (latestDate.compareTo(tagDetails[index].date) > 0){
+                    break;
+                }
+                insertIndex = index + 1;
+            }
+            tagDetails = tagDetails.plus(insertIndex, [new Tag(tag:tag, date:latestDate)]);
         }
-    }else {
-        echo "Using tag: $tag"
-        return tag
     }
+
+    def maxIndex = Math.min(tagDetails.size(), 8);
+    for (index = 0; index < maxIndex; index ++){
+        tagListStr += "${tagDetails[index].tag}\n"
+    }
+    return tagListStr;
 }
 
 def imageStreamName = "{{toKebabCase application.name}}"
@@ -88,26 +102,31 @@ pipeline{
     agent {
         label 'master'
     }
-    parameters {
-        string(name: 'TAG', defaultValue: 'latest', description: 'The tag of the image you wish to deploy', )
-    }
     environment {
-        tag = getTag(project{{toPascalCase sourceEnvironment.postfix}}Project, imageStreamName, tagParam)
+        latestTags = getAvailableTags(project{{toPascalCase sourceEnvironment.postfix}}Project, imageStreamName)
     }
     stages{
+        stage('Select Tag') {
+            steps{
+                script {
+                    env.TAG = input message: 'Please select the tag you wish to deploy', ok: "Deploy",
+                            parameters: [choice(name: 'TAG', choices: latestTags, description: 'Tags are sorted in order of recency')]
+                }
+            }
+        }
         {{#each deploymentEnvironments}}
-            stage('Tag Image') {
-                steps{
-                    echo "Tagging image with tag ${tag}"
-                    tagImageStream(project{{toPascalCase ../sourceEnvironment.postfix}}Project, project{{toPascalCase postfix}}Project, imageStreamName, tag)
-                }
+        stage('Tag Image') {
+            steps{
+                echo "Tagging image with tag ${TAG}"
+                tagImageStream(project{{toPascalCase ../sourceEnvironment.postfix}}Project, project{{toPascalCase postfix}}Project, imageStreamName, TAG)
             }
-            stage('Deploy Application') {
-                steps{
-                    echo "Patching DC ImageStream and rolling out a new deployment"
-                    deploy(project{{toPascalCase postfix}}Project, imageStreamName, tag)
-                }
+        }
+        stage('Deploy Application') {
+            steps{
+                echo "Patching DC ImageStream and rolling out a new deployment"
+                deploy(project{{toPascalCase postfix}}Project, imageStreamName, TAG)
             }
+        }
         {{/each}}
     }
 }

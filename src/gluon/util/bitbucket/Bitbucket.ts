@@ -5,7 +5,7 @@ import {createMenuAttachment} from "../shared/GenericMenu";
 
 export function menuAttachmentForBitbucketRepositories(ctx: HandlerContext, bitbucketRepositories: any[],
                                                        command: HandleCommand, message: string = "Please select a Bitbucket repository",
-                                                       bitbucketProjectNameVariable: string = "bitbucketRepositoryName",
+                                                       bitbucketProjectNameVariable: string = "bitbucketRepositorySlug",
                                                        thumbUrl = ""): Attachment {
     return createMenuAttachment(
         bitbucketRepositories.map(bitbucketRepository => {

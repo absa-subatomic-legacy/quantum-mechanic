@@ -254,7 +254,7 @@ export class OCService {
             {key: "JENKINS_ADMIN_EMAIL", value: "subatomic@local"},
             {
                 key: "NAMESPACE_URL",
-                value: `${dockerRegistryUrl}/${devopsNamespace}`,
+                value: `${dockerRegistryUrl}/${jenkinsImageNamspace}`,
             },
         ];
 

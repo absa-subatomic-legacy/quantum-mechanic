@@ -104,7 +104,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
                     bitbucketBaseUrl: QMConfig.subatomic.bitbucket.baseUrl,
                     teamDevOpsProjectId,
                     bitbucketProjectKey: project.bitbucketProject.key,
-                    bitbucketRepositoryName: application.bitbucketRepository.name,
+                    bitbucketRepositorySlug: application.bitbucketRepository.slug,
                     jenkinsfileName: jenkinsJobTemplate.expectedJenkinsfile,
                 },
             );
