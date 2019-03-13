@@ -1,10 +1,16 @@
 type PackageConfigurationRequestedEvent @rootType {
 	project: Project
 	application: GluonApplication
-	imageName: String
+	s2iImage: ImageStream
 	openshiftTemplate: String
 	jenkinsfileName: String
 	buildEnvironmentVariables: [KeyValuePair]
 	deploymentEnvironmentVariables: [KeyValuePair]
 	actionedBy: ActionedBy
+}
+
+type ImageStream {
+	imageName: String
+	imageTag: String
+	namespace: String
 }

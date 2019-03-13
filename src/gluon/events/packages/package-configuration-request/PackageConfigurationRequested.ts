@@ -46,12 +46,15 @@ subscription PackageConfigurationRequestedEvent {
   PackageConfigurationRequestedEvent {
     id
     application {
-      name
+        name
     }
     project {
-      name
+        name
     }
-    imageName
+    s2iImage {
+        imageName
+        imageTag
+    }
     openshiftTemplate
     jenkinsfileName
     buildEnvironmentVariables{
@@ -63,10 +66,10 @@ subscription PackageConfigurationRequestedEvent {
         value
     }
     actionedBy{
-      firstName
-      slackIdentity {
-        screenName
-      }
+        firstName
+        slackIdentity {
+            screenName
+        }
     }
   }
 }
@@ -119,7 +122,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
                     {
                         buildEnvironmentVariables: packageConfigurationEvent.buildEnvironmentVariables,
                         openshiftTemplate: packageConfigurationEvent.openshiftTemplate,
-                        baseS2IImage: packageConfigurationEvent.imageName,
+                        baseS2IImage: packageConfigurationEvent.s2iImage,
                         deploymentEnvironmentVariables: packageConfigurationEvent.deploymentEnvironmentVariables,
                     },
                     {

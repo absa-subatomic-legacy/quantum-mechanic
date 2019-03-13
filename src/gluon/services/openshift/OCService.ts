@@ -11,7 +11,6 @@ import {
     OpenshiftListResource,
     OpenshiftResource,
 } from "../../../openshift/api/resources/OpenshiftResource";
-import {ResourceFactory} from "../../../openshift/api/resources/ResourceFactory";
 import {userFromDomainUser} from "../../util/member/Members";
 import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";
@@ -204,10 +203,15 @@ export class OCService {
     }
 
     public async getSubatomicImageStreamTags(namespace: string = "subatomic") {
-        return this.ocImageService.getSubatomicImageStreamTags(namespace);
+        return this.ocImageService.getAllSubatomicImageStreams(namespace);
+    }
+
+    public async getImageStream(imageStreamName: string, namespace: string): Promise<OpenshiftResource> {
+        return await this.ocImageService.getImageStream(imageStreamName, namespace);
     }
 
     public async applyResourceFromDataInNamespace(resourceDefinition: OpenshiftResource, projectNamespace: string, applyNotReplace: boolean = false): Promise<OpenshiftApiResult> {
+        // TODO: Change this applyNotReplace to an enum for more clarity.
         logger.debug(`Trying to create resource from data in namespace. projectNamespace: ${projectNamespace}`);
 
         let response: OpenshiftApiResult;
@@ -234,64 +238,13 @@ export class OCService {
         return response;
     }
 
-    public async tagSubatomicImageToNamespace(imageStreamTagName: string, destinationProjectNamespace: string, destinationImageStreamTagName: string = imageStreamTagName): Promise<OpenshiftApiResult> {
-        return await this.tagImageToNamespace("subatomic", imageStreamTagName, destinationProjectNamespace, destinationImageStreamTagName);
-    }
-
-    public async tagImageToNamespace(sourceNamespace: string, imageStreamTagName: string, destinationProjectNamespace: string, destinationImageStreamTagName: string = imageStreamTagName): Promise<OpenshiftApiResult> {
-
-        let applyOrReplace = true;
-
-        // check if exists if so then must replace not apply
-        const existingImageStreamTagResult = await this.openShiftApi.get.get("ImageStreamTag", imageStreamTagName, destinationProjectNamespace);
-        if (isSuccessCode(existingImageStreamTagResult.status)) {
-            applyOrReplace = false;
-        }
-
-        const imageStreamTagResult = await this.openShiftApi.get.get("ImageStreamTag", imageStreamTagName, sourceNamespace);
-
-        if (!isSuccessCode(imageStreamTagResult.status)) {
-            throw new QMError(`Unable to find ImageStreamTag ${imageStreamTagName} in namespace ${sourceNamespace}`);
-        }
-
-        const imageStreamLabels = imageStreamTagResult.data.metadata.labels;
-
-        const imageStreamTag = await this.ocImageService.modifyImageStreamTagToImportIntoNamespace(imageStreamTagResult.data, destinationProjectNamespace);
-
-        imageStreamTag.metadata.name = destinationImageStreamTagName;
-
-        await this.applyResourceFromDataInNamespace(imageStreamTag, destinationProjectNamespace, applyOrReplace);
-
-        const labelPatch = this.createLabelPatch(destinationImageStreamTagName.split(":")[0], "ImageStream", "v1", imageStreamLabels);
-        return await this.patchResourceInNamespace(labelPatch, destinationProjectNamespace, false);
-    }
-
-    public async tagAllSubatomicImageStreamsToDevOpsEnvironment(devopsProjectId) {
-        const imageStreamTagsFromSubatomicNamespace = await this.ocImageService.getSubatomicImageStreamTags();
-
-        const labelPatches = imageStreamTagsFromSubatomicNamespace.map(imageStreamTag => {
-            return this.createLabelPatch(imageStreamTag.metadata.name.split(":")[0], "ImageStream", "v1", imageStreamTag.metadata.labels);
-        });
-
-        const imageStreamTags = await this.ocImageService.modifyImageStreamTagsToImportIntoNamespace(imageStreamTagsFromSubatomicNamespace, devopsProjectId);
-
-        const resourceList = ResourceFactory.resourceList();
-        resourceList.items.push(...imageStreamTags);
-
-        await this.applyResourceFromDataInNamespace(resourceList, devopsProjectId, false);
-
-        for (const labelPatch of labelPatches) {
-            await this.patchResourceInNamespace(labelPatch, devopsProjectId, false);
-        }
-    }
-
-    public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, openShiftCloud: string): Promise<any> {
+    public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, jenkinsImageNamspace: string, dockerRegistryUrl: string): Promise<any> {
         logger.debug(`Trying to process jenkins template for devops project template. devopsNamespace: ${devopsNamespace}`);
 
         // TODO: this should be a property on Team. I.e. teamEmail
         // TODO: the registry Cluster IP we will have to get by introspecting the registry Service
         const params = [
-            {key: "NAMESPACE", value: devopsNamespace},
+            {key: "NAMESPACE", value: jenkinsImageNamspace},
             {key: "BITBUCKET_NAME", value: "Subatomic Bitbucket"},
             {key: "BITBUCKET_URL", value: QMConfig.subatomic.bitbucket.baseUrl},
             {
@@ -300,8 +253,8 @@ export class OCService {
             },
             {key: "JENKINS_ADMIN_EMAIL", value: "subatomic@local"},
             {
-                key: "DEVOPS_URL",
-                value: `${QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.internalDockerRegistryUrl}/${devopsNamespace}`,
+                key: "NAMESPACE_URL",
+                value: `${dockerRegistryUrl}/${devopsNamespace}`,
             },
         ];
 
@@ -670,12 +623,4 @@ export class OCService {
         return response;
     }
 
-    private createLabelPatch(resourceName: string, resourceKind: string, apiVersion: string, labels: { [key: string]: string }) {
-        const labelPatch = ResourceFactory.baseResource(resourceKind, apiVersion);
-        labelPatch.metadata = {
-            name: resourceName,
-            labels,
-        };
-        return labelPatch;
-    }
 }

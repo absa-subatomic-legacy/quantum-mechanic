@@ -4,6 +4,8 @@ import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
+import {getSubatomicJenkinsServiceAccountName} from "../../util/jenkins/Jenkins";
+import {getOpenshiftProductionDevOpsJenkinsTokenCredential} from "../../util/jenkins/JenkinsCredentials";
 import {
     roleBindingDefinition,
     serviceAccountDefinition,
@@ -46,7 +48,7 @@ export class AddJenkinsToProdEnvironment extends Task {
         await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
 
         await this.createJenkinsServiceAccount(teamDevOpsProd);
-        const prodToken = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProd);
+        const prodToken = await this.ocService.getServiceAccountToken(getSubatomicJenkinsServiceAccountName(), teamDevOpsProd);
         await this.taskListMessage.succeedTask(this.TASK_CREATE_JENKINS_SA);
 
         for (const environment of this.prodOpenShiftNamespaces) {
@@ -58,11 +60,11 @@ export class AddJenkinsToProdEnvironment extends Task {
         // Add the prod token to the non prod jenkins instance
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.devOpsRequestedEvent.team.openShiftCloud].openshiftNonProd);
 
-        const jenkinsToken = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsNonProd);
+        const jenkinsToken = await this.ocService.getServiceAccountToken(getSubatomicJenkinsServiceAccountName(), teamDevOpsNonProd);
 
         const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsNonProd);
 
-        await this.createJenkinsCredentials(teamDevOpsNonProd, jenkinsHost, jenkinsToken, this.openshiftEnvironment.name, prodToken);
+        await this.createJenkinsCredentials(this.devOpsRequestedEvent.team.name, jenkinsHost, jenkinsToken, this.openshiftEnvironment.name, prodToken);
 
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_CREDENTIALS);
 

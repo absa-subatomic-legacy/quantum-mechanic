@@ -36,8 +36,6 @@ import {MigrateTeamCloud} from "../team/MigrateTeamCloud";
 import {NewOrUseTeamSlackChannel} from "../team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "../team/NewSlackChannel";
 import {RemoveMemberFromTeam} from "../team/RemoveMemberFromTeam";
-import {TagAllLatestImages} from "../team/TagAllLatestImages";
-import {TagLatestImage} from "../team/TagLatestImage";
 
 export class HelpCategory {
 
@@ -80,8 +78,6 @@ export class HelpCategory {
         PatchBuildConfigBaseImage,
         RemoveMemberFromTeam,
         ReRunProjectProdRequest,
-        TagAllLatestImages,
-        TagLatestImage,
         UpdateProjectProdRequest,
     ];
 

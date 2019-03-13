@@ -17,6 +17,7 @@ export interface OpenshiftProjectEnvironment {
 }
 
 export interface OpenShiftCloud {
+    sharedResourceNamespace: string;
     openshiftNonProd: OpenShiftConfig;
     openshiftProd: OpenShiftConfig[];
 }

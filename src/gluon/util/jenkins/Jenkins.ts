@@ -30,3 +30,7 @@ export function getEnvironmentDeploymentJenkinsJobPostfix(pipelineTag: string, e
 export function getApplicationJenkinsJobDisplayName(applicationName: string, jobPostfix: string) {
     return `${applicationName} ${_.startCase(jobPostfix)}`;
 }
+
+export function getSubatomicJenkinsServiceAccountName() {
+    return "subatomic-jenkins";
+}

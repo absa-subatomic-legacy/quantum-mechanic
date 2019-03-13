@@ -12,7 +12,7 @@ export enum CommandIntent {
     ConfigureApplicationJenkinsProd = "configure application jenkins prod",
     CreateApplicationProd = "request application prod",
     CreateGenericProd = "request generic prod",
-    JenkinsCredentialsRecreate = "create jenkins bitbucket credentials",
+    JenkinsCredentialsRecreate = "create jenkins default credentials",
     CreateOpenShiftPvc = "create openshift pvc",
     CreateProject = "create project",
     CreateProjectJenkinsJob = "project request jenkins job",
@@ -34,8 +34,6 @@ export enum CommandIntent {
     PatchBuildConfigBaseImage = "patch package s2i image",
     RequestProjectEnvironments = "request project environments",
     RemoveMemberFromTeam = "remove team member",
-    TagAllLatestImages = "tag all images",
-    TagLatestImage = "tag image",
 }
 
 export function atomistIntent(baseIntent: CommandIntent) {

@@ -79,6 +79,20 @@ export class JenkinsService {
             "application/xml");
     }
 
+    public async deleteCredential(jenkinsHost: string,
+                                  token: string,
+                                  credentialName: string,
+                                  credentialsFolder: JenkinsCredentialsFolder = {domain: "GLOBAL"}) {
+        logger.debug(`Trying to update jenkins global credentials. jenkinsHost: ${jenkinsHost}; token: ${token}, domain: ${credentialsFolder.domain}`);
+
+        const jenkinsCredentialDomainUrl = this.getCredentialDomainUrl(credentialsFolder, jenkinsHost);
+
+        return await this.jenkinsNetworkHandler.genericJenkinsPost(
+            `${jenkinsCredentialDomainUrl}/credential/${credentialName}/doDelete`,
+            "",
+            token);
+    }
+
     public async createCredentialsWithFile(jenkinsHost: string,
                                            token: string,
                                            jenkinsCredentials: any,

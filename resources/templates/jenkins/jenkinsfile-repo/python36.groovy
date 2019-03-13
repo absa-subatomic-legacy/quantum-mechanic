@@ -53,19 +53,22 @@ def label = "python36-${UUID.randomUUID().toString()}"
 
 def teamDevOpsProject
 def dockerRegistryIp
+def sharedResourceNamespace
 
 withCredentials([
         string(credentialsId: 'devops-project', variable: 'DEVOPS_PROJECT_ID'),
-        string(credentialsId: 'docker-registry-ip', variable: 'DOCKER_REGISTRY_IP')
+        string(credentialsId: 'docker-registry-ip', variable: 'DOCKER_REGISTRY_IP'),
+        string(credentialsId: 'sub-shared-resource-namespace', variable: 'SUB_SHARED_RESOURCE_NAMESPACE')
 ]) {
     teamDevOpsProject = "${env.DEVOPS_PROJECT_ID}"
     dockerRegistryIp = "${env.DOCKER_REGISTRY_IP}"
+    sharedResourceNamespace = "${env.SUB_SHARED_RESOURCE_NAMESPACE}"
 }
 
-echo "Starting to try find pod template: " + dockerRegistryIp + '/' + teamDevOpsProject + '/jenkins-slave-python36-subatomic:2.0'
+echo "Starting to try find pod template: " + dockerRegistryIp + '/' + sharedResourceNamespace + '/jenkins-slave-python36-subatomic:2.0'
 
 podTemplate(cloud: "openshift", label: label, serviceAccount:"jenkins", containers: [
-    containerTemplate(name: 'jnlp', image: dockerRegistryIp + '/' + teamDevOpsProject + '/jenkins-slave-python36-subatomic:2.0', ttyEnabled: false, alwaysPullImage: true, args: '${computer.jnlpmac} ${computer.name}')
+    containerTemplate(name: 'jnlp', image: dockerRegistryIp + '/' + sharedResourceNamespace + '/jenkins-slave-python36-subatomic:2.0', ttyEnabled: false, alwaysPullImage: true, args: '${computer.jnlpmac} ${computer.name}')
   ])
 {
   	echo "Trying to get node " + label

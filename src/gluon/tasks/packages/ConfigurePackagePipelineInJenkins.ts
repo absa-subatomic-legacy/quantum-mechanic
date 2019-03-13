@@ -18,6 +18,7 @@ import {ConfigurePackageInJenkinsService} from "../../services/packages/Configur
 import {
     getApplicationJenkinsJobDisplayName,
     getPathFromJenkinsfileName,
+    getSubatomicJenkinsServiceAccountName,
 } from "../../util/jenkins/Jenkins";
 import {
     EmptyJenkinsJobTemplate,
@@ -101,7 +102,7 @@ export class ConfigurePackagePipelineInJenkins extends Task {
             },
         );
 
-        const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
+        const token = await this.ocService.getServiceAccountToken(getSubatomicJenkinsServiceAccountName(), teamDevOpsProjectId);
         const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
 
         return await this.configurePackageInJenkinsService.createJenkinsJobAndAddToView(

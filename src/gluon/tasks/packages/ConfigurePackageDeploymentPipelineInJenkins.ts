@@ -21,6 +21,7 @@ import {
 import {
     getApplicationJenkinsJobDisplayName,
     getPathFromJenkinsfileName,
+    getSubatomicJenkinsServiceAccountName,
 } from "../../util/jenkins/Jenkins";
 import {
     JenkinsDeploymentJobTemplate,
@@ -84,7 +85,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
                                     project: QMProject,
                                     application: QMApplication,
                                     jenkinsJobTemplates: JenkinsJobTemplate[]): Promise<HandlerResult> {
-        const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
+        const token = await this.ocService.getServiceAccountToken(getSubatomicJenkinsServiceAccountName(), teamDevOpsProjectId);
         const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
 
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);

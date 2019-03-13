@@ -52,6 +52,7 @@ Here is an example `local.json`:
     },
     "openshiftClouds": {
       "ab-cloud": {
+        "sharedResourceNamespace": "subatomic",
         "openshiftNonProd": {
           "name": "nonprod",
           "internalDockerRegistryUrl": "172.30.1.1:5000",

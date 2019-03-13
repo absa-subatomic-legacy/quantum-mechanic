@@ -22,46 +22,45 @@ export class OCImageService {
 
     private openShiftApiInstance: OpenShiftApi;
 
-    public async getAllImageStreamTags(namespace = "subatomic", cleanNamespace = true): Promise<OpenshiftResource[]> {
-        logger.debug(`Trying to get subatomic image stream. namespace: ${namespace}`);
-        const queryResult = await this.openShiftApi.get.getAllFromNamespace("ImageStreamTag", namespace, "v1");
-
-        if (isSuccessCode(queryResult.status)) {
-            const isTags = [];
-            for (const imageStreamTag of queryResult.data.items) {
-                if (cleanNamespace) {
-                    delete imageStreamTag.metadata.namespace;
-                }
-                isTags.push(imageStreamTag);
-            }
-            return isTags;
-        } else {
-            logger.error(`Failed to find Image Stream Tags in the specified namespace: ${inspect(queryResult)}`);
-            throw new QMError("Failed to find Image Stream Tags in the specified namespace");
-        }
-    }
-
-    public async getSubatomicImageStreamTags(namespace: string = "subatomic", cleanNamespace: boolean = true): Promise<OpenshiftResource[]> {
+    public async getAllSubatomicImageStreams(namespace: string = "subatomic", cleanNamespace: boolean = true): Promise<OpenshiftResource[]> {
         logger.debug(`Trying to get subatomic image stream from subatomic namespace`);
-        const queryResult = await this.openShiftApi.get.getAllFromNamespace("ImageStreamTag", "subatomic", "v1");
+        const queryResult = await this.openShiftApi.get.getAllFromNamespace("ImageStream", "subatomic", "v1");
 
         if (isSuccessCode(queryResult.status)) {
-            const isTags = [];
-            for (const imageStreamTag of queryResult.data.items) {
-                if (imageStreamTag.metadata.labels !== undefined) {
-                    if (imageStreamTag.metadata.labels.usage === "subatomic-is") {
-                        imageStreamTag.kind = "ImageStreamTag";
+            const imageStreams = [];
+            for (const imageStream of queryResult.data.items) {
+                if (imageStream.metadata.labels !== undefined) {
+                    if (imageStream.metadata.labels.usage === "subatomic-is") {
+                        imageStream.kind = "ImageStream";
                         if (cleanNamespace) {
-                            delete imageStreamTag.metadata.namespace;
+                            delete imageStream.metadata.namespace;
                         }
-                        isTags.push(imageStreamTag);
+                        imageStreams.push(imageStream);
                     }
                 }
             }
-            return isTags;
+            return imageStreams;
         } else {
-            logger.error(`Failed to find Subatomic Image Stream Tags in the specified namespace: ${inspect(queryResult)}`);
-            throw new QMError("Failed to find Subatomic Image Stream Tags in the specified namespace");
+            logger.error(`Failed to find Subatomic Image Streams in the specified namespace: ${inspect(queryResult)}`);
+            throw new QMError("Failed to find Subatomic Image Streams in the specified namespace");
+        }
+    }
+
+    public async getImageStream(imageStreamName: string, namespace: string = "subatomic", cleanNamespace: boolean = true): Promise<OpenshiftResource> {
+        logger.debug(`Trying to get subatomic image stream from subatomic namespace`);
+        const queryResult = await this.openShiftApi.get.get("ImageStream", imageStreamName, "subatomic", "v1");
+
+        if (isSuccessCode(queryResult.status)) {
+            const imageStream = queryResult.data;
+
+            if (cleanNamespace) {
+                delete imageStream.metadata.namespace;
+            }
+
+            return imageStream;
+        } else {
+            logger.error(`Failed to find Image Stream in the specified namespace: ${inspect(queryResult)}`);
+            throw new QMError("Failed to find Subatomic Image in the specified namespace");
         }
     }
 
@@ -100,11 +99,4 @@ export class OCImageService {
         return imageStreamTag;
     }
 
-    public modifyImageStreamTagsToImportIntoNamespace(imageStreamTagList: OpenshiftResource[], namespace: string): OpenshiftResource[] {
-        const imageStreamTags = [];
-        for (const imageStreamTag of imageStreamTagList) {
-            imageStreamTags.push(this.modifyImageStreamTagToImportIntoNamespace(imageStreamTag, namespace));
-        }
-        return imageStreamTags;
-    }
 }

@@ -1,14 +1,9 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
 import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
-import {JenkinsService} from "../../services/jenkins/JenkinsService";
+import {JenkinsDevOpsCredentialsService} from "../../services/jenkins/JenkinsDevOpsCredentialsService";
 import {OCService} from "../../services/openshift/OCService";
-import {
-    getJenkinsBitbucketProjectCredential,
-    getJenkinsDockerCredential,
-    getJenkinsMavenCredential,
-    getJenkinsNexusCredential,
-} from "../../util/jenkins/JenkinsCredentials";
+import {getSubatomicJenkinsServiceAccountName} from "../../util/jenkins/Jenkins";
 import {
     roleBindingDefinition,
     serviceAccountDefinition,
@@ -28,7 +23,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
     private readonly TASK_CONFIG_JENKINS = TaskListMessage.createUniqueTaskName("ConfigJenkins");
 
     constructor(private team: QMTeam,
-                private jenkinsService = new JenkinsService(),
+                private jenkinsDevOpsCredentialsService = new JenkinsDevOpsCredentialsService(),
                 private ocService = new OCService()) {
         super();
     }
@@ -53,9 +48,13 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         await this.taskListMessage.succeedTask(this.TASK_TAG_TEMPLATE);
 
-        await this.createJenkinsDeploymentConfig(projectId, openShiftCloud);
+        await this.createJenkinsDeploymentConfig(
+            projectId,
+            QMConfig.subatomic.openshiftClouds[openShiftCloud].sharedResourceNamespace,
+            QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd.internalDockerRegistryUrl,
+        );
 
-        await this.createJenkinsServiceAccount(projectId);
+        await this.createSubatomicJenkinsServiceAccount(projectId);
 
         await this.rolloutJenkinsDeployment(projectId);
 
@@ -63,11 +62,11 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
         const jenkinsHost: string = await this.createJenkinsRoute(projectId);
 
-        const token: string = await this.ocService.getServiceAccountToken("subatomic-jenkins", projectId);
+        const token: string = await this.ocService.getServiceAccountToken(getSubatomicJenkinsServiceAccountName(), projectId);
 
         logger.info(`Using Service Account token: ${token}`);
 
-        await this.addJenkinsCredentials(projectId, jenkinsHost, token, openShiftCloud);
+        await this.jenkinsDevOpsCredentialsService.createDevOpsJenkinsGlobalCredentials(projectId, jenkinsHost, token, openShiftCloud);
 
         await this.taskListMessage.succeedTask(this.TASK_CONFIG_JENKINS);
 
@@ -91,18 +90,24 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         }
     }
 
-    private async createJenkinsDeploymentConfig(projectId: string, openShiftCloud: string) {
+    private async createJenkinsDeploymentConfig(projectId: string, jenkinsImageNamespace: string, dockerRegistryUrl: string) {
         logger.info("Processing Jenkins QMFileTemplate...");
-        const openShiftResourceList = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId, openShiftCloud);
+        const openShiftResourceList = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId, jenkinsImageNamespace, dockerRegistryUrl);
         try {
             await this.ocService.getDeploymentConfigInNamespace("jenkins", projectId);
             logger.warn("Jenkins QMFileTemplate has already been processed, deployment exists");
         } catch (error) {
             await this.ocService.applyResourceFromDataInNamespace(openShiftResourceList, projectId);
         }
+
+        // Give image-puller permissions to the created jenkins service account
+        await this.ocService.addRoleToUserInNamespace(
+            `system:serviceaccount:${projectId}:jenkins`,
+            "system:image-pullers",
+            QMConfig.subatomic.openshiftClouds[this.team.openShiftCloud].sharedResourceNamespace);
     }
 
-    private async createJenkinsServiceAccount(projectId: string) {
+    private async createSubatomicJenkinsServiceAccount(projectId: string) {
         await this.ocService.applyResourceFromDataInNamespace(serviceAccountDefinition(), projectId);
 
         await this.ocService.applyResourceFromDataInNamespace(roleBindingDefinition(), projectId, true);
@@ -132,36 +137,6 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
     private async createJenkinsRoute(projectId: string): Promise<string> {
         await this.ocService.annotateJenkinsRoute(projectId);
         return await this.ocService.getJenkinsHost(projectId);
-    }
-
-    private async addJenkinsCredentials(projectId: string, jenkinsHost: string, token: string, openShiftCloud: string) {
-        logger.debug(`Using Jenkins Route host [${jenkinsHost}] to add Bitbucket credentials`);
-        const bitbucketCredentials = getJenkinsBitbucketProjectCredential(projectId);
-
-        await this.createGlobalCredentialsFor("Bitbucket", jenkinsHost, token, bitbucketCredentials);
-
-        const nexusCredentials = getJenkinsNexusCredential();
-
-        await this.createGlobalCredentialsFor("Nexus", jenkinsHost, token, nexusCredentials);
-
-        const dockerRegistryCredentials = getJenkinsDockerCredential(openShiftCloud);
-
-        await this.createGlobalCredentialsFor("Docker", jenkinsHost, token, dockerRegistryCredentials);
-
-        const mavenCredentials = getJenkinsMavenCredential();
-
-        await this.createGlobalCredentialsFor("Maven", jenkinsHost, token, mavenCredentials, {
-            filePath: QMConfig.subatomic.maven.settingsPath,
-            fileName: "settings.xml",
-        });
-    }
-
-    private async createGlobalCredentialsFor(forName: string, jenkinsHost: string, token: string, credentials, fileDetails: { fileName: string, filePath: string } = null) {
-        try {
-            await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, credentials, fileDetails);
-        } catch (error) {
-            throw new QMError(`Failed to create ${forName} Global Credentials in Jenkins`);
-        }
     }
 
 }

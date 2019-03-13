@@ -9,7 +9,10 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
-import {PackageDefinition} from "../../util/packages/packagedef/PackageDefinition";
+import {
+    ImageStreamDefinition,
+    PackageDefinition,
+} from "../../util/packages/packagedef/PackageDefinition";
 import {SetterLoader} from "../../util/packages/packagedef/SetterLoader";
 import {QMColours} from "../../util/QMColour";
 import {
@@ -112,11 +115,13 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
 
     private async callPackageConfiguration(ctx: HandlerContext, definition: PackageDefinition): Promise<HandlerResult> {
         const configurePackage = new ConfigurePackage();
+        const imageStream: ImageStreamDefinition = definition.buildConfig.imageStream;
         configurePackage.screenName = this.screenName;
         configurePackage.teamChannel = this.teamChannel;
         configurePackage.openshiftTemplate = definition.openshiftTemplate || "Default";
         configurePackage.jenkinsfileName = definition.jenkinsfile;
-        configurePackage.imageName = definition.buildConfig.imageStream;
+        configurePackage.imageName = imageStream.imageName;
+        configurePackage.imageTag = imageStream.imageTag;
         if (!_.isEmpty(definition.buildConfig.envVariables)) {
             configurePackage.buildEnvironmentVariables = definition.buildConfig.envVariables;
         } else {

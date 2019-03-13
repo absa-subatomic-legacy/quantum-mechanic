@@ -7,12 +7,12 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
+import {getSubatomicJenkinsServiceAccountName} from "../../util/jenkins/Jenkins";
 import {
     GluonApplicationNameParam,
     GluonApplicationNameSetter,
@@ -28,6 +28,7 @@ import {
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Kick off a Jenkins build", atomistIntent(CommandIntent.KickOffJenkinsBuild))
@@ -85,8 +86,8 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
                                               gluonProjectName: string): Promise<HandlerResult> {
         logger.debug(`Kicking off build for application: ${gluonApplicationName}`);
 
-        const teamDevOpsProjectId = `${_.kebabCase(gluonTeamName).toLowerCase()}-devops`;
-        const token = await this.ocService.getServiceAccountToken("subatomic-jenkins", teamDevOpsProjectId);
+        const teamDevOpsProjectId = getDevOpsEnvironmentDetails(gluonTeamName).openshiftProjectId;
+        const token = await this.ocService.getServiceAccountToken(getSubatomicJenkinsServiceAccountName(), teamDevOpsProjectId);
 
         const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsProjectId);
 
