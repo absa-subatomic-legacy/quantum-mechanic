@@ -62,11 +62,11 @@ def getAvailableTags(projectId, imageStreamName){
                 }
                 insertIndex = index + 1;
             }
-            tagDetails.addAll(insertIndex, new Tag(tag:tag, date:latestDate));
+            tagDetails = tagDetails.plus(insertIndex, [new Tag(tag:tag, date:latestDate)]);
         }
     }
 
-    def maxIndex = Math.min(tagDetails.size(), 5);
+    def maxIndex = Math.min(tagDetails.size(), 8);
     for (index = 0; index < maxIndex; index ++){
         tagListStr += "${tagDetails[index].tag}\n"
     }
