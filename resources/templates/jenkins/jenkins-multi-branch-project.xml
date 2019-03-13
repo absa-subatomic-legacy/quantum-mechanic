@@ -8,7 +8,7 @@
                     <serverUrl>{{bitbucketBaseUrl}}</serverUrl>
                     <credentialsId>{{teamDevOpsProjectId}}-bitbucket</credentialsId>
                     <repoOwner>{{bitbucketProjectKey}}</repoOwner>
-                    <repository>{{bitbucketRepositoryName}}</repository>
+                    <repository>{{bitbucketRepositorySlug}}</repository>
                     <traits>
                         <com.cloudbees.jenkins.plugins.bitbucket.BranchDiscoveryTrait>
                             <strategyId>3</strategyId>
