@@ -13,7 +13,6 @@ export enum CommandIntent {
     CreateApplicationProd = "request application prod",
     CreateGenericProd = "request generic prod",
     JenkinsCredentialsRecreate = "create jenkins default credentials",
-    CreateOpenShiftPvc = "create openshift pvc",
     CreateProject = "create project",
     CreateProjectJenkinsJob = "project request jenkins job",
     CreateProjectProdEnvironments = "request project prod",
