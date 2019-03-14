@@ -46,7 +46,7 @@ export class CreateTeamDevOpsEnvironment extends Task {
             this.team);
 
         await this.ocService.addRoleToUserInNamespace(
-            `system:serviceaccount:${this.devopsEnvironmentDetails.openshiftProjectId}:default`,
+            `system:serviceaccount:${this.devopsEnvironmentDetails.openshiftProjectId}:builder`,
             "system:image-pullers",
             QMConfig.subatomic.openshiftClouds[this.team.openShiftCloud].sharedResourceNamespace);
 
