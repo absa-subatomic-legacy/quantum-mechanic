@@ -42,11 +42,11 @@ export async function loadChannelIdByChannelName(ctx: HandlerContext, name: stri
     return null;
 }
 
-export function getDevOpsEnvironmentDetailsProd(teamName): DevOpsEnvironmentDetails {
+export function getDevOpsEnvironmentDetailsProd(teamName: string): DevOpsEnvironmentDetails {
     return getDevOpsEnvironmentDetails(teamName, "-prod");
 }
 
-export function getDevOpsEnvironmentDetails(teamName, postfix: string = ""): DevOpsEnvironmentDetails {
+export function getDevOpsEnvironmentDetails(teamName: string, postfix: string = ""): DevOpsEnvironmentDetails {
     return {
         openshiftProjectId: `${_.kebabCase(teamName).toLowerCase()}-devops${postfix}`,
         name: `${teamName} DevOps`,
