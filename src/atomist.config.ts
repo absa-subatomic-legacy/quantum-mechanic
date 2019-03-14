@@ -16,7 +16,6 @@ import {LinkExistingLibrary} from "./gluon/commands/packages/LinkExistingLibrary
 import {PatchBuildConfigBaseImage} from "./gluon/commands/packages/PatchBuildConfigBaseImage";
 import {AssociateTeam} from "./gluon/commands/project/AssociateTeam";
 import {CreateGenericProd} from "./gluon/commands/project/CreateGenericProd";
-import {CreateOpenShiftPvc} from "./gluon/commands/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/commands/project/CreateProject";
 import {CreateProjectJenkinsJob} from "./gluon/commands/project/CreateProjectJenkinsJob";
 import {CreateProjectProdEnvironments} from "./gluon/commands/project/CreateProjectProdEnvironments";
@@ -88,7 +87,6 @@ export const configuration: any = {
         CreateApplicationProd,
         CreateGenericProd,
         CreateMembershipRequestToTeam,
-        CreateOpenShiftPvc,
         CreateProject,
         CreateProjectJenkinsJob,
         CreateProjectProdEnvironments,
