@@ -1,0 +1,161 @@
+{
+  "subatomic": {
+    "commandPrefix": "sub",
+    "gluon": {
+      "baseUrl": "http://22.240.214.32:8080"
+    },
+    "openshiftClouds": {
+      "test37-cloud": {
+        "sharedResourceNamespace": "subatomic",
+        "openshiftNonProd": {
+          "name": "37test.nonprod",
+          "internalDockerRegistryUrl": "docker-registry.default.svc:5000",
+          "externalDockerRegistryUrl":"",
+          "masterUrl": "https://host-22-240-214-29.corp.dsarena.com:8443",
+          "auth": {
+            "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJzdWJhdG9taWMiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoic3ViYXRvbWljLXRva2VuLWY5cmoyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InN1YmF0b21pYyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImFlNTYxYWVmLTU1MDItMTFlOS04YzQwLWZhMTYzZTkzNzFhMCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpzdWJhdG9taWM6c3ViYXRvbWljIn0.FlUzxO2YC9dr4Hdcj7GoE3YmcjOKAAZncE6U6uu37fZtQqLKck6y7mMBHmIG1m9uH_Dy0KuPgVoWgbDaeVFKMfLhpaax38JEVXd1A9Q0ZdNle7jneC2XRQI6ycYG4baINAJG0fVeJRLDrbn4Hn_zlYP1P5A5lOt0A9HA-jnbAnwEfnhFJH71oGRd_c6pn0Nc1XtBpAV2pvA-Bc4DSCoYKAexJE7rwaAUal2uVbjKcZ7_g5VvJXiN8LeZEbvVQ4RI3M3oP5TMsO9aOhAWxm64S_g3-GgGeSR98C0LJGzRQ07qhhFhVtnsNilXtMIKReNL-FypM_iBFq-iLNECTnXddg"
+          },
+          "defaultEnvironments": [
+            {
+              "id": "dev",
+              "description": "DEV T3.7"
+            },
+            {
+              "id": "sit",
+              "description": "SIT  T3.7"
+            },
+            {
+              "id": "uat",
+              "description": "UAT  T3.7"
+            }
+          ]
+        },
+        "openshiftProd": [
+          {
+            "name": "37test.prod",
+            "internalDockerRegistryUrl": "docker-registry.default.svc:5000",
+            "externalDockerRegistryUrl":"",
+            "masterUrl": "https://host-22-240-214-29.corp.dsarena.com:8443",
+            "auth": {
+              "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJzdWJhdG9taWMiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoic3ViYXRvbWljLXRva2VuLWY5cmoyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InN1YmF0b21pYyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImFlNTYxYWVmLTU1MDItMTFlOS04YzQwLWZhMTYzZTkzNzFhMCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpzdWJhdG9taWM6c3ViYXRvbWljIn0.FlUzxO2YC9dr4Hdcj7GoE3YmcjOKAAZncE6U6uu37fZtQqLKck6y7mMBHmIG1m9uH_Dy0KuPgVoWgbDaeVFKMfLhpaax38JEVXd1A9Q0ZdNle7jneC2XRQI6ycYG4baINAJG0fVeJRLDrbn4Hn_zlYP1P5A5lOt0A9HA-jnbAnwEfnhFJH71oGRd_c6pn0Nc1XtBpAV2pvA-Bc4DSCoYKAexJE7rwaAUal2uVbjKcZ7_g5VvJXiN8LeZEbvVQ4RI3M3oP5TMsO9aOhAWxm64S_g3-GgGeSR98C0LJGzRQ07qhhFhVtnsNilXtMIKReNL-FypM_iBFq-iLNECTnXddg"
+            },
+            "defaultEnvironments": [
+              {
+                "id": "prod",
+                "description": "Production T3.7"
+              }
+            ]
+          }
+        ]
+      },
+      "test311-cloud": {
+        "sharedResourceNamespace": "subatomic",
+        "openshiftNonProd": {
+          "name": "311test.nonprod",
+          "internalDockerRegistryUrl": "docker-registry.default.svc:5000",
+          "externalDockerRegistryUrl":"",
+          "masterUrl": "https://host-22-240-214-10.corp.dsarena.com:8443",
+          "auth": {
+            "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJzdWJhdG9taWMiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoic3ViYXRvbWljLXRva2VuLWZxbHZ0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InN1YmF0b21pYyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImVlZTAyNzZjLTRhMjQtMTFlOS05ODE2LWZhMTYzZTE0YTkwZiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpzdWJhdG9taWM6c3ViYXRvbWljIn0.llamLi1JWJ6Edd6V8b8wXRWtN0WATWxt5m7zKpz9d2K246OTWk4mc2KQa_zuXbmhZnRGVyI1KdUveUOzAwOMXFR3axZiFoRhnfu7EfGh4LczdZfjEilMReAYdlIMkPmF04Jqj78qcsYphVKEOallDgDUIruRyc83jIrlvKEeDU2ZQtogTS-t6sDVEujfe_Xn08kYwXQZFtZmJDSWRI4vbNbstow6BMOhasxojv9Gn0CY7th_dZaj8UPBYs_fJq4rgO-YPK7JJriromp0DSjBVrkKe0vSr90xc1aJy8lEWSZ2McBr_f6EG24nTdw-kpwC4xntYPhxmMEYWBIIYXAoRw"
+          },
+          "defaultEnvironments": [
+            {
+              "id": "dev",
+              "description": "DEV T3.7"
+            },
+            {
+              "id": "sit",
+              "description": "SIT  T3.7"
+            },
+            {
+              "id": "uat",
+              "description": "UAT  T3.7"
+            }
+          ]
+        },
+        "openshiftProd": [
+          {
+            "name": "311test.prod",
+            "internalDockerRegistryUrl": "docker-registry.default.svc:5000",
+            "externalDockerRegistryUrl":"",
+            "masterUrl": "https://host-22-240-214-29.corp.dsarena.com:8443",
+            "auth": {
+              "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJzdWJhdG9taWMiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoic3ViYXRvbWljLXRva2VuLWZxbHZ0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6InN1YmF0b21pYyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImVlZTAyNzZjLTRhMjQtMTFlOS05ODE2LWZhMTYzZTE0YTkwZiIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpzdWJhdG9taWM6c3ViYXRvbWljIn0.llamLi1JWJ6Edd6V8b8wXRWtN0WATWxt5m7zKpz9d2K246OTWk4mc2KQa_zuXbmhZnRGVyI1KdUveUOzAwOMXFR3axZiFoRhnfu7EfGh4LczdZfjEilMReAYdlIMkPmF04Jqj78qcsYphVKEOallDgDUIruRyc83jIrlvKEeDU2ZQtogTS-t6sDVEujfe_Xn08kYwXQZFtZmJDSWRI4vbNbstow6BMOhasxojv9Gn0CY7th_dZaj8UPBYs_fJq4rgO-YPK7JJriromp0DSjBVrkKe0vSr90xc1aJy8lEWSZ2McBr_f6EG24nTdw-kpwC4xntYPhxmMEYWBIIYXAoRw"
+            },
+            "defaultEnvironments": [
+              {
+                "id": "prod",
+                "description": "Production T3.7"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "bitbucket": {
+      "baseUrl": "https://host-22-240-214-101.corp.dsarena.com:8443",
+      "restUrl": "https://host-22-240-214-101.corp.dsarena.com:8443/rest",
+      "caPath": "/opt/app/config/subatomic-ca-chain.pem",
+      "auth": {
+        "username": "subatomic",
+        "password": "subatomic",
+        "email": "subatomic@local"
+      },
+      "sshPort": 7999,
+      "cicdPrivateKeyPath": "/opt/app/config/id_rsa",
+      "cicdKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC4DVJO+r1cJblZ/MDZI+sWLEnJtK3+BNj3lxYdigBmaMDHUVBYkKMOY0UjcUFXyQAU+VsLDT181NwANz62y5f177qXHcKTh/krXDV1Oct9Lk19DXrmQJUQjOyMZpLVZC75GROKH1crpwO4ubSgqyGAenPIYANQmEDskWBPApVi5mwZJ5STWSDfKeceJEeKMTRUaF+ZJujsbpZ6ELgcNGP+USkRdH1MELQE3GoXfP8WMRKZ3dpncNOXfw6pL7fYTJ1vxTzSSdxZNgbXbLXMiA1Woz67wQ2TShNJv8MSWJICIzVaG1aTVZDC2vd+a4DRo7GOSX40dzUIeV+rKGWhVeGD root@etc3.nonprod.ocp.absa.co.za"
+    },
+    "nexus": {
+      "baseUrl": "https://nexus.prod.ocp.absa.co.za/content/repositories/"
+    },
+    "maven": {
+      "settingsPath": "/opt/app/config/settings.xml"
+    },
+    "docs": {
+      "baseUrl": "http://subatomic.bison.ninja"
+    }
+  },
+  "teamId": "A4LZFQ7GL",
+  "apiKey": "802AF014DAC909A87C85E57DE17FBEA221AFBE8B7250C9BE4D772475951AE5D2",
+  "lifecycles": {
+    "push": {
+      "configuration": {
+        "emoji-style": "default",
+        "show-statuses-on-push": true,
+        "build": {
+          "style": "decorator"
+        },
+        "fingerprints": {
+          "about-hint": false,
+          "render-unchanged": true,
+          "style": "fingerprint-inline"
+        }
+      }
+    },
+    "pull_request": {
+      "configuration": {
+        "emoji-style": "default"
+      }
+    }
+  },
+  "fingerprints": {
+    "data": {
+    }
+  },
+  "http": {
+    "enabled": true,
+    "auth": {
+      "basic": {
+        "enabled": true,
+        "username": "user",
+        "password": "P@ssw0rd"
+      },
+      "bearer": {
+        "enabled": false
+      }
+    }
+  },
+  "secondarySlackChannels": [
+    "sub-community"
+  ]
+}

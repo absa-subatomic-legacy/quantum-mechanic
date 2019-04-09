@@ -1,4 +1,6 @@
+import {AxiosHttpClientFactory, logger} from "@atomist/automation-client";
 import {ingester} from "@atomist/automation-client/lib/graph/graphQL";
+import axios from "axios";
 import {QMConfig} from "./config/QMConfig";
 import {LinkExistingBitbucketProject} from "./gluon/commands/bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "./gluon/commands/bitbucket/BitbucketProjectAccessCommand";
@@ -68,6 +70,31 @@ import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
 
 const apiKey = QMConfig.apiKey;
 const http = QMConfig.http;
+
+class LoggingAxiosHttpClientFactory extends AxiosHttpClientFactory {
+
+    constructor() {
+        super();
+        axios.interceptors.request.use(request => {
+            logger.debug(`Axios http request: ${request.method} ${request.url}`);
+            return request;
+        });
+        axios.interceptors.response.use(response => {
+            logger.debug(`Axios http response: ${response.config.method} ${response.config.url} ${response.status} ${response.statusText}`);
+            return response;
+        }, error => {
+            if (!!error.response) {
+                const response = error.response;
+                logger.error(`Axios http response: ${response.config.method} ${response.config.url} ${response.status} ${response.statusText} < ${JSON.stringify(response.data)}`);
+            } else {
+                logger.error(`Axios http response: ${JSON.stringify(error)}`);
+            }
+            return error;
+        });
+    }
+}
+
+http.client = {factory: LoggingAxiosHttpClientFactory};
 
 export const configuration: any = {
     workspaceIds: [QMConfig.teamId],
@@ -176,7 +203,20 @@ export const configuration: any = {
         ingester("ConfigServerRequestedEvent"),
     ],
     apiKey,
-    http,
+    http: {
+        client: {factory: new LoggingAxiosHttpClientFactory()},
+        enabled: true,
+        auth: {
+            basic: {
+                enabled: true,
+                username: "user",
+                password: "P@ssw0rd",
+            },
+            bearer: {
+                enabled: false,
+            },
+        },
+    },
     logging: {
         level: "debug",
         file: false,
