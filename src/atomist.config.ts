@@ -94,8 +94,6 @@ class LoggingAxiosHttpClientFactory extends AxiosHttpClientFactory {
     }
 }
 
-http.client = {factory: LoggingAxiosHttpClientFactory};
-
 export const configuration: any = {
     workspaceIds: [QMConfig.teamId],
     // running durable will store and forward events when the client is disconnected
