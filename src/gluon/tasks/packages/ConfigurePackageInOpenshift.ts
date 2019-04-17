@@ -153,11 +153,11 @@ export class ConfigurePackageInOpenshift extends Task {
         logger.info(`Using Git URI: ${bitbucketRepoRemoteUrl}`);
         const buildConfig: OpenshiftResource = this.getBuildConfigData(bitbucketRepoRemoteUrl, appBuildName, baseS2IImage);
 
-        for (const envVariableName of this.deploymentDetails.buildEnvironmentVariables) {
+        for (const envVariableKeyValuePair of this.deploymentDetails.buildEnvironmentVariables) {
             buildConfig.spec.strategy.sourceStrategy.env.push(
                 {
-                    name: envVariableName.key,
-                    value: this.deploymentDetails.buildEnvironmentVariables[envVariableName.value],
+                    name: envVariableKeyValuePair.key,
+                    value: envVariableKeyValuePair.value,
                 },
             );
         }
