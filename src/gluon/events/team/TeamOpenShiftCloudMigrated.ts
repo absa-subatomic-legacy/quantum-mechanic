@@ -107,7 +107,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
         try {
-            throw new Error("Fake error");
+            // throw new Error("Fake error");
             const taskRunner = await this.createMigrateTeamToCloudTasks(qmMessageClient, team, teamCloudMigrationEvent.previousCloud);
 
             await taskRunner.execute(ctx);
