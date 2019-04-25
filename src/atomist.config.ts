@@ -40,6 +40,7 @@ import {MigrateTeamCloud} from "./gluon/commands/team/MigrateTeamCloud";
 import {NewOrUseTeamSlackChannel} from "./gluon/commands/team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "./gluon/commands/team/NewSlackChannel";
 import {RemoveMemberFromTeam} from "./gluon/commands/team/RemoveMemberFromTeam";
+import {ReRunMigrateTeamCloud} from "./gluon/commands/team/ReRunMigrateTeamCloud";
 import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAdded";
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
@@ -114,6 +115,7 @@ export const configuration: any = {
         RemoveMemberFromTeam,
         ReRunProjectProdRequest,
         UpdateProjectProdRequest,
+        ReRunMigrateTeamCloud,
     ],
     events: [
         ApplicationCreated,

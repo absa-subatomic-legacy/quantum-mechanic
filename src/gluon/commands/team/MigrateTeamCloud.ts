@@ -18,7 +18,7 @@ import {
     GluonTeamNameParam,
     GluonTeamNameSetter,
     GluonTeamOpenShiftCloudBaseSetter,
-    setGluonTeamOpenShiftCloudForced,
+    setGluonTeamOpenShiftCloud,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
@@ -40,13 +40,14 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
 
     @GluonTeamNameParam({
         callOrder: 0,
-        selectionMessage: "Please select a team associated with the project you wish to configure the package for",
+        selectionMessage: "Please select a team associated with the project you wish to configure the package for.",
     })
     public teamName: string;
 
     @RecursiveParameter({
         callOrder: 1,
-        setter: setGluonTeamOpenShiftCloudForced,
+        setter: setGluonTeamOpenShiftCloud,
+        selectionMessage: "Please select an OpenShift cloud to migrate to.",
     })
     public openShiftCloud: string;
 

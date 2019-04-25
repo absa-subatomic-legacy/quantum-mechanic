@@ -1,4 +1,6 @@
 import {
+    addressEvent,
+    addressSlackChannelsFromContext, buttonForCommand,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -6,13 +8,16 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {timeout, TimeoutError} from "promise-timeout";
+
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {
     OpenshiftListResource,
     OpenshiftResource,
 } from "../../../openshift/api/resources/OpenshiftResource";
+
+import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
+import {ReRunMigrateTeamCloud} from "../../commands/team/ReRunMigrateTeamCloud";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -33,6 +38,7 @@ import {
     OpenShiftProjectNamespace,
     QMProject,
 } from "../../util/project/Project";
+import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
@@ -47,6 +53,7 @@ import {
 } from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
 import {buildJenkinsDeploymentJobTemplates} from "../packages/package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
+import {stringify} from "querystring";
 
 @EventHandler("Receive TeamOpenShiftCloudMigratedEvent events", `
 subscription TeamOpenShiftCloudMigratedEvent {
@@ -91,25 +98,31 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
     }
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
+
         logger.info(`Ingested TeamOpenShiftCloudMigrated event: ${JSON.stringify(event.data)}`);
 
-        const teamCloudMigrationEvent = event.data.TeamOpenShiftCloudMigratedEvent[0];
+        const teamCloudMigrationEvent: any = event.data.TeamOpenShiftCloudMigratedEvent[0];
+
+        const team: QMTeam = EventToGluon.gluonTeam(teamCloudMigrationEvent.team);
+        const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
         try {
-            const team: QMTeam = EventToGluon.gluonTeam(teamCloudMigrationEvent.team);
-            const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
-
+            throw new Error("Fake error");
             const taskRunner = await this.createMigrateTeamToCloudTasks(qmMessageClient, team, teamCloudMigrationEvent.previousCloud);
 
             await taskRunner.execute(ctx);
-
             this.succeedEvent();
 
             return qmMessageClient.send(`:rocket: Team successfully migrated to *${team.openShiftCloud}* cloud.`);
 
         } catch (error) {
             this.failEvent();
-            return await this.handleError(ctx, error, teamCloudMigrationEvent.team.slackIdentity.teamChannel);
+            await handleQMError(qmMessageClient, error);
+
+            const correlationId: string = ctx.correlationId;
+            const destination = await addressSlackChannelsFromContext(ctx, EventToGluon.gluonTeam(teamCloudMigrationEvent.team).slack.teamChannel);
+
+            return await ctx.messageClient.send(this.createRetryMigrationButton(correlationId, JSON.stringify(teamCloudMigrationEvent)), destination, {id: correlationId});
         }
     }
 
@@ -232,5 +245,33 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
 
     private async handleError(ctx: HandlerContext, error, teamChannel: string) {
         return await handleQMError(new ChannelMessageClient(ctx).addDestination(teamChannel), error);
+    }
+
+    private createRetryMigrationButton(correlationId: string, teamCloudMigrationEvent: string) {
+
+        const msg: string = "Please check with your team and retry when the reason of failure has been determined and corrected.";
+
+        return {
+            text: "The migration failed to run successfully.",
+            attachments: [{
+                text: msg,
+                fallback: msg,
+                color: QMColours.stdReddyMcRedFace.hex,
+                actions: [
+                    buttonForCommand(
+                        {
+                            text: "Retry Migration",
+                            style: "danger",
+                        },
+                        // await ctx.messageClient.send(teamCloudMigrationEvent, addressEvent("TeamOpenShiftCloudMigratedEvent")),
+                        new ReRunMigrateTeamCloud(), {
+                            correlationId,
+                            teamCloudMigrationEvent,
+                        },
+                    ),
+                ],
+            },
+            ],
+        };
     }
 }
