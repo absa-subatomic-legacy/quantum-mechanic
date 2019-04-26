@@ -58,15 +58,16 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
         const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(this.project.owningTeam.teamId);
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
 
+        const devopsDetails = getDevOpsEnvironmentDetails(this.project.owningTeam.name);
+
         await this.addJenkinsFiles(
+            devopsDetails.openshiftProjectId,
             this.application,
             this.jenkinsDeploymentJobConfigs,
             this.project.bitbucketProject.key,
             this.application.bitbucketRepository.slug,
         );
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_FILE);
-
-        const devopsDetails = getDevOpsEnvironmentDetails(this.project.owningTeam.name);
 
         await this.createJenkinsJobs(
             devopsDetails.openshiftProjectId,
@@ -118,7 +119,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
         return await this.configurePackageInJenkinsService.createMultipleJenkinsJobsAndAddToView(jenkinsHost, token, project.name, application.name, jenkinsJobDefinitions);
     }
 
-    private async addJenkinsFiles(application: QMApplication, jenkinsDeploymentTemplates: JenkinsDeploymentJobTemplate[], bitbucketProjectKey, bitbucketRepositorySlug): Promise<HandlerResult> {
+    private async addJenkinsFiles(teamDevOpsProjectId: string, application: QMApplication, jenkinsDeploymentTemplates: JenkinsDeploymentJobTemplate[], bitbucketProjectKey, bitbucketRepositorySlug): Promise<HandlerResult> {
 
         const jenkinsfilesToAddToRepository: SourceControlledFileRequest[] = [];
 
@@ -126,6 +127,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
 
             const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(getPathFromJenkinsfileName(jenkinsDeploymentTemplate.sourceJenkinsfile));
             const content = jenkinsTemplate.build({
+                teamDevOpsProjectId,
                 application,
                 sourceEnvironment: jenkinsDeploymentTemplate.sourceEnvironment,
                 deploymentEnvironments: jenkinsDeploymentTemplate.deploymentEnvironments,
