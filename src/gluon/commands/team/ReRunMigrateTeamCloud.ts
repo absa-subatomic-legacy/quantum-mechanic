@@ -37,15 +37,11 @@ export class ReRunMigrateTeamCloud extends BaseQMComand {
 
         try {
             const destination = await addressSlackChannelsFromContext(ctx, this.teamChannel);
+
             await ctx.messageClient.send({
-                text: `Re-running Team Migration`,
+                text: `Re-running Team Migration... 🚀 `,
             }, destination, {id: this.correlationId});
 
-            // const projectProdRequestEvent = {
-            //     projectProdRequestId: this.projectProdRequestId,
-            // };
-
-            // const result = await ctx.messageClient.send(projectProdRequestEvent, addressEvent("ProjectProductionEnvironmentsRequestClosedEvent"));
             const result = await ctx.messageClient.send(JSON.parse(this.teamCloudMigrationEvent), addressEvent("TeamOpenShiftCloudMigratedEvent"));
             this.succeedCommand();
             return result;

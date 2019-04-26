@@ -43,7 +43,7 @@ import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
-    handleQMError,
+    handleQMError, QMError,
     QMMessageClient,
 } from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
@@ -54,6 +54,7 @@ import {
 } from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
 import {buildJenkinsDeploymentJobTemplates} from "../packages/package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
+import {v4 as uuid} from "uuid";
 
 @EventHandler("Receive TeamOpenShiftCloudMigratedEvent events", `
 subscription TeamOpenShiftCloudMigratedEvent {
@@ -107,7 +108,6 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
         try {
-            // throw new Error("Fake error");
             const taskRunner = await this.createMigrateTeamToCloudTasks(qmMessageClient, team, teamCloudMigrationEvent.previousCloud);
 
             await taskRunner.execute(ctx);
@@ -249,21 +249,20 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
 
     private createRetryMigrationButton(correlationId: string, teamCloudMigrationEvent: string) {
 
-        const msg: string = "Please check with your team and retry when the reason of failure has been determined and corrected.";
+        const msg: string = "Please check with your team and retry when the reason for the failure has been corrected.";
 
         return {
-            text: "The migration failed to run successfully.",
+            text: "Your migration failed to run successfully.",
             attachments: [{
                 text: msg,
                 fallback: msg,
-                color: QMColours.stdReddyMcRedFace.hex,
+                color: QMColours.stdGreenyMcAppleStroodle.hex,
                 actions: [
                     buttonForCommand(
                         {
                             text: "Retry Migration",
-                            style: "danger",
+                            style: "primary",
                         },
-                        // await ctx.messageClient.send(teamCloudMigrationEvent, addressEvent("TeamOpenShiftCloudMigratedEvent")),
                         new ReRunMigrateTeamCloud(), {
                             correlationId,
                             teamCloudMigrationEvent,
