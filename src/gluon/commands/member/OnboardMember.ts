@@ -114,7 +114,7 @@ export class OnboardMember extends BaseQMComand {
             logger.error(`Failed to onboard a member since the details of the user are already in use.`);
             throw new QMError(`Failed to onboard since the member's details are already in use. Please retry using different values.`);
         } else if (!isSuccessCode(createMemberResult.status)) {
-            throw new QMError(`Unable to onboard a member with provided details. Details of the user are already in use.`);
+            throw new QMError(`Unable to onboard a member with provided details. Unknown error.`);
         }
     }
 
