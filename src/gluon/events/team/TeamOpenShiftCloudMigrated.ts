@@ -17,6 +17,7 @@ import {
 } from "../../../openshift/api/resources/OpenshiftResource";
 
 import {stringify} from "querystring";
+import {v4 as uuid} from "uuid";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
 import {ReRunMigrateTeamCloud} from "../../commands/team/ReRunMigrateTeamCloud";
 import {QMApplication} from "../../services/gluon/ApplicationService";
@@ -54,7 +55,6 @@ import {
 } from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
 import {buildJenkinsDeploymentJobTemplates} from "../packages/package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
-import {v4 as uuid} from "uuid";
 
 @EventHandler("Receive TeamOpenShiftCloudMigratedEvent events", `
 subscription TeamOpenShiftCloudMigratedEvent {
