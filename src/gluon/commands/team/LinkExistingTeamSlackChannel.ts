@@ -8,6 +8,7 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TeamSlackChannelService} from "../../services/team/TeamSlackChannelService";
+import {QMParamValidationLookup} from "../../util/QMParamValidationLookup";
 import {
     GluonTeamNameParam,
     GluonTeamNameSetter,
@@ -34,7 +35,7 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
         required: true,
         displayName: "Team Slack Channel",
         description: "The slack channel to link to your team (excluding the #)",
-        pattern: /^(?!<#).*/,
+        pattern: QMParamValidationLookup.getValidationPattern("LinkExistingTeamSlackChannel", "newTeamChannel"),
         validInput: "a slack channel name without the #",
     })
     public newTeamChannel: string;

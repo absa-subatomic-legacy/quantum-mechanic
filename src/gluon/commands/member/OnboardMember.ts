@@ -16,6 +16,7 @@ import {isSuccessCode} from "../../../http/Http";
 import {OnboardMemberMessages} from "../../messages/member/OnboardMemberMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OnboardMemberService} from "../../services/member/OnboardMemberService";
+import {QMParamValidationLookup} from "../../util/QMParamValidationLookup";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
@@ -43,13 +44,14 @@ export class OnboardMember extends BaseQMComand {
 
     @Parameter({
         description: "your email address",
-        pattern: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+        pattern: QMParamValidationLookup.getValidationPattern("OnboardMember", "email"),
     })
     public email: string;
 
     @Parameter({
         description: "your username including domain",
-        validInput: "Domain username in the following format: domain\\username",
+        validInput: "domain username in the following format: domain\\username (all lowercase)",
+        pattern: QMParamValidationLookup.getValidationPattern("OnboardMember", "domainUsername"),
     })
     public domainUsername: string;
 
