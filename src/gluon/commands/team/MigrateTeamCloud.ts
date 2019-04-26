@@ -55,7 +55,7 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
         required: false,
         displayable: false,
     })
-    public approval: ApprovalEnum = ApprovalEnum.CONFIRM;
+    public approval: ApprovalEnum = ApprovalEnum.TO_CONFIRM;
 
     @Parameter({
         required: false,
@@ -72,21 +72,21 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
             const team: QMTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
             const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
-            if (this.approval === ApprovalEnum.CONFIRM) {
-                this.correlationId = uuid();
+            if (this.approval === ApprovalEnum.TO_CONFIRM) {
+                this.correlationId = ctx.correlationId;
                 const message = this.confirmMigrationRequest(this);
 
                 return await qmMessageClient.send(message, {id: this.correlationId});
             } else if (this.approval === ApprovalEnum.APPROVED) {
 
                 const requestingMember: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
-
                 await this.gluonService.teams.updateTeamOpenShiftCloud(team.teamId, this.openShiftCloud, requestingMember.memberId);
 
                 this.succeedCommand();
 
-                return success();
+                return await qmMessageClient.send(this.getConfirmationResultMessage(this.approval), {id: this.correlationId});
             } else if (this.approval === ApprovalEnum.REJECTED) {
+
                 return await qmMessageClient.send(this.getConfirmationResultMessage(this.approval), {id: this.correlationId});
             }
 

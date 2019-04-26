@@ -1,5 +1,5 @@
 export enum ApprovalEnum {
-    CONFIRM = "CONFIRM",
+    TO_CONFIRM = "TO_CONFIRM",
     APPROVED = "APPROVED",
     REJECTED = "REJECTED",
 }
