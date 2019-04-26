@@ -1,5 +1,4 @@
 import {
-    addressEvent,
     addressSlackChannelsFromContext, buttonForCommand,
     EventFired,
     HandlerContext,
@@ -15,10 +14,6 @@ import {
     OpenshiftListResource,
     OpenshiftResource,
 } from "../../../openshift/api/resources/OpenshiftResource";
-
-import {stringify} from "querystring";
-import {v4 as uuid} from "uuid";
-import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
 import {ReRunMigrateTeamCloud} from "../../commands/team/ReRunMigrateTeamCloud";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -44,7 +39,7 @@ import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     ChannelMessageClient,
-    handleQMError, QMError,
+    handleQMError,
     QMMessageClient,
 } from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
