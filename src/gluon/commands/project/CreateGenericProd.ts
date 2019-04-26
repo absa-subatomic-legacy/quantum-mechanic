@@ -74,7 +74,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         required: false,
         displayable: false,
     })
-    public approval: ApprovalEnum = ApprovalEnum.CONFIRM;
+    public approval: ApprovalEnum = ApprovalEnum.TO_CONFIRM;
 
     @Parameter({
         required: false,
@@ -99,7 +99,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
             const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
             const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
-            if (this.approval === ApprovalEnum.CONFIRM) {
+            if (this.approval === ApprovalEnum.TO_CONFIRM) {
                 // Ensure project is prod approved before proceeding
                 await assertGenericProdCanBeRequested(this.projectName, this.deploymentPipelineId, this.gluonService);
 
