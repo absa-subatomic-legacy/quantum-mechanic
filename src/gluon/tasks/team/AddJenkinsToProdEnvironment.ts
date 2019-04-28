@@ -5,7 +5,6 @@ import {QMConfig} from "../../../config/QMConfig";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getSubatomicJenkinsServiceAccountName} from "../../util/jenkins/Jenkins";
-import {getOpenshiftProductionDevOpsJenkinsTokenCredential} from "../../util/jenkins/JenkinsCredentials";
 import {
     roleBindingDefinition,
     serviceAccountDefinition,
@@ -87,15 +86,15 @@ export class AddJenkinsToProdEnvironment extends Task {
             destinationNamespace);
     }
 
-    private async createJenkinsCredentials(teamDevOpsProjectId: string, jenkinsHost: string, token: string, prodName: string, secretValue: string) {
+    private async createJenkinsCredentials(teamName: string, jenkinsHost: string, token: string, prodName: string, secretValue: string) {
 
         const jenkinsCredentials = {
             "": "0",
             "credentials": {
                 scope: "GLOBAL",
-                id: `${teamDevOpsProjectId}-${_.kebabCase(prodName)}`,
+                id: `${_.kebabCase(teamName)}-${_.kebabCase(prodName)}`.toLowerCase(),
                 secret: secretValue,
-                description: `${teamDevOpsProjectId} ${prodName} token`,
+                description: `${teamName} ${prodName} token`,
                 $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
             },
         };

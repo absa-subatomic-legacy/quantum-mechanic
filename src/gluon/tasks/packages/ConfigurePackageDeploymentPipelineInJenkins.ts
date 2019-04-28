@@ -61,7 +61,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
         const devopsDetails = getDevOpsEnvironmentDetails(this.project.owningTeam.name);
 
         await this.addJenkinsFiles(
-            devopsDetails.openshiftProjectId,
+            owningTeam.name,
             this.application,
             this.jenkinsDeploymentJobConfigs,
             this.project.bitbucketProject.key,
@@ -119,7 +119,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
         return await this.configurePackageInJenkinsService.createMultipleJenkinsJobsAndAddToView(jenkinsHost, token, project.name, application.name, jenkinsJobDefinitions);
     }
 
-    private async addJenkinsFiles(teamDevOpsProjectId: string, application: QMApplication, jenkinsDeploymentTemplates: JenkinsDeploymentJobTemplate[], bitbucketProjectKey, bitbucketRepositorySlug): Promise<HandlerResult> {
+    private async addJenkinsFiles(teamName: string, application: QMApplication, jenkinsDeploymentTemplates: JenkinsDeploymentJobTemplate[], bitbucketProjectKey, bitbucketRepositorySlug): Promise<HandlerResult> {
 
         const jenkinsfilesToAddToRepository: SourceControlledFileRequest[] = [];
 
@@ -127,7 +127,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
 
             const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(getPathFromJenkinsfileName(jenkinsDeploymentTemplate.sourceJenkinsfile));
             const content = jenkinsTemplate.build({
-                teamDevOpsProjectId,
+                teamName,
                 application,
                 sourceEnvironment: jenkinsDeploymentTemplate.sourceEnvironment,
                 deploymentEnvironments: jenkinsDeploymentTemplate.deploymentEnvironments,
