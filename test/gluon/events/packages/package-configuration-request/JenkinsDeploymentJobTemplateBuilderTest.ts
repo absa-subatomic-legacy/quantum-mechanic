@@ -255,9 +255,9 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
         assert.equal(jenkinsDeploymentJobTemplates.length, 1);
         assert.equal(jenkinsDeploymentJobTemplates[0].sourceEnvironment.postfix, "preprod");
         assert.equal(jenkinsDeploymentJobTemplates[0].sourceEnvironment.displayName, "Demo Pre Prod");
-        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[0].postfix, "a-prod-pretend");
+        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[0].postfix, "prod");
         assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[0].displayName, "Demo a.prod.pretend");
-        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[1].postfix, "b-prod-pretend");
+        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[1].postfix, "prod-b");
         assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[1].displayName, "Demo b.prod.pretend");
         assert.equal(jenkinsDeploymentJobTemplates[0].sourceJenkinsfile, "jenkinsfile.prod");
         assert.equal(jenkinsDeploymentJobTemplates[0].expectedJenkinsfile, "Jenkinsfile.prod");
