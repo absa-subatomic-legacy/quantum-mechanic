@@ -90,7 +90,10 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
                     ).addTask(
                         new CreateOpenshiftEnvironments(request, environmentsForCreation, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
-                        new AddJenkinsToProdEnvironment({team: owningTeam}, environmentsForCreation, prodOpenshift),
+                        new AddJenkinsToProdEnvironment({
+                            team: owningTeam,
+                            project,
+                        }, environmentsForCreation, prodOpenshift),
                     );
                 }
 
