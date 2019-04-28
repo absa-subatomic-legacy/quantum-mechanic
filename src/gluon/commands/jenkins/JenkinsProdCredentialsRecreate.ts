@@ -72,7 +72,7 @@ export class JenkinsProdCredentialsRecreate extends RecursiveParameterRequestCom
 
             const messageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
-            const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Recreating jenkins credentials for the *${this.teamName}* team's *${this.projectName}* project using the *${deploymentPipeline.name}* pipeline:`,
+            const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Recreating production jenkins credentials for the *${this.teamName}* team's *${this.projectName}* project using the *${deploymentPipeline.name}* pipeline:`,
                 messageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
@@ -90,7 +90,7 @@ export class JenkinsProdCredentialsRecreate extends RecursiveParameterRequestCom
 
             this.succeedCommand();
             return await ctx.messageClient.respond({
-                text: `🚀 Successfully created the Jenkins Credentials!.`,
+                text: `🚀 Successfully created the Jenkins production Credentials!`,
             });
         } catch (error) {
             this.failCommand();

@@ -94,7 +94,7 @@ export class AddJenkinsToProdEnvironment extends Task {
     }
 
     private async createJenkinsOpenShiftTokenCredentials(teamName: string, jenkinsHost: string, token: string, prodName: string, secretValue: string) {
-
+        logger.info(`Creating credentials prod access tokens`);
         const jenkinsCredentials = {
             "": "0",
             "credentials": {
@@ -110,8 +110,9 @@ export class AddJenkinsToProdEnvironment extends Task {
     }
 
     private async createJenkinsProjectNameCredentials(jenkinsHost: string, token: string, projectName: string) {
-
+        logger.info(`Creating credentials for production project names`);
         for (const environment of this.prodOpenShiftNamespaces) {
+            logger.info(`Creating credential for ${environment.namespace} environment`);
             const environmentCredential = getOpenshiftEnvironmentCredential(environment);
             const jenkinsCredentialsFolder: JenkinsCredentialsFolder = {
                 domain: this.jenkinsService.getProjectCredentialsDomain(projectName),
