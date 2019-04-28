@@ -6,6 +6,7 @@ import {BitbucketProjectRecommendedPracticesCommand} from "./gluon/commands/bitb
 import {Help} from "./gluon/commands/help/Help";
 import {KickOffJenkinsBuild} from "./gluon/commands/jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsCredentialsRecreate";
+import {JenkinsProdCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsProdCredentialsRecreate";
 import {OnboardMember} from "./gluon/commands/member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "./gluon/commands/packages/ConfigureApplicationJenkinsProd";
 import {ConfigureBasicPackage} from "./gluon/commands/packages/ConfigureBasicPackage";
@@ -96,6 +97,7 @@ export const configuration: any = {
         Help,
         JoinTeam,
         JenkinsCredentialsRecreate,
+        JenkinsProdCredentialsRecreate,
         KickOffJenkinsBuild,
         LinkExistingApplication,
         LinkExistingLibrary,

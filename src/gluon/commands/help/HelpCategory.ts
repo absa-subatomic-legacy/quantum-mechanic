@@ -5,6 +5,7 @@ import {BitbucketProjectAccessCommand} from "../bitbucket/BitbucketProjectAccess
 import {BitbucketProjectRecommendedPracticesCommand} from "../bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "../jenkins/JenkinsCredentialsRecreate";
+import {JenkinsProdCredentialsRecreate} from "../jenkins/JenkinsProdCredentialsRecreate";
 import {OnboardMember} from "../member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "../packages/ConfigureApplicationJenkinsProd";
 import {ConfigureBasicPackage} from "../packages/ConfigureBasicPackage";
@@ -58,6 +59,7 @@ export class HelpCategory {
         CreateTeam,
         JoinTeam,
         JenkinsCredentialsRecreate,
+        JenkinsProdCredentialsRecreate,
         KickOffJenkinsBuild,
         LinkExistingApplication,
         LinkExistingLibrary,
