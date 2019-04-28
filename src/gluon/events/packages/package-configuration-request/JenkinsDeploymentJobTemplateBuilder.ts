@@ -55,14 +55,17 @@ export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, proje
     const deploymentEnvironments = [];
     for (const prodCluster of openShiftProdClusterDefinitions) {
         for (const prodEnvironment of prodCluster.defaultEnvironments) {
+
+            const environment = {
+                displayName: prodCluster.name,
+                postfix: _.kebabCase(prodEnvironment.id),
+            };
+
             const projectMetadata = getDeploymentEnvironmentJenkinsMetadata(
                 tenantName,
                 projectName,
                 releaseDeploymentPipeline,
-                {
-                    displayName: prodCluster.name,
-                    postfix: _.kebabCase(prodEnvironment.id),
-                },
+                environment,
                 prodCluster,
             );
 
