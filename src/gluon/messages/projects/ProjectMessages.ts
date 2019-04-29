@@ -10,8 +10,8 @@ import {MessageLoader} from "../MessageLoader";
 export class ProjectMessages {
     private messageLoader = new MessageLoader("projectMessages");
     public PackageUsageMessage(projectName: string): SlackMessage {
-        if (this.messageLoader.msg !== "") {
-            return this.messageLoader.msg;
+        if (this.messageLoader !== "") {
+            return this.messageLoader;
         } else {
             return {
                 text: `

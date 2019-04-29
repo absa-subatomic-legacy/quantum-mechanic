@@ -21,7 +21,7 @@ export class MessageLoader {
         fs.readdirSync(`resources/templates/messages`).forEach(file => {
             logger.info(`Found file: ${file}`);
             if (file.endsWith(`${this.filename}.json`)) {
-                msgFile = file;}
+                msgFile = file; }
         });
         if (msgFile === "") {
             logger.error("Failed to read message file in resources/templates/messages directory. Using Defaults.");
