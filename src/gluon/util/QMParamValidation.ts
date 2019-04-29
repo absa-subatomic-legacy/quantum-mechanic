@@ -1,47 +1,32 @@
 import {logger} from "@atomist/automation-client";
-import * as fs from "fs";
+import {JsonLoader} from "./resources/JsonLoader";
 
 export class QMParamValidation {
 
     public static paramValidationMap: ParamaterValidationMap;
 
     public static initialize() {
-
-        const rawValidationConfig = fs.readFileSync(this.readConfigFile()).toString();
-        const validationConfigObject = JSON.parse(rawValidationConfig);
-
-        this.paramValidationMap = validationConfigObject;
+        this.paramValidationMap = this.readConfigFile();
     }
 
     public static getPattern(className: string, paramaterName: string, defaultValidation?: string) {
-         if (QMParamValidation.paramValidationMap[className + "_" + paramaterName]) {
+        if (QMParamValidation.paramValidationMap && QMParamValidation.paramValidationMap[className + "_" + paramaterName]) {
             return RegExp(QMParamValidation.paramValidationMap[className + "_" + paramaterName]);
         } else {
             return RegExp(defaultValidation);
         }
     }
 
-    private static readConfigFile() {
+    private static readConfigFile(): any {
+        let valObj = {};
+        try {
+            valObj = new JsonLoader().readFileContents("config/validation.json");
+            logger.info(`Successfully read custom validation JSON file`);
 
-        let configFile = "";
-
-        logger.info(`Searching folder for config.validation.json: config/`);
-        fs.readdirSync(`config/`).forEach(file => {
-            logger.info(`Found file: ${file}`);
-            if (file.endsWith("local.validation.json")) {
-                configFile = file;
-            } else if (file.endsWith("config.validation.json") && configFile !== "local.validation.json") {
-                configFile = file;
-            }
-        });
-
-        if (configFile === "") {
-            logger.error("Failed to read validation config file in config/ directory. Exiting.");
-            process.exit(1);
+        } catch (e) {
+            logger.warn(`Did not find custom validation JSON file in config/ directory. ${e.message}. Will use default validation patterns.`);
         }
-
-        logger.info(`Using validation config file: ${configFile}`);
-        return `config/${configFile}`;
+        return valObj;
     }
 }
 
