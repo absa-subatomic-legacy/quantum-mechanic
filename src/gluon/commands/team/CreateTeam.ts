@@ -9,6 +9,7 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
+import {QMParamValidation} from "../../util/QMParamValidation";
 import {
     GluonTeamOpenShiftCloudParam,
     GluonTeamOpenShiftCloudSetter,
@@ -33,7 +34,7 @@ export class CreateTeam extends RecursiveParameterRequestCommand implements Gluo
 
     @Parameter({
         description: "team name",
-        pattern: /.{1,22}/,
+        pattern: QMParamValidation.getPattern("CreateTeam", "teamName", ".{1,22}"),
         validInput: "between 1->22 characters",
     })
     public teamName: string;
