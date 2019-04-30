@@ -7,22 +7,9 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {SlackMessage} from "@atomist/slack-messages";
-import {CommandIntent} from "../../commands/CommandIntent";
-import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
-import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
-import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
-import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
-import {BroadcastMessageAllChannelsService} from "../../services/communications/broadcastMessageAllChannelsService";
-import {GluonService} from "../../services/gluon/GluonService";
 import {TeamService} from "../../services/gluon/TeamService";
-import {
-    QMProject,
-} from "../../util/project/Project";
-import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
-import {EventToGluon} from "../../util/transform/EventToGluon";
 
 @EventHandler("Receive BroadcastMessageAllChannels events", `
 subscription BroadcastMessageAllChannelsEvent {
@@ -74,7 +61,7 @@ export class BroadcastMessageAllChannels extends BaseQMEvent implements HandleEv
                 return i.slack.teamChannel;
             });
 
-            // build actions adn attachments - multiple attachments and multiple actions/buttons
+            // build actions and attachments - multiple attachments and multiple actions/buttons
             const myAttachments = [];
             broadcastMessageAllChannelsData.attachments.forEach(attachment => {
 
@@ -114,6 +101,7 @@ export class BroadcastMessageAllChannels extends BaseQMEvent implements HandleEv
                 attachments: myAttachments,
             };
 
+            // send the custom message to all team channels
             return await ctx.messageClient.addressChannels(
                 msg,
                 teamChannels);
