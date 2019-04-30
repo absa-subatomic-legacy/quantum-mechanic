@@ -9,7 +9,6 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {TeamService} from "../../services/gluon/TeamService";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
-import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 
 @EventHandler("Receive BroadcastMessageAllChannels events", `
 subscription BroadcastMessageAllChannelsEvent {
@@ -49,10 +48,9 @@ export class BroadcastMessageAllChannels extends BaseQMEvent implements HandleEv
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
 
         logger.info(`Ingested BroadcastMessageAllChannelsEvent, event.data = ${JSON.stringify(event.data)}`);
-
-        const broadcastMessageAllChannelsData = event.data.BroadcastMessageAllChannelsEvent[0];
-
         try {
+            const broadcastMessageAllChannelsData = event.data.BroadcastMessageAllChannelsEvent[0];
+
             const allteams = await this.teamService.getAllTeams();
 
             // map all slack channels and remove nulls
@@ -91,7 +89,7 @@ export class BroadcastMessageAllChannels extends BaseQMEvent implements HandleEv
                     thumb_url: attachment.thumb_url,
                     footer: attachment.footer,
                     footer_icon: attachment.footer_icon,
-                    mrkdwn_in: ["text"],
+                    mrkdwn_in: ["text", "pretext"],
                     actions: myActions,
                 });
             });
@@ -101,6 +99,8 @@ export class BroadcastMessageAllChannels extends BaseQMEvent implements HandleEv
                 attachments: myAttachments,
             };
 
+            this.succeedEvent();
+
             // send the custom message to all team channels
             return await ctx.messageClient.addressChannels(
                 msg,
@@ -108,9 +108,7 @@ export class BroadcastMessageAllChannels extends BaseQMEvent implements HandleEv
 
         } catch (error) {
             this.failEvent();
-            return await handleQMError(new ChannelMessageClient(ctx).addDestination(
-                broadcastMessageAllChannelsData.team.slackIdentity.teamChannel),
-                error);
+            logger.error(`BroadcastMessageAllChannels failed with error: ${error}`);
         }
     }
 }
