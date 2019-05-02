@@ -13,6 +13,7 @@ export class QMTemplate {
         Handlebars.registerHelper("toCamelCase", str => _.camelCase(str));
         Handlebars.registerHelper("toPascalCase", str => _.upperFirst(_.camelCase(str)));
         Handlebars.registerHelper("toUpperSnakeCase", str => _.snakeCase(str).toUpperCase());
+        Handlebars.registerHelper("toLowerKebabCase", str => _.kebabCase(str).toLowerCase());
         Handlebars.registerHelper("ifCond", ifCond);
         this.template = Handlebars.compile(rawTemplateString);
     }

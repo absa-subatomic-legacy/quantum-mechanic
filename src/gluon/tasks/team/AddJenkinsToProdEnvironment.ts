@@ -2,18 +2,22 @@ import {HandlerContext, logger} from "@atomist/automation-client";
 import _ = require("lodash");
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
-import {JenkinsService} from "../../services/jenkins/JenkinsService";
+import {
+    JenkinsCredentialsFolder,
+    JenkinsService,
+} from "../../services/jenkins/JenkinsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getSubatomicJenkinsServiceAccountName} from "../../util/jenkins/Jenkins";
-import {getOpenshiftProductionDevOpsJenkinsTokenCredential} from "../../util/jenkins/JenkinsCredentials";
+import {getOpenshiftEnvironmentCredential} from "../../util/jenkins/JenkinsCredentials";
 import {
     roleBindingDefinition,
     serviceAccountDefinition,
 } from "../../util/jenkins/JenkinsOpenshiftResources";
-import {OpenShiftProjectNamespace} from "../../util/project/Project";
+import {OpenShiftProjectNamespace, QMProject} from "../../util/project/Project";
 import {
     getDevOpsEnvironmentDetails,
     getDevOpsEnvironmentDetailsProd,
+    QMTeam,
 } from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -25,7 +29,7 @@ export class AddJenkinsToProdEnvironment extends Task {
     private readonly TASK_ADD_JENKINS_SA_RIGHTS = TaskListMessage.createUniqueTaskName("JenkinsSAEdit");
     private readonly TASK_ADD_JENKINS_CREDENTIALS = TaskListMessage.createUniqueTaskName("JenkinsCredentials");
 
-    constructor(private devOpsRequestedEvent,
+    constructor(private projectDetails: { team: QMTeam, project: QMProject },
                 private prodOpenShiftNamespaces: OpenShiftProjectNamespace[],
                 private openshiftEnvironment: OpenShiftConfig,
                 private jenkinsService = new JenkinsService(),
@@ -41,8 +45,8 @@ export class AddJenkinsToProdEnvironment extends Task {
     }
 
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
-        const teamDevOpsNonProd = getDevOpsEnvironmentDetails(this.devOpsRequestedEvent.team.name).openshiftProjectId;
-        const teamDevOpsProd = getDevOpsEnvironmentDetailsProd(this.devOpsRequestedEvent.team.name).openshiftProjectId;
+        const teamDevOpsNonProd = getDevOpsEnvironmentDetails(this.projectDetails.team.name).openshiftProjectId;
+        const teamDevOpsProd = getDevOpsEnvironmentDetailsProd(this.projectDetails.team.name).openshiftProjectId;
         logger.info(`Working with OpenShift project Id: ${teamDevOpsProd}`);
 
         await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);
@@ -58,13 +62,15 @@ export class AddJenkinsToProdEnvironment extends Task {
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_SA_RIGHTS);
 
         // Add the prod token to the non prod jenkins instance
-        await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.devOpsRequestedEvent.team.openShiftCloud].openshiftNonProd);
+        await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.projectDetails.team.openShiftCloud].openshiftNonProd);
 
         const jenkinsToken = await this.ocService.getServiceAccountToken(getSubatomicJenkinsServiceAccountName(), teamDevOpsNonProd);
 
         const jenkinsHost: string = await this.ocService.getJenkinsHost(teamDevOpsNonProd);
 
-        await this.createJenkinsCredentials(this.devOpsRequestedEvent.team.name, jenkinsHost, jenkinsToken, this.openshiftEnvironment.name, prodToken);
+        await this.createJenkinsOpenShiftTokenCredentials(this.projectDetails.team.name, jenkinsHost, jenkinsToken, this.openshiftEnvironment.name, prodToken);
+
+        await this.createJenkinsProjectNameCredentials(jenkinsHost, jenkinsToken, this.projectDetails.project.name);
 
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_CREDENTIALS);
 
@@ -87,19 +93,32 @@ export class AddJenkinsToProdEnvironment extends Task {
             destinationNamespace);
     }
 
-    private async createJenkinsCredentials(teamDevOpsProjectId: string, jenkinsHost: string, token: string, prodName: string, secretValue: string) {
-
+    private async createJenkinsOpenShiftTokenCredentials(teamName: string, jenkinsHost: string, token: string, prodName: string, secretValue: string) {
+        logger.info(`Creating credentials prod access tokens`);
         const jenkinsCredentials = {
             "": "0",
             "credentials": {
                 scope: "GLOBAL",
-                id: `${teamDevOpsProjectId}-${_.kebabCase(prodName)}`,
+                id: `${_.kebabCase(teamName)}-${_.kebabCase(prodName)}`.toLowerCase(),
                 secret: secretValue,
-                description: `${teamDevOpsProjectId} ${prodName} token`,
+                description: `${teamName} ${prodName} token`,
                 $class: "org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl",
             },
         };
 
         await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, jenkinsCredentials);
+    }
+
+    private async createJenkinsProjectNameCredentials(jenkinsHost: string, token: string, projectName: string) {
+        logger.info(`Creating credentials for production project names`);
+        for (const environment of this.prodOpenShiftNamespaces) {
+            logger.info(`Creating credential for ${environment.namespace} environment`);
+            const environmentCredential = getOpenshiftEnvironmentCredential(environment);
+            const jenkinsCredentialsFolder: JenkinsCredentialsFolder = {
+                domain: this.jenkinsService.getProjectCredentialsDomain(projectName),
+                jobName: _.kebabCase(projectName),
+            };
+            await this.jenkinsService.createJenkinsCredentialsWithRetries(6, 5000, jenkinsHost, token, environmentCredential, undefined, jenkinsCredentialsFolder);
+        }
     }
 }

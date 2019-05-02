@@ -1,6 +1,5 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {JenkinsDevOpsCredentialsService} from "../../services/jenkins/JenkinsDevOpsCredentialsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getSubatomicJenkinsServiceAccountName} from "../../util/jenkins/Jenkins";
@@ -8,7 +7,6 @@ import {
     roleBindingDefinition,
     serviceAccountDefinition,
 } from "../../util/jenkins/JenkinsOpenshiftResources";
-import {QMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -18,7 +16,6 @@ const promiseRetry = require("promise-retry");
 export class AddJenkinsToDevOpsEnvironment extends Task {
 
     private readonly TASK_HEADER = TaskListMessage.createUniqueTaskName("ConfigureDevOpsJenkins");
-    private readonly TASK_TAG_TEMPLATE = TaskListMessage.createUniqueTaskName("TagTemplate");
     private readonly TASK_ROLLOUT_JENKINS = TaskListMessage.createUniqueTaskName("RolloutJenkins");
     private readonly TASK_CONFIG_JENKINS = TaskListMessage.createUniqueTaskName("ConfigJenkins");
 
@@ -30,7 +27,6 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
 
     protected configureTaskListMessage(taskListMessage: TaskListMessage) {
         taskListMessage.addTask(this.TASK_HEADER, `*Create DevOps Jenkins*`);
-        taskListMessage.addTask(this.TASK_TAG_TEMPLATE, "\tTag jenkins template to environment");
         taskListMessage.addTask(this.TASK_ROLLOUT_JENKINS, "\tRollout Jenkins instance");
         taskListMessage.addTask(this.TASK_CONFIG_JENKINS, "\tConfigure Jenkins");
     }
@@ -43,10 +39,6 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         const openShiftCloud = this.team.openShiftCloud;
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[openShiftCloud].openshiftNonProd);
-
-        await this.copyJenkinsTemplateToDevOpsEnvironment(projectId);
-
-        await this.taskListMessage.succeedTask(this.TASK_TAG_TEMPLATE);
 
         await this.createJenkinsDeploymentConfig(
             projectId,
@@ -75,24 +67,9 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         return true;
     }
 
-    private async copyJenkinsTemplateToDevOpsEnvironment(projectId: string) {
-        let jenkinsTemplate: OpenshiftResource = null;
-        try {
-            jenkinsTemplate = await this.ocService.getTemplate("jenkins-persistent-subatomic", "subatomic");
-        } catch (error) {
-            throw new QMError(error, `Failed to find jenkins template for namespace subatomic`);
-        }
-        jenkinsTemplate.metadata.namespace = projectId;
-        try {
-            await this.ocService.applyResourceFromDataInNamespace(jenkinsTemplate, projectId);
-        } catch (error) {
-            throw new QMError(error, `Failed to apply jenkins template for namespace subatomic to devops environment`);
-        }
-    }
-
-    private async createJenkinsDeploymentConfig(projectId: string, jenkinsImageNamespace: string, dockerRegistryUrl: string) {
+    private async createJenkinsDeploymentConfig(projectId: string, sharedResourceNamespace: string, dockerRegistryUrl: string) {
         logger.info("Processing Jenkins QMFileTemplate...");
-        const openShiftResourceList = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId, jenkinsImageNamespace, dockerRegistryUrl);
+        const openShiftResourceList = await this.ocService.processJenkinsTemplateForDevOpsProject(projectId, sharedResourceNamespace, dockerRegistryUrl);
         try {
             await this.ocService.getDeploymentConfigInNamespace("jenkins", projectId);
             logger.warn("Jenkins QMFileTemplate has already been processed, deployment exists");

@@ -43,9 +43,9 @@ export function buildJenkinsDeploymentJobTemplates(tenantName: string, projectNa
     return jenkinsDeploymentJobTemplates;
 }
 
-export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, projectName: string, nonProdEnvironmentDefinition: OpenShiftConfig, openShiftProdEnvironmentDefinitions: OpenShiftConfig[], releaseDeploymentPipeline: QMDeploymentPipeline) {
+export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, projectName: string, nonProdClusterDefinition: OpenShiftConfig, openShiftProdClusterDefinitions: OpenShiftConfig[], releaseDeploymentPipeline: QMDeploymentPipeline) {
     const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = [];
-    const prepodEnvironment: JenkinsProjectMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releaseDeploymentPipeline, getHighestPreProdEnvironment(releaseDeploymentPipeline), nonProdEnvironmentDefinition);
+    const prepodEnvironment: JenkinsProjectMetadata = getDeploymentEnvironmentJenkinsMetadata(tenantName, projectName, releaseDeploymentPipeline, getHighestPreProdEnvironment(releaseDeploymentPipeline), nonProdClusterDefinition);
 
     const prodPostfix = "prod";
     const sourceJenkinsfile = getDefaultProdJenkinsFileName();
@@ -53,21 +53,26 @@ export function buildJenkinsProdDeploymentJobTemplates(tenantName: string, proje
     const jobNamePostfix = getEnvironmentDeploymentJenkinsJobPostfix(releaseDeploymentPipeline.tag, prodPostfix);
     const jobTemplateFilename = getJenkinsProdJobTemplateFile();
     const deploymentEnvironments = [];
-    for (const prodEnvironment of openShiftProdEnvironmentDefinitions) {
-        const projectMetadata = getDeploymentEnvironmentJenkinsMetadata(
-            tenantName,
-            projectName,
-            releaseDeploymentPipeline,
-            {
-                displayName: prodEnvironment.name,
-                postfix: _.kebabCase(prodEnvironment.name),
-            },
-            prodEnvironment,
-        );
+    for (const prodCluster of openShiftProdClusterDefinitions) {
+        for (const prodEnvironment of prodCluster.defaultEnvironments) {
 
-        deploymentEnvironments.push(
-            projectMetadata,
-        );
+            const environment = {
+                displayName: prodCluster.name,
+                postfix: _.kebabCase(prodEnvironment.id),
+            };
+
+            const projectMetadata = getDeploymentEnvironmentJenkinsMetadata(
+                tenantName,
+                projectName,
+                releaseDeploymentPipeline,
+                environment,
+                prodCluster,
+            );
+
+            deploymentEnvironments.push(
+                projectMetadata,
+            );
+        }
     }
 
     jenkinsDeploymentJobTemplates.push(

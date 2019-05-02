@@ -1,0 +1,27 @@
+type BroadcastMessageAllChannelsEvent @rootType {
+	text: String
+	attachments: [attachment]
+}
+
+type attachment {
+    fallback: String
+    color: String
+    pretext: String
+    author_name: String
+    author_link: String
+    author_icon: String
+    title: String
+    title_link: String
+    text: String
+    img_url: String
+    thumb_url: String
+    footer: String
+    footer_icon: String
+	actions: [action]
+}
+
+type action {
+	text: String
+	style: String
+	command: String
+}

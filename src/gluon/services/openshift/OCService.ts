@@ -238,13 +238,13 @@ export class OCService {
         return response;
     }
 
-    public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, jenkinsImageNamspace: string, dockerRegistryUrl: string): Promise<any> {
+    public async processJenkinsTemplateForDevOpsProject(devopsNamespace: string, jenkinsResourceNamespace: string, dockerRegistryUrl: string): Promise<any> {
         logger.debug(`Trying to process jenkins template for devops project template. devopsNamespace: ${devopsNamespace}`);
 
         // TODO: this should be a property on Team. I.e. teamEmail
         // TODO: the registry Cluster IP we will have to get by introspecting the registry Service
         const params = [
-            {key: "NAMESPACE", value: jenkinsImageNamspace},
+            {key: "NAMESPACE", value: jenkinsResourceNamespace},
             {key: "BITBUCKET_NAME", value: "Subatomic Bitbucket"},
             {key: "BITBUCKET_URL", value: QMConfig.subatomic.bitbucket.baseUrl},
             {
@@ -254,11 +254,11 @@ export class OCService {
             {key: "JENKINS_ADMIN_EMAIL", value: "subatomic@local"},
             {
                 key: "NAMESPACE_URL",
-                value: `${dockerRegistryUrl}/${jenkinsImageNamspace}`,
+                value: `${dockerRegistryUrl}/${jenkinsResourceNamespace}`,
             },
         ];
 
-        return await this.findAndProcessOpenshiftTemplate("jenkins-persistent-subatomic", devopsNamespace, params);
+        return await this.findAndProcessOpenshiftTemplate("jenkins-persistent-subatomic", jenkinsResourceNamespace, params);
     }
 
     public async findAndProcessOpenshiftTemplate(templateName: string, namespace: string, params: Array<{ key: string, value: string }>, ignoreUnknownParameters: boolean = false) {

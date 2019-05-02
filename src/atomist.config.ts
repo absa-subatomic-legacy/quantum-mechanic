@@ -6,6 +6,7 @@ import {BitbucketProjectRecommendedPracticesCommand} from "./gluon/commands/bitb
 import {Help} from "./gluon/commands/help/Help";
 import {KickOffJenkinsBuild} from "./gluon/commands/jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsCredentialsRecreate";
+import {JenkinsProdCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsProdCredentialsRecreate";
 import {OnboardMember} from "./gluon/commands/member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "./gluon/commands/packages/ConfigureApplicationJenkinsProd";
 import {ConfigureBasicPackage} from "./gluon/commands/packages/ConfigureBasicPackage";
@@ -40,7 +41,9 @@ import {MigrateTeamCloud} from "./gluon/commands/team/MigrateTeamCloud";
 import {NewOrUseTeamSlackChannel} from "./gluon/commands/team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "./gluon/commands/team/NewSlackChannel";
 import {RemoveMemberFromTeam} from "./gluon/commands/team/RemoveMemberFromTeam";
+import {ReRunMigrateTeamCloud} from "./gluon/commands/team/ReRunMigrateTeamCloud";
 import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAdded";
+import {BroadcastMessageAllChannels} from "./gluon/events/communications/BroadcastMessageAllChannels";
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
 import {ApplicationProdRequested} from "./gluon/events/packages/ApplicationProdRequested";
@@ -95,6 +98,7 @@ export const configuration: any = {
         Help,
         JoinTeam,
         JenkinsCredentialsRecreate,
+        JenkinsProdCredentialsRecreate,
         KickOffJenkinsBuild,
         LinkExistingApplication,
         LinkExistingLibrary,
@@ -114,6 +118,7 @@ export const configuration: any = {
         RemoveMemberFromTeam,
         ReRunProjectProdRequest,
         UpdateProjectProdRequest,
+        ReRunMigrateTeamCloud,
     ],
     events: [
         ApplicationCreated,
@@ -136,6 +141,7 @@ export const configuration: any = {
         TeamMemberCreated,
         TeamsLinkedToProject,
         TeamOpenShiftCloudMigrated,
+        BroadcastMessageAllChannels,
     ],
     ingesters: [
         ingester("KeyValuePair"),
@@ -174,6 +180,7 @@ export const configuration: any = {
         ingester("ProjectProductionEnvironmentsRequestClosedEvent"),
         ingester("PackageConfigurationRequestedEvent"),
         ingester("ConfigServerRequestedEvent"),
+        ingester("BroadcastMessageAllChannelsEvent"),
     ],
     apiKey,
     http,

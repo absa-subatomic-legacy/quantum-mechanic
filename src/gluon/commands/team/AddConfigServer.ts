@@ -9,6 +9,7 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {ConfigServerRequestedEvent} from "../../events/team/ConfigServerRequested";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMMemberBase} from "../../util/member/Members";
+import {QMParamValidation} from "../../util/QMParamValidation";
 import {
     GluonTeamNameParam,
     GluonTeamNameSetter,
@@ -37,7 +38,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
 
     @Parameter({
         description: "Remote Git repository SSH",
-        pattern: /^ssh:\/\/.*$/,
+        pattern: QMParamValidation.getPattern("AddConfigServer", "gitUri", "^ssh:\\/\\/.*$"),
     })
     public gitUri: string;
 

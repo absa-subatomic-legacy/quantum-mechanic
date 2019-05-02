@@ -255,13 +255,96 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
         assert.equal(jenkinsDeploymentJobTemplates.length, 1);
         assert.equal(jenkinsDeploymentJobTemplates[0].sourceEnvironment.postfix, "preprod");
         assert.equal(jenkinsDeploymentJobTemplates[0].sourceEnvironment.displayName, "Demo Pre Prod");
-        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[0].postfix, "a-prod-pretend");
+        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[0].postfix, "prod");
         assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[0].displayName, "Demo a.prod.pretend");
-        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[1].postfix, "b-prod-pretend");
+        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[1].postfix, "prod-b");
         assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[1].displayName, "Demo b.prod.pretend");
         assert.equal(jenkinsDeploymentJobTemplates[0].sourceJenkinsfile, "jenkinsfile.prod");
         assert.equal(jenkinsDeploymentJobTemplates[0].expectedJenkinsfile, "Jenkinsfile.prod");
         assert.equal(jenkinsDeploymentJobTemplates[0].jobNamePostfix, "-prod");
+        assert.equal(jenkinsDeploymentJobTemplates[0].jobTemplateFilename, "jenkins-prod-project.xml");
+
+    });
+
+    it("with non default release pipeline input expect correct deployment template", async () => {
+
+        const releaseDeploymentPipelines: QMDeploymentPipeline = {
+            name: "Something",
+            tag: "something",
+            pipelineId: "1",
+            environments: [
+                {
+                    postfix: "uat",
+                    displayName: "UAT",
+                    positionInPipeline: 0,
+                }, {
+                    postfix: "preprod",
+                    displayName: "Pre Prod",
+                    positionInPipeline: 1,
+                },
+            ],
+        };
+
+        const openshiftNonprodDefinition: OpenShiftConfig = {
+            name: "a.nonprod.pretend",
+            internalDockerRegistryUrl: "172.30.1.1:5000",
+            externalDockerRegistryUrl: "registry.a.nonprod.com",
+            masterUrl: "https://192.168.64.2:8443",
+            auth: {
+                token: "token",
+            },
+            defaultEnvironments: [
+                {
+                    id: "dev",
+                    description: "DEV",
+                },
+            ],
+        };
+
+        const openshiftProdEnvironmentDefinitions: OpenShiftConfig [] = [
+            {
+                name: "a.prod.pretend",
+                internalDockerRegistryUrl: "172.30.1.1:5000",
+                externalDockerRegistryUrl: "registry.a.com",
+                masterUrl: "https://192.168.64.2:8443",
+                auth: {
+                    token: "token",
+                },
+                defaultEnvironments: [
+                    {
+                        id: "prod",
+                        description: "PROD",
+                    },
+                ],
+            },
+            {
+                name: "b.prod.pretend",
+                internalDockerRegistryUrl: "172.30.1.1:5000",
+                externalDockerRegistryUrl: "registry.b.com",
+                masterUrl: "https://192.168.64.2:8443",
+                auth: {
+                    token: "token",
+                },
+                defaultEnvironments: [
+                    {
+                        id: "prod-b",
+                        description: "PROD",
+                    },
+                ],
+            },
+        ];
+        const jenkinsDeploymentJobTemplates = buildJenkinsProdDeploymentJobTemplates("default", "Demo", openshiftNonprodDefinition, openshiftProdEnvironmentDefinitions, releaseDeploymentPipelines);
+
+        assert.equal(jenkinsDeploymentJobTemplates.length, 1);
+        assert.equal(jenkinsDeploymentJobTemplates[0].sourceEnvironment.postfix, "something-preprod");
+        assert.equal(jenkinsDeploymentJobTemplates[0].sourceEnvironment.displayName, "Demo Something Pre Prod");
+        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[0].postfix, "something-prod");
+        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[0].displayName, "Demo Something a.prod.pretend");
+        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[1].postfix, "something-prod-b");
+        assert.equal(jenkinsDeploymentJobTemplates[0].deploymentEnvironments[1].displayName, "Demo Something b.prod.pretend");
+        assert.equal(jenkinsDeploymentJobTemplates[0].sourceJenkinsfile, "jenkinsfile.prod");
+        assert.equal(jenkinsDeploymentJobTemplates[0].expectedJenkinsfile, "Jenkinsfile.something.prod");
+        assert.equal(jenkinsDeploymentJobTemplates[0].jobNamePostfix, "-something-prod");
         assert.equal(jenkinsDeploymentJobTemplates[0].jobTemplateFilename, "jenkins-prod-project.xml");
 
     });

@@ -65,7 +65,7 @@ export interface GluonTeamNameSetter {
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
 
-export async function setGluonTeamOpenShiftCloud(
+export async function setGluonTeamOpenShiftCloudInferred(
     ctx: HandlerContext,
     commandHandler: GluonTeamOpenShiftCloudSetter,
     selectionMessage: string = "Please select an OpenShift cloud"): Promise<RecursiveSetterResult> {
@@ -87,11 +87,11 @@ export async function setGluonTeamOpenShiftCloud(
         commandHandler.openShiftCloud = team.openShiftCloud;
         return {setterSuccess: true};
     } else {
-        return await setGluonTeamOpenShiftCloudForced(ctx, commandHandler, selectionMessage);
+        return await setGluonTeamOpenShiftCloud(ctx, commandHandler, selectionMessage);
     }
 }
 
-export async function setGluonTeamOpenShiftCloudForced(
+export async function setGluonTeamOpenShiftCloud(
     ctx: HandlerContext,
     commandHandler: GluonTeamOpenShiftCloudBaseSetter,
     selectionMessage: string = "Please select an OpenShift cloud"): Promise<RecursiveSetterResult> {
@@ -114,7 +114,7 @@ export async function setGluonTeamOpenShiftCloudForced(
 }
 
 export function GluonTeamOpenShiftCloudParam(details: RecursiveParameterDetails) {
-    details.setter = setGluonTeamOpenShiftCloud;
+    details.setter = setGluonTeamOpenShiftCloudInferred;
     return RecursiveParameter(details);
 }
 

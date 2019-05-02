@@ -1,0 +1,7 @@
+{
+  "AddConfigServer_gitUri": "^ssh:\\/\\/.*$",
+  "CreateTeam_teamName": ".{1,22}",
+  "LinkExistingTeamSlackChannel_newTeamChannel": "^(?!<#).*",
+  "OnboardMember_domainUsername": "^[a-z0-9\\\\._-]{7,}$",
+  "OnboardMember_email": "[^@]+@[^\\.]+\\..+"
+}
