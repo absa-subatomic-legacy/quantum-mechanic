@@ -31,7 +31,7 @@ import {QMTeam} from "../../util/team/Teams";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Recreate the production jenkins credentials for a project pipeline", atomistIntent(CommandIntent.JenkinsProdCredentialsRecreate))
-@Tags("subatomic", "project")
+@Tags("subatomic", "jenkins", "project")
 export class JenkinsProdCredentialsRecreate extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, DeploymentPipelineIdSetter {
 
