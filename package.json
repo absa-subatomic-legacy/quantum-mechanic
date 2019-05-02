@@ -28,7 +28,7 @@
     "query-string": "^6.2.0",
     "strip-json-comments": "^2.0.1",
     "superagent": "^4.1.0",
-    "xmlbuilder": "^10.1.1"
+    "xmlbuilder": "^12.0.1"
   },
   "devDependencies": {
     "@types/app-root-path": "^1.2.4",
