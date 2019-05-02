@@ -5,40 +5,28 @@ import stripJsonComments = require("strip-json-comments");
 
 export class MessageLoader {
 
-    public static msg: SlackMessage;
-
-    public static initialize() {
-        const msgRaw = stripJsonComments(fs.readFileSync(this.getMessageFile()).toString());
-        const msg = JSON.parse(msgRaw);
-        MessageLoader.msg = msg;
-        }
-
-    private static filename: string;
-
-    private static getMessageFile() {
-        let msgFile = "";
-        logger.info(`Searching folder: message file overrides/`);
-        fs.readdirSync(`resources/templates/messages`).forEach(file => {
-            logger.info(`Found file: ${file}`);
-            if (file.endsWith(`${this.filename}.json`)) {
-                msgFile = file; }
-        });
-        if (msgFile === "") {
-            logger.error("Failed to read message file in resources/templates/messages directory. Using Defaults.");
-            return "placeholder";
-        } else {
-            logger.info(`Using message override file: ${msgFile}`);
-            return `resources/templates/messages/${msgFile}`;
-        }
-    }
-
+    public msgObject: {[key: string]: {text: string}};
+    public validOverride: boolean;
+    private readonly filename: string;
     constructor(overrideFileName: string) {
         if (overrideFileName === "") {
             logger.error("Override file name cannot be blank");
         } else {
-            MessageLoader.filename = overrideFileName;
+            this.filename = overrideFileName;
+            this.loadMessage();
         }
     }
-}
 
-MessageLoader.initialize();
+    private loadMessage() {
+        fs.readFile(`resources/templates/messages/${this.filename}Override.json`, (err, data) => {
+            if (err) {
+                logger.info(`Failed to load override file for ${this.filename}`);
+                this.validOverride = false;
+            }
+            const msgRaw = stripJsonComments(data);
+            const msgObject = JSON.parse(msgRaw);
+            this.validOverride = true;
+            this.msgObject = msgObject;
+        });
+    }
+}
