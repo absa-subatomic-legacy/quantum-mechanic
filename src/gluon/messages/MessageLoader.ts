@@ -1,7 +1,5 @@
 import {logger} from "@atomist/automation-client";
-import {SlackMessage} from "@atomist/slack-messages";
-import fs = require("fs");
-import stripJsonComments = require("strip-json-comments");
+import {JsonLoader} from "../util/resources/JsonLoader";
 
 export class MessageLoader {
 
@@ -10,23 +8,21 @@ export class MessageLoader {
     private readonly filename: string;
     constructor(overrideFileName: string) {
         if (overrideFileName === "") {
-            logger.error("Override file name cannot be blank");
+            logger.error("Message Override file name cannot be blank");
         } else {
             this.filename = overrideFileName;
-            this.loadMessage();
         }
     }
-
-    private loadMessage() {
-        fs.readFile(`resources/templates/messages/${this.filename}Override.json`, (err, data) => {
-            if (err) {
-                logger.info(`Failed to load override file for ${this.filename}`);
-                this.validOverride = false;
-            }
-            const msgRaw = stripJsonComments(data);
-            const msgObject = JSON.parse(msgRaw);
+    public loadMessage() {
+        try {
+            this.msgObject = new JsonLoader().readFileContents(`resources/templates/messages/${this.filename}Override.json`);
+            logger.info("Successfully loaded override messages from file");
             this.validOverride = true;
-            this.msgObject = msgObject;
-        });
+
+        } catch (e) {
+            logger.warn(`Failed to load override file for ${this.filename}`);
+            logger.error(e);
+            this.validOverride = false;
+        }
     }
 }

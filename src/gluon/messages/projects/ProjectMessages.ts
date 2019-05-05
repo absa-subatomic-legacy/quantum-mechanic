@@ -12,6 +12,7 @@ export class ProjectMessages {
 
     public PackageUsageMessage(projectName: string): SlackMessage {
 
+        this.messageLoader.loadMessage();
         const Msg: SlackMessage = {
             text: `
 Since you have Subatomic project environments ready, you can now add packages.
