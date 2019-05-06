@@ -121,8 +121,8 @@ Here is an example `local.json`:
       "directory": "<plugins directory>"
     }
   },
-  "teamId": "<team Id>",
-  "apiKey": "<Atomist workspace apiKey>",
+  "atomistWorkspaceId": "<atomist workspace id>",
+  "atomistAPIKey": "<atomist workspace api key>",
   //lifecycyle configuration
   "lifecycles": {
     "push": {
@@ -178,8 +178,8 @@ Replace the relevant values above:
 | `<local-hadron-collider>` | The directory where [local-hadron-collider](https://github.com/absa-subatomic/local-hadron-collider) has been cloned locally | `git clone https://github.com/absa-subatomic/local-hadron-collider.git` |
 | `<laboratory>` | The directory where [laboratory](https://github.com/absa-subatomic/laboratory) has been cloned locally | `git clone https://github.com/absa-subatomic/laboratory.git` |
 | `<maven settings>` | Directory containing a Maven `settings.xml` to use for Jenkins builds | Example `settings.xml` included [below](#maven-settings) |
-| `<team Id>` | Slack team Id where the Atomist will respond to commands | See [Atomist documentation](https://docs.atomist.com/user/#slack-team-id) |
-| `<Atomist workspace ApiKey>` | Atomist ApiKey | See [Atomist documentation](https://docs.atomist.com/developer/prerequisites) |
+| `<atomist workspace id>` | Atomist workspace ID | Available from app.atomist.com under settings |
+| `<atomist workspace api key>` | Atomist ApiKey | See [Atomist documentation](https://docs.atomist.com/developer/prerequisites) |
 | `<bitbucket ssh port>` | Bitbucket SSH Port | Set this to the port used for ssh git commands on your Bitbucket instance. The default for Local Hadron Collider should be `30999` |
 | `<plugins directory>` | Pluging Directory | Set this to the directory which all available plugin modules will be dropped into |
 | `<external docker registry url>`| External Docker Registry Url | Url pointing to a docker registry. This is only passed as a templating parameter when creating jenkinsfiles so can be empty if your jenkinsfiles do not use these urls. |
@@ -267,4 +267,4 @@ No versioning is in place at the time of creating this documentation
 This project is licensed under the Apache License v2.0 - see the LICENSE file for details
 
 <!-- ## Acknowledgements
-Hat tips to anyone inspirational.. -->
+Hat tips to anyone inspirational... -->
