@@ -32,8 +32,8 @@ export class QMConfig {
         const configRaw = stripJsonComments(fs.readFileSync(this.getConfigFile()).toString());
         const config = JSON.parse(configRaw);
         QMConfig.subatomic = config.subatomic;
-        QMConfig.teamId = config.teamId;
-        QMConfig.apiKey = config.apiKey;
+        QMConfig.teamId = config.atomistWorkspaceId;
+        QMConfig.apiKey = config.atomistAPIKey;
         QMConfig.http = config.http;
         QMConfig.secondarySlackChannels = config.secondarySlackChannels;
         QMConfig.proMetrics = config.proMetrics || {
