@@ -38,7 +38,7 @@ export class ConfigurePackagePipelineInJenkins extends Task {
 
     constructor(private application: QMApplication,
                 private project: QMProject,
-                private jenkinsJobTemplate: JenkinsJobTemplate = EmptyJenkinsJobTemplate,
+                private jenkinsJobTemplate: JenkinsJobTemplate,
                 private ocService = new OCService(),
                 private gluonService = new GluonService(),
                 private bitbucketFileService = new BitbucketFileService(),

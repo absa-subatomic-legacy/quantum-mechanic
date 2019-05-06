@@ -1,5 +1,6 @@
 import {
-    addressSlackChannelsFromContext, buttonForCommand,
+    addressSlackChannelsFromContext,
+    buttonForCommand,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -27,7 +28,12 @@ import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToDevOpsEnvironment} from "../../tasks/team/AddJenkinsToDevOpsEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
-import {JenkinsDeploymentJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
+import {
+    EmptyJenkinsJobTemplate,
+    getJenkinsMultiBranchProjectJobTemplateFile,
+    JenkinsDeploymentJobTemplate,
+    JenkinsJobTemplate,
+} from "../../util/jenkins/JenkinsJobTemplates";
 import {ApplicationType} from "../../util/packages/Applications";
 import {
     getAllPipelineOpenshiftNamespacesForAllPipelines,
@@ -222,7 +228,9 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         const applications: QMApplication[] = await this.gluonService.applications.gluonApplicationsLinkedToGluonProject(project.name, false);
 
         for (const application of applications) {
-            taskRunner.addTask(new ConfigurePackagePipelineInJenkins(application, project), `*Create ${application.name} application Jenkins job*`);
+            const jenkinsBuildJobTemplate: JenkinsJobTemplate = EmptyJenkinsJobTemplate;
+            jenkinsBuildJobTemplate.jobTemplateFilename = getJenkinsMultiBranchProjectJobTemplateFile();
+            taskRunner.addTask(new ConfigurePackagePipelineInJenkins(application, project, jenkinsBuildJobTemplate), `*Create ${application.name} application Jenkins job*`);
             // Add Additional Jenkins Deployment jobs
             if (application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
                 const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = buildJenkinsDeploymentJobTemplates(
