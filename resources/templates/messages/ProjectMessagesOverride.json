@@ -1,5 +1,0 @@
-{
-  "PackageUsageMessage": {
-    "text": "Your Subatomic project environments are ready, you can now add packages. A package is either an application or a library, click the appropriate button below to create an application now. \n\n Alternatively you may use\n http://submarine-subatomic.apps.nonprod.ocp.absa.co.za/ \nfor a bulk upload"
-  }
-}

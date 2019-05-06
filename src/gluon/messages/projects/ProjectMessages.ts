@@ -10,10 +10,10 @@ import {MessageLoader} from "../MessageLoader";
 export class ProjectMessages {
     private messageLoader = new MessageLoader("projectMessages");
 
-    public PackageUsageMessage(projectName: string): SlackMessage {
+    public packageUsageMessage(projectName: string): SlackMessage {
 
         this.messageLoader.loadMessage();
-        const Msg: SlackMessage = {
+        const msg: SlackMessage = {
             text: `
 Since you have Subatomic project environments ready, you can now add packages.
 A package is either an application or a library, click the button below to create an application now.`,
@@ -39,8 +39,8 @@ A package is either an application or a library, click the button below to creat
             }],
         };
         if (this.messageLoader.validOverride) {
-            Msg.text = this.messageLoader.msgObject.PackageUsageMessage.text;
+            msg.text = this.messageLoader.msgObject.PackageUsageMessage.text;
         }
-        return Msg;
+        return msg;
     }
 }
