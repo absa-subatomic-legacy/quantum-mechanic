@@ -69,11 +69,11 @@ import {TeamCreated} from "./gluon/events/team/TeamCreated";
 import {TeamOpenShiftCloudMigrated} from "./gluon/events/team/TeamOpenShiftCloudMigrated";
 import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
 
-const apiKey = QMConfig.apiKey;
+const apiKey = QMConfig.atomistAPIKey;
 const http = QMConfig.http;
 
 export const configuration: any = {
-    workspaceIds: [QMConfig.teamId],
+    workspaceIds: [QMConfig.atomistWorkspaceId],
     // running durable will store and forward events when the client is disconnected
     // this should only be used in production envs
     policy: process.env.NODE_ENV === "production" ? "durable" : "ephemeral",
