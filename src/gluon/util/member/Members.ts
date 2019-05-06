@@ -2,7 +2,13 @@ import {HandlerContext, logger} from "@atomist/automation-client";
 import * as _ from "lodash";
 import * as graphql from "../../../typings/types";
 
-export function userFromDomainUser(domainUsername: string): string {
+export function userFromDomainUser(domainUsername: string, usernameCase = "lower"): string {
+
+    if (usernameCase === "lower") {
+        domainUsername =  domainUsername.toLowerCase();
+    } else {
+        domainUsername =  domainUsername.toUpperCase();
+    }
     return /[^\\]*$/.exec(domainUsername)[0];
 }
 
