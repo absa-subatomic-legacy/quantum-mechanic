@@ -48,6 +48,7 @@ describe("buildJenkinsDeploymentJobTemplates", () => {
 
         const openshiftNonprodDefinition: OpenShiftConfig = {
             name: "a.nonprod.pretend",
+            usernameCase: "upper",
             internalDockerRegistryUrl: "172.30.1.1:5000",
             externalDockerRegistryUrl: "registry.a.nonprod.com",
             masterUrl: "https://192.168.64.2:8443",
@@ -137,6 +138,7 @@ describe("buildJenkinsDeploymentJobTemplates", () => {
 
         const openshiftNonprodDefinition: OpenShiftConfig = {
             name: "a.nonprod.pretend",
+            usernameCase: "upper",
             internalDockerRegistryUrl: "172.30.1.1:5000",
             externalDockerRegistryUrl: "registry.a.nonprod.com",
             masterUrl: "https://192.168.64.2:8443",
@@ -204,6 +206,7 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
 
         const openshiftNonprodDefinition: OpenShiftConfig = {
             name: "a.nonprod.pretend",
+            usernameCase: "upper",
             internalDockerRegistryUrl: "172.30.1.1:5000",
             externalDockerRegistryUrl: "registry.a.nonprod.com",
             masterUrl: "https://192.168.64.2:8443",
@@ -221,6 +224,7 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
         const openshiftProdEnvironmentDefinitions: OpenShiftConfig [] = [
             {
                 name: "a.prod.pretend",
+                usernameCase: "upper",
                 internalDockerRegistryUrl: "172.30.1.1:5000",
                 externalDockerRegistryUrl: "registry.a.com",
                 masterUrl: "https://192.168.64.2:8443",
@@ -236,6 +240,7 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
             },
             {
                 name: "b.prod.pretend",
+                usernameCase: "upper",
                 internalDockerRegistryUrl: "172.30.1.1:5000",
                 externalDockerRegistryUrl: "registry.b.com",
                 masterUrl: "https://192.168.64.2:8443",
@@ -287,6 +292,7 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
 
         const openshiftNonprodDefinition: OpenShiftConfig = {
             name: "a.nonprod.pretend",
+            usernameCase: "upper",
             internalDockerRegistryUrl: "172.30.1.1:5000",
             externalDockerRegistryUrl: "registry.a.nonprod.com",
             masterUrl: "https://192.168.64.2:8443",
@@ -304,6 +310,7 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
         const openshiftProdEnvironmentDefinitions: OpenShiftConfig [] = [
             {
                 name: "a.prod.pretend",
+                usernameCase: "upper",
                 internalDockerRegistryUrl: "172.30.1.1:5000",
                 externalDockerRegistryUrl: "registry.a.com",
                 masterUrl: "https://192.168.64.2:8443",
@@ -319,6 +326,7 @@ describe("buildJenkinsProdDeploymentJobTemplates", () => {
             },
             {
                 name: "b.prod.pretend",
+                usernameCase: "upper",
                 internalDockerRegistryUrl: "172.30.1.1:5000",
                 externalDockerRegistryUrl: "registry.b.com",
                 masterUrl: "https://192.168.64.2:8443",

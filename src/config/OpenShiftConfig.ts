@@ -1,5 +1,6 @@
 export interface OpenShiftConfig {
     name: string;
+    usernameCase: string;
     internalDockerRegistryUrl: string;
     externalDockerRegistryUrl: string;
     masterUrl: string;

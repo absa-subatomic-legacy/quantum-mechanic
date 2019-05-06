@@ -43,7 +43,7 @@ export class CreateTeamDevOpsEnvironment extends Task {
         await this.taskListMessage.succeedTask(this.TASK_OPENSHIFT_ENV);
 
         await this.ocService.addTeamMembershipPermissionsToProject(projectId,
-            this.team);
+            this.team, this.openshiftEnvironment.usernameCase);
 
         await this.ocService.addRoleToUserInNamespace(
             `system:serviceaccount:${this.devopsEnvironmentDetails.openshiftProjectId}:builder`,

@@ -6,6 +6,7 @@
         "sharedResourceNamespace": "subatomic",
         "openshiftNonProd": {
           "name": "nonprod",
+          "usernameCase": "lower",
           "internalDockerRegistryUrl": "123.123.0.0:5000",
           "externalDockerRegistryUrl": "registry.a.com",
           "masterUrl": "https://000.000.00.0:8443",
@@ -30,6 +31,7 @@
         "openshiftProd": [
           {
             "name": "prod-a",
+            "usernameCase": "lower",
             "internalDockerRegistryUrl": "123.123.0.0:5000",
             "externalDockerRegistryUrl": "registry.a.com",
             "masterUrl": "https://000.000.00.0:8443",

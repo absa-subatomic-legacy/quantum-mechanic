@@ -478,22 +478,22 @@ export class OCService {
         }
     }
 
-    public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam) {
-        const teamOwners = team.owners.map(owner => userFromDomainUser(owner.domainUsername));
+    public async addTeamMembershipPermissionsToProject(projectId: string, team: QMTeam, usernameCase: string) {
+        const teamOwners = team.owners.map(owner => userFromDomainUser(owner.domainUsername, usernameCase));
         if (teamOwners.length > 0) {
             logger.debug(`Trying to add team membership permission to project for role admin.`);
             await this.openShiftApi.policy.addRoleToUsers(teamOwners, "admin", projectId);
         }
 
-        const teamMembers = team.members.map(member => userFromDomainUser(member.domainUsername));
+        const teamMembers = team.members.map(member => userFromDomainUser(member.domainUsername, usernameCase));
         if (teamMembers.length > 0) {
             logger.debug(`Trying to add team membership permission to project for role edit.`);
             await this.openShiftApi.policy.addRoleToUsers(teamMembers, "edit", projectId);
         }
     }
 
-    public async removeTeamMembershipPermissionsFromProject(projectId: string, domainUserName: string) {
-        const memberUsername = userFromDomainUser(domainUserName);
+    public async removeTeamMembershipPermissionsFromProject(projectId: string, domainUserName: string, usernameCase: string) {
+        const memberUsername = userFromDomainUser(domainUserName, usernameCase);
         logger.info(`Removing role from project [${projectId}] and member [${domainUserName}]: ${memberUsername}`);
         return await this.openShiftApi.policy.removeRoleFromUser(memberUsername, "edit", projectId);
     }

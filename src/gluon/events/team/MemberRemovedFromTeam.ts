@@ -95,7 +95,7 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
 
         const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
         await this.ocService.removeTeamMembershipPermissionsFromProject(
-            devopsProject, memberRemovedFromTeam.memberRemoved.domainUsername);
+            devopsProject, memberRemovedFromTeam.memberRemoved.domainUsername, osEnv.usernameCase);
 
         for (const project of projects) {
             logger.info(`Removing permissions for project: ${project}`);
@@ -110,7 +110,7 @@ export class MemberRemovedFromTeam extends BaseQMEvent implements HandleEvent<an
             for (const projectOpenShiftNamespace of getAllPipelineOpenshiftNamespacesForAllPipelines(tenant.name, project)) {
                 await this.ocService.removeTeamMembershipPermissionsFromProject(
                     projectOpenShiftNamespace.namespace,
-                    memberRemovedFromTeam.memberRemoved.domainUsername);
+                    memberRemovedFromTeam.memberRemoved.domainUsername, osEnv.usernameCase);
             }
         }
     }
