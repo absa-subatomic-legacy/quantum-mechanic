@@ -1,6 +1,5 @@
 import {
     addressSlackChannelsFromContext,
-    buttonForCommand,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -8,14 +7,8 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {CommandIntent} from "../../commands/CommandIntent";
-import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
-import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
-import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {ProjectMessages} from "../../messages/projects/ProjectMessages";
-import {DevOpsMessages} from "../../messages/team/DevOpsMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsForProject";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
@@ -26,7 +19,6 @@ import {
     OpenShiftProjectNamespace,
     QMProject,
 } from "../../util/project/Project";
-import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
@@ -129,7 +121,7 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
     private async sendPackageUsageMessage(ctx: HandlerContext, projectName: string, teams) {
         const destination = await addressSlackChannelsFromContext(ctx, ...teams.map(team =>
             team.slackIdentity.teamChannel));
-        return await ctx.messageClient.send(this.projectMessages.PackageUsageMessage(projectName), destination);
+        return await ctx.messageClient.send(this.projectMessages.packageUsageMessage(projectName), destination);
     }
 
 }

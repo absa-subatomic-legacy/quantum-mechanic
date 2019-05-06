@@ -1,30 +1,24 @@
 import {logger} from "@atomist/automation-client";
 import {JsonLoader} from "../util/resources/JsonLoader";
-const fs = require("fs");
 
 export class MessageLoader {
-
-    public msgObject: {[key: string]: {text: string}};
+    public msgObject: { [key: string]: { text: string } };
     public validOverride: boolean;
-    private readonly filename: string = "";
-    private readonly path: string;
+    private readonly filename: string;
+
     constructor(overrideFileName: string) {
         if (overrideFileName === "") {
             logger.error("Message Override file name cannot be blank");
         } else {
-            this.path = `resources/templates/messages/${this.filename}Override.json`
-            if (fs.existsSync(this.path)) {
-                logger.info("Message Override file found");
-                this.filename = overrideFileName;
-            }
+            this.filename = overrideFileName;
         }
     }
     public loadMessage() {
         this.validOverride = false;
         if (this.filename !== "") {
-            logger.info(`Message override detected for ${this.filename}`);
+            logger.info(`Message Override detected for ${this.filename}`);
             try {
-                this.msgObject = new JsonLoader().readFileContents(this.path);
+                this.msgObject = new JsonLoader().readFileContents(`resources/templates/messages/${this.filename}Override.json`);
                 logger.info("Successfully loaded override messages from file");
                 this.validOverride = true;
             } catch (e) {

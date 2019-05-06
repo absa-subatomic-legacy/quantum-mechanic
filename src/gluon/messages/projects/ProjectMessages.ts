@@ -1,3 +1,4 @@
+import {logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {CommandIntent} from "../../commands/CommandIntent";
@@ -8,7 +9,7 @@ import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder"
 import {MessageLoader} from "../MessageLoader";
 
 export class ProjectMessages {
-    private messageLoader = new MessageLoader("projectMessages");
+    private messageLoader = new MessageLoader("ProjectMessages");
 
     public packageUsageMessage(projectName: string): SlackMessage {
 
@@ -39,7 +40,11 @@ A package is either an application or a library, click the button below to creat
             }],
         };
         if (this.messageLoader.validOverride) {
-            msg.text = this.messageLoader.msgObject.PackageUsageMessage.text;
+            try {
+                msg.text = this.messageLoader.msgObject.packageUsageMessage.text;
+            } catch (e) {
+                logger.error("Failed to substitute text for packageUsageMessage, Check JSON object:" + e);
+            }
         }
         return msg;
     }
