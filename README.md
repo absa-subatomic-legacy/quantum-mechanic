@@ -267,4 +267,4 @@ No versioning is in place at the time of creating this documentation
 This project is licensed under the Apache License v2.0 - see the LICENSE file for details
 
 <!-- ## Acknowledgements
-Hat tips to anyone inspirational.. -->
+Hat tips to anyone inspirational... -->
