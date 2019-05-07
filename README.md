@@ -268,3 +268,25 @@ This project is licensed under the Apache License v2.0 - see the LICENSE file fo
 
 <!-- ## Acknowledgements
 Hat tips to anyone inspirational.. -->
+
+## Notes for developers
+
+The message override functionality is being implemented on piece meal basis. The mechanism draws a from a JSON file 
+stored in
+`resources/templates/messages/`
+
+The file should be named per the area followed by MessageOverride.json 
+e.g. `ProjectMessagesOverride.json`
+
+The structure of the JSON is as follows:
+
+```json
+{
+  "messageLable1": {
+    "text": "Message substitution text 1"
+  },
+    "messageLable2": {
+      "text": "Message substitution text 2"
+    }
+}
+```
