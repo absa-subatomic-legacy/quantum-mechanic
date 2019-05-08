@@ -28,7 +28,8 @@
     "query-string": "^6.2.0",
     "strip-json-comments": "^2.0.1",
     "superagent": "^4.1.0",
-    "xmlbuilder": "^12.0.1"
+    "xmlbuilder": "^12.0.1",
+    "snyk": "^1.162.0"
   },
   "devDependencies": {
     "@types/app-root-path": "^1.2.4",
@@ -88,7 +89,9 @@
     "test": "nyc mocha --require espower-typescript/guess \"test/**/*.ts\"",
     "test:one": "mocha --require espower-typescript/guess \"test/**/${TEST:-*.ts}\"",
     "typedoc": "typedoc --mode modules --excludeExternals --out build/typedoc src",
-    "tscSourceMap": "tsc test/**/*.ts --module commonjs --sourcemap --lib es2015,dom,esnext.asynciterable"
+    "tscSourceMap": "tsc test/**/*.ts --module commonjs --sourcemap --lib es2015,dom,esnext.asynciterable",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "engines": {
     "node": "10.x.x",
@@ -97,5 +100,6 @@
   "pre-push": [
     "lint",
     "test"
-  ]
+  ],
+  "snyk": true
 }
