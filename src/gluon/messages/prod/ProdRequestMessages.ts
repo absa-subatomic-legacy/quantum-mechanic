@@ -1,3 +1,4 @@
+import {logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {Attachment, SlackMessage} from "@atomist/slack-messages";
 import {CommandIntent} from "../../commands/CommandIntent";
@@ -112,9 +113,12 @@ You will now need to move any deployable resources into prod and create their as
 *Please Note:* If you have not already done so, your Jenkins OpenShift client plugin needs to be configured with the correct production OpenShift cluster details. \
 Contact your system admin for help if necessary.`;
 
-        if (this.messageLoader.overrideValidation) {
-            // text = this.messageLoader.msgObject.getProjectProdCompleteMessage.text;
-            text = this.messageLoader.msgOverrideObject.getProjectProdCompleteMessage.text;
+        if (this.messageLoader.isValidOverride) {
+            try {
+                text = this.messageLoader.getMessage("getProjectProdCompleteMessage",{ProjectName: projectName}).text;
+            } catch (e) {
+                logger.error("Failed to substitute text for getProjectProdCompleteMessage, Check JSON object:" + e);
+            }
         }
         return {
             text,

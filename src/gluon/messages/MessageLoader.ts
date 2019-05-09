@@ -1,4 +1,6 @@
 import {logger} from "@atomist/automation-client";
+import {SlackMessage} from "@atomist/slack-messages";
+import {QMTemplate} from "../../template/QMTemplate";
 import {JsonLoader} from "../util/resources/JsonLoader";
 
 const fs = require("fs");
@@ -36,11 +38,13 @@ export class MessageLoader {
         }
     }
 
-    get msgOverrideObject() {
-        return this.msgObject;
+    public getMessage(messageId: string, parameters: { [k: string]: any }): SlackMessage{
+        const template: QMTemplate = new QMTemplate(JSON.stringify(this.msgObject[messageId]));
+
+        return JSON.parse(template.build(parameters));
     }
 
-    get overrideValidation() {
+    get isValidOverride() {
         this.loadMessage();
         return this.validOverride;
     }

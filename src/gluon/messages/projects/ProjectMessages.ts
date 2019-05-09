@@ -39,9 +39,9 @@ A package is either an application or a library, click the button below to creat
             }],
         };
 
-        if (this.messageLoader.overrideValidation) {
+        if (this.messageLoader.isValidOverride) {
             try {
-                msg.text = this.messageLoader.msgOverrideObject.packageUsageMessage.text;
+                msg.text = this.messageLoader.getMessage("packageUsageMessage", { ProjectName: projectName}).text;
             } catch (e) {
                 logger.error("Failed to substitute text for packageUsageMessage, Check JSON object:" + e);
             }
