@@ -104,7 +104,7 @@ Applications can then be promoted into these production environments. To create 
     }
 
     public getProjectProdCompleteMessage(projectName: string, deploymentPipelineId: string): SlackMessage {
-        this.messageLoader.loadMessage();
+
         let text: string = `
 The *${projectName}* project has successfully been moved to production. \
 The DevOps projects, and production environments have been created. \
@@ -112,8 +112,9 @@ You will now need to move any deployable resources into prod and create their as
 *Please Note:* If you have not already done so, your Jenkins OpenShift client plugin needs to be configured with the correct production OpenShift cluster details. \
 Contact your system admin for help if necessary.`;
 
-        if (this.messageLoader.validOverride) {
-            text = this.messageLoader.msgObject.getProjectProdCompleteMessage.text;
+        if (this.messageLoader.overrideValidation) {
+            // text = this.messageLoader.msgObject.getProjectProdCompleteMessage.text;
+            text = this.messageLoader.msgOverrideObject.getProjectProdCompleteMessage.text;
         }
         return {
             text,

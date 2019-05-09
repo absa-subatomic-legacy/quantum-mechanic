@@ -13,7 +13,6 @@ export class ProjectMessages {
 
     public packageUsageMessage(projectName: string): SlackMessage {
 
-        this.messageLoader.loadMessage();
         const msg: SlackMessage = {
             text: `
 Since you have Subatomic project environments ready, you can now add packages.
@@ -39,13 +38,15 @@ A package is either an application or a library, click the button below to creat
                 ],
             }],
         };
-        if (this.messageLoader.validOverride) {
+
+        if (this.messageLoader.overrideValidation) {
             try {
-                msg.text = this.messageLoader.msgObject.packageUsageMessage.text;
+                msg.text = this.messageLoader.msgOverrideObject.packageUsageMessage.text;
             } catch (e) {
                 logger.error("Failed to substitute text for packageUsageMessage, Check JSON object:" + e);
             }
         }
+
         return msg;
     }
 }

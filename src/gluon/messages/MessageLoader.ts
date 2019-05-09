@@ -1,12 +1,14 @@
 import {logger} from "@atomist/automation-client";
 import {JsonLoader} from "../util/resources/JsonLoader";
+
 const fs = require("fs");
 
 export class MessageLoader {
-    public msgObject: { [key: string]: { text: string } };
-    public validOverride: boolean;
+    private msgObject: { [key: string]: { text: string } };
+    private validOverride: boolean;
     private path: string;
     private readonly filename: string;
+
     constructor(overrideFileName: string) {
         logger.info(`Message Override instantiated for ${overrideFileName}`);
         if (overrideFileName === "") {
@@ -15,10 +17,12 @@ export class MessageLoader {
             this.filename = overrideFileName;
         }
     }
+
     public loadMessage() {
         logger.info("Message Override loading message");
         this.validOverride = false;
         this.path = `resources/templates/messages/${this.filename}Override.json`;
+
         if (this.filename !== "" && fs.existsSync(this.path)) {
             logger.info(`Message Override file detected for ${this.filename}`);
             try {
@@ -30,5 +34,14 @@ export class MessageLoader {
                 logger.error(e);
             }
         }
+    }
+
+    get msgOverrideObject() {
+        return this.msgObject;
+    }
+
+    get overrideValidation() {
+        this.loadMessage();
+        return this.validOverride;
     }
 }
