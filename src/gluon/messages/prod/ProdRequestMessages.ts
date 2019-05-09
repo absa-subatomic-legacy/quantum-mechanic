@@ -115,7 +115,7 @@ Contact your system admin for help if necessary.`;
 
         if (this.messageLoader.isValidOverride) {
             try {
-                text = this.messageLoader.getMessage("getProjectProdCompleteMessage",{ProjectName: projectName}).text;
+                text = this.messageLoader.getMessage("getProjectProdCompleteMessage", {ProjectName: projectName}).text;
             } catch (e) {
                 logger.error("Failed to substitute text for getProjectProdCompleteMessage, Check JSON object:" + e);
             }

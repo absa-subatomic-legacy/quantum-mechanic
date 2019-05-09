@@ -38,7 +38,7 @@ export class MessageLoader {
         }
     }
 
-    public getMessage(messageId: string, parameters: { [k: string]: any }): SlackMessage{
+    public getMessage(messageId: string, parameters: { [k: string]: any }): SlackMessage {
         const template: QMTemplate = new QMTemplate(JSON.stringify(this.msgObject[messageId]));
 
         return JSON.parse(template.build(parameters));
