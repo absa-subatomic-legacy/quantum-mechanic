@@ -6,9 +6,6 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
 import {PackageConfigurationRequestedEvent} from "../../events/packages/package-configuration-request/PackageConfigurationRequestedEvent";
-import {SlackMessage, url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
-import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {QMProject} from "../../util/project/Project";
@@ -35,13 +32,9 @@ import {
 } from "../../util/recursiveparam/OpenshiftParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
-    ParameterDisplayType,
-    RecursiveParameterRequestCommand,
-} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {
-    ResponderMessageClient,
     handleQMError,
     QMMessageClient,
+    ResponderMessageClient,
 } from "../../util/shared/Error";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
