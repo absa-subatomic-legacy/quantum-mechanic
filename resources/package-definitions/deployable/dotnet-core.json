@@ -12,7 +12,11 @@
     }
   ],
   "buildConfig": {
-    "imageStream": "jdk8-maven3-newrelic-subatomic:2.0"
+    "imageStream": {
+      "imageName": "jdk8-maven3-newrelic-subatomic",
+      "imageTag": "2.0"
+    },
+    "envVariables": {}
   },
   "jenkinsfile": "maven-spring-boot"
 }
