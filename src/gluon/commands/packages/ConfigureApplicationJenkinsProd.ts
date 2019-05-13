@@ -6,15 +6,21 @@ import {
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {buildJenkinsProdDeploymentJobTemplates} from "../../events/packages/package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
+import {ConfigurePackageDeploymentPipelineInJenkins} from "../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {ProdDefaultJenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
+import {JenkinsDeploymentJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
 import {QMMemberBase} from "../../util/member/Members";
-import {QMProject} from "../../util/project/Project";
+import {assertApplicationJenkinsProdCanBeRequested} from "../../util/prod/ProdAssertions";
+import {
+    getProjectDeploymentPipelineFromPipelineId,
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/project/Project";
 import {
     DeploymentPipelineIdParam,
     DeploymentPipelineIdSetter,
@@ -31,14 +37,14 @@ import {
     QMMessageClient,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {QMTenant} from "../../util/shared/Tenants";
 import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Add a prod deployment job to jenkins for an application", QMConfig.subatomic.commandPrefix + " configure application jenkins prod")
+@CommandHandler("Add a prod deployment job to jenkins for an application", atomistIntent(CommandIntent.ConfigureApplicationJenkinsProd))
 @Tags("subatomic", "package", "jenkins")
 export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, DeploymentPipelineIdSetter {
-
-    private static PROD_JENKINSFILE = "jenkinsfile.prod";
 
     @GluonTeamNameParam({
         callOrder: 0,
@@ -86,15 +92,28 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-            await this.gluonService.prod.project.assertProjectProdIsApproved(project.projectId, this.deploymentPipelineId);
+            const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+
+            const deploymentPipeline: QMDeploymentPipeline = getProjectDeploymentPipelineFromPipelineId(project, this.deploymentPipelineId);
+
+            // Ensure that the owning project has been prod approved before proceeding
+            await assertApplicationJenkinsProdCanBeRequested(this.applicationName, this.projectName, this.deploymentPipelineId, this.gluonService);
 
             const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
 
             const taskListMessage: TaskListMessage = new TaskListMessage(":rocket: Configuring Application Prod Jenkins...", messageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
+            const jenkinsJobTemplate: JenkinsDeploymentJobTemplate[] = buildJenkinsProdDeploymentJobTemplates(
+                tenant.name,
+                project.name,
+                QMConfig.subatomic.openshiftClouds[project.owningTeam.openShiftCloud].openshiftNonProd,
+                QMConfig.subatomic.openshiftClouds[project.owningTeam.openShiftCloud].openshiftProd,
+                deploymentPipeline,
+            );
+
             taskRunner.addTask(
-                new ConfigurePackageInJenkins(application, project, ConfigureApplicationJenkinsProd.PROD_JENKINSFILE, ProdDefaultJenkinsJobTemplate),
+                new ConfigurePackageDeploymentPipelineInJenkins(application, project, jenkinsJobTemplate),
             );
 
             await taskRunner.execute(ctx);

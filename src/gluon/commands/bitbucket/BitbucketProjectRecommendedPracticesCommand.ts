@@ -5,7 +5,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {QMConfig} from "../../../config/QMConfig";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -22,8 +21,9 @@ import {
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam} from "../../util/team/Teams";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Apply recommended practices to bitbucket project", QMConfig.subatomic.commandPrefix + " apply bitbucket practices")
+@CommandHandler("Apply recommended practices to bitbucket project", atomistIntent(CommandIntent.BitbucketProjectRecommendedPracticesCommand))
 @Tags("bitbucket", "project")
 export class BitbucketProjectRecommendedPracticesCommand extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter {

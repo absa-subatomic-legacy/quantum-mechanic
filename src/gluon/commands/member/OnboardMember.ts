@@ -11,20 +11,21 @@ import {
     Tags,
 } from "@atomist/automation-client/lib/decorators";
 import {addressSlackUsersFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {continueStatement} from "babel-types";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {OnboardMemberMessages} from "../../messages/member/OnboardMemberMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OnboardMemberService} from "../../services/member/OnboardMemberService";
+import {QMParamValidation} from "../../util/QMParamValidation";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
     QMError,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Onboard a new team member", QMConfig.subatomic.commandPrefix + " onboard me")
+@CommandHandler("Onboard a new team member", atomistIntent(CommandIntent.OnboardMember))
 @Tags("subatomic", "slack", "member")
 export class OnboardMember extends BaseQMComand {
     @MappedParameter(MappedParameters.SlackUser)
@@ -43,13 +44,14 @@ export class OnboardMember extends BaseQMComand {
 
     @Parameter({
         description: "your email address",
-        pattern: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+        pattern: QMParamValidation.getPattern("OnboardMember", "email", "[^@]+@[^\\.]+\\..+"),
     })
     public email: string;
 
     @Parameter({
         description: "your username including domain",
-        validInput: "Domain username in the following format: domain\\username",
+        validInput: "domain username in the following format: domain\\username (all lowercase)",
+        pattern: QMParamValidation.getPattern("OnboardMember", "domainUsername", "^[a-z0-9\\\\._-]{7,}$"),
     })
     public domainUsername: string;
 
@@ -96,8 +98,8 @@ export class OnboardMember extends BaseQMComand {
 
         for (const channel of QMConfig.secondarySlackChannels) {
             try {
-                secondaryChannelsInvited.push(await this.onboardMemberService.inviteUserToSecondarySlackChannel(
-                    ctx, this.firstName, channel, this.userId, this.screenName));
+                await this.onboardMemberService.inviteUserToSecondarySlackChannel(ctx, this.firstName, channel, this.userId, this.screenName);
+                secondaryChannelsInvited.push(channel);
             } catch (error) {
                 await this.handleError(ctx, error);
             }
@@ -114,7 +116,7 @@ export class OnboardMember extends BaseQMComand {
             logger.error(`Failed to onboard a member since the details of the user are already in use.`);
             throw new QMError(`Failed to onboard since the member's details are already in use. Please retry using different values.`);
         } else if (!isSuccessCode(createMemberResult.status)) {
-            throw new QMError(`Unable to onboard a member with provided details. Details of the user are already in use.`);
+            throw new QMError(`Unable to onboard a member with provided details. Unknown error.`);
         }
     }
 

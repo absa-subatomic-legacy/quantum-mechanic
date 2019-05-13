@@ -52,9 +52,12 @@ Here is an example `local.json`:
     },
     "openshiftClouds": {
       "ab-cloud": {
+        "sharedResourceNamespace": "subatomic",
         "openshiftNonProd": {
           "name": "nonprod",
-          "dockerRepoUrl": "172.30.1.1:5000",
+          "usernameCase": "<case>",
+          "internalDockerRegistryUrl": "172.30.1.1:5000",
+          "externalDockerRegistryUrl": "<external docker registry url>",
           "masterUrl": "<minishift ip>",
           "auth": {
             "token": "<subatomic service account token>"
@@ -77,7 +80,9 @@ Here is an example `local.json`:
         "openshiftProd": [
           {
             "name": "prod-a",
-            "dockerRepoUrl": "172.30.1.1:5000",
+            "usernameCase": "<case>",
+            "internalDockerRegistryUrl": "172.30.1.1:5000",
+            "externalDockerRegistryUrl": "<external docker registry url>",
             "masterUrl": "<minishift ip>",
             "auth": {
               "token": "<subatomic service account token>"
@@ -118,8 +123,8 @@ Here is an example `local.json`:
       "directory": "<plugins directory>"
     }
   },
-  "teamId": "<team Id>",
-  "apiKey": "<Atomist workspace apiKey>",
+  "atomistWorkspaceId": "<atomist workspace id>",
+  "atomistAPIKey": "<atomist workspace api key>",
   //lifecycyle configuration
   "lifecycles": {
     "push": {
@@ -170,15 +175,17 @@ Replace the relevant values above:
 
 | Value         | Description | Source |
 | ------------- | ----------- | ------ |
-| `<minishift ip`> | The IP address of your minishift instance | Get the IP with `minishift ip` |
+| `<minishift ip>` | The IP address of your minishift instance | Get the IP with `minishift ip` |
 | `<subatomic service account token>` | The OpenShift Service Token used to authenticate | Get the token with `oc sa get-token subatomic -n subatomic` |
 | `<local-hadron-collider>` | The directory where [local-hadron-collider](https://github.com/absa-subatomic/local-hadron-collider) has been cloned locally | `git clone https://github.com/absa-subatomic/local-hadron-collider.git` |
 | `<laboratory>` | The directory where [laboratory](https://github.com/absa-subatomic/laboratory) has been cloned locally | `git clone https://github.com/absa-subatomic/laboratory.git` |
 | `<maven settings>` | Directory containing a Maven `settings.xml` to use for Jenkins builds | Example `settings.xml` included [below](#maven-settings) |
-| `<team Id>` | Slack team Id where the Atomist will respond to commands | See [Atomist documentation](https://docs.atomist.com/user/#slack-team-id) |
-| `<Atomist workspace ApiKey>` | Atomist ApiKey | See [Atomist documentation](https://docs.atomist.com/developer/prerequisites) |
+| `<atomist workspace id>` | Atomist workspace ID | Available from app.atomist.com under settings |
+| `<atomist workspace api key>` | Atomist ApiKey | See [Atomist documentation](https://docs.atomist.com/developer/prerequisites) |
 | `<bitbucket ssh port>` | Bitbucket SSH Port | Set this to the port used for ssh git commands on your Bitbucket instance. The default for Local Hadron Collider should be `30999` |
 | `<plugins directory>` | Pluging Directory | Set this to the directory which all available plugin modules will be dropped into |
+| `<external docker registry url>`| External Docker Registry Url | Url pointing to a docker registry. This is only passed as a templating parameter when creating jenkinsfiles so can be empty if your jenkinsfiles do not use these urls. |
+| `<case>` | Set a username case per cloud | Options are either 'upper' or 'lower' |
 
 Note that the settings should be change appropriately if using different environments for prod or multiple prod environments in the relative parts of the settings file.
 
@@ -263,4 +270,26 @@ No versioning is in place at the time of creating this documentation
 This project is licensed under the Apache License v2.0 - see the LICENSE file for details
 
 <!-- ## Acknowledgements
-Hat tips to anyone inspiration. -->
+Hat tips to anyone inspirational.. -->
+
+## Notes for developers
+
+The message override functionality is being implemented on piece meal basis. The mechanism draws a from a JSON file 
+stored in
+`resources/templates/messages/`
+
+The file should be named per the area followed by MessageOverride.json 
+e.g. `ProjectMessagesOverride.json`
+
+The structure of the JSON is as follows:
+
+```json
+{
+  "messageLable1": {
+    "text": "Message substitution text 1"
+  },
+    "messageLable2": {
+      "text": "Message substitution text 2"
+    }
+}
+```

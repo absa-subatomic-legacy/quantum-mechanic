@@ -14,12 +14,12 @@ import {
     addressSlackChannelsFromContext,
     buttonForCommand,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
+import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
-import {QMConfig} from "../../../config/QMConfig";
 import {OnboardMember} from "../../commands/member/OnboardMember";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {NewDevOpsEnvironment} from "../../commands/team/DevOpsEnvironment";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {GluonService} from "../../services/gluon/GluonService";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
@@ -159,7 +159,7 @@ export class BotJoinedChannel extends BaseQMEvent implements HandleEvent<any> {
             text: `Welcome to *${channelNameString}* team channel!`,
             attachments: [{
                 fallback: `Welcome to the *${channelNameString}* team channel!`,
-                footer: `For more information, please read the ${this.docs()}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.generalCommandReference()}`,
                 text: `
 If you haven't already, you might want to:
 
@@ -192,10 +192,5 @@ If you haven't already, you might want to:
             }
         }
         return result;
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}`,
-            "documentation")}`;
     }
 }

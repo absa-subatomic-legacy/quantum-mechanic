@@ -8,9 +8,6 @@
  {{#each devDeploymentEnvironments}}
  * Secret text   | {{toKebabCase postfix}}-project       | The OpenShift project Id of the project's {{displayName}} environment
  {{/each}}
- {{#each releaseDeploymentEnvironments}}
- * Secret text   | {{toKebabCase postfix}}-project       | The OpenShift project Id of the project's {{displayName}} environment
- {{/each}}
  * Secret text   | docker-registry-ip| The OpenShift docker registry ip
  *
  */
@@ -56,19 +53,22 @@ def label = "python36-${UUID.randomUUID().toString()}"
 
 def teamDevOpsProject
 def dockerRegistryIp
+def sharedResourceNamespace
 
 withCredentials([
         string(credentialsId: 'devops-project', variable: 'DEVOPS_PROJECT_ID'),
-        string(credentialsId: 'docker-registry-ip', variable: 'DOCKER_REGISTRY_IP')
+        string(credentialsId: 'docker-registry-ip', variable: 'DOCKER_REGISTRY_IP'),
+        string(credentialsId: 'sub-shared-resource-namespace', variable: 'SUB_SHARED_RESOURCE_NAMESPACE')
 ]) {
     teamDevOpsProject = "${env.DEVOPS_PROJECT_ID}"
     dockerRegistryIp = "${env.DOCKER_REGISTRY_IP}"
+    sharedResourceNamespace = "${env.SUB_SHARED_RESOURCE_NAMESPACE}"
 }
 
-echo "Starting to try find pod template: " + dockerRegistryIp + '/' + teamDevOpsProject + '/jenkins-slave-python36-subatomic:2.0'
+echo "Starting to try find pod template: " + dockerRegistryIp + '/' + sharedResourceNamespace + '/jenkins-slave-python36-subatomic:2.0'
 
 podTemplate(cloud: "openshift", label: label, serviceAccount:"jenkins", containers: [
-    containerTemplate(name: 'jnlp', image: dockerRegistryIp + '/' + teamDevOpsProject + '/jenkins-slave-python36-subatomic:2.0', ttyEnabled: false, alwaysPullImage: true, args: '${computer.jnlpmac} ${computer.name}')
+    containerTemplate(name: 'jnlp', image: dockerRegistryIp + '/' + sharedResourceNamespace + '/jenkins-slave-python36-subatomic:2.0', ttyEnabled: false, alwaysPullImage: true, args: '${computer.jnlpmac} ${computer.name}')
   ])
 {
   	echo "Trying to get node " + label
@@ -76,23 +76,14 @@ podTemplate(cloud: "openshift", label: label, serviceAccount:"jenkins", containe
         {{#each devDeploymentEnvironments}}
         def project{{toPascalCase postfix}}Project
         {{/each}}
-        {{#each releaseDeploymentEnvironments}}
-        def project{{toPascalCase postfix}}Project
-        {{/each}}
 
         withCredentials([
                 {{#each devDeploymentEnvironments}}
                     string(credentialsId: '{{toKebabCase postfix}}-project', variable: '{{toUpperSnakeCase postfix}}_PROJECT_ID'),
                 {{/each}}
-                {{#each releaseDeploymentEnvironments}}
-                    string(credentialsId: '{{toKebabCase postfix}}-project', variable: '{{toUpperSnakeCase postfix}}_PROJECT_ID'),
-                {{/each}}
                 string(credentialsId: 'devops-project', variable: 'DEVOPS_PROJECT_ID')
         ]) {
             {{#each devDeploymentEnvironments}}
-            project{{toPascalCase postfix}}Project = "${env.{{toUpperSnakeCase postfix}}_PROJECT_ID}"
-            {{/each}}
-            {{#each releaseDeploymentEnvironments}}
             project{{toPascalCase postfix}}Project = "${env.{{toUpperSnakeCase postfix}}_PROJECT_ID}"
             {{/each}}
         }
@@ -139,20 +130,6 @@ podTemplate(cloud: "openshift", label: label, serviceAccount:"jenkins", containe
             {{#each devDeploymentEnvironments}}
             stage('Deploy to {{displayName}}') {
                 sh ': Deploying to {{displayName}}...'
-
-                openshift.withProject(teamDevOpsProject) {
-                    openshift.tag("${teamDevOpsProject}/${appBuildConfig}:${tag}", "${project{{toPascalCase postfix}}Project}/${app}:${tag}")
-                }
-
-                deploy(project{{toPascalCase postfix}}Project, app, tag);
-            }
-            {{/each}}
-
-            {{#each releaseDeploymentEnvironments}}
-            stage('Deploy to {{displayName}}') {
-                sh ': Deploying to {{displayName}}...'
-
-                input "Confirm deployment to {{displayName}}"
 
                 openshift.withProject(teamDevOpsProject) {
                     openshift.tag("${teamDevOpsProject}/${appBuildConfig}:${tag}", "${project{{toPascalCase postfix}}Project}/${app}:${tag}")

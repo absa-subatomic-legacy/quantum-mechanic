@@ -1,6 +1,8 @@
 export interface OpenShiftConfig {
     name: string;
-    dockerRepoUrl: string;
+    usernameCase: string;
+    internalDockerRegistryUrl: string;
+    externalDockerRegistryUrl: string;
     masterUrl: string;
     auth: OpenShiftAuth;
     defaultEnvironments: OpenshiftProjectEnvironment[];
@@ -16,6 +18,7 @@ export interface OpenshiftProjectEnvironment {
 }
 
 export interface OpenShiftCloud {
+    sharedResourceNamespace: string;
     openshiftNonProd: OpenShiftConfig;
     openshiftProd: OpenShiftConfig[];
 }

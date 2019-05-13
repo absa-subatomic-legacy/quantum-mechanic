@@ -5,11 +5,8 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
-import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
-import {QMDeploymentPipeline} from "../../util/project/Project";
 import {
     GluonTeamNameParam,
     GluonTeamNameSetter,
@@ -23,8 +20,9 @@ import {
     ResponderMessageClient,
 } from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Create a new project", QMConfig.subatomic.commandPrefix + " create project")
+@CommandHandler("Create a new project", atomistIntent(CommandIntent.CreateProject))
 @Tags("subatomic", "project", "team")
 export class CreateProject extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonTenantNameSetter {
@@ -83,55 +81,11 @@ export class CreateProject extends RecursiveParameterRequestCommand
                 teams: [{
                     teamId: team.teamId,
                 }],
-                devDeploymentPipeline: this.getDefaultDevDeploymentPipeline(QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd),
-                releaseDeploymentPipelines: [this.getDefaultReleaseDeploymentPipeline(QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd)],
+                devDeploymentPipeline: null,
+                releaseDeploymentPipelines: [],
             });
 
         return await ctx.messageClient.respond("🚀Project successfully created.");
-    }
-
-    private getDefaultDevDeploymentPipeline(openshiftNonProd: OpenShiftConfig) {
-        // The default dev deployment pipeline will consist of all environments
-        // except the last one defined in the default environment list
-        const deploymentPipeline: QMDeploymentPipeline = {
-            name: "Default",
-            tag: "",
-            environments: [],
-        };
-        // Add all environments except the last one as per above
-        for (let i = 0; i < openshiftNonProd.defaultEnvironments.length - 1; i++) {
-            const environment = openshiftNonProd.defaultEnvironments[i];
-            deploymentPipeline.environments.push(
-                {
-                    positionInPipeline: i,
-                    displayName: environment.description,
-                    postfix: environment.id,
-                },
-            );
-        }
-        return deploymentPipeline;
-    }
-
-    private getDefaultReleaseDeploymentPipeline(openshiftNonProd: OpenShiftConfig) {
-        // The default release deployment pipeline will consist of a single
-        // environment only which will be the last environment defined in the
-        // default environment list
-        const deploymentPipeline: QMDeploymentPipeline = {
-            name: "Default",
-            tag: "",
-            environments: [],
-        };
-        // Take only the last environment
-        const environment = openshiftNonProd.defaultEnvironments[openshiftNonProd.defaultEnvironments.length - 1];
-        deploymentPipeline.environments.push(
-            {
-                positionInPipeline: deploymentPipeline.environments.length,
-                displayName: environment.description,
-                postfix: environment.id,
-            },
-        );
-
-        return deploymentPipeline;
     }
 
     private async createGluonProject(projectDetails) {

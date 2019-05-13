@@ -8,6 +8,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
 import {OpenshiftListResource} from "../../../openshift/api/resources/OpenshiftResource";
+import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {QMGenericProdRequest} from "../../services/gluon/GenericProdRequestService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -35,6 +36,8 @@ subscription GenericProdRequestedEvent {
 }
 `)
 export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any> {
+
+    private prodMessages: ProdRequestMessages = new ProdRequestMessages();
 
     constructor(public ocService = new OCService(),
                 public gluonService = new GluonService()) {
@@ -87,7 +90,7 @@ export class GenericProdRequested extends BaseQMEvent implements HandleEvent<any
             await taskRunner.execute(ctx);
 
             this.succeedEvent();
-            return await qmMessageClient.send("Resources successfully created in production environments.");
+            return await qmMessageClient.send(this.prodMessages.getGenericProdRequestCompleteMessage(qmProject.name, genericProdRequest.deploymentPipeline.pipelineId));
         } catch (error) {
             this.failEvent();
             return await handleQMError(qmMessageClient, error);

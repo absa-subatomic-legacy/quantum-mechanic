@@ -3,6 +3,7 @@ import {OpenShiftConfig} from "../../../../src/config/OpenShiftConfig";
 import {
     getAllPipelineOpenshiftNamespaces,
     getAllPipelineOpenshiftNamespacesForAllPipelines,
+    getDeploymentEnvironmentJenkinsMetadata,
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
     getProjectDevOpsId,
     getProjectDisplayName,
@@ -63,6 +64,7 @@ describe("getPipelineOpenShiftNamespacesForOpenShiftCluster", () => {
     it("should return all cluster environment namespaces for specified pipeline", async () => {
         const project: QMProject = {
             projectId: "",
+            description: "",
             bitbucketProject: null,
             owningTeam: null,
             owningTenant: "default",
@@ -77,10 +79,12 @@ describe("getPipelineOpenShiftNamespacesForOpenShiftCluster", () => {
         };
 
         const cluster: OpenShiftConfig = {
-            dockerRepoUrl: "",
+            internalDockerRegistryUrl: "",
+            externalDockerRegistryUrl: "externalurl",
             auth: {token: ""},
             masterUrl: "",
             name: "",
+            usernameCase: "upper",
             defaultEnvironments: [
                 {description: "DEV", id: "dev"},
                 {description: "UAT", id: "uat"},
@@ -106,6 +110,7 @@ describe("getAllPipelineOpenshiftNamespacesForAllPipelines", () => {
             owningTeam: null,
             owningTenant: "default",
             name: "Project",
+            description: "",
             devDeploymentPipeline: {
                 name: "Default",
                 tag: "",
@@ -199,4 +204,107 @@ describe("getAllPipelineOpenshiftNamespacesForAllPipelines", () => {
         assert.equal(deploymentEnvironmentNamespaces[1].postfix, "sit");
     });
 
+});
+
+describe("getDeploymentEnvironmentJenkinsMetadata", () => {
+    it("should return correct meta data for default tenant", async () => {
+        const pipeline: QMDeploymentPipeline = {
+            name: "Pipeline",
+            tag: "pipeline",
+            pipelineId: "1",
+            environments: [
+                {
+                    postfix: "dev",
+                    displayName: "Dev",
+                    positionInPipeline: 0,
+                },
+            ],
+        };
+
+        const cluster: OpenShiftConfig = {
+            internalDockerRegistryUrl: "internalUrl",
+            externalDockerRegistryUrl: "externalUrl",
+            auth: {token: "token"},
+            masterUrl: "masterIr;",
+            name: "clusterName",
+            usernameCase: "upper",
+            defaultEnvironments: [
+                {description: "DEV", id: "dev"},
+                {description: "UAT", id: "uat"},
+            ],
+        };
+
+        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("default", "Project", pipeline, pipeline.environments[0], cluster);
+        assert.equal(environmentJenkinsMetadata.displayName, "Project Pipeline Dev");
+        assert.equal(environmentJenkinsMetadata.postfix, "pipeline-dev");
+        assert.equal(environmentJenkinsMetadata.clusterName, "clusterName");
+        assert.equal(environmentJenkinsMetadata.clusterExternalDockerRegistryUrl, "externalUrl");
+    });
+    it("should return correct meta data for non default tenant", async () => {
+        const pipeline: QMDeploymentPipeline = {
+            name: "Pipeline",
+            tag: "pipeline",
+            pipelineId: "1",
+            environments: [
+                {
+                    postfix: "dev",
+                    displayName: "Dev",
+                    positionInPipeline: 0,
+                },
+            ],
+        };
+
+        const cluster: OpenShiftConfig = {
+            internalDockerRegistryUrl: "internalUrl",
+            externalDockerRegistryUrl: "externalUrl",
+            auth: {token: "token"},
+            masterUrl: "masterIr;",
+            name: "clusterName",
+            usernameCase: "upper",
+            defaultEnvironments: [
+                {description: "DEV", id: "dev"},
+                {description: "UAT", id: "uat"},
+            ],
+        };
+
+        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("something", "Project", pipeline, pipeline.environments[0], cluster);
+        assert.equal(environmentJenkinsMetadata.displayName, "something Project Pipeline Dev");
+        assert.equal(environmentJenkinsMetadata.postfix, "pipeline-dev");
+        assert.equal(environmentJenkinsMetadata.clusterName, "clusterName");
+        assert.equal(environmentJenkinsMetadata.clusterExternalDockerRegistryUrl, "externalUrl");
+    });
+
+    it("should return correct meta data for default pipeline with no tag", async () => {
+        const pipeline: QMDeploymentPipeline = {
+            name: "Default",
+            tag: "",
+            pipelineId: "1",
+            environments: [
+                {
+                    postfix: "dev",
+                    displayName: "Dev",
+                    positionInPipeline: 0,
+                },
+            ],
+        };
+
+        const cluster: OpenShiftConfig = {
+            internalDockerRegistryUrl: "internalUrl",
+            externalDockerRegistryUrl: "externalUrl",
+            auth: {token: "token"},
+            masterUrl: "masterIr;",
+            name: "clusterName",
+            usernameCase: "upper",
+            defaultEnvironments: [
+                {description: "DEV", id: "dev"},
+                {description: "UAT", id: "uat"},
+            ],
+        };
+
+        const environmentJenkinsMetadata = getDeploymentEnvironmentJenkinsMetadata("something", "Project", pipeline, pipeline.environments[0], cluster);
+        assert.equal(environmentJenkinsMetadata.displayName, "something Project Dev");
+        assert.equal(environmentJenkinsMetadata.postfix, "dev");
+        assert.equal(environmentJenkinsMetadata.clusterName, "clusterName");
+        assert.equal(environmentJenkinsMetadata.clusterExternalDockerRegistryUrl, "externalUrl");
+    });
 });

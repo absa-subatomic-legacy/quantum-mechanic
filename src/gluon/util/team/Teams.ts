@@ -1,5 +1,6 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {Attachment} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import * as graphql from "../../../typings/types";
 import {QMMemberBase} from "../member/Members";
@@ -7,7 +8,7 @@ import {createMenuAttachment} from "../shared/GenericMenu";
 
 export function menuAttachmentForTeams(ctx: HandlerContext, teams: any[],
                                        command: HandleCommand, message: string = "Please select a team",
-                                       projectNameVariable: string = "teamName") {
+                                       projectNameVariable: string = "teamName"): Attachment {
     return createMenuAttachment(
         teams.map(team => {
             return {
@@ -41,11 +42,11 @@ export async function loadChannelIdByChannelName(ctx: HandlerContext, name: stri
     return null;
 }
 
-export function getDevOpsEnvironmentDetailsProd(teamName): DevOpsEnvironmentDetails {
+export function getDevOpsEnvironmentDetailsProd(teamName: string): DevOpsEnvironmentDetails {
     return getDevOpsEnvironmentDetails(teamName, "-prod");
 }
 
-export function getDevOpsEnvironmentDetails(teamName, postfix: string = ""): DevOpsEnvironmentDetails {
+export function getDevOpsEnvironmentDetails(teamName: string, postfix: string = ""): DevOpsEnvironmentDetails {
     return {
         openshiftProjectId: `${_.kebabCase(teamName).toLowerCase()}-devops${postfix}`,
         name: `${teamName} DevOps`,
@@ -90,6 +91,7 @@ export interface QMTeamBase {
     teamId: string;
     name: string;
     openShiftCloud: string;
+    description: string;
     slack?: QMTeamSlack;
 }
 
@@ -128,4 +130,18 @@ export function kickUserFromSlackChannel(
             userId,
         },
     });
+}
+
+export function isOwner(
+    team: QMTeam,
+    memberId: string,
+) {
+    return team.owners.some(owner => owner.memberId === memberId);
+}
+
+export function isMember(
+    team: QMTeam,
+    memberId: string,
+) {
+    return team.members.some(member => member.memberId === memberId);
 }

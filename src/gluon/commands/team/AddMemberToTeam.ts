@@ -7,7 +7,6 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
@@ -19,8 +18,9 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Add a member to a team", QMConfig.subatomic.commandPrefix + " add team member")
+@CommandHandler("Add a member to a team", atomistIntent(CommandIntent.AddMemberToTeam))
 @Tags("subatomic", "member", "team")
 export class AddMemberToTeam extends RecursiveParameterRequestCommand implements GluonTeamNameSetter {
 
@@ -32,6 +32,7 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
 
     @Parameter({
         description: "slack name (@User.Name) of the member to make a member",
+        displayable: false,
     })
     public slackName: string;
 

@@ -11,6 +11,7 @@ import {
     OpenshiftResource,
 } from "../../../openshift/api/resources/OpenshiftResource";
 import {QMTemplate} from "../../../template/QMTemplate";
+import {ImageStream} from "../../events/packages/package-configuration-request/PackageConfigurationRequestedEvent";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -23,7 +24,9 @@ import {
     QMProject,
 } from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
+import {imageStreamToFullImageStreamTagString} from "../../util/shared/ImageStreamTranformers";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
+import {KeyValuePairEvent} from "../../util/transform/types/event/KeyValuePairEvent";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -64,6 +67,10 @@ export class ConfigurePackageInOpenshift extends Task {
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.packageDetails.projectName);
             const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
 
+            if (this.deploymentDetails.baseS2IImage.namespace === undefined) {
+                this.deploymentDetails.baseS2IImage.namespace = QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].sharedResourceNamespace;
+            }
+
             await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
             const appBuildName = getBuildConfigName(this.packageDetails.projectName, this.packageDetails.packageName);
             await this.createApplicationImageStream(appBuildName, teamDevOpsProjectId);
@@ -77,7 +84,7 @@ export class ConfigurePackageInOpenshift extends Task {
             logger.info(`Trying to find tenant: ${project.owningTenant}`);
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
             logger.info(`Found tenant: ${tenant}`);
-            await this.createApplicationOpenshiftResources(tenant.name, project, this.packageDetails.packageName);
+            await this.createApplicationOpenshiftResources(tenant.name, project, this.packageDetails.packageName, QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].sharedResourceNamespace);
 
             await this.taskListMessage.succeedTask(this.TASK_ADD_RESOURCES_TO_ENVIRONMENTS);
         }
@@ -93,7 +100,7 @@ export class ConfigurePackageInOpenshift extends Task {
         }, teamDevOpsProjectId);
     }
 
-    private getBuildConfigData(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string): OpenshiftResource {
+    private getBuildConfigData(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: ImageStream): OpenshiftResource {
         return {
             apiVersion: "v1",
             kind: "BuildConfig",
@@ -125,7 +132,8 @@ export class ConfigurePackageInOpenshift extends Task {
                     sourceStrategy: {
                         from: {
                             kind: "ImageStreamTag",
-                            name: baseS2IImage,
+                            name: imageStreamToFullImageStreamTagString(baseS2IImage),
+                            namespace: baseS2IImage.namespace,
                         },
                         env: [],
                     },
@@ -140,16 +148,16 @@ export class ConfigurePackageInOpenshift extends Task {
         };
     }
 
-    private async createApplicationBuildConfig(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: string, teamDevOpsProjectId: string) {
+    private async createApplicationBuildConfig(bitbucketRepoRemoteUrl: string, appBuildName: string, baseS2IImage: ImageStream, teamDevOpsProjectId: string) {
 
         logger.info(`Using Git URI: ${bitbucketRepoRemoteUrl}`);
         const buildConfig: OpenshiftResource = this.getBuildConfigData(bitbucketRepoRemoteUrl, appBuildName, baseS2IImage);
 
-        for (const envVariableName of Object.keys(this.deploymentDetails.buildEnvironmentVariables)) {
+        for (const envVariableKeyValuePair of this.deploymentDetails.buildEnvironmentVariables) {
             buildConfig.spec.strategy.sourceStrategy.env.push(
                 {
-                    name: envVariableName,
-                    value: this.deploymentDetails.buildEnvironmentVariables[envVariableName],
+                    name: envVariableKeyValuePair.key,
+                    value: envVariableKeyValuePair.value,
                 },
             );
         }
@@ -157,19 +165,19 @@ export class ConfigurePackageInOpenshift extends Task {
         await this.ocService.applyResourceFromDataInNamespace(
             buildConfig,
             teamDevOpsProjectId,
-            true);  // TODO clean up this hack - cannot be a boolean (magic)
+            true);
     }
 
-    private async createApplicationOpenshiftResources(tenantName: string, project: QMProject, applicationName: string): Promise<HandlerResult> {
+    private async createApplicationOpenshiftResources(tenantName: string, project: QMProject, applicationName: string, sharedResourceNamespace: string): Promise<HandlerResult> {
         for (const openShiftNamespaceDetails of getAllPipelineOpenshiftNamespacesForAllPipelines(tenantName, project)) {
             const deploymentNamespace = openShiftNamespaceDetails.namespace;
             const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);
             logger.info(`Processing app [${appName}] Template for: ${deploymentNamespace}`);
 
-            const appBaseTemplate = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate, devOpsProjectId);
+            const appBaseTemplate = await this.ocService.getSubatomicTemplate(this.deploymentDetails.openshiftTemplate, sharedResourceNamespace);
             appBaseTemplate.metadata.namespace = deploymentNamespace;
-            await this.ocService.applyResourceFromDataInNamespace(appBaseTemplate, deploymentNamespace);
+            // await this.ocService.applyResourceFromDataInNamespace(appBaseTemplate, deploymentNamespace);
 
             const templateParameters = [
                 {key: "APP_NAME", value: appName},
@@ -179,7 +187,7 @@ export class ConfigurePackageInOpenshift extends Task {
 
             const appProcessedTemplate: OpenshiftListResource = await this.ocService.findAndProcessOpenshiftTemplate(
                 this.deploymentDetails.openshiftTemplate,
-                deploymentNamespace,
+                sharedResourceNamespace,
                 templateParameters,
                 true);
 
@@ -208,14 +216,14 @@ export class ConfigurePackageInOpenshift extends Task {
         return await success();
     }
 
-    private addDeploymentEnvironmentVariablesToDeploymentConfigs(processedTemplate: OpenshiftListResource, deploymentEnvironmentVariables: { [key: string]: string }, parameters: { [key: string]: any }) {
+    private addDeploymentEnvironmentVariablesToDeploymentConfigs(processedTemplate: OpenshiftListResource, deploymentEnvironmentVariables: KeyValuePairEvent[], parameters: { [key: string]: any }) {
         for (const resource of processedTemplate.items) {
             if (resource.kind === "DeploymentConfig") {
                 for (const container of resource.spec.template.spec.containers) {
-                    for (const dcEnvVar of Object.keys(deploymentEnvironmentVariables)) {
+                    for (const dcEnvVar of deploymentEnvironmentVariables) {
                         container.env.push({
-                            name: dcEnvVar,
-                            value: new QMTemplate(deploymentEnvironmentVariables[dcEnvVar]).build(parameters),
+                            name: dcEnvVar.key,
+                            value: new QMTemplate(dcEnvVar.value).build(parameters),
                         });
                     }
                 }
@@ -225,10 +233,10 @@ export class ConfigurePackageInOpenshift extends Task {
 }
 
 export interface PackageDeploymentDetails {
-    buildEnvironmentVariables: { [key: string]: string };
-    deploymentEnvironmentVariables: { [key: string]: string };
+    buildEnvironmentVariables: KeyValuePairEvent[];
+    deploymentEnvironmentVariables: KeyValuePairEvent[];
     openshiftTemplate: string;
-    baseS2IImage: string;
+    baseS2IImage: ImageStream;
 }
 
 export interface PackageDetails {

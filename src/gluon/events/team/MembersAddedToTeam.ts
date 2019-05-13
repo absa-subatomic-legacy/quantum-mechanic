@@ -129,21 +129,23 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
         await this.ocService.setOpenShiftDetails(osEnv);
 
         const devopsProject = getDevOpsEnvironmentDetails(team.name).openshiftProjectId;
-        await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent);
+
+        await this.ocService.addTeamMembershipPermissionsToProject(devopsProject, membersAddedToTeamEvent, osEnv.usernameCase);
         for (const project of projects) {
             logger.info(`Configuring permissions for project: ${project}`);
             // Add to bitbucket
             await bitbucketConfiguration.addAllMembersToProject(
                 project.bitbucketProject.key,
-                membersAddedToTeamEvent.members.map(member => userFromDomainUser(member.domainUsername)));
+                membersAddedToTeamEvent.members.map(member => userFromDomainUser(member.domainUsername, osEnv.usernameCase)));
             await bitbucketConfiguration.addAllOwnersToProject(
                 project.bitbucketProject.key,
-                membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername)),
+                membersAddedToTeamEvent.owners.map(owner => userFromDomainUser(owner.domainUsername, osEnv.usernameCase)),
             );
             const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
+
             // Add to openshift environments
             for (const openShiftNamespace of getAllPipelineOpenshiftNamespacesForAllPipelines(tenant.name, project)) {
-                await this.ocService.addTeamMembershipPermissionsToProject(openShiftNamespace.namespace, membersAddedToTeamEvent);
+                await this.ocService.addTeamMembershipPermissionsToProject(openShiftNamespace.namespace, membersAddedToTeamEvent, osEnv.usernameCase);
             }
         }
     }

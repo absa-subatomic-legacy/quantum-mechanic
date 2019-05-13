@@ -12,9 +12,10 @@ import {QMConfig} from "../../../config/QMConfig";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 import {HelpCategory} from "./HelpCategory";
 
-@CommandHandler("Help regarding subatomic commands", QMConfig.subatomic.commandPrefix + " help")
+@CommandHandler("Help regarding subatomic commands", atomistIntent(CommandIntent.Help))
 export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {
 
     @Parameter({
@@ -114,6 +115,10 @@ export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {
     }
 
     private commandOptions(commandMetadata: any, command: any) {
+        let intent = "";
+        if (commandMetadata.intent !== undefined && commandMetadata.intent.length > 0) {
+            intent = commandMetadata.intent[0];
+        }
         this.optionsAttachments.push({
             text: `\`${commandMetadata.intent}\` - ${commandMetadata.description}`,
             fallback: "",
@@ -122,11 +127,11 @@ export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {
             actions: [
                 buttonForCommand(
                     {
-                        text: commandMetadata.intent,
+                        text: intent,
                         style: "primary",
                     },
                     new Help(), {
-                        selectedOption: `${commandMetadata.intent}`,
+                        selectedOption: `${intent}`,
                         selectedDescription: `${commandMetadata.description}`,
                         commandClassName: command.prototype.__name,
                         prevSelectedOption: this.selectedOption,
@@ -138,19 +143,19 @@ export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {
 
     private finalMenuStep() {
         this.optionsAttachments.push({
-            text: "",
-            fallback: "",
-            color: this.absaColors[this.colorCount % this.absaColors.length],
-            mrkdwn_in: ["text"],
-            actions: [
-            buttonForCommand(
-                {
-                    text: "Run Command",
-                    style: "primary",
-                },
-                this.optionFolders[0].findCommandByName(this.commandClassName), {correlationId: this.correlationId}),
-            ],
-        },
+                text: "",
+                fallback: "",
+                color: this.absaColors[this.colorCount % this.absaColors.length],
+                mrkdwn_in: ["text"],
+                actions: [
+                    buttonForCommand(
+                        {
+                            text: "Run Command",
+                            style: "primary",
+                        },
+                        this.optionFolders[0].findCommandByName(this.commandClassName).name, {correlationId: this.correlationId}),
+                ],
+            },
         );
         this.colorCount++;
         this.returnMenuButton(this.prevSelectedOption, undefined, this.prevSelectedOption);

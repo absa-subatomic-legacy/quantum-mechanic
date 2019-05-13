@@ -1,11 +1,14 @@
 import {logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
+import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {CreateProject} from "../../commands/project/CreateProject";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
+import {QMDeploymentPipeline} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 
@@ -33,8 +36,7 @@ Unfortunately Subatomic does not manage this project.
 Consider creating a new project called ${projectName}. Click the button below to do that now.
                             `,
                         fallback: "Project not managed by Subatomic",
-                        footer: `For more information, please read the ${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#create-project`,
-                            "documentation")}`,
+                        footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.CreateProject)}`,
                         color: QMColours.stdMuddyYellow.hex,
                         mrkdwn_in: ["text"],
                         actions: [
@@ -150,6 +152,12 @@ Consider creating a new project called ${projectName}. Click the button below to
             });
     }
 
+    public async updateProjectPipelines(projectId: string, updateProjectPipelinesRequest: UpdateProjectPipelineRequest): Promise<any> {
+        logger.debug(`Trying to request project environments. projectId: ${projectId}; memberId: ${updateProjectPipelinesRequest.createdBy}`);
+        return await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
+            updateProjectPipelinesRequest);
+    }
+
     public async associateTeamToProject(projectId: string, associationDetails: any): Promise<any> {
         logger.debug(`Trying to associate team to project. projectId: ${projectId}`);
         return await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`, associationDetails);
@@ -160,4 +168,10 @@ Consider creating a new project called ${projectName}. Click the button below to
         return await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/projects/${projectId}`,
             bitbucketDetails);
     }
+}
+
+export interface UpdateProjectPipelineRequest {
+    createdBy: string;
+    devDeploymentPipeline: QMDeploymentPipeline;
+    releaseDeploymentPipelines: QMDeploymentPipeline[];
 }

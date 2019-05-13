@@ -1,5 +1,6 @@
 import {
-    addressSlackUsersFromContext, buttonForCommand,
+    addressSlackUsersFromContext,
+    buttonForCommand,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -13,7 +14,13 @@ import _ = require("lodash");
 import {v4 as uuid} from "uuid";
 import {UpdateProjectProdRequest} from "../../commands/project/UpdateProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
-import {ProjectProdRequestApprovalResponse, QMProject} from "../../util/project/Project";
+import {QMProjectProdRequest} from "../../services/gluon/ProjectProdRequestService";
+import {
+    getProjectDeploymentPipelineFromPipelineId,
+    ProjectProdRequestApprovalResponse,
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 
@@ -38,7 +45,7 @@ export class ProjectProductionEnvironmentsRequested extends BaseQMEvent implemen
 
         logger.info("Trying to find projectProdRequestDetails");
 
-        const projectProdRequest = await this.gluonService.prod.project.getProjectProdRequestById(environmentsRequestedEvent.projectProdRequestId);
+        const projectProdRequest: QMProjectProdRequest = await this.gluonService.prod.project.getProjectProdRequestById(environmentsRequestedEvent.projectProdRequestId);
 
         const associatedTeams = await this.gluonService.teams.getTeamsAssociatedToProject(projectProdRequest.project.projectId);
 
@@ -51,13 +58,15 @@ export class ProjectProductionEnvironmentsRequested extends BaseQMEvent implemen
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectName);
 
+            const deploymentPipeline: QMDeploymentPipeline = getProjectDeploymentPipelineFromPipelineId(project, projectProdRequest.deploymentPipeline.pipelineId);
+
             const membersToMessage = await this.gluonService.members.findMembersAssociatedToTeam(project.owningTeam.teamId);
 
             for (const teamMember of membersToMessage) {
                 const requestCorrelationId: string = uuid();
                 const destination = await addressSlackUsersFromContext(ctx, teamMember.slack.screenName);
                 await ctx.messageClient.send({
-                    text: `The project *${projectName}* owned by team *${project.owningTeam.name}* has been requested to move into prod. As a member of the team you have please select an option below indicating whether you approve of this request.`,
+                    text: `The project *${projectName}* owned by team *${project.owningTeam.name}* has been requested to move the *${deploymentPipeline.name}* pipeline into prod. As a member of the team please select an option below indicating whether you approve of this request.`,
                 }, destination);
 
                 await ctx.messageClient.send(

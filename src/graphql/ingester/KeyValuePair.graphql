@@ -1,0 +1,4 @@
+type KeyValuePair @rootType {
+	key: String
+	value: String
+}

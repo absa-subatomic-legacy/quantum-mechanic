@@ -1,11 +1,11 @@
 import * as _ from "lodash";
 import {MembershipRequestClosed} from "../../events/team/MembershipRequestClosed";
-import {ListExistingBitbucketProject} from "../bitbucket/BitbucketProject";
+import {LinkExistingBitbucketProject} from "../bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "../bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "../bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "../jenkins/JenkinsCredentialsRecreate";
-import {AddSlackDetails} from "../member/AddSlackDetails";
+import {JenkinsProdCredentialsRecreate} from "../jenkins/JenkinsProdCredentialsRecreate";
 import {OnboardMember} from "../member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "../packages/ConfigureApplicationJenkinsProd";
 import {ConfigureBasicPackage} from "../packages/ConfigureBasicPackage";
@@ -16,11 +16,11 @@ import {LinkExistingLibrary} from "../packages/LinkExistingLibrary";
 import {PatchBuildConfigBaseImage} from "../packages/PatchBuildConfigBaseImage";
 import {AssociateTeam} from "../project/AssociateTeam";
 import {CreateGenericProd} from "../project/CreateGenericProd";
-import {CreateOpenShiftPvc} from "../project/CreateOpenShiftPvc";
 import {CreateProject} from "../project/CreateProject";
+import {CreateProjectJenkinsJob} from "../project/CreateProjectJenkinsJob";
 import {CreateProjectProdEnvironments} from "../project/CreateProjectProdEnvironments";
-import {NewProjectEnvironments} from "../project/NewProjectEnvironments";
 import {ListProjectDetails, ListTeamProjects} from "../project/ProjectDetails";
+import {RequestProjectEnvironments} from "../project/request-project-environments/RequestProjectEnvironments";
 import {ReRunProjectProdRequest} from "../project/ReRunProjectProdRequest";
 import {UpdateProjectProdRequest} from "../project/UpdateProjectProdRequest";
 import {AddConfigServer} from "../team/AddConfigServer";
@@ -36,8 +36,6 @@ import {MigrateTeamCloud} from "../team/MigrateTeamCloud";
 import {NewOrUseTeamSlackChannel} from "../team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "../team/NewSlackChannel";
 import {RemoveMemberFromTeam} from "../team/RemoveMemberFromTeam";
-import {TagAllLatestImages} from "../team/TagAllLatestImages";
-import {TagLatestImage} from "../team/TagLatestImage";
 
 export class HelpCategory {
 
@@ -46,7 +44,6 @@ export class HelpCategory {
         AddConfigServer,
         AddMemberToTeam,
         AddOwnerToTeam,
-        AddSlackDetails,
         AssociateTeam,
         BitbucketProjectAccessCommand,
         BitbucketProjectRecommendedPracticesCommand,
@@ -56,17 +53,18 @@ export class HelpCategory {
         CreateApplicationProd,
         CreateGenericProd,
         CreateMembershipRequestToTeam,
-        CreateOpenShiftPvc,
         CreateProject,
+        CreateProjectJenkinsJob,
         CreateProjectProdEnvironments,
         CreateTeam,
         JoinTeam,
         JenkinsCredentialsRecreate,
+        JenkinsProdCredentialsRecreate,
         KickOffJenkinsBuild,
         LinkExistingApplication,
         LinkExistingLibrary,
         LinkExistingTeamSlackChannel,
-        ListExistingBitbucketProject,
+        LinkExistingBitbucketProject,
         ListProjectDetails,
         ListTeamMembers,
         ListTeamProjects,
@@ -74,14 +72,12 @@ export class HelpCategory {
         MigrateTeamCloud,
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,
-        NewProjectEnvironments,
+        RequestProjectEnvironments,
         NewTeamSlackChannel,
         OnboardMember,
         PatchBuildConfigBaseImage,
         RemoveMemberFromTeam,
         ReRunProjectProdRequest,
-        TagAllLatestImages,
-        TagLatestImage,
         UpdateProjectProdRequest,
     ];
 

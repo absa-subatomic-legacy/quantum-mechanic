@@ -1,20 +1,16 @@
 import {
-    buttonForCommand,
+    addressEvent,
     HandlerContext,
     HandlerResult,
     success,
 } from "@atomist/automation-client";
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
+import {PackageConfigurationRequestedEvent} from "../../events/packages/package-configuration-request/PackageConfigurationRequestedEvent";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {ConfigurePackageInJenkins} from "../../tasks/packages/ConfigurePackageInJenkins";
-import {ConfigurePackageInOpenshift} from "../../tasks/packages/ConfigurePackageInOpenshift";
-import {TaskListMessage} from "../../tasks/TaskListMessage";
-import {TaskRunner} from "../../tasks/TaskRunner";
-import {ApplicationType} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
 import {
     GluonApplicationNameParam,
@@ -30,26 +26,31 @@ import {
     JenkinsFileParam,
 } from "../../util/recursiveparam/JenkinsParameterSetters";
 import {
-    ImageNameFromDevOpsParam,
+    ImageNameParam,
     ImageNameSetter,
+    ImageStreamTagParam,
+    ImageTagSetter,
     OpenShiftTemplateParam,
     OpenshiftTemplateSetter,
 } from "../../util/recursiveparam/OpenshiftParameterSetters";
+import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     ParameterDisplayType,
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
-    ChannelMessageClient,
+    ResponderMessageClient,
     handleQMError,
     QMMessageClient,
 } from "../../util/shared/Error";
-import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
+import {GluonToEvent} from "../../util/transform/GluonToEvent";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Configure an existing application/library", QMConfig.subatomic.commandPrefix + " configure custom package")
+@CommandHandler("Configure an existing application/library", atomistIntent(CommandIntent.ConfigurePackage))
 @Tags("subatomic", "package")
 export class ConfigurePackage extends RecursiveParameterRequestCommand
-    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, JenkinsfileNameSetter, OpenshiftTemplateSetter, ImageNameSetter {
+    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter,
+        JenkinsfileNameSetter, OpenshiftTemplateSetter, ImageNameSetter, ImageTagSetter {
 
     @GluonTeamNameParam({
         callOrder: 0,
@@ -75,20 +76,26 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
     })
     public openShiftCloud: string;
 
-    @ImageNameFromDevOpsParam({
+    @ImageNameParam({
         callOrder: 4,
         description: "Please select the base image for the s2i build",
     })
     public imageName: string;
 
-    @OpenShiftTemplateParam({
+    @ImageStreamTagParam({
         callOrder: 5,
+        description: "Please select the base image tag for the s2i build",
+    })
+    public imageTag: string;
+
+    @OpenShiftTemplateParam({
+        callOrder: 6,
         selectionMessage: "Please select the correct openshift template for your package",
     })
     public openshiftTemplate: string;
 
     @JenkinsFileParam({
-        callOrder: 6,
+        callOrder: 7,
         selectionMessage: "Please select the correct jenkinsfile for your package",
     })
     public jenkinsfileName: string;
@@ -103,98 +110,38 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
-        const messageClient: QMMessageClient = new ChannelMessageClient(ctx).addDestination(this.teamChannel);
+        const messageClient: QMMessageClient = new ResponderMessageClient(ctx);
         try {
-            await messageClient.send({
-                text: "Preparing to configure your package...",
-            });
-
-            const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName, false);
-
-            await this.configurePackage(ctx, messageClient);
-
+            await this.requestPackageConfiguration(ctx);
             this.succeedCommand();
-
-            return messageClient.send(this.getDefaultSuccessMessage(this.applicationName, this.projectName, ApplicationType[application.applicationType]));
+            return await messageClient.send("Requesting package configuration...");
         } catch (error) {
             this.failCommand();
             return await handleQMError(messageClient, error);
         }
     }
 
-    private async configurePackage(ctx: HandlerContext, messageClient: QMMessageClient): Promise<HandlerResult> {
+    private async requestPackageConfiguration(ctx: HandlerContext): Promise<HandlerResult> {
+
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
         const application = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
 
-        const taskListMessage = new TaskListMessage(":rocket: Configuring package...", messageClient);
-        const taskRunner = new TaskRunner(taskListMessage);
-        if (application.applicationType === ApplicationType.DEPLOYABLE.toString()) {
-            taskRunner.addTask(
-                new ConfigurePackageInOpenshift(
-                    {
-                        buildEnvironmentVariables: this.buildEnvironmentVariables,
-                        openshiftTemplate: this.openshiftTemplate,
-                        baseS2IImage: this.imageName,
-                        deploymentEnvironmentVariables: this.deploymentEnvironmentVariables,
-                    },
-                    {
-                        teamName: this.teamName,
-                        projectName: this.projectName,
-                        packageName: application.name,
-                        packageType: application.applicationType,
-                        bitbucketRepoRemoteUrl: application.bitbucketRepository.remoteUrl,
-                        owningTeamName: project.owningTeam.name,
-                    }),
-            );
-        }
+        const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-        taskRunner.addTask(
-            new ConfigurePackageInJenkins(
-                application,
-                project,
-                this.jenkinsfileName),
-        );
+        const configurePackageRequest: PackageConfigurationRequestedEvent = {
+            project: GluonToEvent.project(project),
+            application: GluonToEvent.application(application),
+            actionedBy: GluonToEvent.member(member),
+            s2iImage: {imageName: this.imageName, imageTag: this.imageTag},
+            jenkinsfileName: this.jenkinsfileName,
+            openshiftTemplate: this.openshiftTemplate,
+            buildEnvironmentVariables: GluonToEvent.keyValueList(this.buildEnvironmentVariables),
+            deploymentEnvironmentVariables: GluonToEvent.keyValueList(this.deploymentEnvironmentVariables),
+        };
 
-        await taskRunner.execute(ctx);
+        await ctx.messageClient.send(configurePackageRequest, addressEvent("PackageConfigurationRequestedEvent"));
 
         return success();
-    }
-
-    private getDefaultSuccessMessage(applicationName: string, projectName: string, applicationType: ApplicationType): SlackMessage {
-        let packageTypeString = "application";
-        if (applicationType === ApplicationType.LIBRARY) {
-            packageTypeString = "library";
-        }
-
-        return {
-            text: `Your ${packageTypeString} *${applicationName}*, in project *${projectName}*, has been provisioned successfully ` +
-                "and is ready to build/deploy",
-            attachments: [{
-                fallback: `Your ${packageTypeString} has been provisioned successfully`,
-                footer: `For more information, please read the ${this.docs() + "#jenkins-build"}`,
-                text: `
-You can kick off the build pipeline for your ${packageTypeString} by clicking the button below or pushing changes to your ${packageTypeString}'s repository`,
-                mrkdwn_in: ["text"],
-                actions: [
-                    buttonForCommand(
-                        {
-                            text: "Start build",
-                            style: "primary",
-                        },
-                        new KickOffJenkinsBuild(),
-                        {
-                            projectName,
-                            applicationName,
-                            displayResultMenu: ParameterDisplayType.hide,
-                        }),
-                ],
-            }],
-        };
-    }
-
-    private docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference`,
-            "documentation")}`;
     }
 }

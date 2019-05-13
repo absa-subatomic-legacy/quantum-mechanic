@@ -6,7 +6,8 @@ import {
     loadScreenNameByUserId,
     MemberRole,
 } from "../../util/member/Members";
-import {getTeamSlackChannel} from "../../util/team/Teams";
+import {QMError} from "../../util/shared/Error";
+import {isMember, isOwner} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -30,19 +31,28 @@ export class RemoveMemberFromTeamTask extends Task {
     }
 
     protected async executeTask(ctx: HandlerContext): Promise<boolean> {
-            const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
-            const teamChannel = getTeamSlackChannel(team);
-            const screenName = getScreenName(this.slackName);
-            const chatId = await loadScreenNameByUserId(ctx, screenName);
-            const newMember = await this.removeMemberFromTeamService.getMemberGluonDetails(ctx, chatId, teamChannel);
-            this.removeMemberFromTeamService.verifyCanRemoveMemberRequest(newMember, team, this.memberRole);
+        const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
+        const screenName = getScreenName(this.slackName);
+        const chatId = await loadScreenNameByUserId(ctx, screenName);
+        const memberToRemove = await this.removeMemberFromTeamService.getMemberGluonDetails(ctx, chatId);
+        const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-            const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+        if (isOwner(team, actioningMember.memberId)) {
+            logger.info("actioningMember identified with memberRole:Owner");
+            if (isOwner(team, memberToRemove.memberId)) {
+                this.memberRole = MemberRole.owner;
+            } else if (isMember(team, memberToRemove.memberId)) {
+                this.memberRole = MemberRole.member;
+            }
+            logger.info(`memberToRemove identified as ${this.memberRole}`);
+            this.removeMemberFromTeamService.verifyCanRemoveMemberRequest(memberToRemove, team, this.memberRole);
+
             await this.taskListMessage.succeedTask(this.TASK_GATHER_REQUEST_DETAILS);
-            await this.removeMemberFromTeamService.removeUserFromGluonTeam(newMember.memberId, actioningMember.memberId, team.teamId, this.memberRole);
-
+            await this.removeMemberFromTeamService.removeUserFromGluonTeam(memberToRemove.memberId, actioningMember.memberId, team.teamId);
             await this.taskListMessage.succeedTask(this.TASK_REMOVE_USER_FROM_TEAM);
-            return true;
+        } else {
+            throw new QMError(`${actioningMember.slack.screenName}, you are not an owner of this team and cannot remove a member from this team.`);
+        }
+        return true;
     }
-
 }

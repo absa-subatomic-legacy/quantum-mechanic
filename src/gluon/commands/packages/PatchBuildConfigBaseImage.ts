@@ -12,19 +12,23 @@ import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
     GluonTeamNameParam,
-    GluonTeamNameSetter, GluonTeamOpenShiftCloudParam,
+    GluonTeamNameSetter,
+    GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
-    ImageNameFromDevOpsParam,
+    ImageNameParam,
     ImageNameSetter,
+    ImageStreamTagParam,
+    ImageTagSetter,
 } from "../../util/recursiveparam/OpenshiftParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Patch the s2i image used to build a package", QMConfig.subatomic.commandPrefix + " patch package s2i image")
+@CommandHandler("Patch the s2i image used to build a package", atomistIntent(CommandIntent.PatchBuildConfigBaseImage))
 @Tags("subatomic", "package")
 export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
-    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, ImageNameSetter {
+    implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter, ImageNameSetter, ImageTagSetter {
 
     @GluonTeamNameParam({
         callOrder: 0,
@@ -49,11 +53,17 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
     })
     public applicationName: string;
 
-    @ImageNameFromDevOpsParam({
+    @ImageNameParam({
         callOrder: 4,
         description: "Base image for s2i build",
     })
     public imageName: string;
+
+    @ImageStreamTagParam({
+        callOrder: 5,
+        description: "Base image tag for s2i build",
+    })
+    public imageTag: string;
 
     public buildEnvironmentVariables: { [key: string]: string } = {};
 
@@ -69,7 +79,7 @@ export class PatchBuildConfigBaseImage extends RecursiveParameterRequestCommand
                 qmMessageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             taskRunner.addTask(
-                new PatchPackageBuildConfigImage(this.imageName, this.applicationName, this.projectName, this.teamName, QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd),
+                new PatchPackageBuildConfigImage(this.imageName, this.imageTag, QMConfig.subatomic.openshiftClouds[this.openShiftCloud].sharedResourceNamespace, this.applicationName, this.projectName, this.teamName, QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd),
             );
 
             await taskRunner.execute(ctx);

@@ -8,14 +8,16 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
-import {GenericProdRequestMessages} from "../../messages/project/GenericProdRequestMessages";
+import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {
     getHighestPreProdEnvironment,
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
+import {assertGenericProdCanBeRequested} from "../../util/prod/ProdAssertions";
 import {
+    getProjectDeploymentPipelineFromPipelineId,
     getProjectOpenshiftNamespace,
     QMDeploymentPipeline,
     QMProject,
@@ -38,8 +40,9 @@ import {
     QMMessageClient,
     ResponderMessageClient,
 } from "../../util/shared/Error";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Move openshift resources to prod", QMConfig.subatomic.commandPrefix + " request generic prod")
+@CommandHandler("Move openshift resources to prod", atomistIntent(CommandIntent.CreateGenericProd))
 @Tags("subatomic", "project", "other")
 export class CreateGenericProd extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, DeploymentPipelineIdSetter {
@@ -71,7 +74,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         required: false,
         displayable: false,
     })
-    public approval: ApprovalEnum = ApprovalEnum.CONFIRM;
+    public approval: ApprovalEnum = ApprovalEnum.TO_CONFIRM;
 
     @Parameter({
         required: false,
@@ -85,7 +88,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
     })
     public openShiftResourcesJSON: string;
 
-    private genericProdRequestMessages = new GenericProdRequestMessages();
+    private prodRequestMessages = new ProdRequestMessages();
 
     constructor(public gluonService = new GluonService(), public ocService = new OCService()) {
         super();
@@ -96,7 +99,10 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
             const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
             const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
-            if (this.approval === ApprovalEnum.CONFIRM) {
+            if (this.approval === ApprovalEnum.TO_CONFIRM) {
+                // Ensure project is prod approved before proceeding
+                await assertGenericProdCanBeRequested(this.projectName, this.deploymentPipelineId, this.gluonService);
+
                 this.correlationId = uuid();
                 const result = await this.getRequestConfirmation(qmMessageClient);
                 this.succeedCommand();
@@ -150,7 +156,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         await this.findAndListResources(qmMessageClient);
 
-        const message = this.genericProdRequestMessages.confirmProdRequest(this);
+        const message = this.prodRequestMessages.confirmGenericProdRequest(this);
 
         return await qmMessageClient.send(message, {id: this.correlationId});
     }
@@ -163,7 +169,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
 
-        const deploymentPipeline: QMDeploymentPipeline = project.releaseDeploymentPipelines.filter(pipeline => pipeline.pipelineId === this.deploymentPipelineId)[0];
+        const deploymentPipeline: QMDeploymentPipeline = getProjectDeploymentPipelineFromPipelineId(project, this.deploymentPipelineId);
 
         const projectNamespace = getProjectOpenshiftNamespace(tenant.name, project.name, deploymentPipeline.tag, getHighestPreProdEnvironment(deploymentPipeline).postfix);
         const allResources = await this.ocService.exportAllResources(projectNamespace);
@@ -187,8 +193,6 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
     private async createGenericProdRequest() {
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-        await this.gluonService.prod.project.assertProjectProdIsApproved(project.projectId, this.deploymentPipelineId);
-
         const actionedBy = await this.gluonService.members.gluonMemberFromScreenName(this.screenName, false);
 
         const openShiftResources = JSON.parse(this.openShiftResourcesJSON);
@@ -210,4 +214,5 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
 
         await this.gluonService.prod.generic.createGenericProdRequest(request);
     }
+
 }

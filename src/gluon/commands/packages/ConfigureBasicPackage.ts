@@ -11,7 +11,10 @@ import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
-import {PackageDefinition} from "../../util/packages/packagedef/PackageDefinition";
+import {
+    ImageStreamDefinition,
+    PackageDefinition,
+} from "../../util/packages/packagedef/PackageDefinition";
 import {SetterLoader} from "../../util/packages/packagedef/SetterLoader";
 import {QMColours} from "../../util/QMColour";
 import {
@@ -36,12 +39,13 @@ import {
     ResponderMessageClient,
 } from "../../util/shared/Error";
 import {createMenuAttachment} from "../../util/shared/GenericMenu";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 import {ConfigurePackage} from "./ConfigurePackage";
 
 const PACKAGE_DEFINITION_EXTENSION = ".json";
 const PACKAGE_DEFINITION_FOLDER = "resources/package-definitions/";
 
-@CommandHandler("Configure an existing application/library using a predefined template", QMConfig.subatomic.commandPrefix + " configure package")
+@CommandHandler("Configure an existing application/library using a predefined template", atomistIntent(CommandIntent.ConfigureBasicPackage))
 @Tags("subatomic", "package")
 export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonProjectNameSetter, GluonApplicationNameSetter {
@@ -211,11 +215,13 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
 
     private async callPackageConfiguration(ctx: HandlerContext, definition: PackageDefinition): Promise<HandlerResult> {
         const configurePackage = new ConfigurePackage();
+        const imageStream: ImageStreamDefinition = definition.buildConfig.imageStream;
         configurePackage.screenName = this.screenName;
         configurePackage.teamChannel = this.teamChannel;
         configurePackage.openshiftTemplate = definition.openshiftTemplate || "Default";
         configurePackage.jenkinsfileName = definition.jenkinsfile;
-        configurePackage.imageName = definition.buildConfig.imageStream;
+        configurePackage.imageName = imageStream.imageName;
+        configurePackage.imageTag = imageStream.imageTag;
         if (!_.isEmpty(definition.buildConfig.envVariables)) {
             configurePackage.buildEnvironmentVariables = definition.buildConfig.envVariables;
         } else {

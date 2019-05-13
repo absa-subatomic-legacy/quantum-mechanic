@@ -1,6 +1,6 @@
 <org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject plugin="workflow-multibranch@2.14">
     <description>{{gluonApplicationName}} pipelines [[managed by Subatomic]({{gluonBaseUrl}}/projects/{{gluonProjectId}})]</description>
-    <displayName>{{gluonApplicationName}} Prod</displayName>
+    <displayName>{{jobDisplayName}}</displayName>
     <sources class="jenkins.branch.MultiBranchProject$BranchSourceList" plugin="branch-api@2.0.18">
         <data>
             <jenkins.branch.BranchSource>
@@ -8,7 +8,7 @@
                     <serverUrl>{{bitbucketBaseUrl}}</serverUrl>
                     <credentialsId>{{teamDevOpsProjectId}}-bitbucket</credentialsId>
                     <repoOwner>{{bitbucketProjectKey}}</repoOwner>
-                    <repository>{{bitbucketRepositoryName}}</repository>
+                    <repository>{{bitbucketRepositorySlug}}</repository>
                     <traits>
                         <com.cloudbees.jenkins.plugins.bitbucket.BranchDiscoveryTrait>
                             <strategyId>3</strategyId>
@@ -43,6 +43,6 @@
     </sources>
     <factory class="org.jenkinsci.plugins.workflow.multibranch.WorkflowBranchProjectFactory">
         <owner class="org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject" reference="../.." />
-        <scriptPath>Jenkinsfile.prod</scriptPath>
+        <scriptPath>{{jenkinsfileName}}</scriptPath>
     </factory>
 </org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject>

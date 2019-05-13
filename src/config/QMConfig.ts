@@ -12,9 +12,9 @@ export class QMConfig {
 
     public static subatomic: SubatomicConfig;
 
-    public static teamId: string;
+    public static atomistWorkspaceId: string;
 
-    public static apiKey: string;
+    public static atomistAPIKey: string;
 
     public static http: HttpAuth;
 
@@ -32,8 +32,8 @@ export class QMConfig {
         const configRaw = stripJsonComments(fs.readFileSync(this.getConfigFile()).toString());
         const config = JSON.parse(configRaw);
         QMConfig.subatomic = config.subatomic;
-        QMConfig.teamId = config.teamId;
-        QMConfig.apiKey = config.apiKey;
+        QMConfig.atomistWorkspaceId = config.atomistWorkspaceId;
+        QMConfig.atomistAPIKey = config.atomistAPIKey;
         QMConfig.http = config.http;
         QMConfig.secondarySlackChannels = config.secondarySlackChannels;
         QMConfig.proMetrics = config.proMetrics || {
@@ -80,7 +80,7 @@ export class PublicQMConfig {
 
     public subatomic: SubatomicConfig = _.cloneDeep(QMConfig.subatomic);
 
-    public teamId: string = _.cloneDeep(QMConfig.teamId);
+    public teamId: string = _.cloneDeep(QMConfig.atomistWorkspaceId);
 
     constructor() {
         this.subatomic.bitbucket.auth.email = "";

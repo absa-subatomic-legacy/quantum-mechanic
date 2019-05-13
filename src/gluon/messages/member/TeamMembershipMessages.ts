@@ -1,7 +1,8 @@
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {SlackMessage, url} from "@atomist/slack-messages";
-import {QMConfig} from "../../../config/QMConfig";
+import {SlackMessage} from "@atomist/slack-messages";
+import {CommandIntent} from "../../commands/CommandIntent";
 import {JoinTeam} from "../../commands/team/JoinTeam";
+import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
 
 export class TeamMembershipMessages {
     public notAMemberOfTheTeam(): SlackMessage {
@@ -11,7 +12,7 @@ export class TeamMembershipMessages {
             text,
             attachments: [{
                 fallback: "You are not a member of this team.",
-                footer: `For more information, please read the ${this.docs()}`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.JoinTeam)}`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(
@@ -23,11 +24,6 @@ export class TeamMembershipMessages {
                 ],
             }],
         };
-    }
-
-    public docs(): string {
-        return `${url(`${QMConfig.subatomic.docs.baseUrl}/quantum-mechanic/command-reference#joinTeam`,
-            "documentation")}`;
     }
 
 }

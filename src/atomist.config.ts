@@ -1,12 +1,12 @@
 import {ingester} from "@atomist/automation-client/lib/graph/graphQL";
 import {QMConfig} from "./config/QMConfig";
-import {ListExistingBitbucketProject} from "./gluon/commands/bitbucket/BitbucketProject";
+import {LinkExistingBitbucketProject} from "./gluon/commands/bitbucket/BitbucketProject";
 import {BitbucketProjectAccessCommand} from "./gluon/commands/bitbucket/BitbucketProjectAccessCommand";
 import {BitbucketProjectRecommendedPracticesCommand} from "./gluon/commands/bitbucket/BitbucketProjectRecommendedPracticesCommand";
 import {Help} from "./gluon/commands/help/Help";
 import {KickOffJenkinsBuild} from "./gluon/commands/jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsCredentialsRecreate";
-import {AddSlackDetails} from "./gluon/commands/member/AddSlackDetails";
+import {JenkinsProdCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsProdCredentialsRecreate";
 import {OnboardMember} from "./gluon/commands/member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "./gluon/commands/packages/ConfigureApplicationJenkinsProd";
 import {
@@ -20,14 +20,15 @@ import {LinkExistingLibrary} from "./gluon/commands/packages/LinkExistingLibrary
 import {PatchBuildConfigBaseImage} from "./gluon/commands/packages/PatchBuildConfigBaseImage";
 import {AssociateTeam} from "./gluon/commands/project/AssociateTeam";
 import {CreateGenericProd} from "./gluon/commands/project/CreateGenericProd";
-import {CreateOpenShiftPvc} from "./gluon/commands/project/CreateOpenShiftPvc";
 import {CreateProject} from "./gluon/commands/project/CreateProject";
+import {CreateProjectJenkinsJob} from "./gluon/commands/project/CreateProjectJenkinsJob";
 import {CreateProjectProdEnvironments} from "./gluon/commands/project/CreateProjectProdEnvironments";
-import {NewProjectEnvironments} from "./gluon/commands/project/NewProjectEnvironments";
+import {DefineNewProjectEnvironments} from "./gluon/commands/project/DefineNewProjectEnvironments";
 import {
     ListProjectDetails,
     ListTeamProjects,
 } from "./gluon/commands/project/ProjectDetails";
+import {RequestProjectEnvironments} from "./gluon/commands/project/request-project-environments/RequestProjectEnvironments";
 import {ReRunProjectProdRequest} from "./gluon/commands/project/ReRunProjectProdRequest";
 import {UpdateProjectProdRequest} from "./gluon/commands/project/UpdateProjectProdRequest";
 import {AddConfigServer} from "./gluon/commands/team/AddConfigServer";
@@ -43,19 +44,25 @@ import {MigrateTeamCloud} from "./gluon/commands/team/MigrateTeamCloud";
 import {NewOrUseTeamSlackChannel} from "./gluon/commands/team/NewOrExistingTeamSlackChannel";
 import {NewTeamSlackChannel} from "./gluon/commands/team/NewSlackChannel";
 import {RemoveMemberFromTeam} from "./gluon/commands/team/RemoveMemberFromTeam";
-import {TagAllLatestImages} from "./gluon/commands/team/TagAllLatestImages";
-import {TagLatestImage} from "./gluon/commands/team/TagLatestImage";
+import {ReRunMigrateTeamCloud} from "./gluon/commands/team/ReRunMigrateTeamCloud";
 import {BitbucketProjectAdded} from "./gluon/events/bitbucket/BitbucketProjectAdded";
+import {BroadcastMessageAllChannels} from "./gluon/events/communications/BroadcastMessageAllChannels";
 import {TeamMemberCreated} from "./gluon/events/member/TeamMemberCreated";
 import {ApplicationCreated} from "./gluon/events/packages/ApplicationCreated";
 import {ApplicationProdRequested} from "./gluon/events/packages/ApplicationProdRequested";
+import {PackageConfigurationRequested} from "./gluon/events/packages/package-configuration-request/PackageConfigurationRequested";
 import {GenericProdRequested} from "./gluon/events/project/GenericProdRequested";
 import {ProjectCreated} from "./gluon/events/project/ProjectCreated";
 import {ProjectEnvironmentsRequested} from "./gluon/events/project/ProjectEnvironmentsRequested";
+import {ProjectJenkinsJobRequested} from "./gluon/events/project/ProjectJenkinsJobRequested";
 import {ProjectProductionEnvironmentsRequestClosed} from "./gluon/events/project/ProjectProductionEnvironmentsRequestClosed";
 import {ProjectProductionEnvironmentsRequested} from "./gluon/events/project/ProjectProductionEnvironmentsRequested";
 import {TeamsLinkedToProject} from "./gluon/events/project/TeamAssociated";
 import {BotJoinedChannel} from "./gluon/events/team/BotJoinedChannel";
+import {
+    ConfigServerRequested,
+    ConfigServerRequestedEvent,
+} from "./gluon/events/team/ConfigServerRequested";
 import {DevOpsEnvironmentRequested} from "./gluon/events/team/DevOpsEnvironmentRequested";
 import {MemberRemovedFromTeam} from "./gluon/events/team/MemberRemovedFromTeam";
 import {MembersAddedToTeam} from "./gluon/events/team/MembersAddedToTeam";
@@ -65,11 +72,11 @@ import {TeamCreated} from "./gluon/events/team/TeamCreated";
 import {TeamOpenShiftCloudMigrated} from "./gluon/events/team/TeamOpenShiftCloudMigrated";
 import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
 
-const apiKey = QMConfig.apiKey;
+const apiKey = QMConfig.atomistAPIKey;
 const http = QMConfig.http;
 
 export const configuration: any = {
-    workspaceIds: [QMConfig.teamId],
+    workspaceIds: [QMConfig.atomistWorkspaceId],
     // running durable will store and forward events when the client is disconnected
     // this should only be used in production envs
     policy: process.env.NODE_ENV === "production" ? "durable" : "ephemeral",
@@ -77,7 +84,6 @@ export const configuration: any = {
         AddConfigServer,
         AddMemberToTeam,
         AddOwnerToTeam,
-        AddSlackDetails,
         AssociateTeam,
         BitbucketProjectAccessCommand,
         BitbucketProjectRecommendedPracticesCommand,
@@ -87,19 +93,21 @@ export const configuration: any = {
         CreateApplicationProd,
         CreateGenericProd,
         CreateMembershipRequestToTeam,
-        CreateOpenShiftPvc,
         CreateProject,
+        CreateProjectJenkinsJob,
         CreateProjectProdEnvironments,
         CreateTeam,
         DynamicParameterSetter,
+        DefineNewProjectEnvironments,
         Help,
         JoinTeam,
         JenkinsCredentialsRecreate,
+        JenkinsProdCredentialsRecreate,
         KickOffJenkinsBuild,
         LinkExistingApplication,
         LinkExistingLibrary,
         LinkExistingTeamSlackChannel,
-        ListExistingBitbucketProject,
+        LinkExistingBitbucketProject,
         ListProjectDetails,
         ListTeamMembers,
         ListTeamProjects,
@@ -107,39 +115,44 @@ export const configuration: any = {
         MigrateTeamCloud,
         NewDevOpsEnvironment,
         NewOrUseTeamSlackChannel,
-        NewProjectEnvironments,
+        RequestProjectEnvironments,
         NewTeamSlackChannel,
         OnboardMember,
         PatchBuildConfigBaseImage,
         RemoveMemberFromTeam,
         ReRunProjectProdRequest,
-        TagAllLatestImages,
-        TagLatestImage,
         UpdateProjectProdRequest,
+        ReRunMigrateTeamCloud,
     ],
     events: [
         ApplicationCreated,
         ApplicationProdRequested,
         BitbucketProjectAdded,
         BotJoinedChannel,
+        ConfigServerRequested,
         DevOpsEnvironmentRequested,
         GenericProdRequested,
         MemberRemovedFromTeam,
         MembersAddedToTeam,
         MembershipRequestCreated,
+        PackageConfigurationRequested,
         ProjectCreated,
         ProjectEnvironmentsRequested,
+        ProjectJenkinsJobRequested,
         ProjectProductionEnvironmentsRequestClosed,
         ProjectProductionEnvironmentsRequested,
         TeamCreated,
         TeamMemberCreated,
         TeamsLinkedToProject,
         TeamOpenShiftCloudMigrated,
+        BroadcastMessageAllChannels,
     ],
     ingesters: [
+        ingester("KeyValuePair"),
         ingester("TeamDevOpsDetails"),
         ingester("ProjectCreatedEvent"),
         ingester("ProjectEnvironmentsRequestedEvent"),
+        ingester("ProjectJenkinsJobRequestedEvent"),
         ingester("TeamsLinkedToProjectEvent"),
         ingester("SlackIdentity"),
         ingester("DeploymentEnvironment"),
@@ -169,6 +182,9 @@ export const configuration: any = {
         ingester("BitbucketProjectAddedEvent"),
         ingester("ProjectProductionEnvironmentsRequestedEvent"),
         ingester("ProjectProductionEnvironmentsRequestClosedEvent"),
+        ingester("PackageConfigurationRequestedEvent"),
+        ingester("ConfigServerRequestedEvent"),
+        ingester("BroadcastMessageAllChannelsEvent"),
     ],
     apiKey,
     http,

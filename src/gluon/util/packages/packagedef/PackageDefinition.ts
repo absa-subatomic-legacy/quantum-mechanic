@@ -7,7 +7,7 @@ export interface PackageDefinition {
 }
 
 export interface BuildConfig {
-    imageStream: string;
+    imageStream: ImageStreamDefinition;
     envVariables?: { [key: string]: string };
 }
 
@@ -19,4 +19,9 @@ export interface RequiredEnvironmentVariable {
     name: string;
     description: string;
     setter?: string;
+}
+
+export interface ImageStreamDefinition {
+    imageName: string;
+    imageTag: string;
 }

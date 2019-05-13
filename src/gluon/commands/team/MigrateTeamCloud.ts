@@ -9,7 +9,7 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
-import {QMConfig} from "../../../config/QMConfig";
+import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {QMMemberBase} from "../../util/member/Members";
@@ -18,7 +18,7 @@ import {
     GluonTeamNameParam,
     GluonTeamNameSetter,
     GluonTeamOpenShiftCloudBaseSetter,
-    setGluonTeamOpenShiftCloudForced,
+    setGluonTeamOpenShiftCloud,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {
     RecursiveParameter,
@@ -31,21 +31,23 @@ import {
     ResponderMessageClient,
 } from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
+import {atomistIntent, CommandIntent} from "../CommandIntent";
 
-@CommandHandler("Move all Openshift resources belonging to a team to a different cloud", QMConfig.subatomic.commandPrefix + " team migrate cloud")
+@CommandHandler("Move all Openshift resources belonging to a team to a different cloud", atomistIntent(CommandIntent.MigrateTeamCloud))
 @Tags("subatomic", "team", "other")
 export class MigrateTeamCloud extends RecursiveParameterRequestCommand
     implements GluonTeamNameSetter, GluonTeamOpenShiftCloudBaseSetter {
 
     @GluonTeamNameParam({
         callOrder: 0,
-        selectionMessage: "Please select a team associated with the project you wish to configure the package for",
+        selectionMessage: "Please select a team associated with the project you wish to configure the package for.",
     })
     public teamName: string;
 
     @RecursiveParameter({
         callOrder: 1,
-        setter: setGluonTeamOpenShiftCloudForced,
+        setter: setGluonTeamOpenShiftCloud,
+        selectionMessage: "Please select an OpenShift cloud to migrate to.",
     })
     public openShiftCloud: string;
 
@@ -53,7 +55,7 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
         required: false,
         displayable: false,
     })
-    public approval: ApprovalEnum = ApprovalEnum.CONFIRM;
+    public approval: ApprovalEnum = ApprovalEnum.TO_CONFIRM;
 
     @Parameter({
         required: false,
@@ -70,21 +72,21 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
             const team: QMTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
             const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
-            if (this.approval === ApprovalEnum.CONFIRM) {
-                this.correlationId = uuid();
+            if (this.approval === ApprovalEnum.TO_CONFIRM) {
+                this.correlationId = ctx.correlationId;
                 const message = this.confirmMigrationRequest(this);
 
                 return await qmMessageClient.send(message, {id: this.correlationId});
             } else if (this.approval === ApprovalEnum.APPROVED) {
 
                 const requestingMember: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
-
                 await this.gluonService.teams.updateTeamOpenShiftCloud(team.teamId, this.openShiftCloud, requestingMember.memberId);
 
                 this.succeedCommand();
 
-                return success();
+                return await qmMessageClient.send(this.getConfirmationResultMessage(this.approval), {id: this.correlationId});
             } else if (this.approval === ApprovalEnum.REJECTED) {
+
                 return await qmMessageClient.send(this.getConfirmationResultMessage(this.approval), {id: this.correlationId});
             }
 
@@ -125,7 +127,7 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
             text,
             attachments: [{
                 fallback: "Please confirm that the above resources should be moved to Prod",
-                footer: `For more information, please read the docs.`,
+                footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.MigrateTeamCloud)}.`,
                 thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
                 actions: [
                     buttonForCommand(

@@ -1,4 +1,6 @@
 import {
+    addressSlackChannelsFromContext,
+    addressSlackUsersFromContext,
     HandlerContext,
     HandlerResult,
     logger,
@@ -37,7 +39,7 @@ export async function handleQMError(messageClient: QMMessageClient, error) {
 }
 
 export class QMError extends Error {
-    constructor(message: string, protected slackMessage: SlackMessage | string = null, public errorType: QMErrorType = QMErrorType.generic) {
+    constructor(message: string, protected slackMessage: SlackMessage | string = null, public errorType: QMErrorType = QMErrorType.generic, private linkToFAQ: boolean = true) {
         super(message);
     }
 
@@ -61,7 +63,9 @@ export class QMError extends Error {
             displayMessage = displayMessage + ".";
         }
 
-        displayMessage = displayMessage + ` Consulting the ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")} may be useful.`;
+        if (this.linkToFAQ) {
+            displayMessage = displayMessage + ` Consulting the ${url(`${QMConfig.subatomic.docs.baseUrl}/FAQ`, "FAQ")} may be useful.`;
+        }
         let result: SlackMessage = {
             text: displayMessage,
         };
@@ -70,9 +74,7 @@ export class QMError extends Error {
             result.text = displayMessage;
         }
 
-        return {
-            text: displayMessage,
-        };
+        return result;
     }
 }
 
@@ -120,7 +122,7 @@ export class ResponderMessageClient implements QMMessageClient {
 }
 
 export class UserMessageClient implements QMMessageClient {
-    private ctx: HandlerContext;
+    private readonly ctx: HandlerContext;
     private readonly users: string[];
 
     constructor(ctx: HandlerContext) {
@@ -134,12 +136,13 @@ export class UserMessageClient implements QMMessageClient {
     }
 
     public async send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult> {
-        return await this.ctx.messageClient.addressUsers(message, this.users, options);
+        const slackDestination = await addressSlackUsersFromContext(this.ctx, ...this.users);
+        return await this.ctx.messageClient.send(message, slackDestination, options);
     }
 }
 
 export class ChannelMessageClient implements QMMessageClient {
-    private ctx: HandlerContext;
+    private readonly ctx: HandlerContext;
     private readonly channels: string[];
 
     constructor(ctx: HandlerContext) {
@@ -153,6 +156,7 @@ export class ChannelMessageClient implements QMMessageClient {
     }
 
     public async send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult> {
-        return await this.ctx.messageClient.addressChannels(message, this.channels, options);
+        const slackDestination = await addressSlackChannelsFromContext(this.ctx, ...this.channels);
+        return await this.ctx.messageClient.send(message, slackDestination, options);
     }
 }
