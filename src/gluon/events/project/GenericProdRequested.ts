@@ -6,8 +6,9 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
+import {OpenshiftListResource} from "openshift-api/build/src/resources/OpenshiftResource";
 import {QMConfig} from "../../../config/QMConfig";
-import {OpenshiftListResource} from "../../../openshift/api/resources/OpenshiftResource";
+
 import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {QMGenericProdRequest} from "../../services/gluon/GenericProdRequestService";
 import {GluonService} from "../../services/gluon/GluonService";

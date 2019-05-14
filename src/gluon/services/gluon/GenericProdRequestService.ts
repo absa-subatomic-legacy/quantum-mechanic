@@ -1,9 +1,9 @@
 import {logger} from "@atomist/automation-client";
+import {OpenshiftResource} from "openshift-api/build/src/resources/OpenshiftResource";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {QMMemberBase} from "../../util/member/Members";
 import {QMDeploymentPipeline, QMProjectBase} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";

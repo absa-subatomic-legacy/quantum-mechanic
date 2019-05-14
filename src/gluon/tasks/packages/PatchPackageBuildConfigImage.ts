@@ -1,6 +1,7 @@
 import {HandlerContext} from "@atomist/automation-client";
+import {OpenshiftResource} from "openshift-api/build/src/resources/OpenshiftResource";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
+
 import {OCService} from "../../services/openshift/OCService";
 import {getBuildConfigName} from "../../util/packages/Applications";
 import {QMError} from "../../util/shared/Error";

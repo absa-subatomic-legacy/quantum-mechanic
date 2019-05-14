@@ -4,8 +4,9 @@ import {
     logger,
 } from "@atomist/automation-client";
 import {Attachment} from "@atomist/slack-messages";
+import {OpenshiftResource} from "openshift-api/build/src/resources/OpenshiftResource";
 import {QMConfig} from "../../../config/QMConfig";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
+
 import {OCService} from "../../services/openshift/OCService";
 import {QMError} from "../shared/Error";
 import {createMenuAttachment} from "../shared/GenericMenu";

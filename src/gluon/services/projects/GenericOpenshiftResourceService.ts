@@ -1,4 +1,4 @@
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
+import {OpenshiftResource} from "openshift-api/build/src/resources/OpenshiftResource";
 
 export class GenericOpenshiftResourceService {
 

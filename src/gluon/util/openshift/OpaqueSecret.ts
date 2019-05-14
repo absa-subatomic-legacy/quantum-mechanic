@@ -1,6 +1,6 @@
 import {logger} from "@atomist/automation-client";
+import {OpenshiftResource} from "openshift-api/build/src/resources/OpenshiftResource";
 import {inspect} from "util";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 
 export class OpaqueSecret implements OpenshiftResource {
 

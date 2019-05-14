@@ -1,16 +1,13 @@
 import {logger} from "@atomist/automation-client";
 import * as fs from "fs";
 import _ = require("lodash");
+import {OpenshiftApiResult} from "openshift-api/build/src/base/OpenshiftApiResult";
+import {OpenShiftApi} from "openshift-api/build/src/OpenShiftApi";
+import {OpenshiftListResource, OpenshiftResource} from "openshift-api/build/src/resources/OpenshiftResource";
 import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
 import {isSuccessCode} from "../../../http/Http";
-import {OpenshiftApiResult} from "../../../openshift/api/base/OpenshiftApiResult";
-import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
-import {
-    OpenshiftListResource,
-    OpenshiftResource,
-} from "../../../openshift/api/resources/OpenshiftResource";
 import {userFromDomainUser} from "../../util/member/Members";
 import {OpaqueSecret} from "../../util/openshift/OpaqueSecret";
 import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplateLoader";

@@ -8,13 +8,10 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
+import {OpenshiftListResource, OpenshiftResource} from "openshift-api/build/src/resources/OpenshiftResource";
 
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
-import {
-    OpenshiftListResource,
-    OpenshiftResource,
-} from "../../../openshift/api/resources/OpenshiftResource";
 import {ReRunMigrateTeamCloud} from "../../commands/team/ReRunMigrateTeamCloud";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
