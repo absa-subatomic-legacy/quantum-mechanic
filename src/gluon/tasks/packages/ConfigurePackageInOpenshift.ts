@@ -1,3 +1,4 @@
+import {OpenshiftListResource, OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {
     HandlerContext,
     HandlerResult,
@@ -5,7 +6,6 @@ import {
     success,
 } from "@atomist/automation-client";
 import * as _ from "lodash";
-import {OpenshiftListResource, OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {QMConfig} from "../../../config/QMConfig";
 
 import {QMTemplate} from "../../../template/QMTemplate";

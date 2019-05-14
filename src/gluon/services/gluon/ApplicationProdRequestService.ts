@@ -1,5 +1,5 @@
-import {logger} from "@atomist/automation-client";
 import {OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
+import {logger} from "@atomist/automation-client";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";

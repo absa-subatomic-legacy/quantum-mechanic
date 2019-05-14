@@ -1,6 +1,6 @@
+import {OpenshiftListResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {HandlerContext} from "@atomist/automation-client";
 import _ = require("lodash");
-import {OpenshiftListResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {OCService} from "../../services/openshift/OCService";
 import {GenericOpenshiftResourceService} from "../../services/projects/GenericOpenshiftResourceService";

@@ -1,9 +1,9 @@
-import {logger} from "@atomist/automation-client";
-import * as fs from "fs";
-import _ = require("lodash");
 import {OpenshiftApiResult} from "@absa-subatomic/openshift-api/build/src/base/OpenshiftApiResult";
 import {OpenShiftApi} from "@absa-subatomic/openshift-api/build/src/OpenShiftApi";
 import {OpenshiftListResource, OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
+import {logger} from "@atomist/automation-client";
+import * as fs from "fs";
+import _ = require("lodash");
 import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";

@@ -1,5 +1,5 @@
-import {HandlerContext} from "@atomist/automation-client";
 import {OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
+import {HandlerContext} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 
 import {OCService} from "../../services/openshift/OCService";

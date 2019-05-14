@@ -1,10 +1,10 @@
+import {OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {
     HandlerContext,
     HandlerResult,
     logger,
 } from "@atomist/automation-client";
 import {Attachment} from "@atomist/slack-messages";
-import {OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {QMConfig} from "../../../config/QMConfig";
 
 import {OCService} from "../../services/openshift/OCService";
