@@ -197,8 +197,8 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
                         const variablePromptAttachment = createMenuAttachment(
                             menuOptions,
                             this,
-                            `Please set the ${requiredVariable.description} environment variable.`,
-                            `Please set the ${requiredVariable.description} environment variable.`,
+                            `Select a value for the *${requiredVariable.name}* environment variable. ${requiredVariable.description}`,
+                            `Select a value for the *${requiredVariable.name}* environment variable. ${requiredVariable.description}`,
                             "Select a value",
                             "environmentVariableValueHolder",
                         );

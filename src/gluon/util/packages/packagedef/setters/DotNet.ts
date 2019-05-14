@@ -1,83 +1,32 @@
-import {logger} from "@atomist/automation-client";
-import {exec} from "child_process";
-import * as fs from "fs";
-import {BitbucketService} from "../../../../services/bitbucket/BitbucketService";
+import {
+    BitBucketServerRepoRef,
+    GitCommandGitProject,
+    GitProject,
+    logger,
+} from "@atomist/automation-client";
+import {toPromise} from "@atomist/automation-client/lib/project/util/projectUtils";
+import {QMConfig} from "../../../../../config/QMConfig";
 import {ApplicationService} from "../../../../services/gluon/ApplicationService";
 import {ProjectService} from "../../../../services/gluon/ProjectService";
 
 export async function setStartupProject(state) {
-    const bitbucketService = new BitbucketService();
     const applicationService = new ApplicationService();
     const projectService = new ProjectService();
     const application = await applicationService.gluonApplicationForNameAndProjectName(state.applicationName, state.projectName, false);
     const project = await projectService.gluonProjectFromProjectName(state.projectName);
-    const repoResult = await bitbucketService.bitbucketRepositoryForSlug(project.bitbucketProject.key, application.bitbucketRepository.slug);
-    const projectArray = new Array();
-    const util = require("util");
-    const execProm = util.promisify(exec);
-
-    execProm("rm -rf ../tmpGit");
-    execProm("mkdir ../tmpGit");
-
-    await execProm(`git clone --depth 1 ${repoResult.data.links.clone[1].href} ../tmpGit/`).then(async result => {
-        if (result.error) {
-            logger.warn(`Error cloning Bitbucket repo: ${result.error}`);
-        }
-        return await fs.readdirSync("../tmpGit").map(async file => {
-            try {
-                const fileStat = fs.statSync(file);
-                if (fileStat.isDirectory()) {
-                    return traverseDirectories(file, "../tmpGit", projectArray);
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        });
-    }).catch(error => {
-        console.log(error);
-    });
-
-    execProm("rm -rf ../tmpGit");
-    return projectArray;
+    return await findAvailableDotnetProjects(project.bitbucketProject.key, application.bitbucketRepository.slug);
 }
 
-function traverseDirectories(directoryName: string, path: string, projectArray: Array<{ value: string, text: string }>) {
-    const filePath = `${path}/${directoryName}`;
+function getProjectPathsFromSolutionFileContent(solutionFileContent: string) {
+    const projectArray: Array<{ value: string, text: string }> = [];
     try {
-        if (!filePath.endsWith(".git")) {
-            try {
-                fs.readdirSync(filePath).map(async file => {
-                    const fileUrl = `${filePath}/${file}`;
-                    try {
-                        const fileStat = fs.statSync(fileUrl);
-                        if (file.endsWith(".sln")) {
-                            return getProjectPathsFromfile(fileUrl, projectArray);
-                        } else if (fileStat.isDirectory() && checkDirectoryDepth(fileUrl)) {
-                            return traverseDirectories(file, filePath, projectArray);
-                        }
-                    } catch (error) {
-                        console.log(error);
-                    }
-                });
-            } catch (error) {
-                console.log(error);
-            }
-        }
-    } catch (error) {
-        console.log(error);
-    }
-}
-
-function getProjectPathsFromfile(solutionFile: string, projectArray: Array<{ value: string, text: string }>) {
-    try {
-        const data = fs.readFileSync(solutionFile, "utf8");
-        const projectPaths = data.split("\", \"");
+        const projectPaths = solutionFileContent.split("\", \"");
         for (const projectPath of projectPaths) {
             if (projectPath.endsWith("proj")) {
                 projectArray.push(
                     {
-                        value: projectPath,
-                        text: projectPath,
+                        value: projectPath.replace("\\", "/"),
+                        text: projectPath.replace("\\", "/"),
                     },
                 );
             }
@@ -85,14 +34,39 @@ function getProjectPathsFromfile(solutionFile: string, projectArray: Array<{ val
     } catch (error) {
         console.log(error);
     }
+    return projectArray;
 }
 
-function checkDirectoryDepth(filePath: string): boolean {
-    const pathPartition = filePath.split("/");
-    if (pathPartition.length > 6) {
-        return false;
+async function findAvailableDotnetProjects(bitbucketProjectKey, bitbucketRepositorySlug) {
+    const username = QMConfig.subatomic.bitbucket.auth.username;
+    const password = QMConfig.subatomic.bitbucket.auth.password;
+    const project: GitProject = await GitCommandGitProject.cloned({
+            username,
+            password,
+        },
+        new BitBucketServerRepoRef(
+            QMConfig.subatomic.bitbucket.baseUrl,
+            bitbucketProjectKey,
+            bitbucketRepositorySlug));
+    await project.setUserConfig(
+        QMConfig.subatomic.bitbucket.auth.username,
+        QMConfig.subatomic.bitbucket.auth.email,
+    );
+
+    const projectArray: Array<{ value: string, text: string }> = [];
+
+    try {
+        const files = await toPromise(project.streamFiles("*.sln"));
+        for (const file of files) {
+            projectArray.push(...getProjectPathsFromSolutionFileContent(file.getContentSync()));
+        }
+    } catch (error) {
+        logger.info(`Could not find any solution files.`);
+        // await project.addFile(file.filename, file.content);
+        // await project.commit(file.commitMessage);
     }
-    return true;
+
+    return projectArray;
 }
 
 export async function setRestoreSources(state) {

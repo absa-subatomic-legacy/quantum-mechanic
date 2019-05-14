@@ -1,22 +1,18 @@
 {
-  "openshiftTemplate": "subatomic-spring-boot-1x-template",
+  "openshiftTemplate": "subatomic-dotnet-core-22-template",
   "requiredEnvironmentVariables": [
     {
       "name": "DOTNET_STARTUP_PROJECT",
-      "description": "starter project location",
+      "description": "This is the project to use as the startup project.",
       "setter": "DotNet/setStartupProject"
-    },
-    {
-      "name": "DOTNET_RESTORE_SOURCES",
-      "description": "restore sources"
     }
   ],
   "buildConfig": {
     "imageStream": {
-      "imageName": "jdk8-maven3-newrelic-subatomic",
+      "imageName": "dotnet22-subatomic",
       "imageTag": "2.0"
     },
     "envVariables": {}
   },
-  "jenkinsfile": "maven-spring-boot"
+  "jenkinsfile": "dotnet22"
 }
