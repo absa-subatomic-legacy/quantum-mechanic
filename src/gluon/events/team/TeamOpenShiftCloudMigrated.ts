@@ -8,7 +8,7 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {OpenshiftListResource, OpenshiftResource} from "openshift-api/build/src/resources/OpenshiftResource";
+import {OpenshiftListResource, OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";

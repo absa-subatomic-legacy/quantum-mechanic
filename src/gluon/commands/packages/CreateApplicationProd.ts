@@ -5,7 +5,7 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
-import {OpenshiftListResource} from "openshift-api/build/src/resources/OpenshiftResource";
+import {OpenshiftListResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
 import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
