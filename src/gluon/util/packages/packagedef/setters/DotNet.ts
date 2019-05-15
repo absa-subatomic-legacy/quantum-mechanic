@@ -1,13 +1,8 @@
-import {
-    BitBucketServerRepoRef,
-    GitCommandGitProject,
-    GitProject,
-    logger,
-} from "@atomist/automation-client";
+import {GitProject, logger} from "@atomist/automation-client";
 import {toPromise} from "@atomist/automation-client/lib/project/util/projectUtils";
-import {QMConfig} from "../../../../../config/QMConfig";
 import {ApplicationService} from "../../../../services/gluon/ApplicationService";
 import {ProjectService} from "../../../../services/gluon/ProjectService";
+import {cloneBitbucketProject} from "../../../git/Git";
 
 export async function setStartupProject(state) {
     const applicationService = new ApplicationService();
@@ -38,20 +33,7 @@ function getProjectPathsFromSolutionFileContent(solutionFileContent: string) {
 }
 
 async function findAvailableDotnetProjects(bitbucketProjectKey, bitbucketRepositorySlug) {
-    const username = QMConfig.subatomic.bitbucket.auth.username;
-    const password = QMConfig.subatomic.bitbucket.auth.password;
-    const project: GitProject = await GitCommandGitProject.cloned({
-            username,
-            password,
-        },
-        new BitBucketServerRepoRef(
-            QMConfig.subatomic.bitbucket.baseUrl,
-            bitbucketProjectKey,
-            bitbucketRepositorySlug));
-    await project.setUserConfig(
-        QMConfig.subatomic.bitbucket.auth.username,
-        QMConfig.subatomic.bitbucket.auth.email,
-    );
+    const project: GitProject = await cloneBitbucketProject(bitbucketProjectKey, bitbucketRepositorySlug);
 
     const projectArray: Array<{ value: string, text: string }> = [];
 
