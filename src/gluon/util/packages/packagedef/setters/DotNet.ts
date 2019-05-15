@@ -1,15 +1,16 @@
 import {GitProject, logger} from "@atomist/automation-client";
 import {toPromise} from "@atomist/automation-client/lib/project/util/projectUtils";
+import {BitbucketFileService} from "../../../../services/bitbucket/BitbucketFileService";
 import {ApplicationService} from "../../../../services/gluon/ApplicationService";
 import {ProjectService} from "../../../../services/gluon/ProjectService";
-import {cloneBitbucketProject} from "../../../git/Git";
 
 export async function setStartupProject(state) {
     const applicationService = new ApplicationService();
     const projectService = new ProjectService();
     const application = await applicationService.gluonApplicationForNameAndProjectName(state.applicationName, state.projectName, false);
     const project = await projectService.gluonProjectFromProjectName(state.projectName);
-    return await findAvailableDotnetProjects(project.bitbucketProject.key, application.bitbucketRepository.slug);
+    const gitRepo: GitProject = await new BitbucketFileService().cloneBitbucketRepository(project.bitbucketProject.key, application.bitbucketRepository.slug);
+    return await findAvailableDotnetProjects(gitRepo);
 }
 
 function getProjectPathsFromSolutionFileContent(solutionFileContent: string) {
@@ -32,9 +33,7 @@ function getProjectPathsFromSolutionFileContent(solutionFileContent: string) {
     return projectArray;
 }
 
-async function findAvailableDotnetProjects(bitbucketProjectKey, bitbucketRepositorySlug) {
-    const project: GitProject = await cloneBitbucketProject(bitbucketProjectKey, bitbucketRepositorySlug);
-
+async function findAvailableDotnetProjects(project: GitProject) {
     const projectArray: Array<{ value: string, text: string }> = [];
 
     try {
