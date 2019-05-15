@@ -255,7 +255,7 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
 }
 
 @CommandHandler("Sets a parameter dynamically")
-@Tags("subatomic", "slack", "member")
+@Tags("subatomic")
 export class DynamicParameterSetter implements HandleCommand<HandlerResult> {
     /**
      * This class is used to prompt users to enter additional dynamically defined parameters
