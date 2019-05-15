@@ -9,7 +9,10 @@ import {JenkinsCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsCreden
 import {JenkinsProdCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsProdCredentialsRecreate";
 import {OnboardMember} from "./gluon/commands/member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "./gluon/commands/packages/ConfigureApplicationJenkinsProd";
-import {ConfigureBasicPackage} from "./gluon/commands/packages/ConfigureBasicPackage";
+import {
+    ConfigureBasicPackage,
+    DynamicParameterSetter,
+} from "./gluon/commands/packages/ConfigureBasicPackage";
 import {ConfigurePackage} from "./gluon/commands/packages/ConfigurePackage";
 import {CreateApplicationProd} from "./gluon/commands/packages/CreateApplicationProd";
 import {LinkExistingApplication} from "./gluon/commands/packages/LinkExistingApplication";
@@ -94,6 +97,7 @@ export const configuration: any = {
         CreateProjectJenkinsJob,
         CreateProjectProdEnvironments,
         CreateTeam,
+        DynamicParameterSetter,
         DefineNewProjectEnvironments,
         Help,
         JoinTeam,
