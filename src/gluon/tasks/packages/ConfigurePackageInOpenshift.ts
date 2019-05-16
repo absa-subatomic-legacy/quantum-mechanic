@@ -1,3 +1,4 @@
+import {OpenshiftListResource, OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {
     HandlerContext,
     HandlerResult,
@@ -6,10 +7,7 @@ import {
 } from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
-import {
-    OpenshiftListResource,
-    OpenshiftResource,
-} from "../../../openshift/api/resources/OpenshiftResource";
+
 import {QMTemplate} from "../../../template/QMTemplate";
 import {ImageStream} from "../../events/packages/package-configuration-request/PackageConfigurationRequestedEvent";
 import {GluonService} from "../../services/gluon/GluonService";

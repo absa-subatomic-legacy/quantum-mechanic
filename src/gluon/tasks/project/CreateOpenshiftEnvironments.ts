@@ -77,7 +77,7 @@ export class CreateOpenshiftEnvironments extends Task {
 
         await this.ocService.initilizeProjectWithDefaultProjectTemplate(projectNamespaceId, environmentsRequestedEvent.project.name);
         await environmentsRequestedEvent.teams.map(async team => {
-            await this.ocService.addTeamMembershipPermissionsToProject(projectNamespaceId, team);
+            await this.ocService.addTeamMembershipPermissionsToProject(projectNamespaceId, team, this.openshiftEnvironment.usernameCase);
         });
         await this.createProjectQuotasAndLimits(projectNamespaceId);
     }

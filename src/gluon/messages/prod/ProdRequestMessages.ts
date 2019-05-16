@@ -1,3 +1,4 @@
+import {logger} from "@atomist/automation-client";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {Attachment, SlackMessage} from "@atomist/slack-messages";
 import {CommandIntent} from "../../commands/CommandIntent";
@@ -8,8 +9,10 @@ import {CreateProjectProdEnvironments} from "../../commands/project/CreateProjec
 import {QMColours} from "../../util/QMColour";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
+import {MessageLoader} from "../MessageLoader";
 
 export class ProdRequestMessages {
+    private messageLoader = new MessageLoader("ProdRequestMessages");
     public confirmGenericProdRequest(prodRequestCommand: CreateGenericProd): SlackMessage {
 
         const text: string = `By clicking Approve below you confirm that you sign off on the above resources being moved to production. Your user will be logged as the approver for this change.`;
@@ -103,13 +106,20 @@ Applications can then be promoted into these production environments. To create 
 
     public getProjectProdCompleteMessage(projectName: string, deploymentPipelineId: string): SlackMessage {
 
-        const text: string = `
+        let text: string = `
 The *${projectName}* project has successfully been moved to production. \
 The DevOps projects, and production environments have been created. \
 You will now need to move any deployable resources into prod and create their associated Jenkins jobs.
 *Please Note:* If you have not already done so, your Jenkins OpenShift client plugin needs to be configured with the correct production OpenShift cluster details. \
 Contact your system admin for help if necessary.`;
 
+        if (this.messageLoader.isValidOverride) {
+            try {
+                text = this.messageLoader.getMessage("getProjectProdCompleteMessage", {ProjectName: projectName}).text;
+            } catch (e) {
+                logger.error("Failed to substitute text for getProjectProdCompleteMessage, Check JSON object:" + e);
+            }
+        }
         return {
             text,
             attachments: [

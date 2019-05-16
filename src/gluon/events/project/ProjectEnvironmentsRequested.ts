@@ -1,6 +1,5 @@
 import {
     addressSlackChannelsFromContext,
-    buttonForCommand,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -8,12 +7,8 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
-import {CommandIntent} from "../../commands/CommandIntent";
-import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
-import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
-import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
+import {ProjectMessages} from "../../messages/projects/ProjectMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigureJenkinsForProject} from "../../tasks/project/ConfigureJenkinsForProject";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
@@ -24,7 +19,6 @@ import {
     OpenShiftProjectNamespace,
     QMProject,
 } from "../../util/project/Project";
-import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
@@ -77,6 +71,7 @@ subscription ProjectEnvironmentsRequestedEvent {
 export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleEvent<any> {
 
     private qmMessageClient: ChannelMessageClient;
+    private projectMessages = new ProjectMessages();
 
     constructor(public gluonService = new GluonService()) {
         super();
@@ -124,34 +119,9 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
     }
 
     private async sendPackageUsageMessage(ctx: HandlerContext, projectName: string, teams) {
-        const msg: SlackMessage = {
-            text: `
-Since you have Subatomic project environments ready, you can now add packages.
-A package is either an application or a library, click the button below to create an application now.`,
-            attachments: [{
-                fallback: "Create or link existing package",
-                footer: `For more information, please read the ${DocumentationUrlBuilder.generalCommandReference(CommandIntent.ConfigureBasicPackage)}`,
-                color: QMColours.stdGreenyMcAppleStroodle.hex,
-                thumb_url: "https://raw.githubusercontent.com/absa-subatomic/subatomic-documentation/gh-pages/images/subatomic-logo-colour.png",
-                actions: [
-                    buttonForCommand(
-                        {text: "Link existing application"},
-                        new LinkExistingApplication(),
-                        {
-                            projectName,
-                        }),
-                    buttonForCommand(
-                        {text: "Link existing library"},
-                        new LinkExistingLibrary(),
-                        {
-                            projectName,
-                        }),
-                ],
-            }],
-        };
         const destination = await addressSlackChannelsFromContext(ctx, ...teams.map(team =>
             team.slackIdentity.teamChannel));
-        return await ctx.messageClient.send(msg, destination);
+        return await ctx.messageClient.send(this.projectMessages.packageUsageMessage(projectName), destination);
     }
 
 }

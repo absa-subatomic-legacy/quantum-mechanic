@@ -84,6 +84,7 @@ describe("getPipelineOpenShiftNamespacesForOpenShiftCluster", () => {
             auth: {token: ""},
             masterUrl: "",
             name: "",
+            usernameCase: "upper",
             defaultEnvironments: [
                 {description: "DEV", id: "dev"},
                 {description: "UAT", id: "uat"},
@@ -226,6 +227,7 @@ describe("getDeploymentEnvironmentJenkinsMetadata", () => {
             auth: {token: "token"},
             masterUrl: "masterIr;",
             name: "clusterName",
+            usernameCase: "upper",
             defaultEnvironments: [
                 {description: "DEV", id: "dev"},
                 {description: "UAT", id: "uat"},
@@ -258,6 +260,7 @@ describe("getDeploymentEnvironmentJenkinsMetadata", () => {
             auth: {token: "token"},
             masterUrl: "masterIr;",
             name: "clusterName",
+            usernameCase: "upper",
             defaultEnvironments: [
                 {description: "DEV", id: "dev"},
                 {description: "UAT", id: "uat"},
@@ -291,6 +294,7 @@ describe("getDeploymentEnvironmentJenkinsMetadata", () => {
             auth: {token: "token"},
             masterUrl: "masterIr;",
             name: "clusterName",
+            usernameCase: "upper",
             defaultEnvironments: [
                 {description: "DEV", id: "dev"},
                 {description: "UAT", id: "uat"},

@@ -3,9 +3,12 @@
     "commandPrefix": "sub",
     "openshiftClouds": {
       "ab-cloud": {
+        "sharedResourceNamespace": "subatomic",
         "openshiftNonProd": {
           "name": "nonprod",
-          "dockerRepoUrl": "123.123.0.0:5000",
+          "usernameCase": "lower",
+          "internalDockerRegistryUrl": "123.123.0.0:5000",
+          "externalDockerRegistryUrl": "registry.a.com",
           "masterUrl": "https://000.000.00.0:8443",
           "auth": {
             "token": "6kbO2PM3SbH9XrjQ3tw8crWq2_lduOnp-_tvq_VNy0c"
@@ -28,7 +31,9 @@
         "openshiftProd": [
           {
             "name": "prod-a",
-            "dockerRepoUrl": "123.123.0.0:5000",
+            "usernameCase": "lower",
+            "internalDockerRegistryUrl": "123.123.0.0:5000",
+            "externalDockerRegistryUrl": "registry.a.com",
             "masterUrl": "https://000.000.00.0:8443",
             "auth": {
               "token": "6kbO2PM3SbH9XrjQ3tw8crWq2_lduOnp-_tvq_VNy0c"
@@ -63,8 +68,8 @@
       "baseUrl": "http://localhost:8080"
     }
   },
-  "teamId": "F7E6GGR63A",
-  "apiKey": "88agdfgdf8afg7f7d88g9aeadga8sd89cj",
+  "atomistWorkspaceId": "F7E6GGR63A",
+  "atomistAPIKey": "88agdfgdf8afg7f7d88g9aeadga8sd89cj",
   "lifecycles": {
     "push": {
       "configuration": {
@@ -102,5 +107,12 @@
         "enabled": false
       }
     }
-  }
+  },
+  "cluster": {
+    "enabled": false,
+    "workers": 1
+  },
+  "secondarySlackChannels": [
+    "sub-community"
+  ]
 }

@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@atomist/automation-client": "1.4.0",
-    "@atomist/cli": "^1.1.0",
+    "@atomist/cli": "^1.4.0",
     "@atomist/lifecycle-automation": "^0.12.4",
     "@atomist/slack-messages": "^1.1.0",
     "app-root-path": "^2.1.0",
@@ -28,7 +28,8 @@
     "query-string": "^6.2.0",
     "strip-json-comments": "^2.0.1",
     "superagent": "^4.1.0",
-    "xmlbuilder": "^12.0.1"
+    "xmlbuilder": "^12.0.1",
+    "@absa-subatomic/openshift-api": "0.0.2"
   },
   "devDependencies": {
     "@types/app-root-path": "^1.2.4",

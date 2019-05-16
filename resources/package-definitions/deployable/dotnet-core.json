@@ -1,0 +1,18 @@
+{
+  "openshiftTemplate": "subatomic-dotnet-core-22-template",
+  "requiredEnvironmentVariables": [
+    {
+      "name": "DOTNET_STARTUP_PROJECT",
+      "description": "This is the project to use as the startup project.",
+      "setter": "DotNet/setStartupProject"
+    }
+  ],
+  "buildConfig": {
+    "imageStream": {
+      "imageName": "dotnet22-subatomic",
+      "imageTag": "2.0"
+    },
+    "envVariables": {}
+  },
+  "jenkinsfile": "dotnet22"
+}

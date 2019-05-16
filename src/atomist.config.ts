@@ -9,7 +9,10 @@ import {JenkinsCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsCreden
 import {JenkinsProdCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsProdCredentialsRecreate";
 import {OnboardMember} from "./gluon/commands/member/OnboardMember";
 import {ConfigureApplicationJenkinsProd} from "./gluon/commands/packages/ConfigureApplicationJenkinsProd";
-import {ConfigureBasicPackage} from "./gluon/commands/packages/ConfigureBasicPackage";
+import {
+    ConfigureBasicPackage,
+    DynamicParameterSetter,
+} from "./gluon/commands/packages/ConfigureBasicPackage";
 import {ConfigurePackage} from "./gluon/commands/packages/ConfigurePackage";
 import {CreateApplicationProd} from "./gluon/commands/packages/CreateApplicationProd";
 import {LinkExistingApplication} from "./gluon/commands/packages/LinkExistingApplication";
@@ -69,11 +72,11 @@ import {TeamCreated} from "./gluon/events/team/TeamCreated";
 import {TeamOpenShiftCloudMigrated} from "./gluon/events/team/TeamOpenShiftCloudMigrated";
 import {PrometheusClient} from "./gluon/metrics/prometheus/PrometheusClient";
 
-const apiKey = QMConfig.apiKey;
+const apiKey = QMConfig.atomistAPIKey;
 const http = QMConfig.http;
 
 export const configuration: any = {
-    workspaceIds: [QMConfig.teamId],
+    workspaceIds: [QMConfig.atomistWorkspaceId],
     // running durable will store and forward events when the client is disconnected
     // this should only be used in production envs
     policy: process.env.NODE_ENV === "production" ? "durable" : "ephemeral",
@@ -94,6 +97,7 @@ export const configuration: any = {
         CreateProjectJenkinsJob,
         CreateProjectProdEnvironments,
         CreateTeam,
+        DynamicParameterSetter,
         DefineNewProjectEnvironments,
         Help,
         JoinTeam,
