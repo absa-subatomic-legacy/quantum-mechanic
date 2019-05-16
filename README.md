@@ -226,7 +226,7 @@ Next run with:
 $ npm run compile start
 ```
 
-The console will return
+The console will return:
 ``` console return
 ...
 xxx [m:15071] [info ] Opening WebSocket connection

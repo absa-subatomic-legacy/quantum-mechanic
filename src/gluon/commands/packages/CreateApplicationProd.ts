@@ -1,3 +1,4 @@
+import {OpenshiftListResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {
     HandlerContext,
     HandlerResult,
@@ -7,7 +8,6 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
-import {OpenshiftListResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";

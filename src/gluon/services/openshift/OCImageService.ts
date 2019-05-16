@@ -1,9 +1,9 @@
+import {OpenShiftApi} from "@absa-subatomic/openshift-api/build/src/OpenShiftApi";
+import {OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {logger} from "@atomist/automation-client";
 import _ = require("lodash");
 import {inspect} from "util";
 import {isSuccessCode} from "../../../http/Http";
-import {OpenShiftApi} from "../../../openshift/api/OpenShiftApi";
-import {OpenshiftResource} from "../../../openshift/api/resources/OpenshiftResource";
 import {QMError} from "../../util/shared/Error";
 
 export class OCImageService {

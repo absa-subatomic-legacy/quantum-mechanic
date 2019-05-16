@@ -1,9 +1,6 @@
+import {OpenshiftListResource, OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {logger} from "@atomist/automation-client";
 import _ = require("lodash");
-import {
-    OpenshiftListResource,
-    OpenshiftResource,
-} from "../../../openshift/api/resources/OpenshiftResource";
 import {QMError} from "../../util/shared/Error";
 import {GenericOpenshiftResourceService} from "../projects/GenericOpenshiftResourceService";
 
