@@ -185,6 +185,7 @@ export const configuration: any = {
         ingester("PackageConfigurationRequestedEvent"),
         ingester("ConfigServerRequestedEvent"),
         ingester("BroadcastMessageAllChannelsEvent"),
+        ingester("TeamSlackChannelCreatedEvent"),
     ],
     apiKey,
     http,
