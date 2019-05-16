@@ -1,0 +1,30 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.3
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-AXIOS-174505:
+    - '@absa-subatomic/openshift-api > axios':
+        patched: '2019-05-16T07:18:06.521Z'
+    - '@absa-subatomic/openshift-api > @atomist/lifecycle-automation > @atomist/sdm-core > axios':
+        patched: '2019-05-16T07:18:06.521Z'
+    - '@atomist/lifecycle-automation > @atomist/sdm-core > axios':
+        patched: '2019-05-16T07:18:06.521Z'
+  'npm:hoek:20180212':
+    - '@absa-subatomic/openshift-api > @atomist/lifecycle-automation > cf-nodejs-client > request > hawk > hoek':
+        patched: '2019-05-16T07:18:06.521Z'
+    - '@absa-subatomic/openshift-api > @atomist/lifecycle-automation > cf-nodejs-client > request > hawk > boom > hoek':
+        patched: '2019-05-16T07:18:06.521Z'
+    - '@absa-subatomic/openshift-api > @atomist/lifecycle-automation > cf-nodejs-client > request > hawk > sntp > hoek':
+        patched: '2019-05-16T07:18:06.521Z'
+    - '@absa-subatomic/openshift-api > @atomist/lifecycle-automation > cf-nodejs-client > request > hawk > cryptiles > boom > hoek':
+        patched: '2019-05-16T07:18:06.521Z'
+  'npm:request:20160119':
+    - '@absa-subatomic/openshift-api > @atomist/lifecycle-automation > cf-nodejs-client > request':
+        patched: '2019-05-16T07:18:06.521Z'
+  'npm:tough-cookie:20170905':
+    - '@absa-subatomic/openshift-api > @atomist/lifecycle-automation > cf-nodejs-client > request > tough-cookie':
+        patched: '2019-05-16T07:18:06.521Z'
+  'npm:tunnel-agent:20170305':
+    - '@absa-subatomic/openshift-api > @atomist/lifecycle-automation > cf-nodejs-client > request > tunnel-agent':
+        patched: '2019-05-16T07:18:06.521Z'
