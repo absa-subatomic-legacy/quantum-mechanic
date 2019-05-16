@@ -17,7 +17,7 @@
     "@atomist/cli": "^1.4.0",
     "@atomist/lifecycle-automation": "^0.12.4",
     "@atomist/slack-messages": "^1.1.0",
-    "app-root-path": "^2.1.0",
+    "app-root-path": "^2.2.1",
     "axios": "^0.18.0",
     "graphql": "^0.13.2",
     "murmurhash-js": "^1.0.0",
