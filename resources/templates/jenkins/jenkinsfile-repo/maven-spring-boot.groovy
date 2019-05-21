@@ -104,9 +104,11 @@ node('maven') {
                 if (outputImage != "${appBuildConfig}:${tag}") {
                     bc.patch("\'{ \"spec\": { \"output\": { \"to\": { \"name\": \"${appBuildConfig}:${tag}\" } } } }\'")
                 }
-                def build = bc.startBuild()
+
                 def result = "Pending"
                 timeout(5) {
+                    def build = bc.startBuild()
+                    build.logs('-f')
                     build.untilEach(1) {
                       result = it.object().status.phase
                       return result == "Complete" || result == "Failed"
