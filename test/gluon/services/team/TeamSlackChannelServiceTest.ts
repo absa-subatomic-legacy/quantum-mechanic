@@ -45,7 +45,7 @@ describe("TeamSlackChannelService getGluonTeam", () => {
 describe("TeamSlackChannelService addSlackDetailsToGluonTeam", () => {
     it("should fail to add slack details", async () => {
         const mockedTeamService = mock(TeamService);
-        when(mockedTeamService.addSlackDetailsToTeam("Team1Id", "ActionedByMemberId1", anything())).thenResolve({status: 400});
+        when(mockedTeamService.addSlackDetailsToTeam("Team1Id", anything())).thenResolve({status: 400});
         const gluonService = new GluonService(undefined, instance(mockedTeamService));
         const service = new TeamSlackChannelService(gluonService);
 
@@ -62,7 +62,7 @@ describe("TeamSlackChannelService addSlackDetailsToGluonTeam", () => {
 
     it("should succeed and add slack details", async () => {
         const mockedTeamService = mock(TeamService);
-        when(mockedTeamService.addSlackDetailsToTeam("Team1Id", "ActionedByMemberId1", anything())).thenResolve({status: 200});
+        when(mockedTeamService.addSlackDetailsToTeam("Team1Id", anything())).thenResolve({status: 200});
         const gluonService = new GluonService(undefined, instance(mockedTeamService));
         const service = new TeamSlackChannelService(gluonService);
 

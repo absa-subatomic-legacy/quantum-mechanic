@@ -57,7 +57,8 @@ export class TeamSlackChannelService {
 
         logger.info(`Updating team channel [${finalisedSlackChannelName}]: ${gluonTeamId}`);
 
-        const result = await this.gluonService.teams.addSlackDetailsToTeam(gluonTeamId, memberId, {
+        const result = await this.gluonService.teams.addSlackDetailsToTeam(gluonTeamId, {
+            createdBy: memberId,
             slack: {
                 teamChannel: finalisedSlackChannelName,
             },

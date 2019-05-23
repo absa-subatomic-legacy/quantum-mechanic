@@ -114,9 +114,9 @@ export class TeamService {
         });
     }
 
-    public async addSlackDetailsToTeam(teamId: string, actionedByMemberId,  slackDetails: any): Promise<any> {
+    public async addSlackDetailsToTeam(teamId: string,  slackUpdateDetails: any): Promise<any> {
         logger.debug(`Trying to update team slack details. teamId: ${teamId}`);
-        return await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}/members/${actionedByMemberId}`, slackDetails);
+        return await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`, slackUpdateDetails);
     }
 
     public async addMemberToTeam(teamId: string, memberDetails: any): Promise<any> {
