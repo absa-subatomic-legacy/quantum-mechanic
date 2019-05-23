@@ -20,11 +20,12 @@ export class TeamSlackChannelService {
                                              gluonTeamName: string,
                                              slackTeamId: string,
                                              slackChannelName: string,
+                                             memberId: string,
                                              isNewChannel: boolean): Promise<any> {
 
         const team = await this.getGluonTeam(gluonTeamName);
 
-        await this.addSlackDetailsToGluonTeam(team.teamId, slackChannelName, isNewChannel);
+        await this.addSlackDetailsToGluonTeam(team.teamId, slackChannelName, memberId, isNewChannel);
 
         const channel = await this.createTeamSlackChannel(ctx, slackTeamId, slackChannelName);
 
@@ -47,6 +48,7 @@ export class TeamSlackChannelService {
 
     public async addSlackDetailsToGluonTeam(gluonTeamId: string,
                                             slackChannelName: string,
+                                            memberId,
                                             isNewChannel: boolean) {
         let finalisedSlackChannelName: string = slackChannelName;
         if (isNewChannel) {
@@ -55,7 +57,7 @@ export class TeamSlackChannelService {
 
         logger.info(`Updating team channel [${finalisedSlackChannelName}]: ${gluonTeamId}`);
 
-        const result = await this.gluonService.teams.addSlackDetailsToTeam(gluonTeamId, {
+        const result = await this.gluonService.teams.addSlackDetailsToTeam(gluonTeamId, memberId, {
             slack: {
                 teamChannel: finalisedSlackChannelName,
             },

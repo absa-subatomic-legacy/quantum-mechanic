@@ -9,7 +9,9 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import * as _ from "lodash";
+import {GluonService} from "../../services/gluon/GluonService";
 import {TeamSlackChannelService} from "../../services/team/TeamSlackChannelService";
+import {QMMemberBase} from "../../util/member/Members";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
@@ -33,14 +35,16 @@ export class NewTeamSlackChannel extends BaseQMComand implements HandleCommand {
     })
     public newTeamChannel: string;
 
-    constructor(private teamSlackChannelService = new TeamSlackChannelService()) {
+    constructor(public gluonService = new GluonService(),
+                private teamSlackChannelService = new TeamSlackChannelService()) {
         super();
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         try {
             this.newTeamChannel = _.isEmpty(this.newTeamChannel) ? this.teamName : this.newTeamChannel;
-            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, true);
+            const member: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, member.memberId, true);
             this.succeedCommand();
             return result;
         } catch (error) {
