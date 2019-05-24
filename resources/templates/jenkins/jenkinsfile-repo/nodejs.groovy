@@ -99,8 +99,8 @@ node('nodejs') {
                 echo "Current tag: ${outputImage}"
                 if (outputImage != "${appBuildConfig}:${tag}") {
                     bc.patch("\'{ \"spec\": { \"output\": { \"to\": { \"name\": \"${appBuildConfig}:${tag}\" } } } }\'")
+                    def build = bc.startBuild()
                     timeout(5) {
-                        def build = bc.startBuild()
                         build.logs('-f')
                         build.untilEach(1) {
                             return it.object().status.phase == "Complete"
