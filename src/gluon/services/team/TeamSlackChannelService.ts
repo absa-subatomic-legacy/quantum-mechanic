@@ -48,7 +48,7 @@ export class TeamSlackChannelService {
 
     public async addSlackDetailsToGluonTeam(gluonTeamId: string,
                                             slackChannelName: string,
-                                            memberId,
+                                            memberId: string,
                                             isNewChannel: boolean) {
         let finalisedSlackChannelName: string = slackChannelName;
         if (isNewChannel) {
