@@ -1,8 +1,8 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {addBotToSlackChannel} from "@atomist/lifecycle-automation/lib/handlers/command/slack/AddBotToChannel";
-import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/lib/handlers/command/slack/AssociateRepo";
-import {createChannel} from "@atomist/lifecycle-automation/lib/handlers/command/slack/CreateChannel";
-import {CreateSlackChannel} from "@atomist/lifecycle-automation/lib/typings/types";
+import {addBotToSlackChannel} from "@atomist/sdm-pack-lifecycle/lib/handlers/command/slack/AddBotToChannel";
+import {inviteUserToSlackChannel} from "@atomist/sdm-pack-lifecycle/lib/handlers/command/slack/AssociateRepo";
+import {createChannel} from "@atomist/sdm-pack-lifecycle/lib/handlers/command/slack/CreateChannel";
+import {CreateSlackChannel} from "@atomist/sdm-pack-lifecycle/lib/typings/types";
 import * as _ from "lodash";
 import {isSuccessCode} from "../../../http/Http";
 import {TeamSlackChannelMessages} from "../../messages/team/TeamSlackChannelMessages";

@@ -4,7 +4,7 @@ import {
     addressSlackUsersFromContext,
     buttonForCommand,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/lib/handlers/command/slack/AssociateRepo";
+import {inviteUserToSlackChannel} from "@atomist/sdm-pack-lifecycle/lib/handlers/command/slack/AssociateRepo";
 import {SlackMessage} from "@atomist/slack-messages";
 import {inspect} from "util";
 import {isSuccessCode} from "../../../http/Http";

@@ -2,7 +2,7 @@ import {HandlerContext, logger} from "@atomist/automation-client";
 import {
     addressSlackChannelsFromContext,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
-import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/lib/handlers/command/slack/AssociateRepo";
+import {inviteUserToSlackChannel} from "@atomist/sdm-pack-lifecycle/lib/handlers/command/slack/AssociateRepo";
 import {loadChannelIdByChannelName} from "../../util/team/Teams";
 
 export class OnboardMemberService {
