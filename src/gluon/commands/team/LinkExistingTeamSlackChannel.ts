@@ -8,6 +8,7 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TeamSlackChannelService} from "../../services/team/TeamSlackChannelService";
+import {QMMemberBase} from "../../util/member/Members";
 import {QMParamValidation} from "../../util/QMParamValidation";
 import {
     GluonTeamNameParam,
@@ -47,7 +48,8 @@ export class LinkExistingTeamSlackChannel extends RecursiveParameterRequestComma
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, false);
+            const member: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const result = await this.teamSlackChannelService.linkSlackChannelToGluonTeam(ctx, this.teamName, this.teamId, this.newTeamChannel, member.memberId, false);
             this.succeedCommand();
             return result;
         } catch (error) {

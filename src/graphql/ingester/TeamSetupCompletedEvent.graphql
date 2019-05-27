@@ -1,0 +1,4 @@
+type TeamSetupCompletedEvent @rootType {
+  team: GluonTeam
+  createdBy: ActionedBy
+}

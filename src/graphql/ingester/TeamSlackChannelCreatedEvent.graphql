@@ -1,4 +1,0 @@
-type TeamSlackChannelCreatedEvent @rootType {
-  team: GluonTeam
-  createdBy: ActionedBy
-}

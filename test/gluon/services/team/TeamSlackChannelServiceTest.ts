@@ -51,7 +51,7 @@ describe("TeamSlackChannelService addSlackDetailsToGluonTeam", () => {
 
         let thrownError = null;
         try {
-            await service.addSlackDetailsToGluonTeam("Team1Id", "channelName", true);
+            await service.addSlackDetailsToGluonTeam("Team1Id", "channelName", "ActionedByMemberId1", true);
         } catch (error) {
             thrownError = error;
         }
@@ -68,7 +68,7 @@ describe("TeamSlackChannelService addSlackDetailsToGluonTeam", () => {
 
         let thrownError = false;
         try {
-            await service.addSlackDetailsToGluonTeam("Team1Id", "channelName", true);
+            await service.addSlackDetailsToGluonTeam("Team1Id", "channelName", "ActionedByMemberId1", true);
         } catch (error) {
             thrownError = true;
         }
