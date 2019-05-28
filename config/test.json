@@ -113,6 +113,6 @@
     "workers": 1
   },
   "secondarySlackChannels": [
-    "sub-community"
+    "sub-discussion"
   ]
 }
