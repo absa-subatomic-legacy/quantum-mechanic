@@ -3,6 +3,7 @@ node_js:
   - 11.2.0
 script:
   - export NODE_ENV=test
+  - npm install codecov -g
   - npm run build
-  - npm run tscSourceMap
+after_success:
   - npm run sendCodeCoverage
