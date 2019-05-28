@@ -6,6 +6,7 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {getScreenName, loadScreenNameByUserId} from "../../util/member/Members";
@@ -13,8 +14,7 @@ import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
     QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 
 @CommandHandler("Request membership to a team")
 export class CreateMembershipRequestToTeam extends BaseQMComand implements HandleCommand<HandlerResult> {

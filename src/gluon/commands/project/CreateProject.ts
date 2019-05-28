@@ -5,6 +5,7 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
@@ -17,8 +18,7 @@ import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/Recurs
 import {
     handleQMError,
     QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 

@@ -1,8 +1,8 @@
 import {HandlerResult, logger} from "@atomist/automation-client";
 import {Attachment, SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
+import {SimpleQMMessageClient} from "../../context/QMMessageClient";
 import {QMColours} from "../util/QMColour";
-import {QMMessageClient} from "../util/shared/Error";
 
 export class TaskListMessage {
 
@@ -15,7 +15,7 @@ export class TaskListMessage {
     private readonly tasks: { [k: string]: Task };
     private readonly taskOrder: string[];
 
-    constructor(private titleMessage, private messageClient: QMMessageClient) {
+    constructor(private titleMessage, private messageClient: SimpleQMMessageClient) {
         this.messageId = uuid();
         this.tasks = {};
         this.taskOrder = [];

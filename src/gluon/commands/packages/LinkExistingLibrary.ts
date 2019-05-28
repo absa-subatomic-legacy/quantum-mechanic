@@ -6,6 +6,7 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {PackageCommandService} from "../../services/packages/PackageCommandService";
@@ -21,7 +22,7 @@ import {
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Link an existing library", atomistIntent(CommandIntent.LinkExistingLibrary))

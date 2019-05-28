@@ -8,6 +8,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
+import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -20,7 +21,6 @@ import {
 } from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
-    ChannelMessageClient,
     handleQMError,
     QMError,
 } from "../../util/shared/Error";

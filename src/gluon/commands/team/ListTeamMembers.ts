@@ -6,6 +6,7 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {Extensible} from "../../util/plugins/Extensible";
 import {QMColours} from "../../util/QMColour";
@@ -14,7 +15,7 @@ import {
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("List members of a team", atomistIntent(CommandIntent.ListTeamMembers))

@@ -1,6 +1,10 @@
 import {HandlerContext, HandlerResult, Tags} from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
+import {
+    ResponderMessageClient,
+} from "../../../context/QMMessageClient";
+import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
@@ -23,10 +27,8 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
-    ChannelMessageClient,
     handleQMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 

@@ -1,6 +1,7 @@
 import {HandlerContext, HandlerResult, Tags} from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {PatchPackageBuildConfigImage} from "../../tasks/packages/PatchPackageBuildConfigImage";
@@ -22,7 +23,7 @@ import {
     ImageTagSetter,
 } from "../../util/recursiveparam/OpenshiftParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Patch the s2i image used to build a package", atomistIntent(CommandIntent.PatchBuildConfigBaseImage))

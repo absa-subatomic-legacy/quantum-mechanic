@@ -11,6 +11,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
+import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
 import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -29,7 +30,7 @@ import {
 import {QMColours} from "../../util/QMColour";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
-import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetailsProd} from "../../util/team/Teams";
 
 @EventHandler("Receive ProjectProductionEnvironmentsRequestClosedEvent events", `

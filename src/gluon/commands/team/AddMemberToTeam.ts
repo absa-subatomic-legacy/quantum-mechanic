@@ -7,6 +7,7 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
@@ -17,7 +18,7 @@ import {
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Add a member to a team", atomistIntent(CommandIntent.AddMemberToTeam))

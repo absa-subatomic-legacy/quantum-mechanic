@@ -5,9 +5,10 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {TeamSlackChannelMessages} from "../../messages/team/TeamSlackChannelMessages";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 
 @CommandHandler("Check whether to create a new team channel or use an existing channel")
 export class NewOrUseTeamSlackChannel extends BaseQMComand implements HandleCommand {

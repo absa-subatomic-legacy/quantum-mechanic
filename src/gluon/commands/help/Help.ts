@@ -9,9 +9,10 @@ import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import uuid = require("uuid");
 import {QMConfig} from "../../../config/QMConfig";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 import {HelpCategory} from "./HelpCategory";
 

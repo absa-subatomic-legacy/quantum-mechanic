@@ -9,11 +9,12 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import * as _ from "lodash";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TeamSlackChannelService} from "../../services/team/TeamSlackChannelService";
 import {QMMemberBase} from "../../util/member/Members";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Create team channel", atomistIntent(CommandIntent.NewTeamSlackChannel))

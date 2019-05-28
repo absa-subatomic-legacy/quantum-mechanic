@@ -6,6 +6,7 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import * as _ from "lodash";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {menuAttachmentForProjects} from "../../util/project/Project";
@@ -17,8 +18,7 @@ import {RecursiveSetterResult} from "../../util/recursiveparam/RecursiveSetterRe
 import {
     handleQMError,
     QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {menuAttachmentForTeams} from "../../util/team/Teams";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 

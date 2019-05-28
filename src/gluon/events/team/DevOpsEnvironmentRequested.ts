@@ -10,6 +10,7 @@ import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {addressEvent} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {timeout, TimeoutError} from "promise-timeout";
 import {QMConfig} from "../../../config/QMConfig";
+import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {DevOpsMessages} from "../../messages/team/DevOpsMessages";
 import {OCService} from "../../services/openshift/OCService";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
@@ -17,7 +18,7 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToDevOpsEnvironment} from "../../tasks/team/AddJenkinsToDevOpsEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
-import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
 

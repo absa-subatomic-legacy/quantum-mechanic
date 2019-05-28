@@ -5,10 +5,11 @@ import {
     Parameter,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ProjectProdRequestApprovalResponse} from "../../util/project/Project";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 
 @CommandHandler("Ignore a project prod request")
 export class UpdateProjectProdRequest extends BaseQMComand {

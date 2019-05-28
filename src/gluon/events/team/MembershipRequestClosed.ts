@@ -13,6 +13,7 @@ import {
     addressSlackUsersFromContext,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMColours} from "../../util/QMColour";
@@ -21,8 +22,7 @@ import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     handleQMError,
     QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 
 @CommandHandler("Close a membership request")
 export class MembershipRequestClosed extends BaseQMEvent implements HandleCommand<HandlerResult> {

@@ -6,6 +6,7 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -20,7 +21,7 @@ import {
     GluonTeamNameSetter,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam} from "../../util/team/Teams";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
