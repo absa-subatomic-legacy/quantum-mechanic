@@ -7,10 +7,9 @@ import {SlackMessage} from "@atomist/slack-messages";
 import {QMContext} from "../../src/context/QMContext";
 import {QMGraphClient} from "../../src/context/QMGraphClient";
 import {
-    ChannelMessageClient,
+    DirectedQMMessageClient,
     QMMessageClient,
     SimpleQMMessageClient,
-    UserMessageClient,
 } from "../../src/context/QMMessageClient";
 
 export class TestQMContext implements QMContext {
@@ -27,9 +26,49 @@ export class TestQMContext implements QMContext {
 }
 
 export class TestQMMessageClient implements QMMessageClient {
-    public channelMessageClient: TestChannelMessageClient = new TestChannelMessageClient();
-    public responderMessageClient: TestSimpleQMMessageClient = new TestSimpleQMMessageClient();
-    public userMessageClient: TestUserMessageClient = new TestUserMessageClient();
+
+    public responseMessagesSent: SlackMessage[] = [];
+    public channelMessagesSent: SlackMessage[] = [];
+    public userMessagesSent: SlackMessage[] = [];
+
+    public createChannelMessageClient(): DirectedQMMessageClient {
+        return new TestDirectedQMMessageClient();
+    }
+
+    public createResponderMessageClient(): SimpleQMMessageClient {
+        return new TestSimpleQMMessageClient();
+    }
+
+    public createUserMessageClient(): DirectedQMMessageClient {
+        return new TestDirectedQMMessageClient();
+    }
+
+    public async respond(message: string | SlackMessage, options?: MessageOptions): Promise<HandlerResult> {
+        if (typeof message === "string") {
+            this.responseMessagesSent.push({text: message});
+        } else {
+            this.responseMessagesSent.push(message);
+        }
+        return await success();
+    }
+
+    public async sendToChannels(message: string | SlackMessage, channels: string[], options?: MessageOptions): Promise<HandlerResult> {
+        if (typeof message === "string") {
+            this.channelMessagesSent.push({text: message});
+        } else {
+            this.channelMessagesSent.push(message);
+        }
+        return await success();
+    }
+
+    public async sendToUsers(message: string | SlackMessage, users: string[], options?: MessageOptions): Promise<HandlerResult> {
+        if (typeof message === "string") {
+            this.userMessagesSent.push({text: message});
+        } else {
+            this.userMessagesSent.push(message);
+        }
+        return await success();
+    }
 }
 
 export class TestQMGraphClient implements QMGraphClient {
@@ -90,12 +129,9 @@ export class TestSimpleQMMessageClient implements SimpleQMMessageClient {
     }
 }
 
-export class TestChannelMessageClient extends ChannelMessageClient {
+export class TestDirectedQMMessageClient implements DirectedQMMessageClient {
     public messagesSent: SlackMessage[] = [];
-
-    constructor() {
-        super(null);
-    }
+    public destinations: string[] = [];
 
     public async send(message: string | SlackMessage, options?: MessageOptions): Promise<HandlerResult> {
         if (typeof message === "string") {
@@ -106,38 +142,13 @@ export class TestChannelMessageClient extends ChannelMessageClient {
         return await success();
     }
 
-    public async sendToChannels(message: (string | SlackMessage), channels: string[], options?: MessageOptions) {
-        if (typeof message === "string") {
-            this.messagesSent.push({text: message});
-        } else {
-            this.messagesSent.push(message);
-        }
-        return await success();
-    }
-}
-
-export class TestUserMessageClient extends UserMessageClient {
-    public messagesSent: SlackMessage[] = [];
-
-    constructor() {
-        super(null);
+    public addDestination(user: string) {
+        this.destinations.push(user);
+        return this;
     }
 
-    public async send(message: string | SlackMessage, options?: MessageOptions): Promise<HandlerResult> {
-        if (typeof message === "string") {
-            this.messagesSent.push({text: message});
-        } else {
-            this.messagesSent.push(message);
-        }
-        return await success();
-    }
-
-    public async sendToUsers(message: (string | SlackMessage), users: string[], options?: MessageOptions) {
-        if (typeof message === "string") {
-            this.messagesSent.push({text: message});
-        } else {
-            this.messagesSent.push(message);
-        }
-        return await success();
+    public clearDestinations() {
+        this.destinations = [];
+        return this;
     }
 }

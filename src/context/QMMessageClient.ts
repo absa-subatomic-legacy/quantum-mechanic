@@ -8,25 +8,61 @@ import {
 import {SlackMessage} from "@atomist/slack-messages";
 
 export interface QMMessageClient {
-    channelMessageClient: ChannelMessageClient;
-    responderMessageClient: SimpleQMMessageClient;
-    userMessageClient: UserMessageClient;
+    createChannelMessageClient(): DirectedQMMessageClient;
+
+    createResponderMessageClient(): SimpleQMMessageClient;
+
+    createUserMessageClient(): DirectedQMMessageClient;
+
+    sendToUsers(message: (string | SlackMessage), users: string[], options?: MessageOptions): Promise<HandlerResult>;
+
+    sendToChannels(message: (string | SlackMessage), channels: string[], options?: MessageOptions): Promise<HandlerResult>;
+
+    respond(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult>;
 }
 
 export class AtomistQMMessageClient implements QMMessageClient {
-    public channelMessageClient: ChannelMessageClient;
-    public responderMessageClient: ResponderMessageClient;
-    public userMessageClient: UserMessageClient;
 
-    constructor(ctx: HandlerContext) {
-        this.channelMessageClient = new ChannelMessageClient(ctx);
-        this.responderMessageClient = new ResponderMessageClient(ctx);
-        this.userMessageClient = new UserMessageClient(ctx);
+    constructor(private ctx: HandlerContext) {
+    }
+
+    public createChannelMessageClient(): ChannelMessageClient {
+        return new ChannelMessageClient(this.ctx);
+    }
+
+    public createResponderMessageClient(): SimpleQMMessageClient {
+        return new ResponderMessageClient(this.ctx);
+    }
+
+    public createUserMessageClient(): UserMessageClient {
+        return new UserMessageClient(this.ctx);
+    }
+
+    public async respond(message: string | SlackMessage, options?: MessageOptions) {
+        return await this.ctx.messageClient.respond(message, options);
+    }
+
+    public async sendToChannels(message: string | SlackMessage, channels: string[], options?: MessageOptions) {
+        const slackDestination = await addressSlackChannelsFromContext(this.ctx, ...channels);
+        return await this.ctx.messageClient.send(message, slackDestination, options);
+    }
+
+    public async sendToUsers(message: string | SlackMessage, users: string[], options?: MessageOptions) {
+        const slackDestination = await addressSlackUsersFromContext(this.ctx, ...users);
+        return await this.ctx.messageClient.send(message, slackDestination, options);
     }
 }
 
 export interface SimpleQMMessageClient {
     send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult>;
+}
+
+export interface DirectedQMMessageClient extends SimpleQMMessageClient {
+    send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult>;
+
+    addDestination(user: string);
+
+    clearDestinations();
 }
 
 export class ResponderMessageClient implements SimpleQMMessageClient {
@@ -41,7 +77,7 @@ export class ResponderMessageClient implements SimpleQMMessageClient {
     }
 }
 
-export class UserMessageClient implements SimpleQMMessageClient {
+export class UserMessageClient implements DirectedQMMessageClient {
     private readonly ctx: HandlerContext;
     private users: string[];
 
@@ -64,14 +100,9 @@ export class UserMessageClient implements SimpleQMMessageClient {
         const slackDestination = await addressSlackUsersFromContext(this.ctx, ...this.users);
         return await this.ctx.messageClient.send(message, slackDestination, options);
     }
-
-    public async sendToUsers(message: (string | SlackMessage), users: string[], options?: MessageOptions) {
-        const slackDestination = await addressSlackUsersFromContext(this.ctx, ...users);
-        return await this.ctx.messageClient.send(message, slackDestination, options);
-    }
 }
 
-export class ChannelMessageClient implements SimpleQMMessageClient {
+export class ChannelMessageClient implements DirectedQMMessageClient {
     private readonly ctx: HandlerContext;
     private channels: string[];
 
@@ -92,11 +123,6 @@ export class ChannelMessageClient implements SimpleQMMessageClient {
 
     public async send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult> {
         const slackDestination = await addressSlackChannelsFromContext(this.ctx, ...this.channels);
-        return await this.ctx.messageClient.send(message, slackDestination, options);
-    }
-
-    public async sendToChannels(message: (string | SlackMessage), channels: string[], options?: MessageOptions) {
-        const slackDestination = await addressSlackChannelsFromContext(this.ctx, ...channels);
         return await this.ctx.messageClient.send(message, slackDestination, options);
     }
 }

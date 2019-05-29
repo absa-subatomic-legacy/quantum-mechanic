@@ -91,7 +91,7 @@ export class OnboardMember extends BaseQMComand {
         const secondaryChannelsInvited = await this.inviteMembersToSecondarySlackChannels(ctx);
 
         const message = this.onboardMessages.presentTeamCreationAndApplicationOptions(this.firstName, secondaryChannelsInvited);
-        const result = await ctx.messageClient.responderMessageClient.send(message);
+        const result = await ctx.messageClient.respond(message);
 
         this.succeedCommand();
         return result;
@@ -107,7 +107,7 @@ export class OnboardMember extends BaseQMComand {
                 await this.onboardMemberService.inviteUserToSecondarySlackChannel(ctx, this.teamId, this.firstName, channel, this.userId, this.screenName);
                 secondaryChannelsInvited.push(channel);
             } catch (error) {
-                await this.handleError(ctx.messageClient.responderMessageClient, error);
+                await this.handleError(ctx.messageClient.createResponderMessageClient(), error);
             }
         }
 

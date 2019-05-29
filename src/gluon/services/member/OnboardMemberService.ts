@@ -22,7 +22,7 @@ export class OnboardMemberService {
             logger.warn(`inviteUserToCustomSlackChannel warning: ${JSON.stringify(error)}`);
             const msg = `Invitation to channel *${channelName}* failed for *${slackScreenName}*.\n Note, private channels do not currently support automatic user invitation.\n` +
                 `Please invite the user to this slack channel manually.`;
-            return await ctx.messageClient.channelMessageClient.sendToChannels(msg, [channelName]);
+            return await ctx.messageClient.sendToChannels(msg, [channelName]);
         }
     }
 }
