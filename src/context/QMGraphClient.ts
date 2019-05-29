@@ -1,5 +1,5 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import {inviteUserToSlackChannel} from "@atomist/lifecycle-automation/lib/handlers/command/slack/AssociateRepo";
+import {inviteUserToSlackChannel} from "@atomist/sdm-pack-lifecycle/lib/handlers/command/slack/AssociateRepo";
 import * as graphql from "../typings/types";
 
 export interface QMGraphClient {
