@@ -1,12 +1,12 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
 import {
     addressSlackChannelsFromContext,
-    addressSlackUsersFromContext,
     buttonForCommand,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {inviteUserToSlackChannel} from "@atomist/sdm-pack-lifecycle/lib/handlers/command/slack/AssociateRepo";
 import {SlackMessage} from "@atomist/slack-messages";
 import {inspect} from "util";
+import {QMContext} from "../../../context/QMContext";
 import {isSuccessCode} from "../../../http/Http";
 import {CommandIntent} from "../../commands/CommandIntent";
 import {OnboardMember} from "../../commands/member/OnboardMember";
@@ -26,7 +26,7 @@ export class AddMemberToTeamService {
     constructor(private gluonService = new GluonService()) {
     }
 
-    public async getNewMemberGluonDetails(ctx: HandlerContext, chatId: string, teamChannel: string) {
+    public async getNewMemberGluonDetails(ctx: QMContext, chatId: string, teamChannel: string) {
         try {
             return await this.gluonService.members.gluonMemberFromScreenName(chatId);
         } catch (error) {
@@ -139,8 +139,7 @@ They have been sent a request to onboard, once they've successfully onboarded yo
         }
     }
 
-    private async onboardMessage(ctx, chatId: string, teamChannel: string) {
-        const destination = await addressSlackUsersFromContext(ctx, chatId);
+    private async onboardMessage(ctx: QMContext, chatId: string, teamChannel: string) {
         const msg: SlackMessage = {
             text: `Someone tried to add you to the team channel ${teamChannel}.`,
             attachments: [{
@@ -162,6 +161,6 @@ Click the button below to do that now.
                 ],
             }],
         };
-        return await ctx.messageClient.send(msg, destination);
+        return await ctx.messageClient.sendToUsers(msg, chatId);
     }
 }

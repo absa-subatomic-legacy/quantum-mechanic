@@ -1,4 +1,4 @@
-import {HandlerContext} from "@atomist/automation-client";
+import {QMContext} from "../../context/QMContext";
 import {QMError} from "../util/shared/Error";
 import {TaskListMessage} from "./TaskListMessage";
 
@@ -6,7 +6,7 @@ export abstract class Task {
 
     protected taskListMessage: TaskListMessage;
 
-    public async execute(ctx: HandlerContext): Promise<boolean> {
+    public async execute(ctx: QMContext): Promise<boolean> {
         if (this.taskListMessage === undefined) {
             throw new QMError("TaskListMessage is undefined. Cannot start taskRunner.");
         }
@@ -23,7 +23,7 @@ export abstract class Task {
         }
     }
 
-    protected abstract async executeTask(ctx: HandlerContext): Promise<boolean>;
+    protected abstract async executeTask(ctx: QMContext): Promise<boolean>;
 
     protected abstract configureTaskListMessage(taskListMessage: TaskListMessage);
 }

@@ -13,7 +13,7 @@ import {
 } from "../../src/context/QMMessageClient";
 
 export class TestQMContext implements QMContext {
-
+    public descriminator: "QMContext";
     public eventsRaised: Array<{ eventData: any, eventName: string }> = [];
     public graphClient: TestQMGraphClient = new TestQMGraphClient();
     public messageClient: TestQMMessageClient = new TestQMMessageClient();

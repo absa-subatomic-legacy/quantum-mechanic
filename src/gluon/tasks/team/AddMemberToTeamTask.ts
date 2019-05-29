@@ -1,11 +1,8 @@
-import {HandlerContext, logger} from "@atomist/automation-client";
+import {logger} from "@atomist/automation-client";
+import {QMContext} from "../../../context/QMContext";
 import {GluonService} from "../../services/gluon/GluonService";
 import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService";
-import {
-    getScreenName,
-    loadScreenNameByUserId,
-    MemberRole,
-} from "../../util/member/Members";
+import {getScreenName, MemberRole} from "../../util/member/Members";
 import {getTeamSlackChannel} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -29,7 +26,7 @@ export class AddMemberToTeamTask extends Task {
         taskListMessage.addTask(this.TASK_ADD_USER_TO_TEAM, "Add user to team with role: " + this.memberRole.toString());
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
 
         const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
 
@@ -39,7 +36,7 @@ export class AddMemberToTeamTask extends Task {
 
         const screenName = getScreenName(this.slackName);
 
-        const chatId = await loadScreenNameByUserId(ctx, screenName);
+        const chatId = await ctx.graphClient.slackScreenNameFromSlackUserId(screenName);
 
         logger.info(`Got ChatId: ${chatId}`);
 

@@ -1,7 +1,7 @@
 import {OpenshiftListResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
-import {HandlerContext} from "@atomist/automation-client";
 import _ = require("lodash");
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
+import {QMContext} from "../../../context/QMContext";
 import {OCService} from "../../services/openshift/OCService";
 import {GenericOpenshiftResourceService} from "../../services/projects/GenericOpenshiftResourceService";
 import {OpenShiftProjectNamespace} from "../../util/project/Project";
@@ -31,7 +31,7 @@ export class CreateOpenshiftResourcesInProject extends Task {
         }
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
         if (this.taskListMessage === undefined) {
             throw new QMError("TaskListMessage is undefined.");
         }

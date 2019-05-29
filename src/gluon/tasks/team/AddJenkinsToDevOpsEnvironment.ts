@@ -1,5 +1,6 @@
-import {HandlerContext, logger} from "@atomist/automation-client";
+import {logger} from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMContext} from "../../../context/QMContext";
 import {JenkinsDevOpsCredentialsService} from "../../services/jenkins/JenkinsDevOpsCredentialsService";
 import {OCService} from "../../services/openshift/OCService";
 import {getSubatomicJenkinsServiceAccountName} from "../../util/jenkins/Jenkins";
@@ -31,7 +32,7 @@ export class AddJenkinsToDevOpsEnvironment extends Task {
         taskListMessage.addTask(this.TASK_CONFIG_JENKINS, "\tConfigure Jenkins");
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
 
         const projectId = getDevOpsEnvironmentDetails(this.team.name).openshiftProjectId;
         logger.info(`Working with OpenShift project Id: ${projectId}`);

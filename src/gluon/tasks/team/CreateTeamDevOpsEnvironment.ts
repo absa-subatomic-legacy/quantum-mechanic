@@ -1,6 +1,7 @@
-import {HandlerContext, logger} from "@atomist/automation-client";
+import {logger} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMContext} from "../../../context/QMContext";
 import {OCService} from "../../services/openshift/OCService";
 import {QMError, QMErrorType} from "../../util/shared/Error";
 import {
@@ -32,7 +33,7 @@ export class CreateTeamDevOpsEnvironment extends Task {
         taskListMessage.addTask(this.TASK_SECRETS, `\tAdd Secrets`);
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
         const projectId = this.devopsEnvironmentDetails.openshiftProjectId;
         logger.info(`Working with OpenShift project Id: ${projectId}`);
 

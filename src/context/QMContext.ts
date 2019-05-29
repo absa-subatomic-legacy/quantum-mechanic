@@ -7,6 +7,8 @@ import {AtomistQMGraphClient, QMGraphClient} from "./QMGraphClient";
 import {AtomistQMMessageClient, QMMessageClient} from "./QMMessageClient";
 
 export interface QMContext {
+    descriminator: "QMContext";
+
     messageClient: QMMessageClient;
 
     graphClient: QMGraphClient;
@@ -16,6 +18,7 @@ export interface QMContext {
 
 export class AtomistQMContext implements QMContext {
 
+    public descriminator: "QMContext";
     public graphClient: QMGraphClient;
     public messageClient: QMMessageClient;
 
@@ -27,4 +30,8 @@ export class AtomistQMContext implements QMContext {
     public async raiseEvent(eventData: any, eventName: string): Promise<HandlerResult> {
         return this.ctx.messageClient.send(eventData, addressEvent(eventName));
     }
+}
+
+export function isQMContext(ctx: any): ctx is QMContext {
+    return ctx.descriminator === "QMContext";
 }

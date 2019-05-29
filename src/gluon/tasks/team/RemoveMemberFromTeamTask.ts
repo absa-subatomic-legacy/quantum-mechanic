@@ -1,11 +1,8 @@
-import {HandlerContext, logger} from "@atomist/automation-client";
+import {logger} from "@atomist/automation-client";
+import {QMContext} from "../../../context/QMContext";
 import {GluonService} from "../../services/gluon/GluonService";
 import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
-import {
-    getScreenName,
-    loadScreenNameByUserId,
-    MemberRole,
-} from "../../util/member/Members";
+import {getScreenName, MemberRole} from "../../util/member/Members";
 import {QMError} from "../../util/shared/Error";
 import {isMember, isOwner} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -30,11 +27,11 @@ export class RemoveMemberFromTeamTask extends Task {
         taskListMessage.addTask(this.TASK_REMOVE_USER_FROM_TEAM, "Remove user from team with role: " + this.memberRole.toString());
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
         const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
         const screenName = getScreenName(this.slackName);
-        const chatId = await loadScreenNameByUserId(ctx, screenName);
-        const memberToRemove = await this.removeMemberFromTeamService.getMemberGluonDetails(ctx, chatId);
+        const chatId = await ctx.graphClient.slackScreenNameFromSlackUserId(screenName);
+        const memberToRemove = await this.removeMemberFromTeamService.getMemberGluonDetails(chatId);
         const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
         if (isOwner(team, actioningMember.memberId)) {
