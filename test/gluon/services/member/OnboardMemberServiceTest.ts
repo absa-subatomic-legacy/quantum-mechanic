@@ -26,7 +26,7 @@ describe("AddMemberToTeamService inviteUserToCustomSlackChannel", () => {
             "Howard",
         );
 
-        assert.equal(context.messageClient.channelMessagesSent[0].text, "Invitation to channel *channel1* failed for *Howard*.\n Note, private channels do not currently support automatic user invitation.\nPlease invite the user to this slack channel manually.");
+        assert.equal(context.messageClient.channelMessagesSent[0].message.text, "Invitation to channel *channel1* failed for *Howard*.\n Note, private channels do not currently support automatic user invitation.\nPlease invite the user to this slack channel manually.");
     });
 
     it("should invite user to custom slack channel and return channel name", async () => {

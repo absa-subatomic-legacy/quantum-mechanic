@@ -28,6 +28,6 @@ describe("Onboard new member test", () => {
 
         gluon.isDone();
 
-        assert.equal(context.messageClient.responseMessagesSent[0].text, "🚀 Welcome to the Subatomic environment *Peter*!\n\nYou have been added to the Subatomic community channel/s:\n *sub-discussion*\n\nNext steps are to either join an existing team or create a new one.");
+        assert.equal(context.messageClient.responseMessagesSent[0].message.text, "🚀 Welcome to the Subatomic environment *Peter*!\n\nYou have been added to the Subatomic community channel/s:\n *sub-discussion*\n\nNext steps are to either join an existing team or create a new one.");
     });
 });
