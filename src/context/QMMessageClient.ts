@@ -14,9 +14,9 @@ export interface QMMessageClient {
 
     createUserMessageClient(): DirectedQMMessageClient;
 
-    sendToUsers(message: (string | SlackMessage), users: string[], options?: MessageOptions): Promise<HandlerResult>;
+    sendToUsers(message: (string | SlackMessage), users: string | string[], options?: MessageOptions): Promise<HandlerResult>;
 
-    sendToChannels(message: (string | SlackMessage), channels: string[], options?: MessageOptions): Promise<HandlerResult>;
+    sendToChannels(message: (string | SlackMessage), channels: string | string[], options?: MessageOptions): Promise<HandlerResult>;
 
     respond(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult>;
 }
@@ -42,13 +42,21 @@ export class AtomistQMMessageClient implements QMMessageClient {
         return await this.ctx.messageClient.respond(message, options);
     }
 
-    public async sendToChannels(message: string | SlackMessage, channels: string[], options?: MessageOptions) {
-        const slackDestination = await addressSlackChannelsFromContext(this.ctx, ...channels);
+    public async sendToChannels(message: string | SlackMessage, channels: string | string[], options?: MessageOptions) {
+        let destinations = channels;
+        if (typeof channels === "string") {
+            destinations = [channels];
+        }
+        const slackDestination = await addressSlackChannelsFromContext(this.ctx, ...destinations);
         return await this.ctx.messageClient.send(message, slackDestination, options);
     }
 
-    public async sendToUsers(message: string | SlackMessage, users: string[], options?: MessageOptions) {
-        const slackDestination = await addressSlackUsersFromContext(this.ctx, ...users);
+    public async sendToUsers(message: string | SlackMessage, users: string | string[], options?: MessageOptions) {
+        let destinations = users;
+        if (typeof users === "string") {
+            destinations = [users];
+        }
+        const slackDestination = await addressSlackUsersFromContext(this.ctx, ...destinations);
         return await this.ctx.messageClient.send(message, slackDestination, options);
     }
 }

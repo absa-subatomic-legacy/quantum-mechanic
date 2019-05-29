@@ -63,8 +63,14 @@ export class TestQMMessageClient implements QMMessageClient {
         return await success();
     }
 
-    public async sendToChannels(message: string | SlackMessage, channels: string[], options?: MessageOptions): Promise<HandlerResult> {
-        return this.sendToChannelsWithLabel(message, channels, options, "internal");
+    public async sendToChannels(message: string | SlackMessage, channels: string | string[], options?: MessageOptions): Promise<HandlerResult> {
+        let destinations: string[];
+        if (typeof channels === "string") {
+            destinations = [channels];
+        } else {
+            destinations = channels;
+        }
+        return this.sendToChannelsWithLabel(message, destinations, options, "internal");
     }
 
     public async sendToChannelsWithLabel(message: string | SlackMessage, channels: string[], options?: MessageOptions, label?: string): Promise<HandlerResult> {
@@ -85,7 +91,13 @@ export class TestQMMessageClient implements QMMessageClient {
     }
 
     public async sendToUsers(message: string | SlackMessage, users: string[], options?: MessageOptions): Promise<HandlerResult> {
-        return this.sendToUsersWithLabel(message, users, options, "label");
+        let destinations: string[];
+        if (typeof users === "string") {
+            destinations = [users];
+        } else {
+            destinations = users;
+        }
+        return this.sendToUsersWithLabel(message, destinations, options, "label");
     }
 
     public async sendToUsersWithLabel(message: string | SlackMessage, users: string[], options?: MessageOptions, label?: string): Promise<HandlerResult> {
