@@ -1,4 +1,3 @@
-import {ClientLogging, configureLogging} from "@atomist/automation-client";
 import "mocha";
 import assert = require("power-assert");
 import {QMConfig} from "../../../../src/config/QMConfig";
@@ -9,7 +8,8 @@ const nock = require("nock");
 
 describe("DevOpsRequested event", () => {
     it("should create a devops environment and provision a jenkins", async () => {
-        configureLogging(ClientLogging);
+        // Use this if debugging is necessary
+        // configureLogging(ClientLogging);
         const devOpsEnvironmentRequestedEvent = {
             id: 1,
             team: {
