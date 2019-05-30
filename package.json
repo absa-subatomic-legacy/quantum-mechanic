@@ -13,8 +13,8 @@
     "url": "https://github.com/absa-subatomic/quantum-mechanic/issues"
   },
   "dependencies": {
-    "@atomist/automation-client": "1.4.0",
-    "@atomist/cli": "^1.4.0",
+    "@atomist/automation-client": "1.5.1",
+    "@atomist/cli": "^1.5.0",
     "@atomist/sdm-pack-lifecycle": "^0.1.0",
     "@atomist/slack-messages": "^1.1.0",
     "app-root-path": "^2.1.0",
