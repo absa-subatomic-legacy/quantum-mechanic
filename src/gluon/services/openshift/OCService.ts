@@ -1,6 +1,9 @@
 import {OpenshiftApiResult} from "@absa-subatomic/openshift-api/build/src/base/OpenshiftApiResult";
 import {OpenShiftApi} from "@absa-subatomic/openshift-api/build/src/OpenShiftApi";
-import {OpenshiftListResource, OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
+import {
+    OpenshiftListResource,
+    OpenshiftResource,
+} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {logger} from "@atomist/automation-client";
 import * as fs from "fs";
 import _ = require("lodash");
@@ -489,7 +492,7 @@ export class OCService {
         }
     }
 
-    public async removeTeamMembershipPermissionsFromProject(projectId: string, domainUserName: string, usernameCase: string) {
+    public async removeTeamMembershipPermissionsFromProject(projectId: string, domainUserName: string, usernameCase: string): Promise<OpenshiftApiResult> {
         const memberUsername = userFromDomainUser(domainUserName, usernameCase);
         logger.info(`Removing role from project [${projectId}] and member [${domainUserName}]: ${memberUsername}`);
         return await this.openShiftApi.policy.removeRoleFromUser(memberUsername, "edit", projectId);
@@ -590,13 +593,12 @@ export class OCService {
             }
         }
 
-        const openShiftResourceList: OpenshiftListResource = {
+        return {
             kind: "List",
             apiVersion: "v1",
             metadata: {},
             items: resources,
         };
-        return openShiftResourceList;
     }
 
     public async patchResourceInNamespace(resourcePatch: OpenshiftResource, namespace: string, deleteMetaData: boolean = true) {
