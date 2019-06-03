@@ -113,7 +113,8 @@ export class JenkinsService {
             `${jenkinsCredentialDomainUrl}/createCredentials`,
             form,
             token,
-            `multipart/form-data; boundary=${form._boundary}`,
+            `multipart/form-data; boundary=${form.getBoundary()}`,
+            form.getHeaders(),
         );
     }
 

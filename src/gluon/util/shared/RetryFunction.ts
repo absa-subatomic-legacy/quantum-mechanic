@@ -4,7 +4,7 @@ export async function retryFunction(retryAttempts: number, waitBeforeRetry: numb
     while (!success && retryCount < retryAttempts) {
         retryCount += 1;
         success = await fn(retryCount);
-        if (retryCount < retryAttempts) {
+        if (!success && retryCount < retryAttempts) {
             await delay(waitBeforeRetry);
         }
     }
