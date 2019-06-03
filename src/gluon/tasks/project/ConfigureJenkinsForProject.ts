@@ -21,6 +21,7 @@ import {
     QMDeploymentPipeline,
 } from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
+import {retryFunction} from "../../util/shared/RetryFunction";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -106,14 +107,21 @@ export class ConfigureJenkinsForProject extends Task {
 
         const builtTemplate: string = projectTemplate.build(parameters);
         logger.info("Template found and built successfully.");
-        const jenkinsCreateItemResult = await this.jenkinsService.createOpenshiftEnvironmentCredentials(jenkinsHost, token, environmentsRequestedEvent.project.name, builtTemplate);
-
-        if (!isSuccessCode(jenkinsCreateItemResult.status)) {
-            if (jenkinsCreateItemResult.status === 400) {
-                logger.warn(`Folder for [${environmentsRequestedEvent.project.name}] probably already created`);
-            } else {
-                throw new QMError("Failed to create jenkins build template. Network timeout occurred.");
+        const result = await retryFunction(5, 5000, async (attemptNumber: number) => {
+            logger.info(`Trying to create jenkins credentials. Attempt number ${attemptNumber}.`);
+            const jenkinsCreateItemResult = await this.jenkinsService.createOpenshiftEnvironmentCredentials(jenkinsHost, token, environmentsRequestedEvent.project.name, builtTemplate);
+            if (!isSuccessCode(jenkinsCreateItemResult.status)) {
+                if (jenkinsCreateItemResult.status === 400) {
+                    logger.warn(`Folder for [${environmentsRequestedEvent.project.name}] probably already created`);
+                    return true;
+                } else {
+                    return false;
+                }
             }
+            return true;
+        });
+        if (!result) {
+            throw new QMError("Failed to create jenkins build template. Network timeout occurred.");
         }
     }
 

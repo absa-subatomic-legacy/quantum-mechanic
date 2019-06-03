@@ -20,10 +20,7 @@ import {
     getPathFromJenkinsfileName,
     getSubatomicJenkinsServiceAccountName,
 } from "../../util/jenkins/Jenkins";
-import {
-    EmptyJenkinsJobTemplate,
-    JenkinsJobTemplate,
-} from "../../util/jenkins/JenkinsJobTemplates";
+import {JenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
 import {QMProject} from "../../util/project/Project";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";

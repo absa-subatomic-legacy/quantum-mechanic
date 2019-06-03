@@ -30,11 +30,13 @@ export class JenkinsNetworkHandler {
             });
     }
 
-    public async genericJenkinsPost(url: string, body: any, token: string, contentType?: string) {
+    public async genericJenkinsPost(url: string, body: any, token: string, contentType?: string, headers?: { [key: string]: string }) {
 
-        const headers: { [key: string]: string } = {
-            Authorization: `Bearer ${token}`,
-        };
+        if (headers === undefined) {
+            headers = {};
+        }
+
+        headers.Authorization = `Bearer ${token}`;
 
         if (contentType !== undefined) {
             headers["Content-Type"] = contentType;
