@@ -8,6 +8,7 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
 import {JoinTeamMessages} from "../../messages/team/JoinTeamMessages";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -15,8 +16,7 @@ import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
     QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Apply to join an existing team", atomistIntent(CommandIntent.JoinTeam))

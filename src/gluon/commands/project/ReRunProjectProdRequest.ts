@@ -9,9 +9,10 @@ import {
     addressEvent,
     addressSlackChannelsFromContext,
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 
 @CommandHandler("Re-run a failed project production request")
 export class ReRunProjectProdRequest extends BaseQMComand {

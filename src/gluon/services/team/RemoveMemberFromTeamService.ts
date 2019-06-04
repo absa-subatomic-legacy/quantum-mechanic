@@ -23,7 +23,7 @@ export class RemoveMemberFromTeamService {
     constructor(private gluonService = new GluonService()) {
     }
 
-    public async getMemberGluonDetails(ctx: HandlerContext, chatId: string) {
+    public async getMemberGluonDetails(chatId: string) {
         try {
             return await this.gluonService.members.gluonMemberFromScreenName(chatId);
         } catch (error) {

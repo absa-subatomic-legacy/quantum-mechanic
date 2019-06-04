@@ -7,6 +7,10 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage} from "@atomist/slack-messages";
+import {
+    SimpleQMMessageClient,
+} from "../../../context/QMMessageClient";
+import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {CommandIntent} from "../../commands/CommandIntent";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
@@ -14,10 +18,8 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {CreateConfigServer} from "../../tasks/team/CreateConfigServer";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
-    ChannelMessageClient,
     handleQMError,
-    QMMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {GluonTeamEvent} from "../../util/transform/types/event/GluonTeamEvent";
 import {MemberEvent} from "../../util/transform/types/event/MemberEvent";
@@ -53,7 +55,7 @@ export class ConfigServerRequested extends BaseQMEvent implements HandleEvent<an
         logger.info(`Ingested ConfigServerRequested event: ${JSON.stringify(event.data)}`);
         const configServerRequestedEvent: ConfigServerRequestedEvent = event.data.ConfigServerRequestedEvent[0];
 
-        const messageClient: QMMessageClient = new ChannelMessageClient(ctx).addDestination(configServerRequestedEvent.team.slackIdentity.teamChannel);
+        const messageClient: SimpleQMMessageClient = new ChannelMessageClient(ctx).addDestination(configServerRequestedEvent.team.slackIdentity.teamChannel);
 
         try {
             const taskListMessage = new TaskListMessage(`:rocket: Deploying config server into *${configServerRequestedEvent.team.name}* team DevOps...`, messageClient);
@@ -70,7 +72,7 @@ export class ConfigServerRequested extends BaseQMEvent implements HandleEvent<an
         }
     }
 
-    private async sendSuccessResponse(messageClient: QMMessageClient, gluonTeamName: string) {
+    private async sendSuccessResponse(messageClient: SimpleQMMessageClient, gluonTeamName: string) {
         const devOpsProjectId = getDevOpsEnvironmentDetails(gluonTeamName).openshiftProjectId;
         const slackMessage: SlackMessage = {
             text: `Your Subatomic Config Server has been added to your *${devOpsProjectId}* OpenShift project successfully`,

@@ -55,20 +55,24 @@ export class QMConfig {
 
     private static getConfigFile() {
         let configFile = "";
-        logger.info(`Searching folder: config/`);
-        fs.readdirSync(`config/`).forEach(file => {
-            logger.info(`Found file: ${file}`);
-            if (file.endsWith("local.json")) {
-                configFile = file;
-            } else if (file.endsWith("config.json") && configFile !== "local.json") {
-                configFile = file;
-            } else if (file.endsWith(".json") && configFile === "") {
-                configFile = file;
+        if (process.env.NODE_ENV === "test") {
+            configFile = "test.json";
+        } else {
+            logger.info(`Searching folder: config/`);
+            fs.readdirSync(`config/`).forEach(file => {
+                logger.info(`Found file: ${file}`);
+                if (file.endsWith("local.json")) {
+                    configFile = file;
+                } else if (file.endsWith("config.json") && configFile !== "local.json") {
+                    configFile = file;
+                } else if (file.endsWith(".json") && configFile === "") {
+                    configFile = file;
+                }
+            });
+            if (configFile === "") {
+                logger.error("Failed to read config file in config/ directory. Exiting.");
+                process.exit(1);
             }
-        });
-        if (configFile === "") {
-            logger.error("Failed to read config file in config/ directory. Exiting.");
-            process.exit(1);
         }
         logger.info(`Using config file: ${configFile}`);
         return `config/${configFile}`;

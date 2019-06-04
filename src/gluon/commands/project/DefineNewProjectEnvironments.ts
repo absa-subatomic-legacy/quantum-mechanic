@@ -11,6 +11,7 @@ import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/sp
 import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -25,8 +26,7 @@ import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
     QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 
 @CommandHandler("Defines the project associated deployment pipelines using the available default environments")
 @Tags("subatomic", "project")

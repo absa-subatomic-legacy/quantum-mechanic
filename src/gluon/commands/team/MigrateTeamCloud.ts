@@ -3,12 +3,14 @@ import {
     HandlerContext,
     HandlerResult,
     Parameter,
-    success,
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
-import {v4 as uuid} from "uuid";
+import {
+    ChannelMessageClient,
+    ResponderMessageClient,
+} from "../../../context/QMMessageClient";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -25,11 +27,7 @@ import {
     RecursiveParameterRequestCommand,
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
-import {
-    ChannelMessageClient,
-    handleQMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 

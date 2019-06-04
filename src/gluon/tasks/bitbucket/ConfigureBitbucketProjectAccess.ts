@@ -1,4 +1,4 @@
-import {HandlerContext} from "@atomist/automation-client";
+import {QMContext} from "../../../context/QMContext";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {userFromDomainUser} from "../../util/member/Members";
@@ -25,7 +25,7 @@ export class ConfigureBitbucketProjectAccess extends Task {
         this.taskListMessage.addTask(this.TASK_ADD_BITBUCKET_USERS, "\tAdd user permissions to Bitbucket Project");
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
 
         const bitbucketProjectKey = this.project.bitbucketProject.key;
 

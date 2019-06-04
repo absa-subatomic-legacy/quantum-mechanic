@@ -10,6 +10,12 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
+import {
+    SimpleQMMessageClient} from "../../../context/QMMessageClient";
+import {
+    ChannelMessageClient,
+    ResponderMessageClient,
+} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
     ImageStreamDefinition,
@@ -33,11 +39,8 @@ import {
 import {RecursiveSetterResult} from "../../util/recursiveparam/RecursiveSetterResult";
 import {JsonLoader} from "../../util/resources/JsonLoader";
 import {
-    ChannelMessageClient,
     handleQMError,
-    QMMessageClient,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {createMenuAttachment} from "../../util/shared/GenericMenu";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 import {ConfigurePackage} from "./ConfigurePackage";
@@ -109,7 +112,7 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const messageClient: QMMessageClient = new ChannelMessageClient(ctx).addDestination(this.teamChannel);
+            const messageClient: SimpleQMMessageClient = new ChannelMessageClient(ctx).addDestination(this.teamChannel);
             const jsonLoader = new JsonLoader();
             const definition: PackageDefinition = jsonLoader.readTemplatizedFileContents(this.getPathFromDefinitionName(this.packageDefinition), QMConfig.publicConfig());
             const unprocessedPackageDefinition: PackageDefinition = jsonLoader.readFileContents(this.getPathFromDefinitionName(this.packageDefinition));

@@ -9,6 +9,10 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import _ = require("lodash");
 import {inspect} from "util";
 import {QMConfig} from "../../../../config/QMConfig";
+import {
+    SimpleQMMessageClient,
+} from "../../../../context/QMMessageClient";
+import {ChannelMessageClient} from "../../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../../http/Http";
 import {TeamMembershipMessages} from "../../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../../services/gluon/GluonService";
@@ -22,11 +26,9 @@ import {
 } from "../../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
-    ChannelMessageClient,
     handleQMError,
     QMError,
-    QMMessageClient,
-} from "../../../util/shared/Error";
+    } from "../../../util/shared/Error";
 import {DefinePipelineMessages} from "./DefinePipelineMessages";
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")
@@ -60,7 +62,7 @@ export class RequestProjectEnvironments extends RecursiveParameterRequestCommand
 
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-        const messageClient: QMMessageClient = new ChannelMessageClient(ctx).addDestination(project.owningTeam.slack.teamChannel);
+        const messageClient: SimpleQMMessageClient = new ChannelMessageClient(ctx).addDestination(project.owningTeam.slack.teamChannel);
 
         try {
             await messageClient.send({

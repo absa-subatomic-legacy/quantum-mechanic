@@ -5,6 +5,9 @@ import {
     success,
 } from "@atomist/automation-client";
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
+import {
+    SimpleQMMessageClient} from "../../../context/QMMessageClient";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {PackageConfigurationRequestedEvent} from "../../events/packages/package-configuration-request/PackageConfigurationRequestedEvent";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -33,9 +36,7 @@ import {
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
-    QMMessageClient,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
@@ -103,7 +104,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
     }
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
-        const messageClient: QMMessageClient = new ResponderMessageClient(ctx);
+        const messageClient: SimpleQMMessageClient = new ResponderMessageClient(ctx);
         try {
             await this.requestPackageConfiguration(ctx);
             this.succeedCommand();

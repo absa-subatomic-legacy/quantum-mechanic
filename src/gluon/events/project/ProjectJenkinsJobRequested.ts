@@ -9,6 +9,10 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {
+    SimpleQMMessageClient,
+} from "../../../context/QMMessageClient";
+import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {CommandIntent} from "../../commands/CommandIntent";
 import {LinkExistingLibrary} from "../../commands/packages/LinkExistingLibrary";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
@@ -23,10 +27,8 @@ import {
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
-    ChannelMessageClient,
     handleQMError,
-    QMMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
 import {QMTeam} from "../../util/team/Teams";
 
@@ -98,7 +100,7 @@ export class ProjectJenkinsJobRequested extends BaseQMEvent implements HandleEve
         }
     }
 
-    private async sendPackageUsageMessage(qmMessageClient: QMMessageClient, projectName: string) {
+    private async sendPackageUsageMessage(qmMessageClient: SimpleQMMessageClient, projectName: string) {
         const msg: SlackMessage = {
             text: `
 Since you have a project Jenkins project folder ready, you can now add libraries to you project. Note that to add an application instead of a library, you need to have OpenShift environments created.`,

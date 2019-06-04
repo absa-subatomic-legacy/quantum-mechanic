@@ -1,11 +1,7 @@
-import {
-    HandlerContext,
-    HandlerResult,
-    logger,
-    success,
-} from "@atomist/automation-client";
+import {HandlerResult, logger, success} from "@atomist/automation-client";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
+import {QMContext} from "../../../context/QMContext";
 import {QMFileTemplate} from "../../../template/QMTemplate";
 import {
     BitbucketFileService,
@@ -50,7 +46,7 @@ export class ConfigurePackagePipelineInJenkins extends Task {
         this.taskListMessage.addTask(this.TASK_CREATE_JENKINS_JOB, "Create Jenkins Job");
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
         const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(this.project.owningTeam.teamId);
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
 

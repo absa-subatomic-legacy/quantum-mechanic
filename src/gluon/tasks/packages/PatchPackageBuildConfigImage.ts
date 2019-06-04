@@ -1,7 +1,7 @@
 import {OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
-import {HandlerContext} from "@atomist/automation-client";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 
+import {QMContext} from "../../../context/QMContext";
 import {OCService} from "../../services/openshift/OCService";
 import {getBuildConfigName} from "../../util/packages/Applications";
 import {QMError} from "../../util/shared/Error";
@@ -30,7 +30,7 @@ export class PatchPackageBuildConfigImage extends Task {
         this.taskListMessage.addTask(this.TASK_PATCH_BUILD_CONFIG, `Patch BuildConfig *${devopsProjectId}/${buildConfigName}*`);
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
         if (this.taskListMessage === undefined) {
             throw new QMError("TaskListMessage is undefined.");
         }

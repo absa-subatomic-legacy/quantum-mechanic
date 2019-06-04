@@ -8,6 +8,7 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {QMConfig} from "../../../config/QMConfig";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
 import {JenkinsService} from "../../services/jenkins/JenkinsService";
@@ -26,8 +27,7 @@ import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/Recurs
 import {
     handleQMError,
     QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 

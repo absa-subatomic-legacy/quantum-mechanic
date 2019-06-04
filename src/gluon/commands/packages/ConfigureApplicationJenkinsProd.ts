@@ -6,6 +6,9 @@ import {
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {
+    SimpleQMMessageClient} from "../../../context/QMMessageClient";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {buildJenkinsProdDeploymentJobTemplates} from "../../events/packages/package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {QMApplication} from "../../services/gluon/ApplicationService";
@@ -34,9 +37,7 @@ import {
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
-    QMMessageClient,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
 import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
@@ -125,7 +126,7 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
         }
     }
 
-    private async sendPackageProvisionedMessage(messageClient: QMMessageClient, applicationName: string, projectName: string) {
+    private async sendPackageProvisionedMessage(messageClient: SimpleQMMessageClient, applicationName: string, projectName: string) {
 
         const returnableSuccessMessage = this.getSuccessMessage(applicationName, projectName);
 

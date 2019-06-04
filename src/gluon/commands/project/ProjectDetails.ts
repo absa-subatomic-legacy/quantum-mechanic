@@ -9,6 +9,7 @@ import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {buttonForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMColours} from "../../util/QMColour";
 import {
@@ -20,8 +21,7 @@ import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {
     handleQMError,
     logErrorAndReturnSuccess,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("List projects belonging to a team", atomistIntent(CommandIntent.ListTeamProjects))

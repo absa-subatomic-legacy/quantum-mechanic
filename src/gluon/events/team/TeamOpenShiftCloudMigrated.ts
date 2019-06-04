@@ -1,4 +1,7 @@
-import {OpenshiftListResource, OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
+import {
+    OpenshiftListResource,
+    OpenshiftResource,
+} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {
     addressSlackChannelsFromContext,
     buttonForCommand,
@@ -12,6 +15,10 @@ import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {
+    ChannelMessageClient,
+    SimpleQMMessageClient,
+} from "../../../context/QMMessageClient";
 import {ReRunMigrateTeamCloud} from "../../commands/team/ReRunMigrateTeamCloud";
 import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -40,11 +47,7 @@ import {
 } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
-import {
-    ChannelMessageClient,
-    handleQMError,
-    QMMessageClient,
-} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {QMTenant} from "../../util/shared/Tenants";
 import {
     DevOpsEnvironmentDetails,
@@ -124,7 +127,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         }
     }
 
-    private async createMigrateTeamToCloudTasks(qmMessageClient: QMMessageClient, team: QMTeam, previousCloud: string) {
+    private async createMigrateTeamToCloudTasks(qmMessageClient: SimpleQMMessageClient, team: QMTeam, previousCloud: string) {
         const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Migrating Team to cloud *${team.openShiftCloud}* started:`,
             qmMessageClient);
         const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
@@ -241,10 +244,6 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
                 taskRunner.addTask(new ConfigurePackageDeploymentPipelineInJenkins(application, project, jenkinsDeploymentJobTemplates), "Configure Package Deployment Jobs in Jenkins");
             }
         }
-    }
-
-    private async handleError(ctx: HandlerContext, error, teamChannel: string) {
-        return await handleQMError(new ChannelMessageClient(ctx).addDestination(teamChannel), error);
     }
 
     private createRetryMigrationButton(correlationId: string, teamCloudMigrationEvent: string) {

@@ -7,6 +7,9 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {
+    SimpleQMMessageClient} from "../../../context/QMMessageClient";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMMemberBase} from "../../util/member/Members";
@@ -20,9 +23,7 @@ import {
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {
     handleQMError,
-    QMMessageClient,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
@@ -53,7 +54,7 @@ export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info("Requesting jenkins job creation...");
 
-        const messageClient: QMMessageClient = new ResponderMessageClient(ctx);
+        const messageClient: SimpleQMMessageClient = new ResponderMessageClient(ctx);
 
         try {
             await messageClient.send({

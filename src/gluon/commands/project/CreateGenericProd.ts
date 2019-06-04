@@ -8,6 +8,12 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
+import {
+    SimpleQMMessageClient} from "../../../context/QMMessageClient";
+import {
+    ChannelMessageClient,
+    ResponderMessageClient,
+} from "../../../context/QMMessageClient";
 import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -35,11 +41,8 @@ import {
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {
-    ChannelMessageClient,
     handleQMError,
-    QMMessageClient,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Move openshift resources to prod", atomistIntent(CommandIntent.CreateGenericProd))
@@ -149,7 +152,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         return message;
     }
 
-    private async getRequestConfirmation(qmMessageClient: QMMessageClient) {
+    private async getRequestConfirmation(qmMessageClient: SimpleQMMessageClient) {
         await qmMessageClient.send({
             text: "🚀 Finding available resources...",
         });
@@ -161,7 +164,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
         return await qmMessageClient.send(message, {id: this.correlationId});
     }
 
-    private async findAndListResources(qmMessageClient: QMMessageClient) {
+    private async findAndListResources(qmMessageClient: SimpleQMMessageClient) {
 
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 

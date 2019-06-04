@@ -7,8 +7,8 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import _ = require("lodash");
+import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
-import {ChannelMessageClient} from "../../util/shared/Error";
 
 @EventHandler("Receive TeamsLinkedToProject events", `
 subscription TeamsLinkedToProjectEvent {

@@ -11,9 +11,10 @@ import {
 import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import uuid = require("uuid");
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {QMColours} from "../QMColour";
 import {BaseQMComand} from "../shared/BaseQMCommand";
-import {handleQMError, QMError, ResponderMessageClient} from "../shared/Error";
+import {handleQMError, QMError} from "../shared/Error";
 import {ParameterStatusDisplay} from "./ParameterStatusDisplay";
 import {RecursiveSetterResult} from "./RecursiveSetterResult";
 

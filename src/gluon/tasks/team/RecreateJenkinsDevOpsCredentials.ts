@@ -1,5 +1,6 @@
-import {HandlerContext, logger} from "@atomist/automation-client";
+import {logger} from "@atomist/automation-client";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMContext} from "../../../context/QMContext";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
     JenkinsCredentialsAction,
@@ -36,7 +37,7 @@ export class RecreateJenkinsDevOpsCredentials extends Task {
         taskListMessage.addTask(this.TASK_CREATE_PRODUCTION_CREDENTIALS, `\tCreate any required production credentials`);
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
 
         const teamDevOpsProjectId = getDevOpsEnvironmentDetails(this.gluonTeamName).openshiftProjectId;
 

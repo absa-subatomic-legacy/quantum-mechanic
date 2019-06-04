@@ -10,6 +10,10 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage} from "@atomist/slack-messages";
 import {QMConfig} from "../../../../config/QMConfig";
+import {
+    SimpleQMMessageClient,
+} from "../../../../context/QMMessageClient";
+import {ChannelMessageClient} from "../../../../context/QMMessageClient";
 import {CommandIntent} from "../../../commands/CommandIntent";
 import {KickOffJenkinsBuild} from "../../../commands/jenkins/JenkinsBuild";
 import {DocumentationUrlBuilder} from "../../../messages/documentation/DocumentationUrlBuilder";
@@ -31,11 +35,9 @@ import {QMProject} from "../../../util/project/Project";
 import {ParameterDisplayType} from "../../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {BaseQMEvent} from "../../../util/shared/BaseQMEvent";
 import {
-    ChannelMessageClient,
     handleQMError,
     QMError,
-    QMMessageClient,
-} from "../../../util/shared/Error";
+    } from "../../../util/shared/Error";
 import {QMTenant} from "../../../util/shared/Tenants";
 import {isUserAMemberOfTheTeam, QMTeam} from "../../../util/team/Teams";
 import {buildJenkinsDeploymentJobTemplates} from "./JenkinsDeploymentJobTemplateBuilder";
@@ -86,7 +88,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
         logger.info(`Ingested PackageConfigurationRequested event: ${JSON.stringify(event.data)}`);
         const packageConfigurationRequestedEvent: PackageConfigurationRequestedEvent = event.data.PackageConfigurationRequestedEvent[0];
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(packageConfigurationRequestedEvent.project.name);
-        const messageClient: QMMessageClient = new ChannelMessageClient(ctx).addDestination(project.owningTeam.slack.teamChannel);
+        const messageClient: SimpleQMMessageClient = new ChannelMessageClient(ctx).addDestination(project.owningTeam.slack.teamChannel);
         try {
 
             await this.configurePackage(ctx, messageClient, packageConfigurationRequestedEvent);
@@ -98,7 +100,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
         }
     }
 
-    private async configurePackage(ctx: HandlerContext, messageClient: QMMessageClient, packageConfigurationEvent: PackageConfigurationRequestedEvent): Promise<HandlerResult> {
+    private async configurePackage(ctx: HandlerContext, messageClient: SimpleQMMessageClient, packageConfigurationEvent: PackageConfigurationRequestedEvent): Promise<HandlerResult> {
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(packageConfigurationEvent.project.name);
 
         const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(packageConfigurationEvent.application.name, project.name);
@@ -169,7 +171,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
 
     }
 
-    private async sendPackageProvisionedMessage(messageClient: QMMessageClient, applicationName: string, projectName: string, applicationType: ApplicationType) {
+    private async sendPackageProvisionedMessage(messageClient: SimpleQMMessageClient, applicationName: string, projectName: string, applicationType: ApplicationType) {
 
         const returnableSuccessMessage = this.getDefaultSuccessMessage(applicationName, projectName, applicationType);
 

@@ -1,7 +1,8 @@
-import {HandlerContext, logger} from "@atomist/automation-client";
+import {logger} from "@atomist/automation-client";
 import _ = require("lodash");
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMContext} from "../../../context/QMContext";
 import {isSuccessCode} from "../../../http/Http";
 import {QMFileTemplate} from "../../../template/QMTemplate";
 import {
@@ -55,7 +56,7 @@ export class ConfigureJenkinsForProject extends Task {
         this.taskListMessage.addTask(this.TASK_ADD_JENKINS_CREDENTIALS, "\tAdd project environment credentials to Jenkins");
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
         const teamDevOpsProjectId = getDevOpsEnvironmentDetails(this.jenkinsProjectDetails.teams[0].name).openshiftProjectId;
 
         await this.ocService.setOpenShiftDetails(this.openshiftEnvironment);

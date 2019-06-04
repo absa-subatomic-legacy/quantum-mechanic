@@ -16,6 +16,7 @@ import {
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
+import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {OnboardMember} from "../../commands/member/OnboardMember";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {NewDevOpsEnvironment} from "../../commands/team/DevOpsEnvironment";
@@ -23,7 +24,6 @@ import {DocumentationUrlBuilder} from "../../messages/documentation/Documentatio
 import {GluonService} from "../../services/gluon/GluonService";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
-    ChannelMessageClient,
     handleQMError,
     QMError,
 } from "../../util/shared/Error";

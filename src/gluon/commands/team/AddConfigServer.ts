@@ -6,6 +6,7 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {ConfigServerRequestedEvent} from "../../events/team/ConfigServerRequested";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMMemberBase} from "../../util/member/Members";
@@ -16,7 +17,7 @@ import {
     GluonTeamOpenShiftCloudParam,
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {handleQMError, ResponderMessageClient} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {QMTeam} from "../../util/team/Teams";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
 import {atomistIntent, CommandIntent} from "../CommandIntent";

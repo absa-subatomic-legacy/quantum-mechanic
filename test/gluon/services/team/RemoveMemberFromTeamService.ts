@@ -7,7 +7,6 @@ import {MemberService} from "../../../../src/gluon/services/gluon/MemberService"
 import {TeamService} from "../../../../src/gluon/services/gluon/TeamService";
 import {RemoveMemberFromTeamService} from "../../../../src/gluon/services/team/RemoveMemberFromTeamService";
 import {QMError} from "../../../../src/gluon/util/shared/Error";
-import {TestMessageClient} from "../../TestMessageClient";
 
 describe("RemoveMemberFromTeamService getMemberGluonDetails", () => {
     it("should return existing member details", async () => {
@@ -27,14 +26,8 @@ describe("RemoveMemberFromTeamService getMemberGluonDetails", () => {
         }));
         const gluonService = new GluonService(undefined, undefined, instance(mockedMemberService));
         const service = new RemoveMemberFromTeamService(gluonService);
-        const fakeContext = {
-            teamId: "TEST",
-            correlationId: "1231343234234",
-            workspaceId: "2341234123",
-            messageClient: new TestMessageClient(),
-        };
 
-        const result = await service.getMemberGluonDetails(fakeContext, "Dex");
+        const result = await service.getMemberGluonDetails("Dex");
 
         assert.equal(result.id, "User1");
 

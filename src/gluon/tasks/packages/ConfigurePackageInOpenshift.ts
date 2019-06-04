@@ -1,13 +1,12 @@
-import {OpenshiftListResource, OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {
-    HandlerContext,
-    HandlerResult,
-    logger,
-    success,
-} from "@atomist/automation-client";
+    OpenshiftListResource,
+    OpenshiftResource,
+} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
+import {HandlerResult, logger, success} from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
 
+import {QMContext} from "../../../context/QMContext";
 import {QMTemplate} from "../../../template/QMTemplate";
 import {ImageStream} from "../../events/packages/package-configuration-request/PackageConfigurationRequestedEvent";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -47,7 +46,7 @@ export class ConfigurePackageInOpenshift extends Task {
         this.taskListMessage.addTask(this.TASK_ADD_RESOURCES_TO_ENVIRONMENTS, "Add Resources To Deployment Environments");
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
         if (this.taskListMessage === undefined) {
             throw new QMError("TaskListMessage is undefined.");
         }

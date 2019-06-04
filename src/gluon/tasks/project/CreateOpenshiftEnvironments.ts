@@ -1,6 +1,7 @@
-import {HandlerContext, logger} from "@atomist/automation-client";
+import {logger} from "@atomist/automation-client";
 import {inspect} from "util";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
+import {QMContext} from "../../../context/QMContext";
 import {isSuccessCode} from "../../../http/Http";
 import {OCService} from "../../services/openshift/OCService";
 import {
@@ -39,7 +40,7 @@ export class CreateOpenshiftEnvironments extends Task {
         this.taskListMessage.addTask(this.TASK_CREATE_POD_NETWORK, "\tCreate project/devops pod network");
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
         await this.createOpenshiftEnvironments();
 
         await this.createPodNetwork();

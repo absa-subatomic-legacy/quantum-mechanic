@@ -10,6 +10,7 @@ import {MemberRole} from "../../../../src/gluon/util/member/Members";
 import {QMError} from "../../../../src/gluon/util/shared/Error";
 import {TestGraphClient} from "../../TestGraphClient";
 import {TestMessageClient} from "../../TestMessageClient";
+import {TestQMContext} from "../../TestQMContext";
 
 describe("AddMemberToTeamService getNewMemberGluonDetails", () => {
     it("should return member details", async () => {
@@ -29,14 +30,10 @@ describe("AddMemberToTeamService getNewMemberGluonDetails", () => {
         }));
         const gluonService = new GluonService(undefined, undefined, instance(mockedMemberService));
         const service = new AddMemberToTeamService(gluonService);
-        const fakeContext = {
-            teamId: "TEST",
-            correlationId: "1231343234234",
-            workspaceId: "2341234123",
-            messageClient: new TestMessageClient(),
-        };
 
-        const result = await service.getNewMemberGluonDetails(fakeContext, "Dex", "Channel2");
+        const context = new TestQMContext();
+
+        const result = await service.getNewMemberGluonDetails(context, "Dex", "Channel2");
 
         assert.equal(result.id, "User1");
 

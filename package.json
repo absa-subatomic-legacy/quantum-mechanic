@@ -13,6 +13,7 @@
     "url": "https://github.com/absa-subatomic/quantum-mechanic/issues"
   },
   "dependencies": {
+    "@absa-subatomic/openshift-api": "0.0.3",
     "@atomist/automation-client": "1.4.0",
     "@atomist/cli": "^1.4.0",
     "@atomist/sdm-pack-lifecycle": "^0.1.0",
@@ -44,6 +45,7 @@
     "form-data": "^2.3.3",
     "mocha": "^6.1.4",
     "mockttp": "^0.15.0",
+    "nock": "^10.0.6",
     "nodemon": "^1.19.1",
     "npm-run-all": "^4.1.3",
     "nyc": "^14.1.0",
@@ -85,7 +87,7 @@
     "lint:fix": "npm run lint -- --fix",
     "sendCodeCoverage": "nyc report --reporter=json && codecov -f coverage/*.json",
     "start": "atomist start --no-install --no-compile",
-    "test": "nyc mocha --require espower-typescript/guess \"test/**/*.ts\"",
+    "test": "NODE_ENV=test nyc mocha --require espower-typescript/guess \"test/**/*.ts\"",
     "test:one": "mocha --require espower-typescript/guess \"test/**/${TEST:-*.ts}\"",
     "typedoc": "typedoc --mode modules --excludeExternals --out build/typedoc src",
     "tscSourceMap": "tsc test/**/*.ts --module commonjs --sourcemap --lib es2015,dom,esnext.asynciterable"

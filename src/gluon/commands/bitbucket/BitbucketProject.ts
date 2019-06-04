@@ -11,6 +11,7 @@ import {
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {QMConfig} from "../../../config/QMConfig";
+import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -25,8 +26,7 @@ import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/Recurs
 import {
     handleQMError,
     QMError,
-    ResponderMessageClient,
-} from "../../util/shared/Error";
+    } from "../../util/shared/Error";
 import {
     atomistIntent,
     CommandIntent,

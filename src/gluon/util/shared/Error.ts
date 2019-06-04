@@ -1,16 +1,9 @@
-import {
-    addressSlackChannelsFromContext,
-    addressSlackUsersFromContext,
-    HandlerContext,
-    HandlerResult,
-    logger,
-    success,
-} from "@atomist/automation-client";
-import {MessageOptions} from "@atomist/automation-client/lib/spi/message/MessageClient";
+import {HandlerResult, logger, success} from "@atomist/automation-client";
 import {SlackMessage, url} from "@atomist/slack-messages";
 import _ = require("lodash");
 import * as util from "util";
 import {QMConfig} from "../../../config/QMConfig";
+import {SimpleQMMessageClient} from "../../../context/QMMessageClient";
 
 export function logErrorAndReturnSuccess(method, error): HandlerResult {
     logger.info(`Don't display the error - ${method} already handles it.`);
@@ -18,7 +11,7 @@ export function logErrorAndReturnSuccess(method, error): HandlerResult {
     return success();
 }
 
-export async function handleQMError(messageClient: QMMessageClient, error) {
+export async function handleQMError(messageClient: SimpleQMMessageClient, error) {
     logger.error("Trying to handle QM error.");
 
     if (error && "code" in error && error.code === "ECONNREFUSED") {
@@ -102,61 +95,5 @@ export class GitError extends Error {
         return {
             text: `❗${errorFriendlyMessage}`,
         };
-    }
-}
-
-export interface QMMessageClient {
-    send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult>;
-}
-
-export class ResponderMessageClient implements QMMessageClient {
-    private ctx: HandlerContext;
-
-    constructor(ctx: HandlerContext) {
-        this.ctx = ctx;
-    }
-
-    public async send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult> {
-        return await this.ctx.messageClient.respond(message, options);
-    }
-}
-
-export class UserMessageClient implements QMMessageClient {
-    private readonly ctx: HandlerContext;
-    private readonly users: string[];
-
-    constructor(ctx: HandlerContext) {
-        this.ctx = ctx;
-        this.users = [];
-    }
-
-    public addDestination(user: string) {
-        this.users.push(user);
-        return this;
-    }
-
-    public async send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult> {
-        const slackDestination = await addressSlackUsersFromContext(this.ctx, ...this.users);
-        return await this.ctx.messageClient.send(message, slackDestination, options);
-    }
-}
-
-export class ChannelMessageClient implements QMMessageClient {
-    private readonly ctx: HandlerContext;
-    private readonly channels: string[];
-
-    constructor(ctx: HandlerContext) {
-        this.ctx = ctx;
-        this.channels = [];
-    }
-
-    public addDestination(channel: string) {
-        this.channels.push(channel);
-        return this;
-    }
-
-    public async send(message: (string | SlackMessage), options?: MessageOptions): Promise<HandlerResult> {
-        const slackDestination = await addressSlackChannelsFromContext(this.ctx, ...this.channels);
-        return await this.ctx.messageClient.send(message, slackDestination, options);
     }
 }

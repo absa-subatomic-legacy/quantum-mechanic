@@ -1,6 +1,7 @@
-import {HandlerContext, logger} from "@atomist/automation-client";
+import {logger} from "@atomist/automation-client";
 import * as _ from "lodash";
 import {QMConfig} from "../../../config/QMConfig";
+import {QMContext} from "../../../context/QMContext";
 import {OCService} from "../../services/openshift/OCService";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -27,7 +28,7 @@ export class CreateConfigServer extends Task {
         taskListMessage.addTask(this.TASK_CREATE_DEPLOYMENT_CONFIG, `\tCreate Config Server Deployment Config`);
     }
 
-    protected async executeTask(ctx: HandlerContext): Promise<boolean> {
+    protected async executeTask(ctx: QMContext): Promise<boolean> {
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[this.openShiftCloud].openshiftNonProd);
         const devOpsProjectId = getDevOpsEnvironmentDetails(this.gluonTeamName).openshiftProjectId;

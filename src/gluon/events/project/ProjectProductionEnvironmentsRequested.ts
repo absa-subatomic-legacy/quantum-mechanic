@@ -12,6 +12,7 @@ import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {SlackMessage} from "@atomist/slack-messages";
 import _ = require("lodash");
 import {v4 as uuid} from "uuid";
+import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {UpdateProjectProdRequest} from "../../commands/project/UpdateProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMProjectProdRequest} from "../../services/gluon/ProjectProdRequestService";
@@ -22,7 +23,7 @@ import {
     QMProject,
 } from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
-import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 
 @EventHandler("Receive ProjectProductionEnvironmentsRequestedEvent events", `
 subscription ProjectProductionEnvironmentsRequestedEvent {

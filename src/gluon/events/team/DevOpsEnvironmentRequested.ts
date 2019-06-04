@@ -1,5 +1,4 @@
 import {
-    addressSlackChannelsFromContext,
     EventFired,
     HandlerContext,
     HandlerResult,
@@ -7,9 +6,9 @@ import {
 } from "@atomist/automation-client";
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
-import {addressEvent} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {timeout, TimeoutError} from "promise-timeout";
 import {QMConfig} from "../../../config/QMConfig";
+import {AtomistQMContext, QMContext} from "../../../context/QMContext";
 import {DevOpsMessages} from "../../messages/team/DevOpsMessages";
 import {OCService} from "../../services/openshift/OCService";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
@@ -17,7 +16,7 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {AddJenkinsToDevOpsEnvironment} from "../../tasks/team/AddJenkinsToDevOpsEnvironment";
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
-import {ChannelMessageClient, handleQMError} from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
 
@@ -66,13 +65,14 @@ export class DevOpsEnvironmentRequested extends BaseQMEvent implements HandleEve
 
     public async handle(event: EventFired<any>, ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Ingested DevOpsEnvironmentRequestedEvent event: ${JSON.stringify(event.data)}`);
+        return await this.handleQMEvent(event.data.DevOpsEnvironmentRequestedEvent[0], new AtomistQMContext(ctx));
+    }
 
-        const devOpsRequestedEvent = event.data.DevOpsEnvironmentRequestedEvent[0];
-
+    public async handleQMEvent(devOpsRequestedEvent: any, ctx: QMContext): Promise<HandlerResult> {
         try {
             const teamChannel = devOpsRequestedEvent.team.slackIdentity.teamChannel;
             const team: QMTeam = EventToGluon.gluonTeam(devOpsRequestedEvent.team);
-            const taskListMessage = new TaskListMessage(`🚀 Provisioning of DevOps environment for team *${devOpsRequestedEvent.team.name}* started:`, new ChannelMessageClient(ctx).addDestination(teamChannel));
+            const taskListMessage = new TaskListMessage(`🚀 Provisioning of DevOps environment for team *${devOpsRequestedEvent.team.name}* started:`, ctx.messageClient.createChannelMessageClient().addDestination(teamChannel));
             const taskRunner = new TaskRunner(taskListMessage);
             const openShiftCloud = EventToGluon.gluonTeam(devOpsRequestedEvent.team).openShiftCloud;
             taskRunner.addTask(
@@ -90,28 +90,22 @@ export class DevOpsEnvironmentRequested extends BaseQMEvent implements HandleEve
                 devOpsEnvironment: getDevOpsEnvironmentDetails(devOpsRequestedEvent.team.name),
             };
             this.succeedEvent();
-            return await ctx.messageClient.send(devopsEnvironmentProvisionedEvent, addressEvent("DevOpsEnvironmentProvisionedEvent"));
-
+            return await ctx.raiseEvent(devopsEnvironmentProvisionedEvent, "DevOpsEnvironmentProvisionedEvent");
         } catch (error) {
             this.failEvent();
-            return await this.handleError(ctx, error, devOpsRequestedEvent.team.slackIdentity.teamChannel);
+            return await handleQMError(ctx.messageClient.createChannelMessageClient().addDestination(devOpsRequestedEvent.team.slackIdentity.teamChannel), error);
         }
     }
 
-    private async sendDevOpsSuccessfullyProvisionedMessage(ctx: HandlerContext, team: QMTeam) {
+    private async sendDevOpsSuccessfullyProvisionedMessage(ctx: QMContext, team: QMTeam) {
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd);
 
         const jenkinsHost = await this.ocService.getJenkinsHost(getDevOpsEnvironmentDetails(team.name).openshiftProjectId);
 
-        const destination = await addressSlackChannelsFromContext(ctx, team.slack.teamChannel);
-        await ctx.messageClient.send(
+        await ctx.messageClient.sendToChannels(
             this.devopsMessages.jenkinsSuccessfullyProvisioned(jenkinsHost, team.name),
-            destination,
+            team.slack.teamChannel,
         );
-    }
-
-    private async handleError(ctx: HandlerContext, error, teamChannel: string) {
-        return await handleQMError(new ChannelMessageClient(ctx).addDestination(teamChannel), error);
     }
 }
