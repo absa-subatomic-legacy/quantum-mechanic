@@ -107,7 +107,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
 
         const member: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(packageConfigurationEvent.actionedBy.slackIdentity.screenName);
 
-        const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+        const owningTeam: QMTeam = await this.gluonService.teams.getTeamById(project.owningTeam.teamId);
 
         const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 

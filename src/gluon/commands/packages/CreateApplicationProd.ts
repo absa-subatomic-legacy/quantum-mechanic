@@ -107,7 +107,7 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
+            const team = await this.gluonService.teams.getTeamByName(this.teamName);
             const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
             if (this.approval === ApprovalEnum.TO_CONFIRM) {

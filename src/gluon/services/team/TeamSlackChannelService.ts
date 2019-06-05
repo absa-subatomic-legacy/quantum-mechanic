@@ -39,7 +39,7 @@ export class TeamSlackChannelService {
 
     public async getGluonTeam(gluonTeamName): Promise<any> {
         try {
-            return await this.gluonService.teams.gluonTeamByName(gluonTeamName);
+            return await this.gluonService.teams.getTeamByName(gluonTeamName);
         } catch (error) {
             throw new QMError(`Failed to find to gluon team ${gluonTeamName}`,
                 this.teamSlackChannelMessages.requestNonExistentTeamsCreation(gluonTeamName));

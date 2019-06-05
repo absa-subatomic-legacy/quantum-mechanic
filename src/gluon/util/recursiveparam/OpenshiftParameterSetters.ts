@@ -9,7 +9,7 @@ import {QMConfig} from "../../../config/QMConfig";
 
 import {OCService} from "../../services/openshift/OCService";
 import {QMError} from "../shared/Error";
-import {createMenuAttachment} from "../shared/GenericMenu";
+import {createSortedMenuAttachment} from "../shared/GenericMenu";
 import {getDevOpsEnvironmentDetails} from "../team/Teams";
 import {
     RecursiveParameter,
@@ -37,17 +37,18 @@ export async function setOpenshiftTemplate(
     const templates = await commandHandler.ocService.getSubatomicAppTemplates(namespace);
     return {
         setterSuccess: false,
-        messagePrompt: createMenuAttachment(templates.map(template => {
+        messagePrompt: createSortedMenuAttachment(templates.map(template => {
                 return {
                     value: template.metadata.name,
                     text: template.metadata.name,
                 };
             }),
-            commandHandler,
-            selectionMessage,
-            selectionMessage,
-            "Select a template",
-            "openshiftTemplate"),
+            commandHandler, {
+                text: selectionMessage,
+                fallback: selectionMessage,
+                selectionMessage: "Select a template",
+                resultVariableName: "openshiftTemplate",
+            }),
     };
 }
 
@@ -147,7 +148,7 @@ function presentImageMenu(ctx: HandlerContext,
                           selectionMessage: string,
                           images: OpenshiftResource[]): Attachment {
     logger.info(JSON.stringify(images, null, 2));
-    return createMenuAttachment(
+    return createSortedMenuAttachment(
         images.map(image => {
             return {
                 value: image.metadata.name,
@@ -155,10 +156,12 @@ function presentImageMenu(ctx: HandlerContext,
             };
         }),
         commandHandler,
-        selectionMessage,
-        selectionMessage,
-        "Select Image",
-        "imageName");
+        {
+            text: selectionMessage,
+            fallback: selectionMessage,
+            selectionMessage: "Select Image",
+            resultVariableName: "imageName",
+        });
 }
 
 function presentImageTagMenu(ctx: HandlerContext,
@@ -166,7 +169,7 @@ function presentImageTagMenu(ctx: HandlerContext,
                              selectionMessage: string,
                              imageStreamTags: any[]): Attachment {
     logger.info(JSON.stringify(imageStreamTags, null, 2));
-    return createMenuAttachment(
+    return createSortedMenuAttachment(
         imageStreamTags.map(imageTag => {
             return {
                 value: imageTag.tag,
@@ -174,10 +177,12 @@ function presentImageTagMenu(ctx: HandlerContext,
             };
         }),
         commandHandler,
-        selectionMessage,
-        selectionMessage,
-        "Select Image Tag",
-        "imageTag");
+        {
+            text: selectionMessage,
+            fallback: selectionMessage,
+            selectionMessage: "Select Image Tag",
+            resultVariableName: "imageTag",
+        });
 }
 
 export interface ImageNameSetter {

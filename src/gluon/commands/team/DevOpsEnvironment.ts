@@ -52,7 +52,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
 
         const member = await this.gluonService.members.gluonMemberFromScreenName(screenName);
 
-        const team = await this.gluonService.teams.gluonTeamByName(teamName);
+        const team = await this.gluonService.teams.getTeamByName(teamName);
         logger.info("Requesting DevOps environment for team: " + teamName);
 
         const teamUpdateResult = await this.requestDevOpsEnvironmentThroughGluon(team.teamId, member.memberId);

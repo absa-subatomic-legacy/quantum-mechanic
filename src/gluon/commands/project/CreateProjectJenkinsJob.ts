@@ -63,7 +63,7 @@ export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
 
             const member: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-            const team: QMTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
+            const team: QMTeam = await this.gluonService.teams.getTeamByName(this.teamName);
 
             if (!isUserAMemberOfTheTeam(member, team)) {
                 this.failCommand();

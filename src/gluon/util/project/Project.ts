@@ -4,7 +4,7 @@ import {Attachment} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMBitbucketProject} from "../bitbucket/Bitbucket";
-import {createMenuAttachment} from "../shared/GenericMenu";
+import {createSortedMenuAttachment} from "../shared/GenericMenu";
 import {QMTenant} from "../shared/Tenants";
 import {QMTeam, QMTeamBase} from "../team/Teams";
 
@@ -66,7 +66,7 @@ export function getProjectDisplayName(tenant: string, project: string, pipelineD
 export function menuAttachmentForProjects(ctx: HandlerContext, projects: Array<{ name: string }>,
                                           command: HandleCommand, message: string = "Please select a project",
                                           projectNameVariable: string = "projectName"): Attachment {
-    return createMenuAttachment(
+    return createSortedMenuAttachment(
         projects.map(project => {
             return {
                 value: project.name,
@@ -74,10 +74,12 @@ export function menuAttachmentForProjects(ctx: HandlerContext, projects: Array<{
             };
         }),
         command,
-        message,
-        message,
-        "Select Project",
-        projectNameVariable,
+        {
+            text: message,
+            fallback: message,
+            selectionMessage: "Select Project",
+            resultVariableName: projectNameVariable,
+        },
     );
 }
 

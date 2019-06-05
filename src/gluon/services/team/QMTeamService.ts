@@ -6,7 +6,7 @@ export class QMTeamService {
     }
 
     public async isUserMemberOfValidTeam(slackScreenName: string, validTeamIds: string []): Promise<boolean> {
-        const teams = await this.gluonService.teams.gluonTeamsWhoSlackScreenNameBelongsTo(slackScreenName, false);
+        const teams = await this.gluonService.teams.getTeamsWhoSlackScreenNameBelongsTo(slackScreenName, false);
         for (const team of teams) {
             for (const validTeamId of validTeamIds) {
                 if (team.teamId === validTeamId) {

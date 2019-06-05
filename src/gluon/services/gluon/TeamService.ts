@@ -15,7 +15,7 @@ export class TeamService {
     constructor(public axiosInstance = new AwaitAxios()) {
     }
 
-    public async gluonTeamsWhoSlackScreenNameBelongsTo(screenName: string, requestActionOnFailure: boolean = true): Promise<any[]> {
+    public async getTeamsWhoSlackScreenNameBelongsTo(screenName: string, requestActionOnFailure: boolean = true): Promise<any[]> {
         logger.debug(`Trying to get gluon teams associated to a screenName. screenName: ${screenName} `);
 
         const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackScreenName=${screenName}`);
@@ -56,7 +56,7 @@ export class TeamService {
         return returnValue;
     }
 
-    public async gluonTeamForSlackTeamChannel(teamChannel: string): Promise<any> {
+    public async getTeamsBySlackTeamChannel(teamChannel: string): Promise<any> {
         logger.debug(`Trying to get gluon team associated to a teamChannel. teamChannel: ${teamChannel} `);
 
         const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackTeamChannel=${teamChannel}`);
@@ -65,7 +65,7 @@ export class TeamService {
             throw new QMError(`No team associated with Slack team channel: ${teamChannel}`);
         }
 
-        return result.data._embedded.teamResources[0];
+        return result.data._embedded.teamResources;
 
     }
 
@@ -74,7 +74,7 @@ export class TeamService {
         return await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams`);
     }
 
-    public async gluonTeamByName(teamName: string, rawResult = false): Promise<any> {
+    public async getTeamByName(teamName: string, rawResult = false): Promise<any> {
         logger.debug(`Trying to get gluon team with by name. teamName: ${teamName} `);
 
         const teamQueryResult = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?name=${teamName}`);
@@ -89,7 +89,7 @@ export class TeamService {
         return teamQueryResult.data._embedded.teamResources[0];
     }
 
-    public async gluonTeamById(teamId: string, rawResult = false): Promise<any> {
+    public async getTeamById(teamId: string, rawResult = false): Promise<any> {
         logger.debug(`Trying to get gluon team with by name. teamId: ${teamId} `);
 
         const teamQueryResult = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams/${teamId}`);
@@ -104,7 +104,7 @@ export class TeamService {
         return teamQueryResult.data;
     }
 
-    public async createGluonTeam(teamName: string, teamDescription: string, openShiftCloud: string, createdBy: string): Promise<any> {
+    public async createTeam(teamName: string, teamDescription: string, openShiftCloud: string, createdBy: string): Promise<any> {
         logger.debug(`Trying to create team. teamName: ${teamName}; teamDescription: ${teamDescription}; createdBy: ${createdBy}`);
         return await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/teams`, {
             name: teamName,

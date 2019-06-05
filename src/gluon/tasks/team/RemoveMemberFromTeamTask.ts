@@ -28,7 +28,7 @@ export class RemoveMemberFromTeamTask extends Task {
     }
 
     protected async executeTask(ctx: QMContext): Promise<boolean> {
-        const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
+        const team = await this.gluonService.teams.getTeamByName(this.teamName);
         const screenName = getScreenName(this.slackName);
         const chatId = await ctx.graphClient.slackScreenNameFromSlackUserId(screenName);
         const memberToRemove = await this.removeMemberFromTeamService.getMemberGluonDetails(chatId);

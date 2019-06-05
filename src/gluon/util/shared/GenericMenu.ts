@@ -1,37 +1,25 @@
-import {HandlerContext, logger} from "@atomist/automation-client";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {menuForCommand} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {Attachment} from "@atomist/slack-messages";
 
-export function createAndSendMenu(ctx: HandlerContext, menuOptions: Array<{ value: string, text: string }>,
-                                  command: HandleCommand, description: string, selectionMessage: string,
-                                  resultVariableName: string, thumbUrl: string = ""): Promise<any> {
-    const attachment: { [k: string]: any } = createMenuAttachment(menuOptions, command, "", description, selectionMessage, resultVariableName, thumbUrl);
-    logger.info(JSON.stringify(menuOptions));
-    return ctx.messageClient.respond({
-        text: description,
-        attachments: [
-            attachment,
-        ],
-    });
+export function createSortedMenuAttachment(menuOptions: Array<{ value: string, text: string }>,
+                                           command: HandleCommand, slackMessageDetails: { text: string, fallback: string, selectionMessage: string, resultVariableName: string, thumbUrl?: string }) {
+    return createMenuAttachment(menuOptions.sort((a, b) => (a.text > b.text) ? 1 : -1), command, slackMessageDetails);
 }
 
 export function createMenuAttachment(menuOptions: Array<{ value: string, text: string }>,
-                                     command: HandleCommand, text: string, fallback: string, selectionMessage: string,
-                                     resultVariableName: string, thumbUrl: string = ""): Attachment {
-    const attachment: Attachment = {
-        text,
-        fallback,
+                                     command: HandleCommand,
+                                     slackMessageDetails: { text: string, fallback: string, selectionMessage: string, resultVariableName: string, thumbUrl?: string }): Attachment {
+    return {
+        text: slackMessageDetails.text,
+        fallback: slackMessageDetails.fallback,
         actions: [
             menuForCommand({
-                    text: selectionMessage, options:
+                    text: slackMessageDetails.selectionMessage, options:
                     menuOptions,
                 },
-                command, resultVariableName),
+                command, slackMessageDetails.resultVariableName),
         ],
+        thumb_url: slackMessageDetails.thumbUrl,
     };
-    if (thumbUrl.length > 0) {
-        attachment.thumb_url = thumbUrl;
-    }
-    return attachment;
 }

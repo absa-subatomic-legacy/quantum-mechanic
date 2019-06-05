@@ -185,7 +185,7 @@ If you haven't already, you might want to:
     private async getTeams(channelName: string) {
         let result = null;
         try {
-            result = await this.gluonService.teams.gluonTeamForSlackTeamChannel(channelName);
+            result = await this.gluonService.teams.getTeamsBySlackTeamChannel(channelName);
         } catch (error) {
             if (!(error instanceof QMError)) {
                 throw error;

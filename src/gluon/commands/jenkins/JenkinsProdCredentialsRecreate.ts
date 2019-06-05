@@ -64,7 +64,7 @@ export class JenkinsProdCredentialsRecreate extends RecursiveParameterRequestCom
         try {
             await assertApplicationProdCanBeRequested(this.projectName, this.deploymentPipelineId, this.gluonService);
 
-            const team: QMTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
+            const team: QMTeam = await this.gluonService.teams.getTeamByName(this.teamName);
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 

@@ -85,7 +85,7 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
         try {
             const member: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-            const requestingTeam: QMTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
+            const requestingTeam: QMTeam = await this.gluonService.teams.getTeamByName(this.teamName);
 
             if (!isUserAMemberOfTheTeam(member, requestingTeam)) {
                 return await messageClient.send(this.teamMembershipMessages.notAMemberOfTheTeam());

@@ -47,7 +47,7 @@ export class ConfigurePackagePipelineInJenkins extends Task {
     }
 
     protected async executeTask(ctx: QMContext): Promise<boolean> {
-        const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(this.project.owningTeam.teamId);
+        const owningTeam: QMTeam = await this.gluonService.teams.getTeamById(this.project.owningTeam.teamId);
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd);
 
         if (!_.isEmpty(this.jenkinsJobTemplate.sourceJenkinsfile)) {

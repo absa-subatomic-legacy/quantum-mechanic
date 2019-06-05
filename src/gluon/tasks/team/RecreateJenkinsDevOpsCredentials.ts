@@ -41,7 +41,7 @@ export class RecreateJenkinsDevOpsCredentials extends Task {
 
         const teamDevOpsProjectId = getDevOpsEnvironmentDetails(this.gluonTeamName).openshiftProjectId;
 
-        const team: QMTeam = await this.gluonService.teams.gluonTeamByName(this.gluonTeamName);
+        const team: QMTeam = await this.gluonService.teams.getTeamByName(this.gluonTeamName);
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd);
 

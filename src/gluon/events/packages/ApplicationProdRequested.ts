@@ -94,7 +94,7 @@ export class ApplicationProdRequested extends BaseQMEvent implements HandleEvent
             const project = applicationProdRequestedEvent.project;
 
             const qmProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(project.name);
-            const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(qmProject.owningTeam.teamId);
+            const owningTeam: QMTeam = await this.gluonService.teams.getTeamById(qmProject.owningTeam.teamId);
 
             const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.tenant.tenantId);
 

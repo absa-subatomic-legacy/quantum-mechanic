@@ -9,7 +9,7 @@ import {GitProject} from "@atomist/automation-client/lib/project/git/GitProject"
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {QMError} from "../shared/Error";
-import {createMenuAttachment} from "../shared/GenericMenu";
+import {createSortedMenuAttachment} from "../shared/GenericMenu";
 import {
     RecursiveParameter,
     RecursiveParameterDetails,
@@ -72,17 +72,18 @@ function createMenuForJenkinsFileSelection(ctx: HandlerContext, commandHandler, 
     });
     return {
         setterSuccess: false,
-        messagePrompt: createMenuAttachment(jenkinsfileOptions.map(jenkinsfile => {
+        messagePrompt: createSortedMenuAttachment(jenkinsfileOptions.map(jenkinsfile => {
                 return {
                     value: jenkinsfile,
                     text: jenkinsfile,
                 };
             }),
-            commandHandler,
-            selectionDescriptionMessage,
-            selectionDescriptionMessage,
-            "Select a jenkinsfile",
-            "jenkinsfileName"),
+            commandHandler, {
+                text: selectionDescriptionMessage,
+                fallback: selectionDescriptionMessage,
+                selectionMessage: "Select a jenkinsfile",
+                resultVariableName: "jenkinsfileName",
+            }),
     };
 }
 
