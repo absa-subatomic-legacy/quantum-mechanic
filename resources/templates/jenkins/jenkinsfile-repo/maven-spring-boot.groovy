@@ -34,7 +34,7 @@ def deploy(project, app, tag) {
                     replicationController.untilEach(1) {
                         def replicationControllerMap = it.object()
                         echo "Replicas: ${replicationControllerMap.status.readyReplicas}"
-                        return (replicationControllerMap.status.replicas.equals(replicationControllerMap.status.readyReplicas))
+                        return(replicationControllerMap.spec.replicas.equals(replicationControllerMap.status.readyReplicas))
                     }
                 } else {
                     echo "Deployment has a replica count of 0. Not waiting for Pods to become healthy..."
