@@ -2,6 +2,7 @@ import {OpenshiftListResource} from "@absa-subatomic/openshift-api/build/src/res
 import {
     HandlerContext,
     HandlerResult,
+    logger,
     Parameter,
     Tags,
 } from "@atomist/automation-client";
@@ -9,10 +10,9 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
 import {
-    SimpleQMMessageClient} from "../../../context/QMMessageClient";
-import {
     ChannelMessageClient,
     ResponderMessageClient,
+    SimpleQMMessageClient,
 } from "../../../context/QMMessageClient";
 import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -42,9 +42,7 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
-import {
-    handleQMError,
-    } from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Create application in prod", atomistIntent(CommandIntent.CreateApplicationProd))
@@ -190,6 +188,8 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
             allResources,
         );
 
+        logger.info("Stringifying identified prod resources");
+
         this.openShiftResourcesJSON = JSON.stringify(resources.items.map(resource => {
                 return {
                     kind: resource.kind,
@@ -198,6 +198,8 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
                 };
             },
         ));
+
+        logger.info("Informing user of identified resources");
 
         return await qmMessageClient.send({
             text: getResourceDisplayMessage(resources),

@@ -1,4 +1,7 @@
-import {OpenshiftListResource, OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
+import {
+    OpenshiftListResource,
+    OpenshiftResource,
+} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {logger} from "@atomist/automation-client";
 import _ = require("lodash");
 import {QMError} from "../../util/shared/Error";
@@ -37,6 +40,7 @@ export class PackageOpenshiftResourceService {
 
         resources.items = [];
 
+        logger.info("Cleaning identified resources");
         resources.items.push(...this.genericOpenshiftResourceService.cleanAllPromotableResources(collectedResources));
 
         return resources;
@@ -67,6 +71,7 @@ export class PackageOpenshiftResourceService {
                     pvcs.push(pvc);
                 }
             }
+            logger.info("Found PVC's for application");
         } catch (error) {
             logger.info("No PVC's found for application");
             logger.debug(error);
@@ -84,6 +89,7 @@ export class PackageOpenshiftResourceService {
                     secrets.push(secret);
                 }
             }
+            logger.info("Found PVC's for application");
         } catch (error) {
             logger.info("No Secrets found for application");
             logger.debug(error);
@@ -101,6 +107,7 @@ export class PackageOpenshiftResourceService {
                     configMaps.push(configMap);
                 }
             }
+            logger.info("Found ConfigMaps's for application");
         } catch (error) {
             logger.info("No ConfigMaps found for application");
             logger.debug(error);
@@ -161,6 +168,7 @@ export class PackageOpenshiftResourceService {
                 imageStream.spec.tags = [];
                 imageStreams.push(imageStream);
             }
+            logger.info("Found imagestream's for application");
         } catch (error) {
             logger.info("Unable to find image stream for DC");
             logger.debug(error);
@@ -183,6 +191,7 @@ export class PackageOpenshiftResourceService {
                     }
                 }
             }
+            logger.info("Found services's for application");
         } catch (error) {
             logger.info("Unable to find services for DC");
             logger.debug(error);
@@ -205,6 +214,7 @@ export class PackageOpenshiftResourceService {
                     }
                 }
             }
+            logger.info("Found Routes's for application");
         } catch (error) {
             logger.info("Unable to find routes for DC");
             logger.debug(error);
