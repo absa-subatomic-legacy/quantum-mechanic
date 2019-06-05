@@ -20,10 +20,11 @@ export class BitbucketFileService {
             } catch (error) {
                 logger.info(`${file.filename} doesnt exist. Adding it!`);
                 await project.addFile(file.filename, file.content);
-                await project.commit(file.commitMessage);
                 filesAdded = true;
             }
         }
+
+        await project.commit("Files added by Subatomic.");
 
         try {
             if (filesAdded) {
