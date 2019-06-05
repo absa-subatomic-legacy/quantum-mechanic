@@ -24,10 +24,9 @@ export class BitbucketFileService {
             }
         }
 
-        await project.commit("Files added by Subatomic.");
-
         try {
             if (filesAdded) {
+                await project.commit("Files added by Subatomic.");
                 await project.push();
             }
         } catch (error) {
