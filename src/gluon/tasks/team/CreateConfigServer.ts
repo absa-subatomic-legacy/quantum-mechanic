@@ -93,7 +93,7 @@ spring:
             devOpsProjectId);
     }
 
-    private async createConfigServerDeploymentConfig(gitUri: string, imageStreamNamespace: string, devOpsProjectId: string) {
+    private async createConfigServerDeploymentConfig(gitUri: string, sharedResourceNamespace: string, devOpsProjectId: string) {
         try {
             await this.ocService.getDeploymentConfigInNamespace("subatomic-config-server", devOpsProjectId);
             logger.warn(`Subatomic Config Server Template has already been processed, deployment exists`);
@@ -102,12 +102,12 @@ spring:
 
             const templateParameters = [
                 {key: "GIT_URI", value: saneGitUri},
-                {key: "IMAGE_STREAM_PROJECT", value: imageStreamNamespace},
+                {key: "IMAGE_STREAM_PROJECT", value: sharedResourceNamespace},
             ];
 
             const appTemplate = await this.ocService.findAndProcessOpenshiftTemplate(
                 "subatomic-config-server-template",
-                "subatomic",
+                sharedResourceNamespace,
                 templateParameters);
 
             logger.debug(`Processed Subatomic Config Server Template: ${JSON.stringify(appTemplate)}`);
