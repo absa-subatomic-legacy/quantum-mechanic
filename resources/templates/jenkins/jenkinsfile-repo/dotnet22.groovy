@@ -11,6 +11,7 @@
  * Secret text   | docker-registry-ip| The OpenShift docker registry ip
  *
  */
+properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', daysToKeepStr: '10', numToKeepStr: '10']]]);
 
 def deploy(project, app, tag) {
     openshift.withProject(project) {

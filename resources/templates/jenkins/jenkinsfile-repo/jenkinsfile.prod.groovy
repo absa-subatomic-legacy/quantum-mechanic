@@ -1,3 +1,5 @@
+properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', daysToKeepStr: '10', numToKeepStr: '10']]]);
+
 def copyAndDeploy(imageStreamName, devOpsProjectId, prodProjectId, app) {
     openshift.withProject(devOpsProjectId) {
         openshift.tag("$devOpsProjectId/$imageStreamName", "$prodProjectId/$imageStreamName")
