@@ -117,12 +117,20 @@ podTemplate(cloud: "openshift", label: label, serviceAccount:"jenkins", containe
                     echo "Current tag: ${outputImage}"
                     if (outputImage != "${appBuildConfig}:${tag}") {
                         bc.patch("\'{ \"spec\": { \"output\": { \"to\": { \"name\": \"${appBuildConfig}:${tag}\" } } } }\'")
+                        def result = "Pending"
                         def build = bc.startBuild()
-                        timeout(5) {
+                        timeout(10) {
+                            build.untilEach(1) {
+                              return it.object().status.phase == "Running"
+                            }
                             build.logs('-f')
                             build.untilEach(1) {
-                                return it.object().status.phase == "Complete"
+                              result = it.object().status.phase
+                              return result == "Complete" || result == "Failed"
                             }
+                        }
+                        if (result == "Failed"){
+                          error("Build failed")
                         }
                     }
                 }

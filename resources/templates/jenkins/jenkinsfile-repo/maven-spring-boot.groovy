@@ -107,7 +107,10 @@ node('maven') {
 
                 def result = "Pending"
                 def build = bc.startBuild()
-                timeout(5) {
+                timeout(10) {
+                    build.untilEach(1) {
+                      return it.object().status.phase == "Running"
+                    }
                     build.logs('-f')
                     build.untilEach(1) {
                       result = it.object().status.phase

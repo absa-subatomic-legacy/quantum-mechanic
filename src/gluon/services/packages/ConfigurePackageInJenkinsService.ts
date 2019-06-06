@@ -70,7 +70,7 @@ export class ConfigurePackageInJenkinsService {
 
             const addJobToViewResult = await retryFunction(5, 5000, async (attemptNumber: number) => {
                 logger.info(`Add Jenkins Job to Build View attempt: ${attemptNumber}`);
-                const addJobToViewResponse = await this.jenkinsService.createBuildViewForApplication(jenkinsHost, token, projectName, applicationName);
+                const addJobToViewResponse = await this.jenkinsService.addBuildJobToApplicationView(jenkinsHost, token, projectName, applicationName, jenkinsJob.jenkinsJobDisplayName);
 
                 return isSuccessCode(addJobToViewResponse.status);
             });
