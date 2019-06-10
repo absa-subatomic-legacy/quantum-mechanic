@@ -10,6 +10,7 @@
  {{/each}}
  *
  */
+properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', daysToKeepStr: '10', numToKeepStr: '10']]]);
 
 import groovy.json.JsonOutput
 

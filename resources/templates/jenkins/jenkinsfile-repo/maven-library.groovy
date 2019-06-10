@@ -2,7 +2,7 @@
  * Jenkins pipeline to build an application with the GitHub flow in mind (https://guides.github.com/introduction/flow/).
  *
  */
-
+properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', daysToKeepStr: '10', numToKeepStr: '10']]]);
 
 node('maven') {
     def project = "${env.JOB_NAME.split('/')[0]}"
