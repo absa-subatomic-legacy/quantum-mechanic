@@ -11,7 +11,7 @@ import {TestMessageClient} from "../../TestMessageClient";
 describe("TeamSlackChannelService getGluonTeam", () => {
     it("should fail to get team details", async () => {
         const mockedTeamService = mock(TeamService);
-        when(mockedTeamService.gluonTeamByName("Team1")).thenThrow(new QMError("Failed"));
+        when(mockedTeamService.getTeamByName("Team1")).thenThrow(new QMError("Failed"));
         const gluonService = new GluonService(undefined, instance(mockedTeamService));
         const service = new TeamSlackChannelService(gluonService);
 
@@ -28,7 +28,7 @@ describe("TeamSlackChannelService getGluonTeam", () => {
 
     it("should succeed and return team details", async () => {
         const mockedTeamService = mock(TeamService);
-        when(mockedTeamService.gluonTeamByName("Team1"))
+        when(mockedTeamService.getTeamByName("Team1"))
             .thenResolve(
                 {
                     id: "Team1Id",

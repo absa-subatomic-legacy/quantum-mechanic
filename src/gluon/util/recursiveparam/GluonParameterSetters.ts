@@ -8,9 +8,12 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {menuAttachmentForApplications} from "../packages/Applications";
 import {menuAttachmentForProjects, QMProject} from "../project/Project";
 import {QMError} from "../shared/Error";
-import {createMenuAttachment} from "../shared/GenericMenu";
+import {
+    createMenuAttachment,
+    createSortedMenuAttachment,
+} from "../shared/GenericMenu";
 import {menuAttachmentForTenants} from "../shared/Tenants";
-import {menuAttachmentForTeams} from "../team/Teams";
+import {menuAttachmentForTeams, QMTeam} from "../team/Teams";
 import {
     RecursiveParameter,
     RecursiveParameterDetails,
@@ -29,19 +32,21 @@ export async function setGluonTeamName(
         throw new QMError(`setGluonTeamName commandHandler requires screenName mapped parameter to be defined`);
     }
 
+    let teams: QMTeam[];
     if (commandHandler.teamChannel !== undefined) {
         try {
-            const team = await commandHandler.gluonService.teams.gluonTeamForSlackTeamChannel(commandHandler.teamChannel);
-            commandHandler.teamName = team.name;
-            return {setterSuccess: true};
+            teams = await commandHandler.gluonService.teams.getTeamsBySlackTeamChannel(commandHandler.teamChannel);
+            if (teams.length === 1) {
+                commandHandler.teamName = teams[0].name;
+                return {setterSuccess: true};
+            }
         } catch (slackChannelError) {
             logger.info(`Could not find team associated with channel: ${commandHandler.teamChannel}. Trying to find teams member is a part of.`);
         }
     } else {
         logger.info(`CommandHandler teamChannel is undefined. Trying to find teams member is a part of.`);
+        teams = await commandHandler.gluonService.teams.getTeamsWhoSlackScreenNameBelongsTo(commandHandler.screenName);
     }
-
-    const teams = await commandHandler.gluonService.teams.gluonTeamsWhoSlackScreenNameBelongsTo(commandHandler.screenName);
     return {
         setterSuccess: false,
         messagePrompt: menuAttachmentForTeams(
@@ -77,7 +82,7 @@ export async function setGluonTeamOpenShiftCloudInferred(
 
     if (commandHandler.teamName !== undefined) {
         try {
-            team = await commandHandler.gluonService.teams.gluonTeamByName(commandHandler.teamName);
+            team = await commandHandler.gluonService.teams.getTeamByName(commandHandler.teamName);
         } catch (error) {
             team = undefined;
         }
@@ -105,10 +110,12 @@ export async function setGluonTeamOpenShiftCloud(
                 };
             }),
             commandHandler,
-            selectionMessage,
-            selectionMessage,
-            "Select OpenShift Cloud",
-            "openShiftCloud",
+            {
+                text: selectionMessage,
+                fallback: selectionMessage,
+                selectionMessage: "Select OpenShift Cloud",
+                resultVariableName: "openShiftCloud",
+            },
         ),
     };
 }
@@ -251,7 +258,7 @@ export async function setDeploymentPipelineId(
     } else {
         return {
             setterSuccess: false,
-            messagePrompt: createMenuAttachment(
+            messagePrompt: createSortedMenuAttachment(
                 project.releaseDeploymentPipelines.map(deploymentPipeline => {
                     return {
                         value: deploymentPipeline.pipelineId,
@@ -259,10 +266,12 @@ export async function setDeploymentPipelineId(
                     };
                 }),
                 commandHandler,
-                selectionMessage,
-                selectionMessage,
-                "Select Deployment Pipeline",
-                "deploymentPipelineId",
+                {
+                    text: selectionMessage,
+                    fallback: selectionMessage,
+                    selectionMessage: "Select Deployment Pipeline",
+                    resultVariableName: "deploymentPipelineId",
+                },
             ),
         };
     }

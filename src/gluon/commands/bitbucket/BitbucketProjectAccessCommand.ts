@@ -56,7 +56,7 @@ export class BitbucketProjectAccessCommand extends RecursiveParameterRequestComm
         try {
             const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
 
-            const requestingTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
+            const requestingTeam = await this.gluonService.teams.getTeamByName(this.teamName);
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 

@@ -11,10 +11,9 @@ import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import _ = require("lodash");
 import {QMConfig} from "../../../config/QMConfig";
 import {
-    SimpleQMMessageClient} from "../../../context/QMMessageClient";
-import {
     ChannelMessageClient,
     ResponderMessageClient,
+    SimpleQMMessageClient,
 } from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {
@@ -38,10 +37,8 @@ import {
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {RecursiveSetterResult} from "../../util/recursiveparam/RecursiveSetterResult";
 import {JsonLoader} from "../../util/resources/JsonLoader";
-import {
-    handleQMError,
-    } from "../../util/shared/Error";
-import {createMenuAttachment} from "../../util/shared/GenericMenu";
+import {handleQMError} from "../../util/shared/Error";
+import {createSortedMenuAttachment} from "../../util/shared/GenericMenu";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 import {ConfigurePackage} from "./ConfigurePackage";
 
@@ -197,13 +194,14 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
                         const menuOptions = await optionsSetterFunction(this);
                         const displayMessage = this.getDisplayMessage();
 
-                        const variablePromptAttachment = createMenuAttachment(
+                        const variablePromptAttachment = createSortedMenuAttachment(
                             menuOptions,
-                            this,
-                            `Select a value for the *${requiredVariable.name}* environment variable. ${requiredVariable.description}`,
-                            `Select a value for the *${requiredVariable.name}* environment variable. ${requiredVariable.description}`,
-                            "Select a value",
-                            "environmentVariableValueHolder",
+                            this, {
+                                text: `Select a value for the *${requiredVariable.name}* environment variable. ${requiredVariable.description}`,
+                                fallback: `Select a value for the *${requiredVariable.name}* environment variable. ${requiredVariable.description}`,
+                                selectionMessage: "Select a value",
+                                resultVariableName: "environmentVariableValueHolder",
+                            },
                         );
 
                         variablePromptAttachment.color = QMColours.stdShySkyBlue.hex;
@@ -374,17 +372,19 @@ async function setPackageDefinitionFile(ctx: HandlerContext, commandHandler: Con
     const packageDefinitionOptions: string [] = readPackageDefinitions(commandHandler.packageType);
     return {
         setterSuccess: false,
-        messagePrompt: createMenuAttachment(packageDefinitionOptions.map(packageDefinition => {
+        messagePrompt: createSortedMenuAttachment(packageDefinitionOptions.map(packageDefinition => {
                 return {
                     value: packageDefinition,
                     text: packageDefinition,
                 };
             }),
             commandHandler,
-            selectionMessage,
-            selectionMessage,
-            "Select a package definition",
-            "packageDefinition"),
+            {
+                text: selectionMessage,
+                fallback: selectionMessage,
+                selectionMessage: "Select a package definition",
+                resultVariableName: "packageDefinition",
+            }),
     };
 }
 

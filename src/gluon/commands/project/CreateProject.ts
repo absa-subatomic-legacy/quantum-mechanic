@@ -70,7 +70,7 @@ export class CreateProject extends RecursiveParameterRequestCommand
 
         const member = await this.gluonService.members.gluonMemberFromScreenName(screenName);
 
-        const team: QMTeam = await this.gluonService.teams.gluonTeamByName(teamName);
+        const team: QMTeam = await this.gluonService.teams.getTeamByName(teamName);
 
         await this.createGluonProject(
             {

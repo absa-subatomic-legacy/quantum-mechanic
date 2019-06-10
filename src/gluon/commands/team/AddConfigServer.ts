@@ -65,7 +65,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
                                   gluonTeamName: string,
                                   actionedByScreenName: string,
                                   gitUri: string): Promise<any> {
-        const team: QMTeam = await this.gluonService.teams.gluonTeamByName(gluonTeamName);
+        const team: QMTeam = await this.gluonService.teams.getTeamByName(gluonTeamName);
         const actionedBy: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(actionedByScreenName);
 
         const requestConfigServerEvent: ConfigServerRequestedEvent = {

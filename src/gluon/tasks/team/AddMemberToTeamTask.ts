@@ -28,7 +28,7 @@ export class AddMemberToTeamTask extends Task {
 
     protected async executeTask(ctx: QMContext): Promise<boolean> {
 
-        const team = await this.gluonService.teams.gluonTeamByName(this.teamName);
+        const team = await this.gluonService.teams.getTeamByName(this.teamName);
 
         const teamChannel = getTeamSlackChannel(team);
 

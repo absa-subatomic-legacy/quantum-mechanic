@@ -50,7 +50,7 @@ export class JenkinsCredentialsRecreate extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext) {
         try {
-            const team: QMTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
+            const team: QMTeam = await this.gluonService.teams.getTeamByName(this.teamName);
 
             const messageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 

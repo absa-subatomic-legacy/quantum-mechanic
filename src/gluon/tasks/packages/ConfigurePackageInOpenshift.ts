@@ -62,7 +62,7 @@ export class ConfigurePackageInOpenshift extends Task {
         if (this.packageDetails.packageType === ApplicationType.DEPLOYABLE.toString()) {
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.packageDetails.projectName);
-            const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+            const owningTeam: QMTeam = await this.gluonService.teams.getTeamById(project.owningTeam.teamId);
 
             if (this.deploymentDetails.baseS2IImage.namespace === undefined) {
                 this.deploymentDetails.baseS2IImage.namespace = QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].sharedResourceNamespace;

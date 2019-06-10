@@ -1,13 +1,13 @@
 import {HandlerContext} from "@atomist/automation-client";
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {Attachment} from "@atomist/slack-messages";
-import {createMenuAttachment} from "../shared/GenericMenu";
+import {createSortedMenuAttachment} from "../shared/GenericMenu";
 
 export function menuAttachmentForBitbucketRepositories(ctx: HandlerContext, bitbucketRepositories: any[],
                                                        command: HandleCommand, message: string = "Please select a Bitbucket repository",
                                                        bitbucketProjectNameVariable: string = "bitbucketRepositorySlug",
                                                        thumbUrl = ""): Attachment {
-    return createMenuAttachment(
+    return createSortedMenuAttachment(
         bitbucketRepositories.map(bitbucketRepository => {
             return {
                 value: bitbucketRepository.slug,
@@ -15,11 +15,13 @@ export function menuAttachmentForBitbucketRepositories(ctx: HandlerContext, bitb
             };
         }),
         command,
-        message,
-        message,
-        "Select Bitbucket Repo",
-        bitbucketProjectNameVariable,
-        thumbUrl,
+        {
+            text: message,
+            fallback: message,
+            selectionMessage: "Select Bitbucket Repo",
+            resultVariableName: bitbucketProjectNameVariable,
+            thumbUrl,
+        },
     );
 }
 

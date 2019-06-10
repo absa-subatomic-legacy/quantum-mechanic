@@ -68,7 +68,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
 
                 const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(projectProdRequest.project.name);
 
-                const owningTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+                const owningTeam = await this.gluonService.teams.getTeamById(project.owningTeam.teamId);
 
                 const owningTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 

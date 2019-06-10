@@ -67,7 +67,7 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
 
     protected async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
         try {
-            const team: QMTeam = await this.gluonService.teams.gluonTeamByName(this.teamName);
+            const team: QMTeam = await this.gluonService.teams.getTeamByName(this.teamName);
             const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
             if (this.approval === ApprovalEnum.TO_CONFIRM) {

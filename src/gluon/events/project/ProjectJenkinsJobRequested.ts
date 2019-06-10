@@ -73,7 +73,7 @@ export class ProjectJenkinsJobRequested extends BaseQMEvent implements HandleEve
 
         try {
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(jenkinsJobRequestedEvent.project.name);
-            const owningTeam: QMTeam = await this.gluonService.teams.gluonTeamById(project.owningTeam.teamId);
+            const owningTeam: QMTeam = await this.gluonService.teams.getTeamById(project.owningTeam.teamId);
             const owningTenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Provisioning of jenkins job for project *${jenkinsJobRequestedEvent.project.name}* started:`,

@@ -69,7 +69,7 @@ export class CreateTeam extends RecursiveParameterRequestCommand implements Gluo
     }
 
     private async createTeamInGluon(teamName: string, teamDescription: string, openShiftCloud: string, createdBy: string) {
-        const teamCreationResult = await this.gluonService.teams.createGluonTeam(teamName, teamDescription, openShiftCloud, createdBy);
+        const teamCreationResult = await this.gluonService.teams.createTeam(teamName, teamDescription, openShiftCloud, createdBy);
 
         if (teamCreationResult.status === 409) {
             logger.error(`Failed to create team since the team name is already in use.`);

@@ -39,7 +39,7 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
     @Extensible("Team.ListTeamMembers")
     protected async runCommand(ctx: HandlerContext) {
         try {
-            const result = await this.gluonService.teams.gluonTeamByName(this.teamName);
+            const result = await this.gluonService.teams.getTeamByName(this.teamName);
             const teamOwners = this.getTeamMemberNames(result.owners);
             const teamMembers = this.getTeamMemberNames(result.members);
 
