@@ -33,3 +33,8 @@ export function menuAttachmentForApplications(ctx: HandlerContext, applications:
 export function getBuildConfigName(projectName: string, packageName: string): string {
     return `${_.kebabCase(projectName).toLowerCase()}-${_.kebabCase(packageName).toLowerCase()}`;
 }
+
+export function bitbucketProjectKeyFromRepositoryRemoteUrl(remoteUrl: string) {
+    const remoteSplit = remoteUrl.split("/");
+    return remoteSplit[remoteSplit.length - 2];
+}

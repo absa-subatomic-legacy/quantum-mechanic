@@ -85,15 +85,44 @@ export class GitError extends Error {
         let errorFriendlyMessage = "Failed to interpret Git exception. Please alert your system admin to check the logs and correct the issue accordingly.";
         logger.debug(`Attempting to resolve slack message for GitError`);
 
-        const regex: RegExp = /-{5,}\s{1,}remote:([\s\S]*?)remote:\s-{1,}/;
-        const match = regex.exec(this.message);
-        if (match !== null) {
-            errorFriendlyMessage = match[1];
-            errorFriendlyMessage = errorFriendlyMessage.replace("remote: ", "");
-            logger.debug(`Derived error message from Error for GitError: ${errorFriendlyMessage}`);
+        const identificationFunctions = [
+            this.identifyCannotPushToMasterError,
+            this.identifyNonExistantOrMissingPermissionsError,
+        ];
+
+        for (const identificationFunction of identificationFunctions) {
+            const identification = identificationFunction();
+            if (identification.identified) {
+                errorFriendlyMessage = identification.friendlyErrorMessage;
+                break;
+            }
         }
+
         return {
             text: `❗${errorFriendlyMessage}`,
         };
+    }
+
+    private identifyCannotPushToMasterError(): { identified: boolean, friendlyErrorMessage?: string } {
+        const regex: RegExp = /-{5,}\s+remote:([\s\S]*?)remote:\s-+/;
+        const match = regex.exec(this.message);
+        if (match == null) {
+            return {identified: false};
+        }
+        let errorFriendlyMessage = match[1];
+        errorFriendlyMessage = errorFriendlyMessage.replace("remote: ", "");
+        logger.debug(`Derived error message from Error for GitError: ${errorFriendlyMessage}`);
+        return {identified: true, friendlyErrorMessage: errorFriendlyMessage};
+    }
+
+    private identifyNonExistantOrMissingPermissionsError(): { identified: boolean, friendlyErrorMessage?: string } {
+        const regex: RegExp = /The\s*requested\s*repository\s*does\s*not\s*exist,\s*or\s*you\s*do\s*not\s*have\s*permission\s*to\s*access\s*it/;
+        const match = regex.exec(this.message);
+        if (match == null) {
+            return {identified: false};
+        }
+        const errorFriendlyMessage = "The target repository either does not exist, or Subatomic does not have permissions to access it.";
+        logger.debug(`Derived error message from Error for GitError: ${errorFriendlyMessage}`);
+        return {identified: true, friendlyErrorMessage: errorFriendlyMessage};
     }
 }

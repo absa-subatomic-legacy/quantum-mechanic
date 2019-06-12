@@ -17,6 +17,7 @@ import {
     getSubatomicJenkinsServiceAccountName,
 } from "../../util/jenkins/Jenkins";
 import {JenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
+import {bitbucketProjectKeyFromRepositoryRemoteUrl} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -53,7 +54,7 @@ export class ConfigurePackagePipelineInJenkins extends Task {
         if (!_.isEmpty(this.jenkinsJobTemplate.sourceJenkinsfile)) {
             await this.addJenkinsFile(
                 this.jenkinsJobTemplate.sourceJenkinsfile,
-                this.project.bitbucketProject.key,
+                bitbucketProjectKeyFromRepositoryRemoteUrl(this.application.bitbucketRepository.remoteUrl),
                 this.application.bitbucketRepository.slug,
                 this.jenkinsJobTemplate.expectedJenkinsfile,
             );

@@ -23,6 +23,7 @@ import {
     JenkinsDeploymentJobTemplate,
     JenkinsJobTemplate,
 } from "../../util/jenkins/JenkinsJobTemplates";
+import {bitbucketProjectKeyFromRepositoryRemoteUrl} from "../../util/packages/Applications";
 import {QMProject} from "../../util/project/Project";
 import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -60,7 +61,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
             owningTeam.name,
             this.application,
             this.jenkinsDeploymentJobConfigs,
-            this.project.bitbucketProject.key,
+            bitbucketProjectKeyFromRepositoryRemoteUrl(this.application.bitbucketRepository.remoteUrl),
             this.application.bitbucketRepository.slug,
         );
         await this.taskListMessage.succeedTask(this.TASK_ADD_JENKINS_FILE);
