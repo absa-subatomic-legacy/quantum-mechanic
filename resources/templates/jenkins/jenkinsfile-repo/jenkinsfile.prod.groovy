@@ -5,8 +5,8 @@ def copyAndDeploy(imageStreamName, devOpsProjectId, prodProjectId, app) {
         openshift.tag("$devOpsProjectId/$imageStreamName", "$prodProjectId/$imageStreamName")
     }
     openshift.withProject(prodProjectId) {
-
         def dc = openshift.selector('dc', app);
+        def latestVersion = dc.object().status.latestVersion
         for (trigger in dc.object().spec.triggers) {
             if (trigger.type == "ImageChange") {
                 def oldImageStreamName = trigger.imageChangeParams.from.name
@@ -16,7 +16,10 @@ def copyAndDeploy(imageStreamName, devOpsProjectId, prodProjectId, app) {
                     openshift.selector('dc', app).patch("\'{ \"spec\": { \"triggers\": [{ \"type\": \"ImageChange\", \"imageChangeParams\": { \"automatic\": false, \"containerNames\": [\"${app}\"], \"from\": { \"kind\": \"ImageStreamTag\", \"name\": \"${imageStreamName}\" } } }] } }\'")
                 }
             }
-            openshift.selector('dc', app).rollout().latest()
+            echo "Rollout deployment of DC"
+            if (latestVersion !='0'){
+                openshift.selector('dc', app).rollout().latest()
+            }
 
             timeout(5) {
                 def deploymentObject = openshift.selector('dc', "${app}").object()
