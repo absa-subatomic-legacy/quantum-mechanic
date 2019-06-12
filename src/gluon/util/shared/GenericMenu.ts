@@ -4,7 +4,7 @@ import {Attachment} from "@atomist/slack-messages";
 
 export function createSortedMenuAttachment(menuOptions: Array<{ value: string, text: string }>,
                                            command: HandleCommand, slackMessageDetails: { text: string, fallback: string, selectionMessage: string, resultVariableName: string, thumbUrl?: string }) {
-    return createMenuAttachment(menuOptions.sort((a, b) => (a.text > b.text) ? 1 : -1), command, slackMessageDetails);
+    return createMenuAttachment(menuOptions.sort((a, b) => (a.text.toLowerCase() > b.text.toLowerCase()) ? 1 : -1), command, slackMessageDetails);
 }
 
 export function createMenuAttachment(menuOptions: Array<{ value: string, text: string }>,

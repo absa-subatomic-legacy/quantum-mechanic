@@ -10,6 +10,7 @@ describe("createSortedMenuAttachment", () => {
             {value: "1", text: "b"},
             {value: "2", text: "a"},
             {value: "3", text: "c"},
+            {value: "4", text: "B2"},
         ], new OnboardMember(), {
             text: "Hello",
             fallback: "Hello Fallback",
@@ -20,10 +21,12 @@ describe("createSortedMenuAttachment", () => {
         assert.equal(menuAttachment.text, `Hello`);
         assert.equal(menuAttachment.actions[0].options[0].text, "a");
         assert.equal(menuAttachment.actions[0].options[1].text, "b");
-        assert.equal(menuAttachment.actions[0].options[2].text, "c");
+        assert.equal(menuAttachment.actions[0].options[2].text, "B2");
+        assert.equal(menuAttachment.actions[0].options[3].text, "c");
 
         assert.equal(menuAttachment.actions[0].options[0].value, "2");
         assert.equal(menuAttachment.actions[0].options[1].value, "1");
-        assert.equal(menuAttachment.actions[0].options[2].value, "3");
+        assert.equal(menuAttachment.actions[0].options[2].value, "4");
+        assert.equal(menuAttachment.actions[0].options[3].value, "3");
     });
 });
