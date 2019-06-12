@@ -16,6 +16,7 @@ properties([[$class: 'BuildDiscarderProperty', strategy: [$class: 'LogRotator', 
 def deploy(project, app, tag) {
     openshift.withProject(project) {
         def dc = openshift.selector('dc', app);
+        def latestVersion = dc.object().status.latestVersion
         for (trigger in dc.object().spec.triggers) {
             if (trigger.type == "ImageChange") {
                 def imageStreamName = trigger.imageChangeParams.from.name
@@ -24,20 +25,25 @@ def deploy(project, app, tag) {
                 if (imageStreamName != "${app}:${tag}") {
                     openshift.selector('dc', app).patch("\'{ \"spec\": { \"triggers\": [{ \"type\": \"ImageChange\", \"imageChangeParams\": { \"automatic\": false, \"containerNames\": [\"${app}\"], \"from\": { \"kind\": \"ImageStreamTag\", \"name\": \"${app}:${tag}\" } } }] } }\'")
                 }
-                def latestVersion = dc.object().status.latestVersion
+
             }
-            openshift.selector('dc', app).rollout().latest()
+            echo "Rollout deployment of DC"
+            if (latestVersion !='0'){
+                openshift.selector('dc', app).rollout().latest()
+            }
 
             timeout(10) {
                 def deploymentObject = openshift.selector('dc', "${app}").object()
                 if (deploymentObject.spec.replicas > 0) {
                     def latestDeploymentVersion = deploymentObject.status.latestVersion
                     def replicationController = openshift.selector('rc', "${app}-${latestDeploymentVersion}")
+                    echo "Waiting for replication controller ${app}-${latestDeploymentVersion} to become ready."
                     replicationController.untilEach(1) {
                         def replicationControllerMap = it.object()
-                        echo "Replicas: ${replicationControllerMap.status.readyReplicas}"
-                        return(replicationControllerMap.spec.replicas.equals(replicationControllerMap.status.readyReplicas))
+                        echo "Deployment pending."
+                        return (replicationControllerMap.status.replicas.equals(replicationControllerMap.status.readyReplicas))
                     }
+                    echo "Deployment complete. All replicas are ready."
                 } else {
                     echo "Deployment has a replica count of 0. Not waiting for Pods to become healthy..."
                 }
@@ -119,16 +125,13 @@ podTemplate(cloud: "openshift", label: label, serviceAccount:"jenkins", containe
                     if (outputImage != "${appBuildConfig}:${tag}") {
                         bc.patch("\'{ \"spec\": { \"output\": { \"to\": { \"name\": \"${appBuildConfig}:${tag}\" } } } }\'")
                         def result = "Pending"
-                        def build = bc.startBuild()
                         timeout(10) {
                             build.untilEach(1) {
                               return it.object().status.phase == "Running"
                             }
                             build.logs('-f')
-                            build.untilEach(1) {
-                              result = it.object().status.phase
-                              return result == "Complete" || result == "Failed"
-                            }
+                            result = build.object().status.phase
+                            echo "Build result: ${result}"
                         }
                         if (result == "Failed"){
                           error("Build failed")
