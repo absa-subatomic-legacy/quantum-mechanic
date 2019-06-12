@@ -43,7 +43,9 @@ export async function setGluonTeamName(
         } catch (slackChannelError) {
             logger.info(`Could not find team associated with channel: ${commandHandler.teamChannel}. Trying to find teams member is a part of.`);
         }
-    } else {
+    }
+
+    if (teams === undefined) {
         logger.info(`CommandHandler teamChannel is undefined. Trying to find teams member is a part of.`);
         teams = await commandHandler.gluonService.teams.getTeamsWhoSlackScreenNameBelongsTo(commandHandler.screenName);
     }
