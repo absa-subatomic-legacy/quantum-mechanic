@@ -4,6 +4,7 @@ import {
     GitProject,
     logger,
 } from "@atomist/automation-client";
+import {execPromise} from "@atomist/automation-client/lib/util/child_process";
 import {QMConfig} from "../../../config/QMConfig";
 import {GitError} from "../../util/shared/Error";
 
@@ -39,14 +40,27 @@ export class BitbucketFileService {
     public async cloneBitbucketRepository(bitbucketProjectKey, bitbucketRepositorySlug): Promise<GitProject> {
         const username = QMConfig.subatomic.bitbucket.auth.username;
         const password = QMConfig.subatomic.bitbucket.auth.password;
-        const project: GitProject = await GitCommandGitProject.cloned({
-                username,
-                password,
-            },
-            new BitBucketServerRepoRef(
-                QMConfig.subatomic.bitbucket.baseUrl,
-                bitbucketProjectKey,
-                bitbucketRepositorySlug));
+        let project: GitProject;
+        try {
+            project = await GitCommandGitProject.cloned({
+                    username,
+                    password,
+                },
+                new BitBucketServerRepoRef(
+                    QMConfig.subatomic.bitbucket.baseUrl,
+                    bitbucketProjectKey,
+                    bitbucketRepositorySlug));
+        } catch (e) {
+            logger.error(`Failed to clone git repository: ` + e.message);
+            throw new GitError(e.message, "Failed to clone git repository. Please make sure that the repository exists, and that Subatomic has access to it.");
+        }
+        try {
+            project.branch = (await execPromise("git", ["rev-parse", "--abbrev-ref", "HEAD"], {cwd: project.baseDir})).stdout.trim();
+            logger.info(`Set current branch to "${project.branch}"`);
+        } catch (e) {
+            logger.error(`Failed to set branch to default branch. Assuming master branch. Error: ${e.message}`);
+        }
+
         await project.setUserConfig(
             QMConfig.subatomic.bitbucket.auth.username,
             QMConfig.subatomic.bitbucket.auth.email,
