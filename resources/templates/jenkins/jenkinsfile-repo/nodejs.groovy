@@ -107,6 +107,7 @@ node('nodejs') {
                 if (outputImage != "${appBuildConfig}:${tag}") {
                     bc.patch("\'{ \"spec\": { \"output\": { \"to\": { \"name\": \"${appBuildConfig}:${tag}\" } } } }\'")
                     def result = "Pending"
+                    def build = bc.startBuild()
                     timeout(10) {
                         build.untilEach(1) {
                           return it.object().status.phase == "Running"
