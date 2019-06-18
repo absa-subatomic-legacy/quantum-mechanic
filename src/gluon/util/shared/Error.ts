@@ -77,21 +77,22 @@ export enum QMErrorType {
 }
 
 export class GitError extends Error {
-    constructor(message: string) {
+    constructor(message: string, private defaultMessage: string = "Failed to interpret Git exception. Please alert your system admin to check the logs and correct the issue accordingly.") {
         super(message);
     }
 
     public getSlackMessage() {
-        let errorFriendlyMessage = "Failed to interpret Git exception. Please alert your system admin to check the logs and correct the issue accordingly.";
+        let errorFriendlyMessage = this.defaultMessage;
         logger.debug(`Attempting to resolve slack message for GitError`);
 
         const identificationFunctions = [
             this.identifyCannotPushToMasterError,
             this.identifyNonExistantOrMissingPermissionsError,
+            this.identifyUninitializedRepository,
         ];
 
         for (const identificationFunction of identificationFunctions) {
-            const identification = identificationFunction();
+            const identification = identificationFunction(this.message);
             if (identification.identified) {
                 errorFriendlyMessage = identification.friendlyErrorMessage;
                 break;
@@ -103,9 +104,9 @@ export class GitError extends Error {
         };
     }
 
-    private identifyCannotPushToMasterError(): { identified: boolean, friendlyErrorMessage?: string } {
+    private identifyCannotPushToMasterError(message: string): { identified: boolean, friendlyErrorMessage?: string } {
         const regex: RegExp = /-{5,}\s+remote:([\s\S]*?)remote:\s-+/;
-        const match = regex.exec(this.message);
+        const match = regex.exec(message);
         if (match == null) {
             return {identified: false};
         }
@@ -115,13 +116,24 @@ export class GitError extends Error {
         return {identified: true, friendlyErrorMessage: errorFriendlyMessage};
     }
 
-    private identifyNonExistantOrMissingPermissionsError(): { identified: boolean, friendlyErrorMessage?: string } {
+    private identifyNonExistantOrMissingPermissionsError(message: string): { identified: boolean, friendlyErrorMessage?: string } {
         const regex: RegExp = /The\s*requested\s*repository\s*does\s*not\s*exist,\s*or\s*you\s*do\s*not\s*have\s*permission\s*to\s*access\s*it/;
-        const match = regex.exec(this.message);
+        const match = regex.exec(message);
         if (match == null) {
             return {identified: false};
         }
         const errorFriendlyMessage = "The target repository either does not exist, or Subatomic does not have permissions to access it.";
+        logger.debug(`Derived error message from Error for GitError: ${errorFriendlyMessage}`);
+        return {identified: true, friendlyErrorMessage: errorFriendlyMessage};
+    }
+
+    private identifyUninitializedRepository(message: string): { identified: boolean, friendlyErrorMessage?: string } {
+        const regex: RegExp = /--unshallow\s*on\s*a\s*complete\s*repository\s*does\s*not\s*make\s*sense/;
+        const match = regex.exec(message);
+        if (match == null) {
+            return {identified: false};
+        }
+        const errorFriendlyMessage = "The target repository has not been initialised. An initial commit is required before Subatomic can operate on the repository.";
         logger.debug(`Derived error message from Error for GitError: ${errorFriendlyMessage}`);
         return {identified: true, friendlyErrorMessage: errorFriendlyMessage};
     }
