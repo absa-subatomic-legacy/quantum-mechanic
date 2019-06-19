@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@absa-subatomic/openshift-api": "0.0.3",
-    "@atomist/automation-client": "1.4.0",
+    "@atomist/automation-client": "1.5.3",
     "@atomist/cli": "^1.4.0",
     "@atomist/sdm-pack-lifecycle": "^0.1.0",
     "@atomist/slack-messages": "^1.1.1",
