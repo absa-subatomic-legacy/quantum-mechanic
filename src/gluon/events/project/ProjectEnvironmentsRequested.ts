@@ -8,6 +8,7 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
+import {AtomistQMContext} from "../../../context/QMContext";
 import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {ProjectMessages} from "../../messages/projects/ProjectMessages";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -97,7 +98,7 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
             const environmentsForCreation: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespacesForAllPipelines(environmentsRequestedEvent.owningTenant.name, project);
 
             taskRunner.addTask(
-                new CreateOpenshiftEnvironments(environmentsRequestedEvent, environmentsForCreation, openshiftNonProd),
+                new CreateOpenshiftEnvironments(new AtomistQMContext(ctx), environmentsRequestedEvent, environmentsForCreation, openshiftNonProd),
             ).addTask(
                 new ConfigureJenkinsForProject(environmentsRequestedEvent, project.devDeploymentPipeline, project.releaseDeploymentPipelines, openshiftNonProd),
             );

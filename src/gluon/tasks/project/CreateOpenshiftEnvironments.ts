@@ -22,7 +22,8 @@ export class CreateOpenshiftEnvironments extends Task {
     private readonly TASK_CREATE_POD_NETWORK = TaskListMessage.createUniqueTaskName("PodNetwork");
     private dynamicTaskNameStore: { [k: string]: string } = {};
 
-    constructor(private environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest,
+    constructor(private ctx: QMContext,
+                private environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest,
                 private environmentsForCreation: OpenShiftProjectNamespace[],
                 private openshiftEnvironment: OpenShiftConfig,
                 private devopsEnvironmentDetails: DevOpsEnvironmentDetails = getDevOpsEnvironmentDetails(environmentsRequestedEvent.teams[0].name),
@@ -60,6 +61,18 @@ export class CreateOpenshiftEnvironments extends Task {
             logger.info(`Working with OpenShift project Id: ${environment.namespace}`);
 
             await this.createOpenshiftProject(environment.namespace, environment.displayName, this.environmentsRequestedEvent, environment.postfix);
+                // place it here openshiftProjectEnvironmentCreatedEvent
+
+            const openShiftProjectEnvironmentCreatedEvent = {
+                team: this.environmentsRequestedEvent.teams,
+                owningTenant: this.environmentsRequestedEvent.owningTenant,
+                project: this.environmentsRequestedEvent.project,
+                namespace: environment.namespace,
+                displayName: environment.displayName,
+                postfix: environment.postfix,
+            };
+            await this.ctx.raiseEvent(openShiftProjectEnvironmentCreatedEvent, "OpenShiftProjectEnvironmentCreatedEvent");
+
             await this.taskListMessage.succeedTask(this.dynamicTaskNameStore[`${environment.namespace}Environment`]);
         }
 

@@ -11,6 +11,7 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {v4 as uuid} from "uuid";
 import {QMConfig} from "../../../config/QMConfig";
+import {AtomistQMContext} from "../../../context/QMContext";
 import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
 import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
@@ -89,7 +90,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
 
                     taskRunner.addTask(new CreateTeamDevOpsEnvironment(owningTeam, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
-                        new CreateOpenshiftEnvironments(request, environmentsForCreation, prodOpenshift, devopsEnvironmentDetails),
+                        new CreateOpenshiftEnvironments(new AtomistQMContext(ctx), request, environmentsForCreation, prodOpenshift, devopsEnvironmentDetails),
                     ).addTask(
                         new AddJenkinsToProdEnvironment({
                             team: owningTeam,

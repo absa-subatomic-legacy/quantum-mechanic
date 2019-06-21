@@ -1,0 +1,9 @@
+type OpenShiftProjectEnvironmentCreatedEvent @rootType {
+    team: GluonTeam
+    owningTenant: String
+    project: String
+    namespace: String
+    displayName: String
+    postfix: String
+    requestedBy: ActionedBy
+}
