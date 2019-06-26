@@ -18,13 +18,3 @@ type Member {
 	domainUsername: String
 	slackIdentity: SlackIdentity
 }
-
-type MetaData {
-	description: String
-	metadataEntries:[MetadataEntries]
-}
-
-type MetadataEntries {
-	key: String
-	value: String
-}

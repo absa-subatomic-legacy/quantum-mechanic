@@ -29,7 +29,7 @@ export class CreateOpenshiftEnvironments extends Task {
                 private owningTeam: QMTeam,
                 private devopsEnvironmentDetails: DevOpsEnvironmentDetails = getDevOpsEnvironmentDetails(environmentsRequestedEvent.teams[0].name),
                 private ocService = new OCService(),
-                ) {
+    ) {
         super();
     }
 
@@ -64,22 +64,28 @@ export class CreateOpenshiftEnvironments extends Task {
 
             await this.createOpenshiftProject(environment.namespace, environment.displayName, this.environmentsRequestedEvent, environment.postfix);
 
-            const openShiftProjectEnvironmentCreatedEvent = {
-                owningTeam: this.owningTeam,
-                namespace: environment.namespace,
-                masterUrl: this.openshiftEnvironment.masterUrl,
-                owningTenant: this.environmentsRequestedEvent.owningTenant,
-                project: this.environmentsRequestedEvent.project,
-                displayName: environment.displayName,
-                postfix: environment.postfix,
-            };
-
-            logger.debug(`openShiftProjectEnvironmentCreatedEvent: ${JSON.stringify(openShiftProjectEnvironmentCreatedEvent)}`);
-
-            await this.ctx.raiseEvent(openShiftProjectEnvironmentCreatedEvent, "OpenShiftProjectEnvironmentCreatedEvent");
+            await this.raiseOpenShiftProjectEnvironmentCreatedEvent(environment);
 
             await this.taskListMessage.succeedTask(this.dynamicTaskNameStore[`${environment.namespace}Environment`]);
         }
+    }
+
+    private async raiseOpenShiftProjectEnvironmentCreatedEvent(environment: any) {
+
+        const openShiftProjectEnvironmentCreatedEvent = {
+            owningTeam: this.owningTeam,
+            namespace: environment.namespace,
+            masterUrl: this.openshiftEnvironment.masterUrl,
+            owningTenant: this.environmentsRequestedEvent.owningTenant,
+            project: this.environmentsRequestedEvent.project,
+            displayName: environment.displayName,
+            postfix: environment.postfix,
+        };
+
+        logger.debug(`openShiftProjectEnvironmentCreatedEvent: ${JSON.stringify(openShiftProjectEnvironmentCreatedEvent)}`);
+
+        await this.ctx.raiseEvent(openShiftProjectEnvironmentCreatedEvent, "OpenShiftProjectEnvironmentCreatedEvent");
+        logger.debug(`openShiftProjectEnvironmentCreatedEvent raised OK`);
     }
 
     private async createOpenshiftProject(

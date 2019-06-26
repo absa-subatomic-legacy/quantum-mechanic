@@ -8,7 +8,7 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
-import {AtomistQMContext} from "../../../context/QMContext";
+import {AtomistQMContext, QMContext} from "../../../context/QMContext";
 import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {ProjectMessages} from "../../messages/projects/ProjectMessages";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -84,9 +84,11 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
 
         const environmentsRequestedEvent = event.data.ProjectEnvironmentsRequestedEvent[0];
 
+        const atomistQMContext: QMContext = new AtomistQMContext(ctx);
         this.qmMessageClient = this.createMessageClient(ctx, environmentsRequestedEvent.teams);
 
         try {
+
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(environmentsRequestedEvent.project.name);
             const owningTeam: QMTeam = await this.gluonService.teams.getTeamById(project.owningTeam.teamId);
 
@@ -100,12 +102,12 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
             const environmentsForCreation: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespacesForAllPipelines(environmentsRequestedEvent.owningTenant.name, project);
 
             taskRunner.addTask(
-                new CreateOpenshiftEnvironments(new AtomistQMContext(ctx), environmentsRequestedEvent, environmentsForCreation, openshiftNonProd, owningTeam),
+                new CreateOpenshiftEnvironments(atomistQMContext, environmentsRequestedEvent, environmentsForCreation, openshiftNonProd, owningTeam),
             ).addTask(
                 new ConfigureJenkinsForProject(environmentsRequestedEvent, project.devDeploymentPipeline, project.releaseDeploymentPipelines, openshiftNonProd),
             );
 
-            await taskRunner.execute(ctx);
+            await taskRunner.execute(atomistQMContext);
             this.succeedEvent();
             return await this.sendPackageUsageMessage(ctx, environmentsRequestedEvent.project.name, environmentsRequestedEvent.teams);
         } catch (error) {
