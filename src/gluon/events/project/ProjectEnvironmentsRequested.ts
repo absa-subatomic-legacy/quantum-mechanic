@@ -90,6 +90,8 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(environmentsRequestedEvent.project.name);
             const owningTeam: QMTeam = await this.gluonService.teams.getTeamById(project.owningTeam.teamId);
 
+            logger.debug(`ProjectEnvironmentsRequested.owningTeam: ${JSON.stringify(owningTeam)}`);
+
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Provisioning of environment's for project *${environmentsRequestedEvent.project.name}* started:`,
                 this.qmMessageClient);
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
@@ -98,7 +100,7 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
             const environmentsForCreation: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespacesForAllPipelines(environmentsRequestedEvent.owningTenant.name, project);
 
             taskRunner.addTask(
-                new CreateOpenshiftEnvironments(new AtomistQMContext(ctx), environmentsRequestedEvent, environmentsForCreation, openshiftNonProd),
+                new CreateOpenshiftEnvironments(new AtomistQMContext(ctx), environmentsRequestedEvent, environmentsForCreation, openshiftNonProd, owningTeam),
             ).addTask(
                 new ConfigureJenkinsForProject(environmentsRequestedEvent, project.devDeploymentPipeline, project.releaseDeploymentPipelines, openshiftNonProd),
             );

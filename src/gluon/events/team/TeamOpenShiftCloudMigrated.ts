@@ -210,7 +210,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         const openShiftNonProd: OpenShiftConfig = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
 
         taskRunner.addTask(
-            new CreateOpenshiftEnvironments(new AtomistQMContext(ctx), createOpenshiftEnvironmentsDetails, environmentsForCreation, openShiftNonProd),
+            new CreateOpenshiftEnvironments(new AtomistQMContext(ctx), createOpenshiftEnvironmentsDetails, environmentsForCreation, openShiftNonProd, team),
         ).addTask(
             new ConfigureJenkinsForProject(createOpenshiftEnvironmentsDetails, project.devDeploymentPipeline, project.releaseDeploymentPipelines, openShiftNonProd),
         );
