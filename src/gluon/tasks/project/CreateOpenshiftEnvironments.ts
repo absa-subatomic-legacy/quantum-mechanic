@@ -13,6 +13,7 @@ import {
     DevOpsEnvironmentDetails,
     getDevOpsEnvironmentDetails, QMTeam,
 } from "../../util/team/Teams";
+import {GluonToEvent} from "../../util/transform/GluonToEvent";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -73,7 +74,7 @@ export class CreateOpenshiftEnvironments extends Task {
     private async raiseOpenShiftProjectEnvironmentCreatedEvent(environment: any) {
 
         const openShiftProjectEnvironmentCreatedEvent = {
-            owningTeam: this.owningTeam,
+            owningTeam: GluonToEvent.team(this.owningTeam),
             namespace: environment.namespace,
             masterUrl: this.openshiftEnvironment.masterUrl,
             owningTenant: this.environmentsRequestedEvent.owningTenant,

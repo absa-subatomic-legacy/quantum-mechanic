@@ -186,6 +186,7 @@ export const configuration: any = {
         ingester("ConfigServerRequestedEvent"),
         ingester("BroadcastMessageAllChannelsEvent"),
         ingester("TeamSetupCompletedEvent"),
+        ingester("OpenShiftProjectEnvironmentCreatedEvent"),
         ingester("MetaData"),
         ingester("MetadataEntries"),
     ],
