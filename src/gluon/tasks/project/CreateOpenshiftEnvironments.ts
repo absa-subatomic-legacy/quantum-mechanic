@@ -74,13 +74,14 @@ export class CreateOpenshiftEnvironments extends Task {
     private async raiseOpenShiftProjectEnvironmentCreatedEvent(environment: any) {
 
         const openShiftProjectEnvironmentCreatedEvent = {
-            owningTeam: GluonToEvent.team(this.owningTeam),
+            owningTeam: this.owningTeam,
             namespace: environment.namespace,
             masterUrl: this.openshiftEnvironment.masterUrl,
             owningTenant: this.environmentsRequestedEvent.owningTenant,
             project: this.environmentsRequestedEvent.project,
             displayName: environment.displayName,
             postfix: environment.postfix,
+            teamChannel: this.owningTeam.slack.teamChannel,
         };
 
         logger.debug(`openShiftProjectEnvironmentCreatedEvent: ${JSON.stringify(openShiftProjectEnvironmentCreatedEvent)}`);
