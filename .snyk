@@ -1,0 +1,470 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-450202:
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-typescript > apollo-codegen-core > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > node-cache > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > inquirer > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > inquirer > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > node-cache > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > inquirer > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-config > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@absa-subatomic/openshift-api > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > babel-types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > @atomist/tree-path > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/sdm-local > simple-node-logger > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > heroku-cli-util > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > cli-ux > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > @oclif/plugin-not-found > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > babel-types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > cli-ux > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > inquirer > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-config > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-tag-pluck > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-config > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > @oclif/plugin-not-found > cli-ux > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > heroku-cli-util > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-core > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-flow > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-typescript > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > gaze > globule > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-core > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > @oclif/plugin-not-found > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-core > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-flow > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-typescript > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-flow > apollo-codegen-core > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > @oclif/plugin-plugins > cli-ux > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-scala > apollo-codegen-core > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-swift > apollo-codegen-core > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-typescript > apollo-codegen-core > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > gaze > globule > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-core > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-flow > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-typescript > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-tag-pluck > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-core > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-typescript > apollo-codegen-core > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-swift > apollo-codegen-core > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-scala > apollo-codegen-core > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-flow > apollo-codegen-core > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-toolkit > graphql-tag-pluck > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-config > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-scala > apollo-codegen-core > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-flow > apollo-codegen-core > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-scala > apollo-codegen-core > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-swift > apollo-codegen-core > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-tag-pluck > @babel/traverse > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > apollo > apollo-codegen-typescript > apollo-codegen-core > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-core > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-flow > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-typescript > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-flow > apollo-codegen-core > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-swift > apollo-codegen-core > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-typescript > apollo-codegen-core > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-swift > apollo-codegen-core > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-scala > apollo-codegen-core > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-flow > apollo-codegen-core > apollo-language-server > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-tag-pluck > @babel/traverse > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-swift > apollo-codegen-core > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-typescript > apollo-codegen-core > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-flow > apollo-codegen-core > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > apollo > apollo-codegen-scala > apollo-codegen-core > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > winston > async > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/generator > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-code-generator > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-split-export-declaration > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-client > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-codegen-typescript-server > graphql-codegen-typescript-common > graphql-codegen-plugin-helpers > graphql-codegen-core > graphql-toolkit > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-07-04T01:15:49.591Z'
