@@ -1,8 +1,8 @@
 import {SlackMessage} from "@atomist/slack-messages";
 import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
-import {QMProject} from "../project/Project";
 import {QMError} from "../shared/Error";
+import {QMProject} from "../transform/types/gluon/Project";
 
 export async function assertProjectProductionIsApproved(projectName: string, deploymentPipelineId: string, failureMessage: string, gluonService: GluonService = new GluonService()) {
     const project: QMProject = await gluonService.projects.gluonProjectFromProjectName(projectName);

@@ -25,9 +25,7 @@ import {assertGenericProdCanBeRequested} from "../../util/prod/ProdAssertions";
 import {
     getProjectDeploymentPipelineFromPipelineId,
     getProjectOpenshiftNamespace,
-    QMDeploymentPipeline,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     DeploymentPipelineIdParam,
@@ -43,6 +41,10 @@ import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {
     handleQMError,
     } from "../../util/shared/Error";
+import {
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/transform/types/gluon/Project";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Move openshift resources to prod", atomistIntent(CommandIntent.CreateGenericProd))

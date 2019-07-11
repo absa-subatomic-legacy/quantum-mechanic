@@ -22,7 +22,7 @@ import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/Recurs
 import {
     handleQMError,
     } from "../../util/shared/Error";
-import {QMTeam} from "../../util/team/Teams";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Recreate the Jenkins Bitbucket Credentials", atomistIntent(CommandIntent.JenkinsCredentialsRecreate))

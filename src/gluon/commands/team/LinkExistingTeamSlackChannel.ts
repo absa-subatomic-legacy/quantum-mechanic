@@ -9,7 +9,6 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TeamSlackChannelService} from "../../services/team/TeamSlackChannelService";
-import {QMMemberBase} from "../../util/member/Members";
 import {QMParamValidation} from "../../util/QMParamValidation";
 import {
     GluonTeamNameParam,
@@ -17,6 +16,7 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError} from "../../util/shared/Error";
+import {QMMemberBase} from "../../util/transform/types/gluon/Member";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Link existing team channel", atomistIntent(CommandIntent.LinkExistingTeamSlackChannel))

@@ -12,9 +12,9 @@ import * as _ from "lodash";
 import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
 import {TeamSlackChannelService} from "../../services/team/TeamSlackChannelService";
-import {QMMemberBase} from "../../util/member/Members";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
 import {handleQMError} from "../../util/shared/Error";
+import {QMMemberBase} from "../../util/transform/types/gluon/Member";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Create team channel", atomistIntent(CommandIntent.NewTeamSlackChannel))

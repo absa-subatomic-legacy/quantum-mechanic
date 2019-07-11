@@ -3,8 +3,9 @@ import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {Attachment} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import * as graphql from "../../../typings/types";
-import {QMMemberBase} from "../member/Members";
 import {createSortedMenuAttachment} from "../shared/GenericMenu";
+import {QMMemberBase} from "../transform/types/gluon/Member";
+import {QMTeam} from "../transform/types/gluon/Team";
 
 export function menuAttachmentForTeams(ctx: HandlerContext, teams: any[],
                                        command: HandleCommand, message: string = "Please select a team",
@@ -83,23 +84,6 @@ export function isUserAMemberOfTheTeam(user: QMMemberBase, team: QMTeam) {
     }
 
     return false;
-}
-
-export interface QMTeamSlack {
-    teamChannel: string;
-}
-
-export interface QMTeamBase {
-    teamId: string;
-    name: string;
-    openShiftCloud: string;
-    description: string;
-    slack?: QMTeamSlack;
-}
-
-export interface QMTeam extends QMTeamBase {
-    owners: QMMemberBase[];
-    members: QMMemberBase[];
 }
 
 const KickUserFromSlackChannelMutation = `mutation kickUserFromSlackChannel(

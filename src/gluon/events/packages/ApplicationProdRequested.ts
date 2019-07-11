@@ -9,8 +9,6 @@ import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
 import {ChannelMessageClient} from "../../../context/QMMessageClient";
-import {QMApplicationProdRequest} from "../../services/gluon/ApplicationProdRequestService";
-import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {ConfigurePackageDeploymentPipelineInJenkins} from "../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
@@ -23,12 +21,14 @@ import {
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
     getProjectOpenshiftNamespace,
     OpenShiftProjectNamespace,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
-import {QMTenant} from "../../util/shared/Tenants";
-import {QMTeam} from "../../util/team/Teams";
+import {QMApplication} from "../../util/transform/types/gluon/Application";
+import {QMApplicationProdRequest} from "../../util/transform/types/gluon/ApplicationProdRequest";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
+import {QMTenant} from "../../util/transform/types/gluon/Tenant";
 import {buildJenkinsProdDeploymentJobTemplates} from "./package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
 
 @EventHandler("Receive ApplicationProdRequestedEvent events", `

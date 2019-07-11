@@ -7,8 +7,8 @@ import {QMError, QMErrorType} from "../../util/shared/Error";
 import {
     DevOpsEnvironmentDetails,
     getDevOpsEnvironmentDetails,
-    QMTeam,
-} from "../../util/team/Teams";
+    } from "../../util/team/Teams";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 

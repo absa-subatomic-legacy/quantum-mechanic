@@ -15,12 +15,12 @@ import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
 import {QMConfig} from "../../../config/QMConfig";
+import {AtomistQMContext, QMContext} from "../../../context/QMContext";
 import {
     ChannelMessageClient,
     SimpleQMMessageClient,
 } from "../../../context/QMMessageClient";
 import {ReRunMigrateTeamCloud} from "../../commands/team/ReRunMigrateTeamCloud";
-import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {ConfigurePackageDeploymentPipelineInJenkins} from "../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
@@ -43,18 +43,19 @@ import {
     getAllPipelineOpenshiftNamespacesForAllPipelines,
     OpenshiftProjectEnvironmentRequest,
     OpenShiftProjectNamespace,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
-import {QMTenant} from "../../util/shared/Tenants";
 import {
     DevOpsEnvironmentDetails,
     getDevOpsEnvironmentDetails,
-    QMTeam,
-} from "../../util/team/Teams";
+    } from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
+import {QMApplication} from "../../util/transform/types/gluon/Application";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
+import {QMTenant} from "../../util/transform/types/gluon/Tenant";
 import {buildJenkinsDeploymentJobTemplates} from "../packages/package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
 
 @EventHandler("Receive TeamOpenShiftCloudMigratedEvent events", `
@@ -109,9 +110,12 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         const qmMessageClient = new ChannelMessageClient(ctx).addDestination(team.slack.teamChannel);
 
         try {
-            const taskRunner = await this.createMigrateTeamToCloudTasks(qmMessageClient, team, teamCloudMigrationEvent.previousCloud);
 
-            await taskRunner.execute(ctx);
+            const atomistQMContext: QMContext = new AtomistQMContext(ctx);
+
+            const taskRunner = await this.createMigrateTeamToCloudTasks(atomistQMContext, qmMessageClient, team, teamCloudMigrationEvent.previousCloud);
+
+            await taskRunner.execute(atomistQMContext);
             this.succeedEvent();
 
             return qmMessageClient.send(`:rocket: Team successfully migrated to *${team.openShiftCloud}* cloud.`);
@@ -127,7 +131,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         }
     }
 
-    private async createMigrateTeamToCloudTasks(qmMessageClient: SimpleQMMessageClient, team: QMTeam, previousCloud: string) {
+    private async createMigrateTeamToCloudTasks(atomistQMContext: QMContext,  qmMessageClient: SimpleQMMessageClient, team: QMTeam, previousCloud: string) {
         const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Migrating Team to cloud *${team.openShiftCloud}* started:`,
             qmMessageClient);
         const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
@@ -142,7 +146,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
 
         const projects = await this.gluonService.projects.gluonProjectsWhichBelongToGluonTeam(team.name, false);
         for (const project of projects) {
-            await this.addCreateProjectEnvironmentsTasks(taskRunner, team, project, previousCloud);
+            await this.addCreateProjectEnvironmentsTasks(atomistQMContext, taskRunner, team, project, previousCloud);
         }
 
         return taskRunner;
@@ -192,7 +196,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         }
     }
 
-    private async addCreateProjectEnvironmentsTasks(taskRunner: TaskRunner, team: QMTeam, project: QMProject, previousCloud: string) {
+    private async addCreateProjectEnvironmentsTasks(atomistQMContext: QMContext, taskRunner: TaskRunner, team: QMTeam, project: QMProject, previousCloud: string) {
 
         const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
@@ -209,7 +213,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         const openShiftNonProd: OpenShiftConfig = QMConfig.subatomic.openshiftClouds[team.openShiftCloud].openshiftNonProd;
 
         taskRunner.addTask(
-            new CreateOpenshiftEnvironments(createOpenshiftEnvironmentsDetails, environmentsForCreation, openShiftNonProd),
+            new CreateOpenshiftEnvironments(atomistQMContext, createOpenshiftEnvironmentsDetails, environmentsForCreation, openShiftNonProd, team),
         ).addTask(
             new ConfigureJenkinsForProject(createOpenshiftEnvironmentsDetails, project.devDeploymentPipeline, project.releaseDeploymentPipelines, openShiftNonProd),
         );

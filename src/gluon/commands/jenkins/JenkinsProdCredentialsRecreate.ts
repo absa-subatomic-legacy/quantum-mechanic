@@ -15,8 +15,7 @@ import {
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
     getProjectDeploymentPipelineFromPipelineId,
     OpenShiftProjectNamespace,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {
     DeploymentPipelineIdParam,
     DeploymentPipelineIdSetter,
@@ -29,7 +28,8 @@ import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/Recurs
 import {
     handleQMError,
     } from "../../util/shared/Error";
-import {QMTeam} from "../../util/team/Teams";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Recreate the production jenkins credentials for a project pipeline", atomistIntent(CommandIntent.JenkinsProdCredentialsRecreate))

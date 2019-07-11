@@ -8,9 +8,9 @@ import {isSuccessCode} from "../../../http/Http";
 import {CommandIntent} from "../../commands/CommandIntent";
 import {CreateProject} from "../../commands/project/CreateProject";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
-import {QMDeploymentPipeline} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
+import {QMDeploymentPipeline} from "../../util/transform/types/gluon/Project";
 
 export class ProjectService {
 

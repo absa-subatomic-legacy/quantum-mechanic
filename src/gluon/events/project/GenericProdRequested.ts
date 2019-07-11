@@ -11,7 +11,6 @@ import {QMConfig} from "../../../config/QMConfig";
 
 import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
-import {QMGenericProdRequest} from "../../services/gluon/GenericProdRequestService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {CreateOpenshiftResourcesInProject} from "../../tasks/project/CreateOpenshiftResourcesInProject";
@@ -22,12 +21,13 @@ import {
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
     getProjectOpenshiftNamespace,
     OpenShiftProjectNamespace,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
-import {QMTenant} from "../../util/shared/Tenants";
-import {QMTeam} from "../../util/team/Teams";
+import {QMGenericProdRequest} from "../../util/transform/types/gluon/GenericProdRequest";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
+import {QMTenant} from "../../util/transform/types/gluon/Tenant";
 
 @EventHandler("Receive GenericProdRequestedEvent events", `
 subscription GenericProdRequestedEvent {

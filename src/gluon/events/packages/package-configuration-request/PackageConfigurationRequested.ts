@@ -18,7 +18,6 @@ import {CommandIntent} from "../../../commands/CommandIntent";
 import {KickOffJenkinsBuild} from "../../../commands/jenkins/JenkinsBuild";
 import {DocumentationUrlBuilder} from "../../../messages/documentation/DocumentationUrlBuilder";
 import {TeamMembershipMessages} from "../../../messages/member/TeamMembershipMessages";
-import {QMApplication} from "../../../services/gluon/ApplicationService";
 import {GluonService} from "../../../services/gluon/GluonService";
 import {ConfigurePackageDeploymentPipelineInJenkins} from "../../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
 import {ConfigurePackageInOpenshift} from "../../../tasks/packages/ConfigurePackageInOpenshift";
@@ -29,17 +28,19 @@ import {
     JenkinsDeploymentJobTemplate,
     NonProdDefaultJenkinsJobTemplate,
 } from "../../../util/jenkins/JenkinsJobTemplates";
-import {QMMemberBase} from "../../../util/member/Members";
 import {ApplicationType} from "../../../util/packages/Applications";
-import {QMProject} from "../../../util/project/Project";
 import {ParameterDisplayType} from "../../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {BaseQMEvent} from "../../../util/shared/BaseQMEvent";
 import {
     handleQMError,
     QMError,
     } from "../../../util/shared/Error";
-import {QMTenant} from "../../../util/shared/Tenants";
-import {isUserAMemberOfTheTeam, QMTeam} from "../../../util/team/Teams";
+import {isUserAMemberOfTheTeam} from "../../../util/team/Teams";
+import {QMApplication} from "../../../util/transform/types/gluon/Application";
+import {QMMemberBase} from "../../../util/transform/types/gluon/Member";
+import {QMProject} from "../../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../../util/transform/types/gluon/Team";
+import {QMTenant} from "../../../util/transform/types/gluon/Tenant";
 import {buildJenkinsDeploymentJobTemplates} from "./JenkinsDeploymentJobTemplateBuilder";
 import {PackageConfigurationRequestedEvent} from "./PackageConfigurationRequestedEvent";
 

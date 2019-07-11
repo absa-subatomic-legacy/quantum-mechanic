@@ -1,4 +1,5 @@
 import {MemberEvent} from "./MemberEvent";
+import {MetaData} from "./MetaData";
 import {SlackIdentityTeamEvent} from "./SlackIdentityTeamEvent";
 
 export interface GluonTeamEvent {
@@ -9,4 +10,5 @@ export interface GluonTeamEvent {
     openShiftCloud: string;
     owners: MemberEvent[];
     members: MemberEvent[];
+    metadata: MetaData[];
 }

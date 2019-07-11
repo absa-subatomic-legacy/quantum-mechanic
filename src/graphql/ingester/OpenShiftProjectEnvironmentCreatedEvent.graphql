@@ -1,0 +1,15 @@
+type OpenShiftProjectEnvironmentCreatedEvent @rootType {
+    owningTeam(name: String): GluonTeam
+    namespace: String
+    masterUrl: String
+    owningTenant: OwningTenant
+    project: Project
+    displayName: String
+    postfix: String
+}
+
+type OwningTenant {
+    description: String
+    name: String
+    tenantId: String
+}

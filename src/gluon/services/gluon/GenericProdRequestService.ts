@@ -1,11 +1,8 @@
-import {OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {logger} from "@atomist/automation-client";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
-import {QMMemberBase} from "../../util/member/Members";
-import {QMDeploymentPipeline, QMProjectBase} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 
 export class GenericProdRequestService {
@@ -42,12 +39,4 @@ export class GenericProdRequestService {
 
         return prodRequestResult.data;
     }
-}
-
-export interface QMGenericProdRequest {
-    genericProdRequestId: string;
-    project: QMProjectBase;
-    actionedBy: QMMemberBase;
-    openShiftResources: OpenshiftResource[];
-    deploymentPipeline: QMDeploymentPipeline;
 }

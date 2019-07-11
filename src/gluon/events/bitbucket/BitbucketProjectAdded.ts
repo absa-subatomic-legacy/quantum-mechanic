@@ -18,10 +18,10 @@ import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {ConfigureBitbucketProjectAccess} from "../../tasks/bitbucket/ConfigureBitbucketProjectAccess";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {QMProjectBase} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
+import {QMProjectBase} from "../../util/transform/types/gluon/Project";
 
 @EventHandler("Receive BitbucketProjectAddedEvent events", `
 subscription BitbucketProjectAddedEvent {

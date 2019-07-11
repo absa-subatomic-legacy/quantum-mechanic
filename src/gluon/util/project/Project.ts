@@ -3,10 +3,13 @@ import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {Attachment} from "@atomist/slack-messages";
 import * as _ from "lodash";
 import {OpenShiftConfig} from "../../../config/OpenShiftConfig";
-import {QMBitbucketProject} from "../bitbucket/Bitbucket";
 import {createSortedMenuAttachment} from "../shared/GenericMenu";
-import {QMTenant} from "../shared/Tenants";
-import {QMTeam, QMTeamBase} from "../team/Teams";
+import {
+    QMDeploymentPipeline,
+    QMProject,
+} from "../transform/types/gluon/Project";
+import {QMTeam} from "../transform/types/gluon/Team";
+import {QMTenant} from "../transform/types/gluon/Tenant";
 
 /**
  * Returns the expected OpenShift namespace for a given project pipeline environment.
@@ -192,33 +195,6 @@ export interface JenkinsProjectMetadata {
     postfix: string;
     clusterExternalDockerRegistryUrl: string;
     clusterName: string;
-}
-
-export interface QMProjectBase {
-    projectId: string;
-    name: string;
-    bitbucketProject: QMBitbucketProject;
-    owningTenant: string;
-    description: string;
-}
-
-export interface QMProject extends QMProjectBase {
-    owningTeam: QMTeamBase;
-    devDeploymentPipeline: QMDeploymentPipeline;
-    releaseDeploymentPipelines: QMDeploymentPipeline[];
-}
-
-export interface QMDeploymentPipeline {
-    pipelineId?: string;
-    name: string;
-    tag: string;
-    environments: QMDeploymentEnvironment[];
-}
-
-export interface QMDeploymentEnvironment {
-    positionInPipeline: number;
-    displayName: string;
-    postfix: string;
 }
 
 export enum ProjectProdRequestApprovalResponse {

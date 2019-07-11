@@ -8,6 +8,7 @@ import {
 import {EventHandler} from "@atomist/automation-client/lib/decorators";
 import {HandleEvent} from "@atomist/automation-client/lib/HandleEvent";
 import {QMConfig} from "../../../config/QMConfig";
+import {AtomistQMContext, QMContext} from "../../../context/QMContext";
 import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {ProjectMessages} from "../../messages/projects/ProjectMessages";
 import {GluonService} from "../../services/gluon/GluonService";
@@ -18,11 +19,11 @@ import {TaskRunner} from "../../tasks/TaskRunner";
 import {
     getAllPipelineOpenshiftNamespacesForAllPipelines,
     OpenShiftProjectNamespace,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
-import {QMTeam} from "../../util/team/Teams";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 
 @EventHandler("Receive ProjectEnvironmentsRequestedEvent events", `
 subscription ProjectEnvironmentsRequestedEvent {
@@ -83,11 +84,15 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
 
         const environmentsRequestedEvent = event.data.ProjectEnvironmentsRequestedEvent[0];
 
+        const atomistQMContext: QMContext = new AtomistQMContext(ctx);
         this.qmMessageClient = this.createMessageClient(ctx, environmentsRequestedEvent.teams);
 
         try {
+
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(environmentsRequestedEvent.project.name);
             const owningTeam: QMTeam = await this.gluonService.teams.getTeamById(project.owningTeam.teamId);
+
+            logger.debug(`ProjectEnvironmentsRequested.owningTeam: ${JSON.stringify(owningTeam)}`);
 
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Provisioning of environment's for project *${environmentsRequestedEvent.project.name}* started:`,
                 this.qmMessageClient);
@@ -97,12 +102,12 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
             const environmentsForCreation: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespacesForAllPipelines(environmentsRequestedEvent.owningTenant.name, project);
 
             taskRunner.addTask(
-                new CreateOpenshiftEnvironments(environmentsRequestedEvent, environmentsForCreation, openshiftNonProd),
+                new CreateOpenshiftEnvironments(atomistQMContext, environmentsRequestedEvent, environmentsForCreation, openshiftNonProd, owningTeam),
             ).addTask(
                 new ConfigureJenkinsForProject(environmentsRequestedEvent, project.devDeploymentPipeline, project.releaseDeploymentPipelines, openshiftNonProd),
             );
 
-            await taskRunner.execute(ctx);
+            await taskRunner.execute(atomistQMContext);
             this.succeedEvent();
             return await this.sendPackageUsageMessage(ctx, environmentsRequestedEvent.project.name, environmentsRequestedEvent.teams);
         } catch (error) {

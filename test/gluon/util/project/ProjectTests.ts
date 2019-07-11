@@ -8,9 +8,11 @@ import {
     getProjectDevOpsId,
     getProjectDisplayName,
     getProjectOpenshiftNamespace,
+    } from "../../../../src/gluon/util/project/Project";
+import {
     QMDeploymentPipeline,
     QMProject,
-} from "../../../../src/gluon/util/project/Project";
+} from "../../../../src/gluon/util/transform/types/gluon/Project";
 
 describe("getProjectOpenshiftNamespace", () => {
     it("with pipelineTag should return namespace including tag", async () => {

@@ -9,7 +9,6 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {ConfigServerRequestedEvent} from "../../events/team/ConfigServerRequested";
 import {GluonService} from "../../services/gluon/GluonService";
-import {QMMemberBase} from "../../util/member/Members";
 import {QMParamValidation} from "../../util/QMParamValidation";
 import {
     GluonTeamNameParam,
@@ -18,8 +17,9 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError} from "../../util/shared/Error";
-import {QMTeam} from "../../util/team/Teams";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
+import {QMMemberBase} from "../../util/transform/types/gluon/Member";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Add a new Subatomic Config Server", atomistIntent(CommandIntent.AddConfigServer))

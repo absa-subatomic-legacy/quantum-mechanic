@@ -14,12 +14,13 @@ import {
     roleBindingDefinition,
     serviceAccountDefinition,
 } from "../../util/jenkins/JenkinsOpenshiftResources";
-import {OpenShiftProjectNamespace, QMProject} from "../../util/project/Project";
+import {OpenShiftProjectNamespace} from "../../util/project/Project";
 import {
     getDevOpsEnvironmentDetails,
     getDevOpsEnvironmentDetailsProd,
-    QMTeam,
-} from "../../util/team/Teams";
+    } from "../../util/team/Teams";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 

@@ -15,7 +15,6 @@ import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {GluonService} from "../../services/gluon/GluonService";
-import {QMProject} from "../../util/project/Project";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
@@ -27,6 +26,7 @@ import {
     handleQMError,
     QMError,
     } from "../../util/shared/Error";
+import {QMProject} from "../../util/transform/types/gluon/Project";
 import {
     atomistIntent,
     CommandIntent,

@@ -11,8 +11,9 @@ import {
 import {QMError, QMErrorType} from "../../util/shared/Error";
 import {
     DevOpsEnvironmentDetails,
-    getDevOpsEnvironmentDetails,
-} from "../../util/team/Teams";
+    getDevOpsEnvironmentDetails } from "../../util/team/Teams";
+import {GluonToEvent} from "../../util/transform/GluonToEvent";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -22,11 +23,14 @@ export class CreateOpenshiftEnvironments extends Task {
     private readonly TASK_CREATE_POD_NETWORK = TaskListMessage.createUniqueTaskName("PodNetwork");
     private dynamicTaskNameStore: { [k: string]: string } = {};
 
-    constructor(private environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest,
+    constructor(private ctx: QMContext,
+                private environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest,
                 private environmentsForCreation: OpenShiftProjectNamespace[],
                 private openshiftEnvironment: OpenShiftConfig,
+                private owningTeam: QMTeam,
                 private devopsEnvironmentDetails: DevOpsEnvironmentDetails = getDevOpsEnvironmentDetails(environmentsRequestedEvent.teams[0].name),
-                private ocService = new OCService()) {
+                private ocService = new OCService(),
+    ) {
         super();
     }
 
@@ -60,13 +64,38 @@ export class CreateOpenshiftEnvironments extends Task {
             logger.info(`Working with OpenShift project Id: ${environment.namespace}`);
 
             await this.createOpenshiftProject(environment.namespace, environment.displayName, this.environmentsRequestedEvent, environment.postfix);
+
+            await this.raiseOpenShiftProjectEnvironmentCreatedEvent(environment);
+
             await this.taskListMessage.succeedTask(this.dynamicTaskNameStore[`${environment.namespace}Environment`]);
         }
-
     }
 
-    private async createOpenshiftProject(projectNamespaceId: string, projectDisplayName: string, environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest, environmentPostfix: string) {
+    private async raiseOpenShiftProjectEnvironmentCreatedEvent(environment: any) {
+
+        const openShiftProjectEnvironmentCreatedEvent = {
+            owningTeam: GluonToEvent.team(this.owningTeam),
+            namespace: environment.namespace,
+            masterUrl: this.openshiftEnvironment.masterUrl,
+            owningTenant: this.environmentsRequestedEvent.owningTenant,
+            project: this.environmentsRequestedEvent.project,
+            displayName: environment.displayName,
+            postfix: environment.postfix,
+        };
+
+        logger.debug(`openShiftProjectEnvironmentCreatedEvent: ${JSON.stringify(openShiftProjectEnvironmentCreatedEvent)}`);
+
+        await this.ctx.raiseEvent(openShiftProjectEnvironmentCreatedEvent, "OpenShiftProjectEnvironmentCreatedEvent");
+        logger.debug(`openShiftProjectEnvironmentCreatedEvent raised OK`);
+    }
+
+    private async createOpenshiftProject(
+        projectNamespaceId: string,
+        projectDisplayName: string,
+        environmentsRequestedEvent: OpenshiftProjectEnvironmentRequest,
+        environmentPostfix: string) {
         try {
+
             await this.ocService.newSubatomicProject(projectNamespaceId, projectDisplayName, environmentsRequestedEvent.project.name, environmentPostfix);
         } catch (error) {
             if (error instanceof QMError && error.errorType === QMErrorType.conflict) {

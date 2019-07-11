@@ -9,7 +9,6 @@ import {CommandHandler} from "@atomist/automation-client/lib/decorators";
 import {addressSlackChannelsFromContext} from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {GluonService} from "../../services/gluon/GluonService";
-import {QMProject} from "../../util/project/Project";
 import {
     DeploymentPipelineIdParam,
     DeploymentPipelineIdSetter,
@@ -20,6 +19,7 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError} from "../../util/shared/Error";
+import {QMProject} from "../../util/transform/types/gluon/Project";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Create the OpenShift production environments for a project", atomistIntent(CommandIntent.CreateProjectProdEnvironments))

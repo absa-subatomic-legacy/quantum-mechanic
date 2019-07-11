@@ -6,6 +6,7 @@ type GluonTeam @rootType {
 	openShiftCloud: String
 	owners: [Owner]
 	members: [Member]
+	metadata: [MetaData]
 }
 type Owner {
 	firstName: String

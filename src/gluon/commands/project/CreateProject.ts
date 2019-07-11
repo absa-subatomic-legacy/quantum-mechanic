@@ -19,7 +19,7 @@ import {
     handleQMError,
     QMError,
     } from "../../util/shared/Error";
-import {QMTeam} from "../../util/team/Teams";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Create a new project", atomistIntent(CommandIntent.CreateProject))

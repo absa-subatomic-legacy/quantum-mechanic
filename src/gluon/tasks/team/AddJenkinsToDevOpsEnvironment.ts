@@ -8,7 +8,8 @@ import {
     roleBindingDefinition,
     serviceAccountDefinition,
 } from "../../util/jenkins/JenkinsOpenshiftResources";
-import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 

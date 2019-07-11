@@ -11,19 +11,15 @@ import {
 import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {buildJenkinsProdDeploymentJobTemplates} from "../../events/packages/package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
-import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigurePackageDeploymentPipelineInJenkins} from "../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {JenkinsDeploymentJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
-import {QMMemberBase} from "../../util/member/Members";
 import {assertApplicationJenkinsProdCanBeRequested} from "../../util/prod/ProdAssertions";
 import {
     getProjectDeploymentPipelineFromPipelineId,
-    QMDeploymentPipeline,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {
     DeploymentPipelineIdParam,
     DeploymentPipelineIdSetter,
@@ -38,8 +34,15 @@ import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/Recurs
 import {
     handleQMError,
     } from "../../util/shared/Error";
-import {QMTenant} from "../../util/shared/Tenants";
-import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
+import {isUserAMemberOfTheTeam} from "../../util/team/Teams";
+import {QMApplication} from "../../util/transform/types/gluon/Application";
+import {QMMemberBase} from "../../util/transform/types/gluon/Member";
+import {
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
+import {QMTenant} from "../../util/transform/types/gluon/Tenant";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Add a prod deployment job to jenkins for an application", atomistIntent(CommandIntent.ConfigureApplicationJenkinsProd))

@@ -4,7 +4,7 @@ import {
     buildJenkinsDeploymentJobTemplates,
     buildJenkinsProdDeploymentJobTemplates,
 } from "../../../../../src/gluon/events/packages/package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
-import {QMDeploymentPipeline} from "../../../../../src/gluon/util/project/Project";
+import {QMDeploymentPipeline} from "../../../../../src/gluon/util/transform/types/gluon/Project";
 
 describe("buildJenkinsDeploymentJobTemplates", () => {
     it("with single release pipeline should return correct template", async () => {
