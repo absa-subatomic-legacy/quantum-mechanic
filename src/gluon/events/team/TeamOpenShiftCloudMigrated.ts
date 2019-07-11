@@ -21,7 +21,6 @@ import {
     SimpleQMMessageClient,
 } from "../../../context/QMMessageClient";
 import {ReRunMigrateTeamCloud} from "../../commands/team/ReRunMigrateTeamCloud";
-import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {ConfigurePackageDeploymentPipelineInJenkins} from "../../tasks/packages/ConfigurePackageDeploymentPipelineInJenkins";
@@ -44,18 +43,19 @@ import {
     getAllPipelineOpenshiftNamespacesForAllPipelines,
     OpenshiftProjectEnvironmentRequest,
     OpenShiftProjectNamespace,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
-import {QMTenant} from "../../util/shared/Tenants";
 import {
     DevOpsEnvironmentDetails,
     getDevOpsEnvironmentDetails,
-    QMTeam,
-} from "../../util/team/Teams";
+    } from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
+import {QMApplication} from "../../util/transform/types/gluon/Application";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
+import {QMTenant} from "../../util/transform/types/gluon/Tenant";
 import {buildJenkinsDeploymentJobTemplates} from "../packages/package-configuration-request/JenkinsDeploymentJobTemplateBuilder";
 
 @EventHandler("Receive TeamOpenShiftCloudMigratedEvent events", `

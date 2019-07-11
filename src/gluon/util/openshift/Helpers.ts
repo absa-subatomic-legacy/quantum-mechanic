@@ -1,7 +1,7 @@
 import {
-    QMDeploymentEnvironment,
     QMDeploymentPipeline,
-} from "../project/Project";
+} from "../transform/types/gluon/Project";
+import {QMDeploymentEnvironment} from "../transform/types/gluon/Project";
 
 export function getHighestPreProdEnvironment(deploymentPipeline: QMDeploymentPipeline): QMDeploymentEnvironment {
     return deploymentPipeline.environments[deploymentPipeline.environments.length - 1];

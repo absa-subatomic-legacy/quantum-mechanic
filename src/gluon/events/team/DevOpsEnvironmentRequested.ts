@@ -17,8 +17,9 @@ import {AddJenkinsToDevOpsEnvironment} from "../../tasks/team/AddJenkinsToDevOps
 import {CreateTeamDevOpsEnvironment} from "../../tasks/team/CreateTeamDevOpsEnvironment";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
-import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 
 @EventHandler("Receive DevOpsEnvironmentRequestedEvent events", `
 subscription DevOpsEnvironmentRequestedEvent {

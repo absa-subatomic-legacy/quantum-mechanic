@@ -8,9 +8,12 @@ import {isSuccessCode} from "../../../http/Http";
 import {CommandIntent} from "../../commands/CommandIntent";
 import {LinkExistingApplication} from "../../commands/packages/LinkExistingApplication";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
-import {QMMemberBase} from "../../util/member/Members";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
+import {
+    QMApplication,
+    QMNewApplication,
+} from "../../util/transform/types/gluon/Application";
 
 export class ApplicationService {
 
@@ -112,32 +115,4 @@ Consider linking an existing application called ${applicationName}. Click the bu
         return await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`, applicationDetails);
     }
 
-}
-
-export interface QMNewApplication {
-    name: string;
-    description: string;
-    applicationType: string;
-    projectId: string;
-    bitbucketRepository: QMBitbucketRepository;
-    createdBy: QMMemberBase;
-    requestConfiguration: boolean;
-}
-
-export interface QMApplication {
-    applicationId: string;
-    name: string;
-    description: string;
-    applicationType: string;
-    projectId: string;
-    bitbucketRepository: QMBitbucketRepository;
-    createdBy: QMMemberBase;
-}
-
-export interface QMBitbucketRepository {
-    bitbucketId?: string;
-    slug?: string;
-    name: string;
-    repoUrl: string;
-    remoteUrl?: string;
 }

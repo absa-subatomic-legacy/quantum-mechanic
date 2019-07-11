@@ -16,8 +16,6 @@ import {ChannelMessageClient} from "../../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../../http/Http";
 import {TeamMembershipMessages} from "../../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../../services/gluon/GluonService";
-import {QMMemberBase} from "../../../util/member/Members";
-import {QMProject} from "../../../util/project/Project";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
@@ -29,6 +27,8 @@ import {
     handleQMError,
     QMError,
     } from "../../../util/shared/Error";
+import {QMMemberBase} from "../../../util/transform/types/gluon/Member";
+import {QMProject} from "../../../util/transform/types/gluon/Project";
 import {DefinePipelineMessages} from "./DefinePipelineMessages";
 
 @CommandHandler("Create new OpenShift environments for a project", QMConfig.subatomic.commandPrefix + " request project environments")

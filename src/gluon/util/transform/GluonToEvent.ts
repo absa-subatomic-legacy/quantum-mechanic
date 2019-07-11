@@ -1,12 +1,13 @@
-import {QMApplication} from "../../services/gluon/ApplicationService";
-import {QMMemberBase} from "../member/Members";
-import {QMProject} from "../project/Project";
-import {QMTeam, QMTeamBase} from "../team/Teams";
 import {GluonApplicationEvent} from "./types/event/GluonApplicationEvent";
 import {KeyValuePairEvent} from "./types/event/KeyValuePairEvent";
 import {MemberEvent} from "./types/event/MemberEvent";
 import {ProjectEvent} from "./types/event/ProjectEvent";
 import {SlackIdentityTeamEvent} from "./types/event/SlackIdentityTeamEvent";
+import {QMApplication} from "./types/gluon/Application";
+import {QMMemberBase} from "./types/gluon/Member";
+import {QMProject} from "./types/gluon/Project";
+import {QMTeamBase} from "./types/gluon/Team";
+import {QMTeam} from "./types/gluon/Team";
 
 export class GluonToEvent {
 
@@ -66,6 +67,7 @@ export class GluonToEvent {
             members: gluonTeamFull.members,
             openShiftCloud: gluonTeamFull.openShiftCloud,
             description: gluonTeamFull.description,
+            metadata: gluonTeamFull.metadata,
         };
     }
 

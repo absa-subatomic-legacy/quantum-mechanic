@@ -12,8 +12,6 @@ import {
 import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
-import {QMMemberBase} from "../../util/member/Members";
-import {QMProject} from "../../util/project/Project";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
@@ -24,8 +22,11 @@ import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/Recurs
 import {
     handleQMError,
     } from "../../util/shared/Error";
-import {isUserAMemberOfTheTeam, QMTeam} from "../../util/team/Teams";
+import {isUserAMemberOfTheTeam} from "../../util/team/Teams";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
+import {QMMemberBase} from "../../util/transform/types/gluon/Member";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Creates a jenkins build job for a given project", atomistIntent(CommandIntent.CreateProjectJenkinsJob))

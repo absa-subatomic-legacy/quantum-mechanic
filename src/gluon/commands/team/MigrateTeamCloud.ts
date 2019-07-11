@@ -14,7 +14,6 @@ import {
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {QMMemberBase} from "../../util/member/Members";
 import {QMColours} from "../../util/QMColour";
 import {
     GluonTeamNameParam,
@@ -28,7 +27,8 @@ import {
 } from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {handleQMError} from "../../util/shared/Error";
-import {QMTeam} from "../../util/team/Teams";
+import {QMMemberBase} from "../../util/transform/types/gluon/Member";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Move all Openshift resources belonging to a team to a different cloud", atomistIntent(CommandIntent.MigrateTeamCloud))

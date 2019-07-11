@@ -11,9 +11,9 @@ import {
 import {QMError, QMErrorType} from "../../util/shared/Error";
 import {
     DevOpsEnvironmentDetails,
-    getDevOpsEnvironmentDetails, QMTeam,
-} from "../../util/team/Teams";
+    getDevOpsEnvironmentDetails } from "../../util/team/Teams";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 
@@ -74,14 +74,13 @@ export class CreateOpenshiftEnvironments extends Task {
     private async raiseOpenShiftProjectEnvironmentCreatedEvent(environment: any) {
 
         const openShiftProjectEnvironmentCreatedEvent = {
-            owningTeam: this.owningTeam,
+            owningTeam: GluonToEvent.team(this.owningTeam),
             namespace: environment.namespace,
             masterUrl: this.openshiftEnvironment.masterUrl,
             owningTenant: this.environmentsRequestedEvent.owningTenant,
             project: this.environmentsRequestedEvent.project,
             displayName: environment.displayName,
             postfix: environment.postfix,
-            teamChannel: this.owningTeam.slack.teamChannel,
         };
 
         logger.debug(`openShiftProjectEnvironmentCreatedEvent: ${JSON.stringify(openShiftProjectEnvironmentCreatedEvent)}`);

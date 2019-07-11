@@ -18,12 +18,13 @@ import {
 import {
     getAllPipelineOpenshiftNamespacesForAllPipelines,
     getProjectDevOpsId,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {imageStreamToFullImageStreamTagString} from "../../util/shared/ImageStreamTranformers";
-import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {KeyValuePairEvent} from "../../util/transform/types/event/KeyValuePairEvent";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 

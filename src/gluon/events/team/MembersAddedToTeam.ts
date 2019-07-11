@@ -17,16 +17,17 @@ import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService
 import {userFromDomainUser} from "../../util/member/Members";
 import {
     getAllPipelineOpenshiftNamespacesForAllPipelines,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     handleQMError,
     QMError,
 } from "../../util/shared/Error";
-import {QMTenant} from "../../util/shared/Tenants";
-import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
+import {QMTenant} from "../../util/transform/types/gluon/Tenant";
 
 @EventHandler("Receive MembersAddedToTeamEvent events", `
 subscription MembersAddedToTeamEvent {

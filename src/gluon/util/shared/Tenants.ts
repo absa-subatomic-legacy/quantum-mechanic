@@ -1,5 +1,6 @@
 import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {Attachment} from "@atomist/slack-messages";
+import {QMTenant} from "../transform/types/gluon/Tenant";
 import {createMenuAttachment} from "./GenericMenu";
 
 export function menuAttachmentForTenants(tenants: QMTenant[],
@@ -31,8 +32,4 @@ export function createQMTenant(name: string): QMTenant {
     return {
         name,
     };
-}
-
-export interface QMTenant {
-    name: string;
 }

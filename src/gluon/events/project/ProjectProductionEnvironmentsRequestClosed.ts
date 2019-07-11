@@ -16,7 +16,6 @@ import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {ReRunProjectProdRequest} from "../../commands/project/ReRunProjectProdRequest";
 import {ProdRequestMessages} from "../../messages/prod/ProdRequestMessages";
 import {GluonService} from "../../services/gluon/GluonService";
-import {QMProjectProdRequest} from "../../services/gluon/ProjectProdRequestService";
 import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEnvironments";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
@@ -26,13 +25,14 @@ import {
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
     OpenshiftProjectEnvironmentRequest,
     OpenShiftProjectNamespace,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
 import {getDevOpsEnvironmentDetailsProd} from "../../util/team/Teams";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMProjectProdRequest} from "../../util/transform/types/gluon/ProjectProdRequest";
 
 @EventHandler("Receive ProjectProductionEnvironmentsRequestClosedEvent events", `
 subscription ProjectProductionEnvironmentsRequestClosedEvent {

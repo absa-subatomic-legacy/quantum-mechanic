@@ -7,7 +7,6 @@ import {
     BitbucketFileService,
     SourceControlledFileRequest,
 } from "../../services/bitbucket/BitbucketFileService";
-import {QMApplication} from "../../services/gluon/ApplicationService";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
 import {ConfigurePackageInJenkinsService} from "../../services/packages/ConfigurePackageInJenkinsService";
@@ -18,8 +17,10 @@ import {
 } from "../../util/jenkins/Jenkins";
 import {JenkinsJobTemplate} from "../../util/jenkins/JenkinsJobTemplates";
 import {bitbucketProjectKeyFromRepositoryRemoteUrl} from "../../util/packages/Applications";
-import {QMProject} from "../../util/project/Project";
-import {getDevOpsEnvironmentDetails, QMTeam} from "../../util/team/Teams";
+import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {QMApplication} from "../../util/transform/types/gluon/Application";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 

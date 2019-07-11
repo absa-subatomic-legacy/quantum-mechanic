@@ -14,8 +14,8 @@ import {getHighestPreProdEnvironment} from "../../../util/openshift/Helpers";
 import {
     getDeploymentEnvironmentJenkinsMetadata,
     JenkinsProjectMetadata,
-    QMDeploymentPipeline,
-} from "../../../util/project/Project";
+    } from "../../../util/project/Project";
+import {QMDeploymentPipeline} from "../../../util/transform/types/gluon/Project";
 
 export function buildJenkinsDeploymentJobTemplates(tenantName: string, projectName: string, devDeploymentPipeline: QMDeploymentPipeline, releaseDeploymentPipelines: QMDeploymentPipeline[], clusterDetails: { name: string, externalDockerRegistryUrl: string }) {
     const jenkinsDeploymentJobTemplates: JenkinsDeploymentJobTemplate[] = [];

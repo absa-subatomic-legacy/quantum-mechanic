@@ -1,8 +1,8 @@
 import _ = require("lodash");
-import {QMMemberBase} from "../member/Members";
-import {QMTeam} from "../team/Teams";
 import {GluonTeamEvent} from "./types/event/GluonTeamEvent";
 import {MemberEvent} from "./types/event/MemberEvent";
+import {QMMemberBase} from "./types/gluon/Member";
+import {QMTeam} from "./types/gluon/Team";
 
 export class EventToGluon {
 
@@ -15,6 +15,7 @@ export class EventToGluon {
             owners: [],
             members: [],
             description: eventTeam.description,
+            metadata: eventTeam.metadata,
         };
 
         if (!_.isEmpty(eventTeam.members)) {

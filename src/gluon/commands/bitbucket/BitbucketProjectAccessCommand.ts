@@ -13,7 +13,6 @@ import {GluonService} from "../../services/gluon/GluonService";
 import {ConfigureBitbucketProjectAccess} from "../../tasks/bitbucket/ConfigureBitbucketProjectAccess";
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
-import {QMProject} from "../../util/project/Project";
 import {
     GluonProjectNameParam,
     GluonProjectNameSetter,
@@ -23,6 +22,7 @@ import {
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError} from "../../util/shared/Error";
 import {isUserAMemberOfTheTeam} from "../../util/team/Teams";
+import {QMProject} from "../../util/transform/types/gluon/Project";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Reconfigure user and system access to Bitbucket for an existing project", atomistIntent(CommandIntent.BitbucketProjectAccessCommand))

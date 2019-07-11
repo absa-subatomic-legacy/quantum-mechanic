@@ -6,7 +6,6 @@ type OpenShiftProjectEnvironmentCreatedEvent @rootType {
     project: Project
     displayName: String
     postfix: String
-    teamChannel: String
 }
 
 type OwningTenant {

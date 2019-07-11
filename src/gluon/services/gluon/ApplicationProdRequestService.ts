@@ -1,11 +1,8 @@
-import {OpenshiftResource} from "@absa-subatomic/openshift-api/build/src/resources/OpenshiftResource";
 import {logger} from "@atomist/automation-client";
 import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
-
-import {QMDeploymentPipeline} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 
 export class ApplicationProdRequestService {
@@ -42,12 +39,4 @@ export class ApplicationProdRequestService {
 
         return prodRequestResult.data;
     }
-}
-
-export interface QMApplicationProdRequest {
-    applicationProdRequestId: string;
-    applicationId: string;
-    actionedBy: string;
-    openShiftResources: OpenshiftResource[];
-    deploymentPipeline: QMDeploymentPipeline;
 }

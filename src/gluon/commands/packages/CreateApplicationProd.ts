@@ -25,9 +25,7 @@ import {
 import {assertApplicationProdCanBeRequested} from "../../util/prod/ProdAssertions";
 import {
     getProjectOpenshiftNamespace,
-    QMDeploymentPipeline,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     DeploymentPipelineIdParam,
@@ -43,6 +41,10 @@ import {
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {ApprovalEnum} from "../../util/shared/ApprovalEnum";
 import {handleQMError} from "../../util/shared/Error";
+import {
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/transform/types/gluon/Project";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Create application in prod", atomistIntent(CommandIntent.CreateApplicationProd))

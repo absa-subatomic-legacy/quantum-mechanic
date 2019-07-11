@@ -19,11 +19,11 @@ import {
     getAllPipelineOpenshiftNamespaces,
     OpenshiftProjectEnvironmentRequest,
     OpenShiftProjectNamespace,
-    QMDeploymentPipeline,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {retryFunction} from "../../util/shared/RetryFunction";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
+import {QMDeploymentPipeline} from "../../util/transform/types/gluon/Project";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 

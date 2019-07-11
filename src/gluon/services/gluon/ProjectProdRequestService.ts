@@ -4,9 +4,8 @@ import {inspect} from "util";
 import {QMConfig} from "../../../config/QMConfig";
 import {AwaitAxios} from "../../../http/AwaitAxios";
 import {isSuccessCode} from "../../../http/Http";
-import {QMMemberBase} from "../../util/member/Members";
-import {QMDeploymentPipeline, QMProjectBase} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
+import {QMProjectProdRequest} from "../../util/transform/types/gluon/ProjectProdRequest";
 
 export class ProjectProdRequestService {
 
@@ -129,17 +128,4 @@ export class ProjectProdRequestService {
             });
     }
 
-}
-
-export interface QMProjectProdRequestBase {
-    projectProdRequestId: string;
-    approvalStatus: string;
-}
-
-export interface QMProjectProdRequest extends QMProjectProdRequestBase {
-    project: QMProjectBase;
-    actionedBy: QMMemberBase;
-    authorizingMembers: QMMemberBase[];
-    rejectingMember?: QMMemberBase;
-    deploymentPipeline: QMDeploymentPipeline;
 }

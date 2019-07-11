@@ -8,14 +8,15 @@ import {isSuccessCode} from "../../../http/Http";
 import {CommandIntent} from "../../commands/CommandIntent";
 import {AddMemberToTeam} from "../../commands/team/AddMemberToTeam";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
-import {MemberRole, QMMemberBase} from "../../util/member/Members";
+import {MemberRole} from "../../util/member/Members";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
 import {
     kickUserFromSlackChannel,
     loadChannelIdByChannelName,
-    QMTeam,
-} from "../../util/team/Teams";
+    } from "../../util/team/Teams";
+import {QMMemberBase} from "../../util/transform/types/gluon/Member";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {GluonService} from "../gluon/GluonService";
 
 export class RemoveMemberFromTeamService {

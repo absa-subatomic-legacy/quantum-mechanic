@@ -6,14 +6,16 @@ import {
 import {QMConfig} from "../../../config/QMConfig";
 import {GluonService} from "../../services/gluon/GluonService";
 import {menuAttachmentForApplications} from "../packages/Applications";
-import {menuAttachmentForProjects, QMProject} from "../project/Project";
+import {menuAttachmentForProjects} from "../project/Project";
 import {QMError} from "../shared/Error";
 import {
     createMenuAttachment,
     createSortedMenuAttachment,
 } from "../shared/GenericMenu";
 import {menuAttachmentForTenants} from "../shared/Tenants";
-import {menuAttachmentForTeams, QMTeam} from "../team/Teams";
+import {menuAttachmentForTeams} from "../team/Teams";
+import {QMProject} from "../transform/types/gluon/Project";
+import {QMTeam} from "../transform/types/gluon/Team";
 import {
     RecursiveParameter,
     RecursiveParameterDetails,

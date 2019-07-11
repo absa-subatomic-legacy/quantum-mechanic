@@ -2,10 +2,10 @@ import {HandlerResult, logger, success} from "@atomist/automation-client";
 import * as _ from "lodash";
 import {inspect} from "util";
 import {isSuccessCode} from "../../../http/Http";
-import {QMMemberBase} from "../../util/member/Members";
 import {ApplicationType} from "../../util/packages/Applications";
-import {QMProject} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
+import {QMMemberBase} from "../../util/transform/types/gluon/Member";
+import {QMProject} from "../../util/transform/types/gluon/Project";
 import {BitbucketService} from "../bitbucket/BitbucketService";
 import {GluonService} from "../gluon/GluonService";
 

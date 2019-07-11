@@ -16,8 +16,6 @@ import {isSuccessCode} from "../../../http/Http";
 import {TeamMembershipMessages} from "../../messages/member/TeamMembershipMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {UpdateProjectPipelineRequest} from "../../services/gluon/ProjectService";
-import {QMMemberBase} from "../../util/member/Members";
-import {QMDeploymentPipeline, QMProject} from "../../util/project/Project";
 import {
     GluonProjectNameSetter,
     GluonTeamNameSetter,
@@ -27,6 +25,9 @@ import {
     handleQMError,
     QMError,
     } from "../../util/shared/Error";
+import {QMMemberBase} from "../../util/transform/types/gluon/Member";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMDeploymentPipeline} from "../../util/transform/types/gluon/Project";
 
 @CommandHandler("Defines the project associated deployment pipelines using the available default environments")
 @Tags("subatomic", "project")

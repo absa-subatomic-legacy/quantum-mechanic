@@ -2,8 +2,8 @@ import {QMContext} from "../../../context/QMContext";
 import {BitbucketConfigurationService} from "../../services/bitbucket/BitbucketConfigurationService";
 import {BitbucketService} from "../../services/bitbucket/BitbucketService";
 import {userFromDomainUser} from "../../util/member/Members";
-import {QMProjectBase} from "../../util/project/Project";
-import {QMTeam} from "../../util/team/Teams";
+import {QMProjectBase} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
 

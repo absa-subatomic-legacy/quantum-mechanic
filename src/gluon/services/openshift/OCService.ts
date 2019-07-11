@@ -17,7 +17,7 @@ import {BaseProjectTemplateLoader} from "../../util/resources/BaseProjectTemplat
 import {QuotaLoader} from "../../util/resources/QuotaLoader";
 import {QMError, QMErrorType} from "../../util/shared/Error";
 import {retryFunction} from "../../util/shared/RetryFunction";
-import {QMTeam} from "../../util/team/Teams";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
 import {OCImageService} from "./OCImageService";
 
 export class OCService {

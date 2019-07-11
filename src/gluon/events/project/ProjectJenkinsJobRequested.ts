@@ -22,15 +22,15 @@ import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {
     OpenshiftProjectEnvironmentRequest,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
     handleQMError,
     } from "../../util/shared/Error";
-import {QMTenant} from "../../util/shared/Tenants";
-import {QMTeam} from "../../util/team/Teams";
+import {QMProject} from "../../util/transform/types/gluon/Project";
+import {QMTeam} from "../../util/transform/types/gluon/Team";
+import {QMTenant} from "../../util/transform/types/gluon/Tenant";
 
 @EventHandler("Receive ProjectJenkinsJobRequestedEvent events", `
 subscription ProjectJenkinsJobRequestedEvent {

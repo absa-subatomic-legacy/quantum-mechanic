@@ -11,7 +11,6 @@ import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {PackageConfigurationRequestedEvent} from "../../events/packages/package-configuration-request/PackageConfigurationRequestedEvent";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
-import {QMProject} from "../../util/project/Project";
 import {
     GluonApplicationNameParam,
     GluonApplicationNameSetter,
@@ -38,6 +37,7 @@ import {
     handleQMError,
     } from "../../util/shared/Error";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
+import {QMProject} from "../../util/transform/types/gluon/Project";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Configure an existing application/library", atomistIntent(CommandIntent.ConfigurePackage))

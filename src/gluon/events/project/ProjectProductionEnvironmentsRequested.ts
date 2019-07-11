@@ -15,15 +15,17 @@ import {v4 as uuid} from "uuid";
 import {ChannelMessageClient} from "../../../context/QMMessageClient";
 import {UpdateProjectProdRequest} from "../../commands/project/UpdateProjectProdRequest";
 import {GluonService} from "../../services/gluon/GluonService";
-import {QMProjectProdRequest} from "../../services/gluon/ProjectProdRequestService";
 import {
     getProjectDeploymentPipelineFromPipelineId,
     ProjectProdRequestApprovalResponse,
-    QMDeploymentPipeline,
-    QMProject,
-} from "../../util/project/Project";
+    } from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
+import {
+    QMDeploymentPipeline,
+    QMProject,
+} from "../../util/transform/types/gluon/Project";
+import {QMProjectProdRequest} from "../../util/transform/types/gluon/ProjectProdRequest";
 
 @EventHandler("Receive ProjectProductionEnvironmentsRequestedEvent events", `
 subscription ProjectProductionEnvironmentsRequestedEvent {
