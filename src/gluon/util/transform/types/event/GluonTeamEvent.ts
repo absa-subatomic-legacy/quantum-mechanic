@@ -10,5 +10,5 @@ export interface GluonTeamEvent {
     openShiftCloud: string;
     owners: MemberEvent[];
     members: MemberEvent[];
-    metadata: MetaData;
+    metadata: MetaData[];
 }

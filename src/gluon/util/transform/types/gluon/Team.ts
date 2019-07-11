@@ -16,5 +16,5 @@ export interface QMTeamBase {
 export interface QMTeam extends QMTeamBase {
     owners: QMMemberBase[];
     members: QMMemberBase[];
-    metadata: QMMetaData;
+    metadata: QMMetaData[];
 }

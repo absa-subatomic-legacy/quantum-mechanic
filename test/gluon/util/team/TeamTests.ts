@@ -49,7 +49,7 @@ const team = {
             },
         },
     ],
-    metadata: null,
+    metadata: [],
     membershipRequests: [],
     devOpsEnvironment: null,
     _links: {
