@@ -7,6 +7,7 @@ import {KickOffJenkinsBuild} from "../jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "../jenkins/JenkinsCredentialsRecreate";
 import {JenkinsProdCredentialsRecreate} from "../jenkins/JenkinsProdCredentialsRecreate";
 import {OnboardMember} from "../member/OnboardMember";
+import {UpdateMemberSlackDetails} from "../member/UpdateMemberSlackDetails";
 import {ConfigureApplicationJenkinsProd} from "../packages/ConfigureApplicationJenkinsProd";
 import {ConfigureBasicPackage} from "../packages/ConfigureBasicPackage";
 import {ConfigurePackage} from "../packages/ConfigurePackage";
@@ -79,6 +80,7 @@ export class HelpCategory {
         RemoveMemberFromTeam,
         ReRunProjectProdRequest,
         UpdateProjectProdRequest,
+        UpdateMemberSlackDetails,
     ];
 
     constructor(protected name, protected description, protected tags: string) {
