@@ -100,13 +100,13 @@ export class BotJoinedChannel extends BaseQMEvent implements HandleEvent<any> {
     }
 
     private async processUserJoinedChannelEvent(ctx: HandlerContext, botJoinedChannel: any) {
-        const userName = botJoinedChannel.user.screenName;
+        const userId = botJoinedChannel.user.userId;
 
         logger.info("Checking whether the user onboarded");
         const destination = await addressSlackChannelsFromContext(ctx, botJoinedChannel.channel.channelId);
         let existingUser;
         try {
-            existingUser = await this.gluonService.members.gluonMemberFromScreenName(userName);
+            existingUser = await this.gluonService.members.gluonMemberFromSlackUserId(userId);
 
             logger.info("Checking whether the user is a part of the team");
             for (const team of existingUser.teams) {
@@ -116,14 +116,14 @@ export class BotJoinedChannel extends BaseQMEvent implements HandleEvent<any> {
                 }
             }
             const slackMessage: SlackMessage = {
-                text: `Welcome to *${botJoinedChannel.channel.name}* team channel @${userName}!`,
+                text: `Welcome to *${botJoinedChannel.channel.name}* team channel <@${userId}>!`,
                 attachments: [{
                     fallback: `Welcome to *${botJoinedChannel.channel.name}* team channel!`,
                     text: "You are not part of this team. To join this team get a team owner (`sub list team members`) to add you.",
                     actions: [
                         buttonForCommand(
                             {
-                                text: `Add ${userName}`,
+                                text: `Add ${userId}`,
                                 style: "primary",
                             },
                             new AddMemberToTeam(),
@@ -137,7 +137,7 @@ export class BotJoinedChannel extends BaseQMEvent implements HandleEvent<any> {
             return ctx.messageClient.send(slackMessage, destination);
         } catch (error) {
             const msg: SlackMessage = {
-                text: `Welcome to *${botJoinedChannel.channel.name}* team channel @${userName}!`,
+                text: `Welcome to *${botJoinedChannel.channel.name}* team channel <@${userId}>!`,
                 attachments: [{
                     fallback: `Welcome to *${botJoinedChannel.channel.name}* team channel!`,
                     text: "You don't have a Subatomic account",

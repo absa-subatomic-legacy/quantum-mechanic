@@ -83,8 +83,7 @@ export class MembershipRequestClosed extends BaseQMEvent implements HandleComman
         logger.info(`Attempting approval from user: ${this.approverUserName}`);
 
         try {
-
-            const actioningMember = await this.findGluonTeamMember(this.approverUserName);
+            const actioningMember = await this.findGluonTeamMember(this.approverUserId);
 
             await this.updateGluonMembershipRequest(
                 this.teamId,

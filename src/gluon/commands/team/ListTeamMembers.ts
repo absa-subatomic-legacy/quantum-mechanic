@@ -72,7 +72,7 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
         const teamMemberNames = [];
 
         for (const member of teamDetails) {
-            teamMemberNames.push(` @${member.slack.screenName}`);
+            teamMemberNames.push(` <@${member.slack.userId}>`);
         }
 
         return teamMemberNames;
