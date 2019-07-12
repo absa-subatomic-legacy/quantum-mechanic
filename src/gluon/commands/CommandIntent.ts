@@ -34,6 +34,7 @@ export enum CommandIntent {
     PatchBuildConfigBaseImage = "patch package s2i image",
     RequestProjectEnvironments = "request project environments",
     RemoveMemberFromTeam = "remove team member",
+    UpdateSlackDetails = "update slack details",
 }
 
 export function atomistIntent(baseIntent: CommandIntent) {

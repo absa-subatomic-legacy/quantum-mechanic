@@ -8,6 +8,7 @@ import {KickOffJenkinsBuild} from "./gluon/commands/jenkins/JenkinsBuild";
 import {JenkinsCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsCredentialsRecreate";
 import {JenkinsProdCredentialsRecreate} from "./gluon/commands/jenkins/JenkinsProdCredentialsRecreate";
 import {OnboardMember} from "./gluon/commands/member/OnboardMember";
+import {UpdateMemberSlackDetails} from "./gluon/commands/member/UpdateMemberSlackDetails";
 import {ConfigureApplicationJenkinsProd} from "./gluon/commands/packages/ConfigureApplicationJenkinsProd";
 import {
     ConfigureBasicPackage,
@@ -123,6 +124,7 @@ export const configuration: any = {
         ReRunProjectProdRequest,
         UpdateProjectProdRequest,
         ReRunMigrateTeamCloud,
+        UpdateMemberSlackDetails,
     ],
     events: [
         ApplicationCreated,

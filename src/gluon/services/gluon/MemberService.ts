@@ -61,6 +61,22 @@ To create a team you must first onboard yourself. Click the button below to do t
         return result.data._embedded.teamMemberResources[0];
     }
 
+    public async gluonMemberFromSlackUserId(userId: string, rawResult = false): Promise<any> {
+        logger.info(`Trying to get gluon member from user id. userId: ${userId} `);
+
+        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackUserId=${userId}`);
+
+        if (rawResult) {
+            return result;
+        }
+
+        if (!isSuccessCode(result.status)) {
+            throw new QMError("Error connecting to the Subatomic backend. Please alert the system administrator.");
+        }
+
+        return result.data._embedded.teamMemberResources[0];
+    }
+
     public async gluonMemberFromEmailAddress(emailAddress: string): Promise<any> {
         logger.debug(`Trying to get member from email address. emailAddress: ${emailAddress}`);
         return await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/members?email=${emailAddress}`);
@@ -84,10 +100,10 @@ To create a team you must first onboard yourself. Click the button below to do t
             membershipRequestDetails);
     }
 
-    public async updateMemberSlackDetails(memberId: string, slackDetails: any): Promise<any> {
+    public async updateMemberSlackDetails(memberId: string, slackDetails: { userId: string, screenName: string }): Promise<any> {
         logger.debug(`Trying to update member slack details. memberId: ${memberId}`);
         return await this.axiosInstance.put(
-            `${QMConfig.subatomic.gluon.baseUrl}/members/${memberId}`, slackDetails);
+            `${QMConfig.subatomic.gluon.baseUrl}/members/${memberId}`, {slack: slackDetails});
     }
 
     public async findMembersAssociatedToTeam(teamId: string, rawResult = false): Promise<any> {
