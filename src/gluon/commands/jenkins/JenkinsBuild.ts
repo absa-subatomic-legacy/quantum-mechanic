@@ -94,7 +94,6 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
 
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to kick off build`);
 
-
         const kickOffBuildResult = await this.jenkinsService.kickOffBuild(
             jenkinsHost,
             token,
