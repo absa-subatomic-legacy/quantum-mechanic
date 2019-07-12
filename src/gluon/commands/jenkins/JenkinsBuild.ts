@@ -7,6 +7,7 @@ import {
     Tags,
 } from "@atomist/automation-client";
 import {CommandHandler} from "@atomist/automation-client/lib/decorators";
+import {url} from "@atomist/slack-messages";
 import {QMConfig} from "../../../config/QMConfig";
 import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
@@ -93,6 +94,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
 
         logger.debug(`Using Jenkins Route host [${jenkinsHost}] to kick off build`);
 
+
         const kickOffBuildResult = await this.jenkinsService.kickOffBuild(
             jenkinsHost,
             token,
@@ -101,7 +103,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
         );
         if (isSuccessCode(kickOffBuildResult.status)) {
             return await ctx.messageClient.respond({
-                text: `🚀 *${gluonApplicationName}* is being built...`,
+                text: `🚀 *${gluonApplicationName}* is being built at ${url(`https://${jenkinsHost}`)} ...`,
             });
         } else {
             if (kickOffBuildResult.status === 404) {
@@ -113,7 +115,7 @@ export class KickOffJenkinsBuild extends RecursiveParameterRequestCommand
                     gluonApplicationName,
                 );
                 return await ctx.messageClient.respond({
-                    text: `🚀 *${gluonApplicationName}* is being built for the first time...`,
+                    text: `🚀 *${gluonApplicationName}* is being built for the first time at ${url(`https://${jenkinsHost}`)} ...`,
                 });
             } else {
                 logger.error(`Failed to kick off JenkinsBuild. Error: ${JSON.stringify(kickOffBuildResult)}`);
