@@ -188,7 +188,8 @@ export class Help extends BaseQMComand implements HandleCommand<HandlerResult> {
             this.colorCount++;
         }
         return await ctx.messageClient.respond({
-            text: "What would you like to do?",
+            text: "You can access the Subatomic user docs at https://subatomic.bison.ninja\n\n" +
+                "What would you like to do?",
             attachments: this.optionsAttachments,
         }, {id: this.correlationId});
     }
