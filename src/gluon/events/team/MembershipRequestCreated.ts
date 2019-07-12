@@ -51,9 +51,9 @@ export class MembershipRequestCreated extends BaseQMEvent implements HandleEvent
         if (membershipRequestCreatedEvent.team.slackIdentity !== null) {
             const correlationId: string = uuid();
             const msg: SlackMessage = {
-                text: `User @${membershipRequestCreatedEvent.requestedBy.slackIdentity.screenName} has requested to be added as a team member.`,
+                text: `User <@${membershipRequestCreatedEvent.requestedBy.slackIdentity.user}> has requested to be added as a team member.`,
                 attachments: [{
-                    fallback: `User @${membershipRequestCreatedEvent.requestedBy.slackIdentity.screenName} has requested to be added as a team member`,
+                    fallback: `User <@${membershipRequestCreatedEvent.requestedBy.slackIdentity.screenName}> has requested to be added as a team member`,
                     text: `
                         A team owner should approve/reject this user's membership request`,
                     mrkdwn_in: ["text"],

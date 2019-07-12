@@ -27,8 +27,8 @@ import {
 @CommandHandler("Close a membership request")
 export class MembershipRequestClosed extends BaseQMEvent implements HandleCommand<HandlerResult> {
 
-    @MappedParameter(MappedParameters.SlackUserName)
-    public approverUserName: string;
+    @MappedParameter(MappedParameters.SlackUser)
+    public approverUserId: string;
 
     @MappedParameter(MappedParameters.SlackTeam)
     public slackTeam: string;
@@ -80,7 +80,7 @@ export class MembershipRequestClosed extends BaseQMEvent implements HandleComman
     }
 
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
-        logger.info(`Attempting approval from user: ${this.approverUserName}`);
+        logger.info(`Attempting approval from user: ${this.approverUserId}`);
 
         try {
             const actioningMember = await this.findGluonTeamMember(this.approverUserId);
@@ -101,7 +101,7 @@ export class MembershipRequestClosed extends BaseQMEvent implements HandleComman
 
     private async findGluonTeamMember(slackScreenName: string) {
         try {
-            return await this.gluonService.members.gluonMemberFromScreenName(slackScreenName, false);
+            return await this.gluonService.members.gluonMemberFromSlackUserId(slackScreenName, false);
         } catch (error) {
             logger.error("The approver is not a gluon member. This can only happen if the user was deleted before approving this request.");
             throw new QMError("You are no longer a Subatomic user. Membership request closure failed.");
@@ -132,13 +132,13 @@ export class MembershipRequestClosed extends BaseQMEvent implements HandleComman
             await this.editRequestMessage(ctx, ApprovalEnum.APPROVED.valueOf(), QMColours.stdGreenyMcAppleStroodle.hex);
         } else {
             await this.editRequestMessage(ctx, ApprovalEnum.REJECTED.valueOf(), QMColours.stdReddyMcRedFace.hex);
-            return await this.handleRejectedMembershipRequest(ctx, this.teamName, this.approverUserName, this.userScreenName);
+            return await this.handleRejectedMembershipRequest(ctx, this.teamName, this.approverUserId, this.userScreenName);
         }
     }
 
-    private async handleRejectedMembershipRequest(ctx: HandlerContext, teamName: string, rejectingUserScreenName: string, rejectedUserScreenName: string) {
+    private async handleRejectedMembershipRequest(ctx: HandlerContext, teamName: string, rejectingUserSlackUserId: string, rejectedUserScreenName: string) {
         const destination = await addressSlackUsersFromContext(ctx, rejectedUserScreenName);
-        return await ctx.messageClient.send(`Your membership request to team '${teamName}' has been rejected by @${rejectingUserScreenName}`,
+        return await ctx.messageClient.send(`Your membership request to team '${teamName}' has been rejected by <@${rejectingUserSlackUserId}>`,
             destination);
     }
 
@@ -149,9 +149,9 @@ export class MembershipRequestClosed extends BaseQMEvent implements HandleComman
 
     private async editRequestMessage(ctx: HandlerContext, status: string, color: string) {
         const msg: SlackMessage = {
-            text: `User @${this.userScreenName} has requested to be added as a team member.`,
+            text: `User <@${this.userSlackId}> has requested to be added as a team member.`,
             attachments: [{
-                fallback: `User @${this.userScreenName} has requested to be added as a team member`,
+                fallback: `User <@${this.userSlackId}> has requested to be added as a team member`,
                 color: `${color}`,
                 text: `${status}`,
                 mrkdwn_in: ["text"],
