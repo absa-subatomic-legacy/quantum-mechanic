@@ -75,7 +75,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand
             });
 
             const result = await this.packageCommandService.linkBitbucketRepoToGluonPackage(
-                this.screenName,
+                this.slackUserId,
                 this.name,
                 this.description,
                 this.bitbucketRepositorySlug,

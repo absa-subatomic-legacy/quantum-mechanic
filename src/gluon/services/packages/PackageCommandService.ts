@@ -15,7 +15,7 @@ export class PackageCommandService {
                 private bitbucketService = new BitbucketService()) {
     }
 
-    public async linkBitbucketRepoToGluonPackage(slackScreeName: string,
+    public async linkBitbucketRepoToGluonPackage(slackUserId: string,
                                                  packageName: string,
                                                  packageDescription: string,
                                                  bitbucketRepositorySlug: string,
@@ -30,7 +30,7 @@ export class PackageCommandService {
             return (clone as any).name === "ssh";
         }) as any;
 
-        const member = await this.gluonService.members.gluonMemberFromScreenName(slackScreeName);
+        const member = await this.gluonService.members.gluonMemberFromSlackUserId(slackUserId);
 
         return await this.linkBitbucketRepository(
             member,
