@@ -55,7 +55,7 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            taskRunner.addTask(new AddMemberToTeamTask(slackHandleToSlackUserId(this.slackHandleOfMemberToAdd), this.screenName, this.teamName, MemberRole.member));
+            taskRunner.addTask(new AddMemberToTeamTask(slackHandleToSlackUserId(this.slackHandleOfMemberToAdd), this.slackUserId, this.teamName, MemberRole.member));
 
             await taskRunner.execute(ctx);
             this.succeedCommand();

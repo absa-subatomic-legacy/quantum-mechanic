@@ -14,7 +14,7 @@ export class RemoveMemberFromTeamTask extends Task {
     private readonly TASK_REMOVE_USER_FROM_TEAM = TaskListMessage.createUniqueTaskName("RemoveUserFromTeam");
 
     constructor(private memberToRemoveSlackUserId: string,
-                private screenName: string,
+                private actioningMemberSlackUserId: string,
                 private teamName: string,
                 private memberRole: MemberRole,
                 private removeMemberFromTeamService = new RemoveMemberFromTeamService(),
@@ -30,7 +30,7 @@ export class RemoveMemberFromTeamTask extends Task {
     protected async executeTask(ctx: QMContext): Promise<boolean> {
         const team = await this.gluonService.teams.getTeamByName(this.teamName);
         const memberToRemove = await this.removeMemberFromTeamService.getMemberGluonDetails(this.memberToRemoveSlackUserId);
-        const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+        const actioningMember = await this.gluonService.members.gluonMemberFromSlackUserId(this.actioningMemberSlackUserId);
 
         if (isOwner(team, actioningMember.memberId)) {
             logger.info("actioningMember identified with memberRole:Owner");

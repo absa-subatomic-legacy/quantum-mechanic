@@ -13,7 +13,7 @@ export class AddMemberToTeamTask extends Task {
     private readonly TASK_ADD_USER_TO_TEAM = TaskListMessage.createUniqueTaskName("AddUserToTeam");
 
     constructor(private memberToAddSlackUserId: string,
-                private screenName: string,
+                private actioningMemberSlackUserId: string,
                 private teamName: string,
                 private memberRole: MemberRole,
                 private addMemberToTeamService = new AddMemberToTeamService(),
@@ -40,7 +40,7 @@ export class AddMemberToTeamTask extends Task {
 
         logger.info(`Gluon member found: ${JSON.stringify(newMember)}`);
 
-        const actioningMember = await this.gluonService.members.gluonMemberFromSlackUserId(this.screenName);
+        const actioningMember = await this.gluonService.members.gluonMemberFromSlackUserId(this.actioningMemberSlackUserId);
 
         await this.taskListMessage.succeedTask(this.TASK_GATHER_REQUEST_DETAILS);
 
