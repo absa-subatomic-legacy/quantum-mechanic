@@ -72,6 +72,7 @@ subscription PackageConfigurationRequestedEvent {
         firstName
         slackIdentity {
             screenName
+            userId
         }
     }
   }
