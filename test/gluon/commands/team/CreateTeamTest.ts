@@ -13,16 +13,16 @@ describe("Create Team test", () => {
     it("should create team", async () => {
         const axiosWrapper = new AwaitAxios();
         const mock = new MockAdapter(axiosWrapper.axiosInstance);
-        const screenName = "Test.User";
+        const slackUserId = "9USDA7D6dH";
 
-        mock.onGet(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${screenName}`).reply(200, {
+        mock.onGet(`${QMConfig.subatomic.gluon.baseUrl}/members?slackUserId=${slackUserId}`).reply(200, {
             _embedded: {
                 teamMemberResources: [
                     {
                         memberId: "3d01d401-abb3-4eee-8884-2ed5a472172d",
                         slack: {
-                            screenName: `${screenName}`,
-                            userId: "9USDA7D6dH",
+                            screenName: `Steve`,
+                            userId: slackUserId,
                         },
                     },
                 ],
@@ -38,7 +38,7 @@ describe("Create Team test", () => {
         const gluonService = new GluonService(axiosWrapper);
 
         const subject = new CreateTeam(gluonService);
-        subject.screenName = `${screenName}`;
+        subject.slackUserId = `${slackUserId}`;
 
         const fakeContext = {
             teamId: "TEST",
@@ -55,16 +55,16 @@ describe("Create Team test", () => {
     it("should fail creating team", async () => {
         const axiosWrapper = new AwaitAxios();
         const mock = new MockAdapter(axiosWrapper.axiosInstance);
-        const screenName = "Test.User";
+        const slackUserId = "9USDA7D6dH";
 
-        mock.onGet(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${screenName}`).reply(201, {
+        mock.onGet(`${QMConfig.subatomic.gluon.baseUrl}/members?slackUserId=${slackUserId}`).reply(200, {
             _embedded: {
                 teamMemberResources: [
                     {
                         memberId: "3d01d401-abb3-4eee-8884-2ed5a472172d",
                         slack: {
-                            screenName: `${screenName}`,
-                            userId: "9USDA7D6dH",
+                            screenName: `Steve`,
+                            userId: slackUserId,
                         },
                     },
                 ],
@@ -80,7 +80,7 @@ describe("Create Team test", () => {
         const gluonService = new GluonService(axiosWrapper);
 
         const subject = new CreateTeam(gluonService);
-        subject.screenName = `${screenName}`;
+        subject.slackUserId = `${slackUserId}`;
 
         const fakeContext = {
             teamId: "TEST",

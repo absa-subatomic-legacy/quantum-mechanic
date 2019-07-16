@@ -30,7 +30,7 @@ describe("Join team tests", () => {
         const gluonService = new GluonService(axiosWrapper);
 
         const subject = new JoinTeam(gluonService);
-        subject.slackName = `${slackName}`;
+        subject.slackUserId = `${slackName}`;
 
         const fakeContext = {
             teamId: "TEST",

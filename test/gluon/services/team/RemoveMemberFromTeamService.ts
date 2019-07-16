@@ -11,7 +11,7 @@ import {QMError} from "../../../../src/gluon/util/shared/Error";
 describe("RemoveMemberFromTeamService getMemberGluonDetails", () => {
     it("should return existing member details", async () => {
         const mockedMemberService = mock(MemberService);
-        when(mockedMemberService.gluonMemberFromScreenName("Dex")).thenReturn(Promise.resolve({
+        when(mockedMemberService.gluonMemberFromSlackUserId("Dex")).thenReturn(Promise.resolve({
             id: "User1",
             teams: [
                 {

@@ -19,6 +19,7 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError} from "../../util/shared/Error";
+import {slackHandleToSlackUserId} from "../../util/shared/Slack";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Add a member to a team", atomistIntent(CommandIntent.AddMemberToTeam))
@@ -35,7 +36,7 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
         description: "slack name (@User.Name) of the member to make a member",
         displayable: false,
     })
-    public slackName: string;
+    public slackHandleOfMemberToAdd: string;
 
     @GluonTeamNameParam({
         callOrder: 0,
@@ -54,7 +55,7 @@ export class AddMemberToTeam extends RecursiveParameterRequestCommand implements
 
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
 
-            taskRunner.addTask(new AddMemberToTeamTask(this.slackName, this.screenName, this.teamName, MemberRole.member));
+            taskRunner.addTask(new AddMemberToTeamTask(slackHandleToSlackUserId(this.slackHandleOfMemberToAdd), this.screenName, this.teamName, MemberRole.member));
 
             await taskRunner.execute(ctx);
             this.succeedCommand();

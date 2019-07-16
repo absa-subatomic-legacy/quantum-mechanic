@@ -15,7 +15,7 @@ import {TestQMContext} from "../../TestQMContext";
 describe("AddMemberToTeamService getNewMemberGluonDetails", () => {
     it("should return member details", async () => {
         const mockedMemberService = mock(MemberService);
-        when(mockedMemberService.gluonMemberFromScreenName("Dex")).thenReturn(Promise.resolve({
+        when(mockedMemberService.gluonMemberFromSlackUserId("Dex")).thenReturn(Promise.resolve({
             id: "User1",
             teams: [
                 {
