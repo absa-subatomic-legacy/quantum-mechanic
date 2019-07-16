@@ -49,7 +49,7 @@ export class CreateTeam extends RecursiveParameterRequestCommand implements Gluo
     }
 
     public async runCommand(ctx: HandlerContext): Promise<HandlerResult> {
-        logger.info(`Creating team for member: ${this.screenName}`);
+        logger.info(`Creating team for member: ${this.slackUserId}`);
 
         try {
             const member = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);

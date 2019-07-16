@@ -218,6 +218,7 @@ export class ConfigureBasicPackage extends RecursiveParameterRequestCommand
         const configurePackage = new ConfigurePackage();
         const imageStream: ImageStreamDefinition = definition.buildConfig.imageStream;
         configurePackage.screenName = this.screenName;
+        configurePackage.slackUserId = this.slackUserId;
         configurePackage.teamChannel = this.teamChannel;
         configurePackage.openshiftTemplate = definition.openshiftTemplate || "Default";
         configurePackage.jenkinsfileName = definition.jenkinsfile;
