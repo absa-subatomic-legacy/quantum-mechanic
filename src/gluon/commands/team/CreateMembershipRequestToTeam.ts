@@ -42,7 +42,7 @@ export class CreateMembershipRequestToTeam extends BaseQMComand implements Handl
 
             const chatId = await loadScreenNameByUserId(ctx, screenName);
 
-            const memberDetails = await this.gluonService.members.gluonMemberFromScreenName(chatId);
+            const memberDetails = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
             await this.createMembershipRequest(memberDetails);
 

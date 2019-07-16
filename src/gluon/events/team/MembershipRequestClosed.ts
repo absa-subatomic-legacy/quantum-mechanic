@@ -23,6 +23,7 @@ import {
     handleQMError,
     QMError,
     } from "../../util/shared/Error";
+import {slackUserIdToSlackHandle} from "../../util/shared/Slack";
 
 @CommandHandler("Close a membership request")
 export class MembershipRequestClosed extends BaseQMEvent implements HandleCommand<HandlerResult> {
@@ -138,7 +139,7 @@ export class MembershipRequestClosed extends BaseQMEvent implements HandleComman
 
     private async handleRejectedMembershipRequest(ctx: HandlerContext, teamName: string, rejectingUserSlackUserId: string, rejectedUserScreenName: string) {
         const destination = await addressSlackUsersFromContext(ctx, rejectedUserScreenName);
-        return await ctx.messageClient.send(`Your membership request to team '${teamName}' has been rejected by <@${rejectingUserSlackUserId}>`,
+        return await ctx.messageClient.send(`Your membership request to team '${teamName}' has been rejected by ${slackUserIdToSlackHandle(rejectingUserSlackUserId)}`,
             destination);
     }
 
@@ -149,9 +150,9 @@ export class MembershipRequestClosed extends BaseQMEvent implements HandleComman
 
     private async editRequestMessage(ctx: HandlerContext, status: string, color: string) {
         const msg: SlackMessage = {
-            text: `User <@${this.userSlackId}> has requested to be added as a team member.`,
+            text: `User ${slackUserIdToSlackHandle(this.userSlackId)} has requested to be added as a team member.`,
             attachments: [{
-                fallback: `User <@${this.userSlackId}> has requested to be added as a team member`,
+                fallback: `User ${slackUserIdToSlackHandle(this.userSlackId)} has requested to be added as a team member`,
                 color: `${color}`,
                 text: `${status}`,
                 mrkdwn_in: ["text"],

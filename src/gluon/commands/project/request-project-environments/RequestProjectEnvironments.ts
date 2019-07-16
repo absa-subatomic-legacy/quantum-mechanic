@@ -69,7 +69,7 @@ export class RequestProjectEnvironments extends RecursiveParameterRequestCommand
                 text: `Requesting project environment's for project *${this.projectName}*`,
             });
 
-            const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const member = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
             if (_.isEmpty(project.devDeploymentPipeline.environments)) {
                 logger.info("Project environments are not defined. Requesting default pipeline assignment and creation.");

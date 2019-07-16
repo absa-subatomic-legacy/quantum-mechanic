@@ -27,6 +27,7 @@ import {
     handleQMError,
     QMError,
 } from "../../util/shared/Error";
+import {slackUserIdToSlackHandle} from "../../util/shared/Slack";
 
 @EventHandler("Display a helpful message when the bot joins a channel",
     `subscription BotJoinedChannel {
@@ -116,7 +117,7 @@ export class BotJoinedChannel extends BaseQMEvent implements HandleEvent<any> {
                 }
             }
             const slackMessage: SlackMessage = {
-                text: `Welcome to *${botJoinedChannel.channel.name}* team channel <@${userId}>!`,
+                text: `Welcome to *${botJoinedChannel.channel.name}* team channel ${slackUserIdToSlackHandle(userId)}!`,
                 attachments: [{
                     fallback: `Welcome to *${botJoinedChannel.channel.name}* team channel!`,
                     text: "You are not part of this team. To join this team get a team owner (`sub list team members`) to add you.",
@@ -137,7 +138,7 @@ export class BotJoinedChannel extends BaseQMEvent implements HandleEvent<any> {
             return ctx.messageClient.send(slackMessage, destination);
         } catch (error) {
             const msg: SlackMessage = {
-                text: `Welcome to *${botJoinedChannel.channel.name}* team channel <@${userId}>!`,
+                text: `Welcome to *${botJoinedChannel.channel.name}* team channel ${slackUserIdToSlackHandle(userId)}!`,
                 attachments: [{
                     fallback: `Welcome to *${botJoinedChannel.channel.name}* team channel!`,
                     text: "You don't have a Subatomic account",

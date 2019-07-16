@@ -121,7 +121,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
 
         const application = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
 
-        const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+        const member = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
         const configurePackageRequest: PackageConfigurationRequestedEvent = {
             project: GluonToEvent.project(project),

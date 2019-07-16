@@ -69,7 +69,7 @@ export class DefineNewProjectEnvironments extends BaseQMComand
                 text: `Requesting project environment's for project *${this.projectName}*`,
             }, destination);
 
-            const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const member = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 

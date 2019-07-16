@@ -23,9 +23,7 @@ import {
     getResourceDisplayMessage,
 } from "../../util/openshift/Helpers";
 import {assertApplicationProdCanBeRequested} from "../../util/prod/ProdAssertions";
-import {
-    getProjectOpenshiftNamespace,
-    } from "../../util/project/Project";
+import {getProjectOpenshiftNamespace} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {
     DeploymentPipelineIdParam,
@@ -214,7 +212,7 @@ export class CreateApplicationProd extends RecursiveParameterRequestCommand
 
         const application = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, project.name);
 
-        const actionedBy = await this.gluonService.members.gluonMemberFromScreenName(this.screenName, false);
+        const actionedBy = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId, false);
 
         const openShiftResources = JSON.parse(this.openShiftResourcesJSON);
 

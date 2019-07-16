@@ -46,7 +46,7 @@ export class AddMemberToTeamTask extends Task {
 
         logger.info(`Gluon member found: ${JSON.stringify(newMember)}`);
 
-        const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+        const actioningMember = await this.gluonService.members.gluonMemberFromSlackUserId(this.screenName);
 
         await this.taskListMessage.succeedTask(this.TASK_GATHER_REQUEST_DETAILS);
 

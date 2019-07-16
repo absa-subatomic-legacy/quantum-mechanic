@@ -33,7 +33,7 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
     public runQMCommand(ctx: QMContext) {
         return this.requestDevOpsEnvironment(
             ctx,
-            this.screenName,
+            this.slackUserId,
             this.teamName,
             this.teamChannel,
         );
@@ -44,13 +44,13 @@ export class NewDevOpsEnvironment extends RecursiveParameterRequestCommand
     }
 
     private async requestDevOpsEnvironment(ctx: QMContext,
-                                           screenName: string,
+                                           slackUserId: string,
                                            teamName: string,
                                            teamChannel: string): Promise<any> {
 
         await ctx.messageClient.sendToChannels(`Requesting DevOps environment for *${teamName}* team.`, teamChannel);
 
-        const member = await this.gluonService.members.gluonMemberFromScreenName(screenName);
+        const member = await this.gluonService.members.gluonMemberFromSlackUserId(slackUserId);
 
         const team = await this.gluonService.teams.getTeamByName(teamName);
         logger.info("Requesting DevOps environment for team: " + teamName);

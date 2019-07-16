@@ -16,6 +16,9 @@ export abstract class BaseQMComand extends BaseQMHandler implements HandleComman
     @MappedParameter(MappedParameters.SlackUserName)
     public screenName;
 
+    @MappedParameter(MappedParameters.SlackUser)
+    public slackUserId: string;
+
     @MappedParameter(MappedParameters.SlackChannelName)
     public teamChannel: string;
 

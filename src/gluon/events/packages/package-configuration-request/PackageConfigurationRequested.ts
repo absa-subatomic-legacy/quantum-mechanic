@@ -106,7 +106,7 @@ export class PackageConfigurationRequested extends BaseQMEvent implements Handle
 
         const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(packageConfigurationEvent.application.name, project.name);
 
-        const member: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(packageConfigurationEvent.actionedBy.slackIdentity.screenName);
+        const member: QMMemberBase = await this.gluonService.members.gluonMemberFromSlackUserId(packageConfigurationEvent.actionedBy.slackIdentity.userId);
 
         const owningTeam: QMTeam = await this.gluonService.teams.getTeamById(project.owningTeam.teamId);
 

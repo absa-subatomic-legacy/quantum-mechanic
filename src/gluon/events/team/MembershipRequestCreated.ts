@@ -15,6 +15,7 @@ import {
 import {SlackMessage} from "@atomist/slack-messages";
 import {v4 as uuid} from "uuid";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
+import {slackUserIdToSlackHandle} from "../../util/shared/Slack";
 import {MembershipRequestClosed} from "./MembershipRequestClosed";
 
 @EventHandler("Receive MembershipRequestCreated events", `
@@ -51,9 +52,9 @@ export class MembershipRequestCreated extends BaseQMEvent implements HandleEvent
         if (membershipRequestCreatedEvent.team.slackIdentity !== null) {
             const correlationId: string = uuid();
             const msg: SlackMessage = {
-                text: `User <@${membershipRequestCreatedEvent.requestedBy.slackIdentity.user}> has requested to be added as a team member.`,
+                text: `User ${slackUserIdToSlackHandle(membershipRequestCreatedEvent.requestedBy.slackIdentity.userId)} has requested to be added as a team member.`,
                 attachments: [{
-                    fallback: `User <@${membershipRequestCreatedEvent.requestedBy.slackIdentity.screenName}> has requested to be added as a team member`,
+                    fallback: `User ${slackUserIdToSlackHandle(membershipRequestCreatedEvent.requestedBy.slackIdentity.userId)} has requested to be added as a team member`,
                     text: `
                         A team owner should approve/reject this user's membership request`,
                     mrkdwn_in: ["text"],

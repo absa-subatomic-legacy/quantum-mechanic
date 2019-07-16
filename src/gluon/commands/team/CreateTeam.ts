@@ -52,7 +52,7 @@ export class CreateTeam extends RecursiveParameterRequestCommand implements Gluo
         logger.info(`Creating team for member: ${this.screenName}`);
 
         try {
-            const member = await this.getGluonMemberFromScreenName(this.screenName);
+            const member = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
             await this.createTeamInGluon(this.teamName, this.description, this.openShiftCloud, member.memberId);
 
@@ -62,10 +62,6 @@ export class CreateTeam extends RecursiveParameterRequestCommand implements Gluo
             this.failCommand();
             return await this.handleError(ctx, error);
         }
-    }
-
-    private async getGluonMemberFromScreenName(screenName: string) {
-        return await this.gluonService.members.gluonMemberFromScreenName(screenName);
     }
 
     private async createTeamInGluon(teamName: string, teamDescription: string, openShiftCloud: string, createdBy: string) {

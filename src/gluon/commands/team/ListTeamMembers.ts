@@ -16,6 +16,7 @@ import {
 } from "../../util/recursiveparam/GluonParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
 import {handleQMError} from "../../util/shared/Error";
+import {slackUserIdToSlackHandle} from "../../util/shared/Slack";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("List members of a team", atomistIntent(CommandIntent.ListTeamMembers))
@@ -72,7 +73,7 @@ export class ListTeamMembers extends RecursiveParameterRequestCommand
         const teamMemberNames = [];
 
         for (const member of teamDetails) {
-            teamMemberNames.push(` <@${member.slack.userId}>`);
+            teamMemberNames.push(` ${slackUserIdToSlackHandle(member.slack.userId)}`);
         }
 
         return teamMemberNames;
