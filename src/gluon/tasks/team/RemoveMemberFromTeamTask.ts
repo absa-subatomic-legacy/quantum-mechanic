@@ -2,7 +2,7 @@ import {logger} from "@atomist/automation-client";
 import {QMContext} from "../../../context/QMContext";
 import {GluonService} from "../../services/gluon/GluonService";
 import {RemoveMemberFromTeamService} from "../../services/team/RemoveMemberFromTeamService";
-import {getScreenName, MemberRole} from "../../util/member/Members";
+import {MemberRole} from "../../util/member/Members";
 import {QMError} from "../../util/shared/Error";
 import {isMember, isOwner} from "../../util/team/Teams";
 import {Task} from "../Task";
@@ -13,8 +13,8 @@ export class RemoveMemberFromTeamTask extends Task {
     private readonly TASK_GATHER_REQUEST_DETAILS = TaskListMessage.createUniqueTaskName("GatherRequestDetails");
     private readonly TASK_REMOVE_USER_FROM_TEAM = TaskListMessage.createUniqueTaskName("RemoveUserFromTeam");
 
-    constructor(private slackName: string,
-                private screenName: string,
+    constructor(private memberToRemoveSlackUserId: string,
+                private actioningMemberSlackUserId: string,
                 private teamName: string,
                 private memberRole: MemberRole,
                 private removeMemberFromTeamService = new RemoveMemberFromTeamService(),
@@ -29,10 +29,8 @@ export class RemoveMemberFromTeamTask extends Task {
 
     protected async executeTask(ctx: QMContext): Promise<boolean> {
         const team = await this.gluonService.teams.getTeamByName(this.teamName);
-        const screenName = getScreenName(this.slackName);
-        const chatId = await ctx.graphClient.slackScreenNameFromSlackUserId(screenName);
-        const memberToRemove = await this.removeMemberFromTeamService.getMemberGluonDetails(chatId);
-        const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+        const memberToRemove = await this.removeMemberFromTeamService.getMemberGluonDetails(this.memberToRemoveSlackUserId);
+        const actioningMember = await this.gluonService.members.gluonMemberFromSlackUserId(this.actioningMemberSlackUserId);
 
         if (isOwner(team, actioningMember.memberId)) {
             logger.info("actioningMember identified with memberRole:Owner");

@@ -52,7 +52,7 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
             return await this.addConfigServer(
                 ctx,
                 this.teamName,
-                this.screenName,
+                this.slackUserId,
                 this.gitUri,
             );
         } catch (error) {
@@ -63,10 +63,10 @@ export class AddConfigServer extends RecursiveParameterRequestCommand
 
     private async addConfigServer(ctx: HandlerContext,
                                   gluonTeamName: string,
-                                  actionedByScreenName: string,
+                                  actionedBySlackUserId: string,
                                   gitUri: string): Promise<any> {
         const team: QMTeam = await this.gluonService.teams.getTeamByName(gluonTeamName);
-        const actionedBy: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(actionedByScreenName);
+        const actionedBy: QMMemberBase = await this.gluonService.members.gluonMemberFromSlackUserId(actionedBySlackUserId);
 
         const requestConfigServerEvent: ConfigServerRequestedEvent = {
             team: GluonToEvent.team(team),

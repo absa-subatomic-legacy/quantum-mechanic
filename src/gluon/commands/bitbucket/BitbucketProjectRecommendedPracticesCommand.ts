@@ -53,7 +53,7 @@ export class BitbucketProjectRecommendedPracticesCommand extends RecursiveParame
         const messageClient: ResponderMessageClient = new ResponderMessageClient(ctx);
 
         try {
-            const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const member = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
             const requestingTeam = await this.gluonService.teams.getTeamByName(this.teamName);
 

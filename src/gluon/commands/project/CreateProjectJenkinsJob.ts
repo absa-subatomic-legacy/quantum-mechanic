@@ -62,7 +62,7 @@ export class CreateProjectJenkinsJob extends RecursiveParameterRequestCommand
                 text: `Requesting project *${this.projectName}* jenkins job creation...`,
             });
 
-            const member: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const member: QMMemberBase = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
             const team: QMTeam = await this.gluonService.teams.getTeamByName(this.teamName);
 

@@ -13,7 +13,7 @@ describe("Close a membership request", () => {
     it("should approve team member", async () => {
         const axiosWrapper = new AwaitAxios();
         const mock = new MockAdapter(axiosWrapper.axiosInstance);
-        const approverUserName = "Approval.User";
+        const approverUserId = "Approval.User";
         const slackTeam = "A-Team";
         const slackChannelId = "84383asda2123-334daeerasde";
         const teamChannel = "Four Dudes";
@@ -25,7 +25,7 @@ describe("Close a membership request", () => {
         const approvalStatus = "APPROVED";
         const memberId = "3d01d401-abb3-4eee-8884-2ed5a472172d";
 
-        mock.onGet(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${approverUserName}`).reply(200, {
+        mock.onGet(`${QMConfig.subatomic.gluon.baseUrl}/members?slackUserId=${approverUserId}`).reply(200, {
             _embedded: {
                 teamMemberResources: [
                     {
@@ -55,7 +55,7 @@ describe("Close a membership request", () => {
         const gluonService = new GluonService(axiosWrapper);
 
         const subject = new MembershipRequestClosed(gluonService);
-        subject.approverUserName = `${approverUserName}`;
+        subject.approverUserId = `${approverUserId}`;
         subject.slackTeam = `${slackTeam}`;
         subject.slackChannelId = `${slackChannelId}`;
         subject.teamChannel = `${teamChannel}`;
@@ -78,13 +78,13 @@ describe("Close a membership request", () => {
         fakeContext.graphClient.executeQueryResults.push({result: true, returnValue: {ChatTeam: [{id: "1234"}]}});
 
         await subject.handle(fakeContext);
-        assert(fakeContext.messageClient.textMsg[0].text === `User @${userScreenName} has requested to be added as a team member.`);
+        assert(fakeContext.messageClient.textMsg[0].text === `User <@${userSlackId}> has requested to be added as a team member.`);
     });
 
     it("should reject team member", async () => {
         const axiosWrapper = new AwaitAxios();
         const mock = new MockAdapter(axiosWrapper.axiosInstance);
-        const approverUserName = "Approval.User";
+        const approverUserId = "Approval.User";
         const slackTeam = "A-Team";
         const slackChannelId = "84383asda2123-334daeerasde";
         const teamChannel = "test-channel";
@@ -96,7 +96,7 @@ describe("Close a membership request", () => {
         const approvalStatus = "REJECT";
         const memberId = "3d01d401-abb3-4eee-8884-2ed5a472172d";
 
-        mock.onGet(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${approverUserName}`).reply(200, {
+        mock.onGet(`${QMConfig.subatomic.gluon.baseUrl}/members?slackUserId=${approverUserId}`).reply(200, {
             _embedded: {
                 teamMemberResources: [
                     {
@@ -126,7 +126,7 @@ describe("Close a membership request", () => {
         const gluonService = new GluonService(axiosWrapper);
 
         const subject = new MembershipRequestClosed(gluonService);
-        subject.approverUserName = `${approverUserName}`;
+        subject.approverUserId = `${approverUserId}`;
         subject.slackTeam = `${slackTeam}`;
         subject.slackChannelId = `${slackChannelId}`;
         subject.teamChannel = `${teamChannel}`;
@@ -149,7 +149,7 @@ describe("Close a membership request", () => {
         fakeContext.graphClient.executeQueryResults.push({result: true, returnValue: {ChatTeam: [{id: "1234"}]}});
 
         await subject.handle(fakeContext);
-        assert(fakeContext.messageClient.textMsg[0].text === `User @${userScreenName} has requested to be added as a team member.`);
-        assert.equal(fakeContext.messageClient.textMsg[1], "Your membership request to team 'test_Team' has been rejected by @Approval.User");
+        assert(fakeContext.messageClient.textMsg[0].text === `User <@${userSlackId}> has requested to be added as a team member.`);
+        assert.equal(fakeContext.messageClient.textMsg[1], "Your membership request to team 'test_Team' has been rejected by <@Approval.User>");
     });
 });

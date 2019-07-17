@@ -198,7 +198,7 @@ export class CreateGenericProd extends RecursiveParameterRequestCommand
     private async createGenericProdRequest() {
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-        const actionedBy = await this.gluonService.members.gluonMemberFromScreenName(this.screenName, false);
+        const actionedBy = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId, false);
 
         const openShiftResources = JSON.parse(this.openShiftResourcesJSON);
 

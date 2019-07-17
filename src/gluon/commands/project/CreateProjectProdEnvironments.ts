@@ -61,7 +61,7 @@ export class CreateProjectProdEnvironments extends RecursiveParameterRequestComm
 
             const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-            const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const member = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
             await this.gluonService.prod.project.createProjectProdRequest(member.memberId, project.projectId, this.deploymentPipelineId);
 

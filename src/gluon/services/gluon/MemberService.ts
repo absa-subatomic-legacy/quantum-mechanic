@@ -11,25 +11,26 @@ import {OnboardMember} from "../../commands/member/OnboardMember";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {QMColours} from "../../util/QMColour";
 import {QMError} from "../../util/shared/Error";
+import {slackUserIdToSlackHandle} from "../../util/shared/Slack";
 
 export class MemberService {
 
     constructor(public axiosInstance = new AwaitAxios()) {
     }
 
-    public async gluonMemberFromScreenName(screenName: string,
-                                           requestOnboardingIfFailure: boolean = true,
-                                           rawResult = false): Promise<any> {
-        logger.info(`Trying to get gluon member from screen name. screenName: ${screenName} `);
+    public async gluonMemberFromSlackUserId(userId: string,
+                                            requestOnboardingIfFailure: boolean = true,
+                                            rawResult = false): Promise<any> {
+        logger.info(`Trying to get gluon member from user id. userId: ${userId} `);
 
-        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackScreenName=${screenName}`);
+        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackUserId=${userId}`);
 
         if (rawResult) {
             return result;
         }
 
         if (!isSuccessCode(result.status) || _.isEmpty(result.data._embedded)) {
-            const errorMessage = `Failed to get member details. Member ${screenName} appears to not be onboarded.`;
+            const errorMessage = `Failed to get member details. Member ${slackUserIdToSlackHandle(userId)} appears to not be onboarded.`;
             if (requestOnboardingIfFailure) {
                 const msg: SlackMessage = {
                     text: "This command requires the member to be onboarded onto subatomic",
@@ -56,18 +57,6 @@ To create a team you must first onboard yourself. Click the button below to do t
             } else {
                 throw new QMError(errorMessage);
             }
-        }
-
-        return result.data._embedded.teamMemberResources[0];
-    }
-
-    public async gluonMemberFromSlackUserId(userId: string, rawResult = false): Promise<any> {
-        logger.info(`Trying to get gluon member from user id. userId: ${userId} `);
-
-        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/members?slackUserId=${userId}`);
-
-        if (rawResult) {
-            return result;
         }
 
         if (!isSuccessCode(result.status)) {

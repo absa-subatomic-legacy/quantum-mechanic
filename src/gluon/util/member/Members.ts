@@ -1,23 +1,14 @@
 import {HandlerContext, logger} from "@atomist/automation-client";
-import * as _ from "lodash";
 import * as graphql from "../../../typings/types";
 
 export function userFromDomainUser(domainUsername: string, usernameCase = "lower"): string {
 
     if (usernameCase === "lower") {
-        domainUsername =  domainUsername.toLowerCase();
+        domainUsername = domainUsername.toLowerCase();
     } else {
-        domainUsername =  domainUsername.toUpperCase();
+        domainUsername = domainUsername.toUpperCase();
     }
     return /[^\\]*$/.exec(domainUsername)[0];
-}
-
-export function getScreenName(screenName: string) {
-    let result = screenName;
-    if (screenName.startsWith("<@")) {
-        result = _.replace(screenName, /(<@)|>/g, "");
-    }
-    return result.trim();
 }
 
 export async function loadScreenNameByUserId(ctx: HandlerContext, userId: string): Promise<string> {

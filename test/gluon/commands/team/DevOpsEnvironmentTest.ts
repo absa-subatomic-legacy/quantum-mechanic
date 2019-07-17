@@ -10,7 +10,7 @@ describe("NewDevOpsEnvironment command", () => {
     it("should request a DevOps environment", async () => {
 
         const teamName = "test_name";
-        const screenName = "Test.User";
+        const slackUserId = "Test.User";
         const teamChannel = "test_channel";
         const teamId = "79c41ee3-f092-4664-916f-da780195a51e";
         const memberId = "3d01d401-abb3-4eee-8884-2ed5a472172d";
@@ -26,7 +26,7 @@ describe("NewDevOpsEnvironment command", () => {
                     ],
                 },
             })
-            .get(`/members?slackScreenName=${screenName}`)
+            .get(`/members?slackUserId=${slackUserId}`)
             .reply(200, {
                 _embedded: {
                     teamMemberResources: [
@@ -47,7 +47,7 @@ describe("NewDevOpsEnvironment command", () => {
 
         command.teamName = teamName;
         command.teamChannel = teamChannel;
-        command.screenName = screenName;
+        command.slackUserId = slackUserId;
 
         const context = new TestQMContext();
 

@@ -104,7 +104,7 @@ export class ProjectProductionEnvironmentsRequestClosed extends BaseQMEvent impl
                 await qmMessageClient.send(this.prodMessages.getProjectProdCompleteMessage(project.name, projectProdRequest.deploymentPipeline.pipelineId));
             } else {
                 logger.info(`Closed prod request: ${JSON.stringify(projectProdRequest, null, 2)}`);
-                await qmMessageClient.send(`Prod request for project ${projectProdRequest.project.name} was rejected and closed by @${projectProdRequest.rejectingMember.slack.screenName}`);
+                await qmMessageClient.send(`Prod request for project ${projectProdRequest.project.name} was rejected and closed by <@${projectProdRequest.rejectingMember.slack.userId}>`);
             }
             return await success();
         } catch (error) {

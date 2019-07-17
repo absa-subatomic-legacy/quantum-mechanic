@@ -9,12 +9,8 @@ import {HandleCommand} from "@atomist/automation-client/lib/HandleCommand";
 import {ResponderMessageClient} from "../../../context/QMMessageClient";
 import {isSuccessCode} from "../../../http/Http";
 import {GluonService} from "../../services/gluon/GluonService";
-import {getScreenName, loadScreenNameByUserId} from "../../util/member/Members";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
-import {
-    handleQMError,
-    QMError,
-    } from "../../util/shared/Error";
+import {handleQMError, QMError} from "../../util/shared/Error";
 
 @CommandHandler("Request membership to a team")
 export class CreateMembershipRequestToTeam extends BaseQMComand implements HandleCommand<HandlerResult> {
@@ -25,11 +21,6 @@ export class CreateMembershipRequestToTeam extends BaseQMComand implements Handl
     })
     public teamId: string;
 
-    @Parameter({
-        description: "Slack name of the member to add.",
-    })
-    public slackName: string;
-
     constructor(private gluonService = new GluonService()) {
         super();
     }
@@ -37,12 +28,7 @@ export class CreateMembershipRequestToTeam extends BaseQMComand implements Handl
     public async handle(ctx: HandlerContext): Promise<HandlerResult> {
         logger.info(`Request to join team: ${this.teamId}`);
         try {
-
-            const screenName = getScreenName(this.slackName);
-
-            const chatId = await loadScreenNameByUserId(ctx, screenName);
-
-            const memberDetails = await this.gluonService.members.gluonMemberFromScreenName(chatId);
+            const memberDetails = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
             await this.createMembershipRequest(memberDetails);
 

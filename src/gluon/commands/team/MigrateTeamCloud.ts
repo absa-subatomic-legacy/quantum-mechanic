@@ -77,7 +77,7 @@ export class MigrateTeamCloud extends RecursiveParameterRequestCommand
                 return await qmMessageClient.send(message, {id: this.correlationId});
             } else if (this.approval === ApprovalEnum.APPROVED) {
 
-                const requestingMember: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+                const requestingMember: QMMemberBase = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
                 await this.gluonService.teams.updateTeamOpenShiftCloud(team.teamId, this.openShiftCloud, requestingMember.memberId);
 
                 this.succeedCommand();

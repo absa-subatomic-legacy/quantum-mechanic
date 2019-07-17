@@ -1,7 +1,3 @@
-import {logger} from "@atomist/automation-client";
-import * as _ from "lodash";
-import {PrometheusClient} from "../../metrics/prometheus/PrometheusClient";
-
 export class BaseQMHandler {
     get handlerResult() {
         if (this.result === undefined) {

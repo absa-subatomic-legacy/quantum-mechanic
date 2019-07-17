@@ -24,16 +24,16 @@ export class RemoveMemberFromTeamService {
     constructor(private gluonService = new GluonService()) {
     }
 
-    public async getMemberGluonDetails(chatId: string) {
+    public async getMemberGluonDetails(slackuserIf: string) {
         try {
-            return await this.gluonService.members.gluonMemberFromScreenName(chatId);
+            return await this.gluonService.members.gluonMemberFromSlackUserId(slackuserIf);
         } catch (error) {
             const isQMError = error instanceof QMError;
-            if (!isQMError || (isQMError && error.message === `${chatId} is already a member of this team.`)) {
+            if (!isQMError || (isQMError && error.message === `${slackuserIf} is already a member of this team.`)) {
                 throw error;
             }
 
-            const errorMessage = `Failed to get member's details. Member *${chatId}* appears to not be onboarded.`;
+            const errorMessage = `Failed to get member's details. Member *${slackuserIf}* appears to not be onboarded.`;
             const msg: SlackMessage = {
                 text: errorMessage,
                 attachments: [{

@@ -76,7 +76,7 @@ export class LinkExistingBitbucketProject
         try {
             logger.info(`Team: ${this.teamName}, Project: ${this.projectName}`);
 
-            const member = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const member = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
             const gluonProject: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
             const projectUiUrl = `${QMConfig.subatomic.bitbucket.baseUrl}/projects/${this.bitbucketProjectKey}`;

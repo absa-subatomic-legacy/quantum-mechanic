@@ -8,7 +8,7 @@ import {CreateTeam} from "../../commands/team/CreateTeam";
 import {DocumentationUrlBuilder} from "../documentation/DocumentationUrlBuilder";
 
 export class JoinTeamMessages {
-    public presentMenuForTeamSelection(slackName: string, teams): SlackMessage {
+    public presentMenuForTeamSelection(teams): SlackMessage {
         return {
             text: "Please select the team you would like to join",
             attachments: [{
@@ -23,8 +23,9 @@ export class JoinTeamMessages {
                                     };
                                 }),
                         },
-                        "CreateMembershipRequestToTeam", "teamId",
-                        {slackName}),
+                        "CreateMembershipRequestToTeam",
+                        "teamId",
+                    ),
                 ],
             }],
         };

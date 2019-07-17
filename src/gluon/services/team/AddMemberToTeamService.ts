@@ -26,16 +26,16 @@ export class AddMemberToTeamService {
     constructor(private gluonService = new GluonService()) {
     }
 
-    public async getNewMemberGluonDetails(ctx: QMContext, chatId: string, teamChannel: string) {
+    public async getNewMemberGluonDetails(ctx: QMContext, slackUserId: string, teamChannel: string) {
         try {
-            return await this.gluonService.members.gluonMemberFromScreenName(chatId);
+            return await this.gluonService.members.gluonMemberFromSlackUserId(slackUserId);
         } catch (error) {
             const isQMError = error instanceof QMError;
-            if (!isQMError || (isQMError && error.message === `${chatId} is already a member of this team.`)) {
+            if (!isQMError || (isQMError && error.message === `${slackUserId} is already a member of this team.`)) {
                 throw error;
             }
-            await this.onboardMessage(ctx, chatId, teamChannel);
-            const errorMessage = `Failed to get member's details. Member *${chatId}* appears to not be onboarded.`;
+            await this.onboardMessage(ctx, slackUserId, teamChannel);
+            const errorMessage = `Failed to get member's details. Member *${slackUserId}* appears to not be onboarded.`;
             const msg: SlackMessage = {
                 text: errorMessage,
                 attachments: [{

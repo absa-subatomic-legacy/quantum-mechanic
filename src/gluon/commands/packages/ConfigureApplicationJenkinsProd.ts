@@ -86,7 +86,7 @@ export class ConfigureApplicationJenkinsProd extends RecursiveParameterRequestCo
         const messageClient: ResponderMessageClient = new ResponderMessageClient(ctx);
 
         try {
-            const member: QMMemberBase = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+            const member: QMMemberBase = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
             const requestingTeam: QMTeam = await this.gluonService.teams.getTeamByName(this.teamName);
 

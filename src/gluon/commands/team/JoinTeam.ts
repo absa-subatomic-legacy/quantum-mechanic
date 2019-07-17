@@ -13,10 +13,7 @@ import {isSuccessCode} from "../../../http/Http";
 import {JoinTeamMessages} from "../../messages/team/JoinTeamMessages";
 import {GluonService} from "../../services/gluon/GluonService";
 import {BaseQMComand} from "../../util/shared/BaseQMCommand";
-import {
-    handleQMError,
-    QMError,
-    } from "../../util/shared/Error";
+import {handleQMError, QMError} from "../../util/shared/Error";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
 @CommandHandler("Apply to join an existing team", atomistIntent(CommandIntent.JoinTeam))
@@ -39,7 +36,7 @@ export class JoinTeam extends BaseQMComand implements HandleCommand<HandlerResul
 
             // remove teams that he is already a member of - TODO in future
 
-            const result = ctx.messageClient.respond(this.joinTeamMessages.presentMenuForTeamSelection(this.slackName, teams));
+            const result = ctx.messageClient.respond(this.joinTeamMessages.presentMenuForTeamSelection(teams));
             this.succeedCommand();
             return result;
         } catch (error) {

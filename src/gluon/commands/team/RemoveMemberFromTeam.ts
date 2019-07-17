@@ -52,7 +52,7 @@ export class RemoveMemberFromTeam extends RecursiveParameterRequestCommand imple
             const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Removing member from team started:`,
                 new ResponderMessageClient(ctx));
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
-            taskRunner.addTask(new RemoveMemberFromTeamTask(this.slackName, this.screenName, this.teamName, MemberRole.member));
+            taskRunner.addTask(new RemoveMemberFromTeamTask(this.slackName, this.slackUserId, this.teamName, MemberRole.member));
             await taskRunner.execute(ctx);
             this.succeedCommand();
         } catch (error) {

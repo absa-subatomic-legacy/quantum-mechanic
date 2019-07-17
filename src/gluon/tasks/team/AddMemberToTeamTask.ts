@@ -2,7 +2,7 @@ import {logger} from "@atomist/automation-client";
 import {QMContext} from "../../../context/QMContext";
 import {GluonService} from "../../services/gluon/GluonService";
 import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService";
-import {getScreenName, MemberRole} from "../../util/member/Members";
+import {MemberRole} from "../../util/member/Members";
 import {getTeamSlackChannel} from "../../util/team/Teams";
 import {Task} from "../Task";
 import {TaskListMessage} from "../TaskListMessage";
@@ -12,8 +12,8 @@ export class AddMemberToTeamTask extends Task {
     private readonly TASK_GATHER_REQUEST_DETAILS = TaskListMessage.createUniqueTaskName("GatherRequestDetails");
     private readonly TASK_ADD_USER_TO_TEAM = TaskListMessage.createUniqueTaskName("AddUserToTeam");
 
-    constructor(private slackName: string,
-                private screenName: string,
+    constructor(private memberToAddSlackUserId: string,
+                private actioningMemberSlackUserId: string,
                 private teamName: string,
                 private memberRole: MemberRole,
                 private addMemberToTeamService = new AddMemberToTeamService(),
@@ -32,21 +32,15 @@ export class AddMemberToTeamTask extends Task {
 
         const teamChannel = getTeamSlackChannel(team);
 
-        logger.info(`Adding member [${this.slackName}] to team: ${this.teamName}`);
+        logger.info(`Adding member [${this.memberToAddSlackUserId}] to team: ${this.teamName}`);
 
-        const screenName = getScreenName(this.slackName);
-
-        const chatId = await ctx.graphClient.slackScreenNameFromSlackUserId(screenName);
-
-        logger.info(`Got ChatId: ${chatId}`);
-
-        const newMember = await this.addMemberToTeamService.getNewMemberGluonDetails(ctx, chatId, teamChannel);
+        const newMember = await this.addMemberToTeamService.getNewMemberGluonDetails(ctx, this.memberToAddSlackUserId, teamChannel);
 
         this.addMemberToTeamService.verifyAddMemberRequest(newMember, team, this.memberRole);
 
         logger.info(`Gluon member found: ${JSON.stringify(newMember)}`);
 
-        const actioningMember = await this.gluonService.members.gluonMemberFromScreenName(this.screenName);
+        const actioningMember = await this.gluonService.members.gluonMemberFromSlackUserId(this.actioningMemberSlackUserId);
 
         await this.taskListMessage.succeedTask(this.TASK_GATHER_REQUEST_DETAILS);
 

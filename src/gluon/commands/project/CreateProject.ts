@@ -56,7 +56,7 @@ export class CreateProject extends RecursiveParameterRequestCommand
     protected async runCommand(ctx: HandlerContext) {
         try {
             const tenant = await this.gluonService.tenants.gluonTenantFromTenantName(this.tenantName);
-            const result = await this.requestNewProjectForTeamAndTenant(ctx, this.screenName, this.teamName, tenant.tenantId);
+            const result = await this.requestNewProjectForTeamAndTenant(ctx, this.slackUserId, this.teamName, tenant.tenantId);
             this.succeedCommand();
             return result;
         } catch (error) {
@@ -65,10 +65,10 @@ export class CreateProject extends RecursiveParameterRequestCommand
         }
     }
 
-    private async requestNewProjectForTeamAndTenant(ctx: HandlerContext, screenName: string,
+    private async requestNewProjectForTeamAndTenant(ctx: HandlerContext, slackUserId: string,
                                                     teamName: string, tenantId: string): Promise<any> {
 
-        const member = await this.gluonService.members.gluonMemberFromScreenName(screenName);
+        const member = await this.gluonService.members.gluonMemberFromSlackUserId(slackUserId);
 
         const team: QMTeam = await this.gluonService.teams.getTeamByName(teamName);
 
