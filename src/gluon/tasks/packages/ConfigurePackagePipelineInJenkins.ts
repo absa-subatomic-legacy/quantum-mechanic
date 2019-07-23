@@ -118,7 +118,6 @@ export class ConfigurePackagePipelineInJenkins extends Task {
             const jenkinsTemplate: QMFileTemplate = new QMFileTemplate(getPathFromJenkinsfileName(jenkinsfileName));
             const content = jenkinsTemplate.build({
                 devDeploymentEnvironments: this.project.devDeploymentPipeline.environments,
-                releaseDeploymentEnvironments: this.project.releaseDeploymentPipelines[0].environments,
             });
             const commitMessage = `Added ${destinationJenkinsfileName}`;
 
