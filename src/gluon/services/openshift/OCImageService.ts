@@ -22,9 +22,9 @@ export class OCImageService {
 
     private openShiftApiInstance: OpenShiftApi;
 
-    public async getAllSubatomicImageStreams(namespace: string = "subatomic", cleanNamespace: boolean = true): Promise<OpenshiftResource[]> {
-        logger.debug(`Trying to get subatomic image stream from subatomic namespace`);
-        const queryResult = await this.openShiftApi.get.getAllFromNamespace("ImageStream", "subatomic", "v1");
+    public async getAllSubatomicImageStreams(namespace, cleanNamespace: boolean = true): Promise<OpenshiftResource[]> {
+        logger.debug(`Trying to get subatomic image stream from ${namespace} namespace`);
+        const queryResult = await this.openShiftApi.get.getAllFromNamespace("ImageStream", namespace, "v1");
 
         if (isSuccessCode(queryResult.status)) {
             const imageStreams = [];
@@ -46,9 +46,9 @@ export class OCImageService {
         }
     }
 
-    public async getImageStream(imageStreamName: string, namespace: string = "subatomic", cleanNamespace: boolean = true): Promise<OpenshiftResource> {
-        logger.debug(`Trying to get subatomic image stream from subatomic namespace`);
-        const queryResult = await this.openShiftApi.get.get("ImageStream", imageStreamName, "subatomic", "v1");
+    public async getImageStream(imageStreamName: string, namespace: string, cleanNamespace: boolean = true): Promise<OpenshiftResource> {
+        logger.debug(`Trying to get subatomic image stream from ${namespace} namespace`);
+        const queryResult = await this.openShiftApi.get.get("ImageStream", imageStreamName, namespace, "v1");
 
         if (isSuccessCode(queryResult.status)) {
             const imageStream = queryResult.data;

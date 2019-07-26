@@ -202,7 +202,7 @@ export class OCService {
         }
     }
 
-    public async getSubatomicImageStreamTags(namespace: string = "subatomic") {
+    public async getSubatomicImageStreamTags(namespace: string) {
         return this.ocImageService.getAllSubatomicImageStreams(namespace);
     }
 
