@@ -74,7 +74,7 @@ export async function setImageName(
 
     await commandHandler.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].openshiftNonProd);
 
-    const images = await commandHandler.ocService.getSubatomicImageStreamTags();
+    const images = await commandHandler.ocService.getSubatomicImageStreamTags(QMConfig.subatomic.openshiftClouds[commandHandler.openShiftCloud].sharedResourceNamespace);
 
     return {
         setterSuccess: false,
