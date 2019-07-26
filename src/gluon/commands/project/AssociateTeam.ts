@@ -95,7 +95,7 @@ export class AssociateTeam extends RecursiveParameterRequestCommand {
 }
 
 async function setGluonTeamFromUnassociatedTeams(ctx: HandlerContext, commandHandler: AssociateTeam): Promise<RecursiveSetterResult> {
-    const teams = await commandHandler.gluonService.teams.getTeamsWhoSlackScreenNameBelongsTo(commandHandler.screenName);
+    const teams = await commandHandler.gluonService.teams.getTeamsWhoSlackUserIdBelongsTo(commandHandler.slackUserId);
     const availTeams = await availableTeamsToAssociate(commandHandler.gluonService, teams, commandHandler.projectName);
 
     if (_.isEmpty(availTeams)) {
