@@ -18,6 +18,7 @@ export interface OpenshiftProjectEnvironment {
 }
 
 export interface OpenShiftCloud {
+    canProvisionNewTeams: boolean;
     sharedResourceNamespace: string;
     openshiftNonProd: OpenShiftConfig;
     openshiftProd: OpenShiftConfig[];

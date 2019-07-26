@@ -107,7 +107,9 @@ export async function setGluonTeamOpenShiftCloud(
     return {
         setterSuccess: false,
         messagePrompt: createMenuAttachment(
-            Object.keys(QMConfig.subatomic.openshiftClouds).map(cloudName => {
+            Object.keys(QMConfig.subatomic.openshiftClouds).filter(cloudName => {
+                return QMConfig.subatomic.openshiftClouds[cloudName].canProvisionNewTeams;
+            }).map(cloudName => {
                 return {
                     value: cloudName,
                     text: cloudName,
