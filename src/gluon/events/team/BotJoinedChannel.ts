@@ -124,7 +124,7 @@ export class BotJoinedChannel extends BaseQMEvent implements HandleEvent<any> {
                     actions: [
                         buttonForCommand(
                             {
-                                text: `Add ${userId}`,
+                                text: `Add ${existingUser.firstName}`,
                                 style: "primary",
                             },
                             new AddMemberToTeam(),

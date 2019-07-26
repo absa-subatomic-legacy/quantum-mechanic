@@ -15,12 +15,12 @@ export class TeamService {
     constructor(public axiosInstance = new AwaitAxios()) {
     }
 
-    public async getTeamsWhoSlackScreenNameBelongsTo(screenName: string, requestActionOnFailure: boolean = true): Promise<any[]> {
-        logger.debug(`Trying to get gluon teams associated to a screenName. screenName: ${screenName} `);
+    public async getTeamsWhoSlackUserIdBelongsTo(slackUserId: string, requestActionOnFailure: boolean = true): Promise<any[]> {
+        logger.debug(`Trying to get gluon teams associated to a screenName. screenName: ${slackUserId} `);
 
-        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackScreenName=${screenName}`);
+        const result = await this.axiosInstance.get(`${QMConfig.subatomic.gluon.baseUrl}/teams?slackUserId=${slackUserId}`);
 
-        const errorMessage = `Failed to find teams associated to member. Member ${screenName} is either not onboarded, or is not a member of any team..`;
+        const errorMessage = `Failed to find teams associated to member. Member ${slackUserId} is either not onboarded, or is not a member of any team..`;
 
         if (!isSuccessCode(result.status)) {
             throw new QMError(errorMessage);

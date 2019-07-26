@@ -30,8 +30,8 @@ export async function setGluonTeamName(
         throw new QMError(`setGluonTeamName commandHandler requires gluonService parameter to be defined`);
     }
 
-    if (commandHandler.screenName === undefined) {
-        throw new QMError(`setGluonTeamName commandHandler requires screenName mapped parameter to be defined`);
+    if (commandHandler.slackUserId === undefined) {
+        throw new QMError(`setGluonTeamName commandHandler requires slackUserId mapped parameter to be defined`);
     }
 
     let teams: QMTeam[];
@@ -49,7 +49,7 @@ export async function setGluonTeamName(
 
     if (teams === undefined) {
         logger.info(`CommandHandler teamChannel is undefined. Trying to find teams member is a part of.`);
-        teams = await commandHandler.gluonService.teams.getTeamsWhoSlackScreenNameBelongsTo(commandHandler.screenName);
+        teams = await commandHandler.gluonService.teams.getTeamsWhoSlackUserIdBelongsTo(commandHandler.slackUserId);
     }
     return {
         setterSuccess: false,
@@ -69,7 +69,7 @@ export function GluonTeamNameParam(details: RecursiveParameterDetails) {
 export interface GluonTeamNameSetter {
     gluonService: GluonService;
     teamChannel?: string;
-    screenName: string;
+    slackUserId: string;
     teamName: string;
     handle: (ctx: HandlerContext) => Promise<HandlerResult>;
 }
