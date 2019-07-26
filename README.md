@@ -52,6 +52,7 @@ Here is an example `local.json`:
     },
     "openshiftClouds": {
       "ab-cloud": {
+        "canProvisionNewTeams": true,
         "sharedResourceNamespace": "subatomic",
         "openshiftNonProd": {
           "name": "nonprod",
