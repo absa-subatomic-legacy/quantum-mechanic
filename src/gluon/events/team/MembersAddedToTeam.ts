@@ -16,7 +16,7 @@ import {OCService} from "../../services/openshift/OCService";
 import {AddMemberToTeamService} from "../../services/team/AddMemberToTeamService";
 import {userFromDomainUser} from "../../util/member/Members";
 import {
-    getAllPipelineOpenshiftNamespacesForAllPipelines,
+    getAllPipelineOpenshiftNamespacesForProject,
     } from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {
@@ -145,7 +145,7 @@ export class MembersAddedToTeam extends BaseQMEvent implements HandleEvent<any> 
             const tenant: QMTenant = await this.gluonService.tenants.gluonTenantFromTenantId(project.owningTenant);
 
             // Add to openshift environments
-            for (const openShiftNamespace of getAllPipelineOpenshiftNamespacesForAllPipelines(tenant.name, project)) {
+            for (const openShiftNamespace of getAllPipelineOpenshiftNamespacesForProject(tenant.name, project)) {
                 await this.ocService.addTeamMembershipPermissionsToProject(openShiftNamespace.namespace, membersAddedToTeamEvent, osEnv.usernameCase);
             }
         }

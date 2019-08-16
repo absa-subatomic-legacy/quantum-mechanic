@@ -5,4 +5,5 @@ type Project @rootType {
     tenant: GluonTenantId
     devDeploymentPipeline: DeploymentPipeline
     releaseDeploymentPipelines: [DeploymentPipeline]
+    additionalEnvironments: [AdditionalEnvironment]
 }

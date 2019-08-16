@@ -2,13 +2,13 @@ import assert = require("power-assert");
 import {OpenShiftConfig} from "../../../../src/config/OpenShiftConfig";
 import {
     getAllPipelineOpenshiftNamespaces,
-    getAllPipelineOpenshiftNamespacesForAllPipelines,
+    getAllPipelineOpenshiftNamespacesForProject,
     getDeploymentEnvironmentJenkinsMetadata,
     getPipelineOpenShiftNamespacesForOpenShiftCluster,
     getProjectDevOpsId,
     getProjectDisplayName,
     getProjectOpenshiftNamespace,
-    } from "../../../../src/gluon/util/project/Project";
+} from "../../../../src/gluon/util/project/Project";
 import {
     QMDeploymentPipeline,
     QMProject,
@@ -78,6 +78,7 @@ describe("getPipelineOpenShiftNamespacesForOpenShiftCluster", () => {
                 environments: [],
             },
             releaseDeploymentPipelines: [],
+            additionalEnvironments: [],
         };
 
         const cluster: OpenShiftConfig = {
@@ -104,7 +105,7 @@ describe("getPipelineOpenShiftNamespacesForOpenShiftCluster", () => {
     });
 });
 
-describe("getAllPipelineOpenshiftNamespacesForAllPipelines", () => {
+describe("getAllPipelineOpenshiftNamespacesForProject", () => {
     it("should return all OpenShiftNamespaces for all pipelines in a project", async () => {
         const project: QMProject = {
             projectId: "",
@@ -156,9 +157,10 @@ describe("getAllPipelineOpenshiftNamespacesForAllPipelines", () => {
                     ],
                 },
             ],
+            additionalEnvironments: [],
         };
 
-        const deploymentEnvironmentNamespaces = getAllPipelineOpenshiftNamespacesForAllPipelines("default", project);
+        const deploymentEnvironmentNamespaces = getAllPipelineOpenshiftNamespacesForProject("default", project);
         assert.equal(deploymentEnvironmentNamespaces.length, 4);
         assert.equal(deploymentEnvironmentNamespaces[0].namespace, "default-project-dev");
         assert.equal(deploymentEnvironmentNamespaces[0].displayName, "Project Dev");
@@ -176,7 +178,7 @@ describe("getAllPipelineOpenshiftNamespacesForAllPipelines", () => {
 
 });
 
-describe("getAllPipelineOpenshiftNamespacesForAllPipelines", () => {
+describe("getAllPipelineOpenshiftNamespacesForProject", () => {
     it("should return all OpenShiftNamespaces for all pipelines in a project", async () => {
         const pipeline: QMDeploymentPipeline = {
             name: "Default",

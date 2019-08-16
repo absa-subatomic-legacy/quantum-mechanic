@@ -13,6 +13,7 @@ export interface QMProject extends QMProjectBase {
     owningTeam: QMTeamBase;
     devDeploymentPipeline: QMDeploymentPipeline;
     releaseDeploymentPipelines: QMDeploymentPipeline[];
+    additionalEnvironments: QMAdditionalEnvironment[];
 }
 
 export interface QMDeploymentPipeline {
@@ -26,4 +27,8 @@ export interface QMDeploymentEnvironment {
     positionInPipeline: number;
     displayName: string;
     postfix: string;
+}
+
+export interface QMAdditionalEnvironment {
+    displayName: string;
 }
