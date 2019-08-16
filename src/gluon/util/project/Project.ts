@@ -112,16 +112,30 @@ export function getPipelineOpenShiftNamespacesForOpenShiftCluster(tenantName: st
 }
 
 /**
+ * Return a list of project OpenShiftNamespaces for all the environments associated to a project.
+ * The list of OpenShiftNamespaces contains details about the namespace and its various name components.
+ * @param tenantName - The project owning tenant name
+ * @param project - The project to generate the OpenShiftNamespace list for
+ */
+export function getAllOpenshiftNamespacesForProject(tenantName: string, project: QMProject) {
+    const namespaces: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespacesForProject(tenantName, project);
+    namespaces.push(...generateCustomOpenshiftNamespaces(tenantName, project.name, project.additionalEnvironments.map(environment => environment.displayName)));
+
+    return namespaces;
+}
+
+/**
  * Return a list of project OpenShiftNamespaces for all the deployment pipelines associated to a project.
  * The list of OpenShiftNamespaces contains details about the namespace and its various name components.
  * @param tenantName - The project owning tenant name
  * @param project - The project to generate the OpenShiftNamespace list for
  */
-export function getAllPipelineOpenshiftNamespacesForAllPipelines(tenantName: string, project: QMProject) {
+export function getAllPipelineOpenshiftNamespacesForProject(tenantName: string, project: QMProject) {
     const namespaces: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespaces(tenantName, project.name, project.devDeploymentPipeline);
     for (const pipeline of project.releaseDeploymentPipelines) {
         namespaces.push(...getAllPipelineOpenshiftNamespaces(tenantName, project.name, pipeline));
     }
+
     return namespaces;
 }
 
@@ -147,6 +161,16 @@ export function getAllPipelineOpenshiftNamespaces(owningTenantName: string, proj
     }
 
     return environmentsForCreation;
+}
+
+export function generateCustomOpenshiftNamespaces(owningTenantName: string, projectName: string, environmentNames: string[]) {
+    return environmentNames.map(environmentName => {
+        return {
+            namespace: getProjectOpenshiftNamespace(owningTenantName, projectName, "custom", environmentName),
+            displayName: getProjectDisplayName(owningTenantName, projectName, "", environmentName),
+            postfix: getDeploymentEnvironmentFullPostfix("custom", environmentName),
+        };
+    });
 }
 
 /**

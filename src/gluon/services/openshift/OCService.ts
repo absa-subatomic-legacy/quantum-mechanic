@@ -86,73 +86,134 @@ export class OCService {
 
     public async createDevOpsDefaultResourceQuota(openshiftProjectId: string, replace = true, rawResult = false): Promise<any> {
         logger.debug(`Trying to create DevOps default resource quota. openshiftProjectId: ${openshiftProjectId}`);
-        const createResult = await this.openShiftApi.create.create(
-            this.quotaLoader.getDevOpsDefaultResourceQuota(),
-            openshiftProjectId,
-            replace,
-        );
+        const defaultResourceQuota: OpenshiftResource = this.quotaLoader.getDevOpsDefaultResourceQuota();
 
-        if (rawResult) {
-            return createResult;
-        } else if (!isSuccessCode(createResult.status)) {
-            logger.error(`Failed to create default quota in DevOps: ${inspect(createResult)}`);
-            throw new QMError("Failed to create the OpenShift default Quota in DevOps as requested");
+        let quotaExists = true;
+        let openshiftApiResult;
+        try {
+            openshiftApiResult = await this.openShiftApi.get.get(defaultResourceQuota.kind, defaultResourceQuota.metadata.name, openshiftProjectId);
+        } catch (e) {
+            quotaExists = false;
         }
-        return createResult.data;
+
+        if (!quotaExists) {
+            const createResult = await this.openShiftApi.create.create(
+                defaultResourceQuota,
+                openshiftProjectId,
+                replace,
+            );
+
+            if (rawResult) {
+                return createResult;
+            } else if (!isSuccessCode(createResult.status)) {
+                logger.error(`Failed to create default quota in DevOps: ${inspect(createResult)}`);
+                throw new QMError("Failed to create the OpenShift default Quota in DevOps as requested");
+            }
+            return createResult.data;
+        } else {
+            logger.info(`Default Quota already exists in namespace: ${openshiftProjectId}`);
+            return openshiftApiResult.data;
+        }
     }
 
     public async createDevOpsDefaultLimits(openshiftProjectId: string, apply = true, rawResult = false): Promise<any> {
         logger.debug(`Trying to create DevOps default limits. openshiftProjectId: ${openshiftProjectId}`);
 
-        const createResult = await this.openShiftApi.create.create(
-            this.quotaLoader.getDevOpsDefaultLimitRange(),
-            openshiftProjectId,
-            apply,
-        );
+        const defaultLimitRange: OpenshiftResource = this.quotaLoader.getProjectDefaultLimitRange();
 
-        if (rawResult) {
-            return createResult;
-        } else if (!isSuccessCode(createResult.status)) {
-            logger.error(`Failed to create default limits in DevOps: ${inspect(createResult)}`);
-            throw new QMError("Failed to create the OpenShift default-limits in DevOps as requested");
+        let limitExists = true;
+        let openshiftApiResult;
+        try {
+            openshiftApiResult = await this.openShiftApi.get.get(defaultLimitRange.kind, defaultLimitRange.metadata.name, openshiftProjectId);
+        } catch (e) {
+            limitExists = false;
         }
-        return createResult.data;
+
+        if (!limitExists) {
+            const createResult = await this.openShiftApi.create.create(
+                this.quotaLoader.getDevOpsDefaultLimitRange(),
+                openshiftProjectId,
+                apply,
+            );
+
+            if (rawResult) {
+                return createResult;
+            } else if (!isSuccessCode(createResult.status)) {
+                logger.error(`Failed to create default limits in DevOps: ${inspect(createResult)}`);
+                throw new QMError("Failed to create the OpenShift default-limits in DevOps as requested");
+            }
+
+            return createResult.data;
+        } else {
+            logger.info(`Default Limit already exists in namespace: ${openshiftProjectId}`);
+            return openshiftApiResult.data;
+        }
     }
 
     public async createProjectDefaultResourceQuota(openshiftProjectId: string, apply = true, rawResult = false): Promise<any> {
         logger.debug(`Trying to create project default resource quota. openshiftProjectId: ${openshiftProjectId}`);
 
-        const createResult = await this.openShiftApi.create.create(
-            this.quotaLoader.getProjectDefaultResourceQuota(),
-            openshiftProjectId,
-            apply,
-        );
+        const defaultResourceQuota: OpenshiftResource = this.quotaLoader.getProjectDefaultResourceQuota();
 
-        if (rawResult) {
-            return createResult;
-        } else if (!isSuccessCode(createResult.status)) {
-            logger.error(`Failed to create default quota in project: ${inspect(createResult)}`);
-            throw new QMError("Failed to create the OpenShift default Quota in project as requested");
+        let quotaExists = true;
+        let openshiftApiResult;
+        try {
+            openshiftApiResult = await this.openShiftApi.get.get(defaultResourceQuota.kind, defaultResourceQuota.metadata.name, openshiftProjectId);
+        } catch (e) {
+            quotaExists = false;
         }
-        return createResult.data;
+
+        if (!quotaExists) {
+            const createResult = await this.openShiftApi.create.create(
+                defaultResourceQuota,
+                openshiftProjectId,
+                apply,
+            );
+
+            if (rawResult) {
+                return createResult;
+            } else if (!isSuccessCode(createResult.status)) {
+                logger.error(`Failed to create default quota in project: ${inspect(createResult)}`);
+                throw new QMError("Failed to create the OpenShift default Quota in project as requested");
+            }
+            return createResult.data;
+        } else {
+            logger.info(`Default Quota already exists in namespace: ${openshiftProjectId}`);
+            return openshiftApiResult.data;
+        }
     }
 
     public async createProjectDefaultLimits(openshiftProjectId: string, apply = true, rawResult = false): Promise<any> {
         logger.debug(`Trying to create project default limits. openshiftProjectId: ${openshiftProjectId}`);
 
-        const createResult = await this.openShiftApi.create.create(
-            this.quotaLoader.getProjectDefaultLimitRange(),
-            openshiftProjectId,
-            apply,
-        );
+        const defaultLimitRange: OpenshiftResource = this.quotaLoader.getProjectDefaultLimitRange();
 
-        if (rawResult) {
-            return createResult;
-        } else if (!isSuccessCode(createResult.status)) {
-            logger.error(`Failed to create default limits in project: ${inspect(createResult)}`);
-            throw new QMError("Failed to create the OpenShift default-limits in project as requested");
+        let limitExists = true;
+        let openshiftApiResult;
+        try {
+            openshiftApiResult = await this.openShiftApi.get.get(defaultLimitRange.kind, defaultLimitRange.metadata.name, openshiftProjectId);
+        } catch (e) {
+            limitExists = false;
         }
-        return createResult.data;
+
+        if (!limitExists) {
+            const createResult = await this.openShiftApi.create.create(
+                this.quotaLoader.getProjectDefaultLimitRange(),
+                openshiftProjectId,
+                apply,
+            );
+
+            if (rawResult) {
+                return createResult;
+            } else if (!isSuccessCode(createResult.status)) {
+                logger.error(`Failed to create default limits in project: ${inspect(createResult)}`);
+                throw new QMError("Failed to create the OpenShift default-limits in project as requested");
+            }
+            return createResult.data;
+        } else {
+            logger.info(`Default Limit already exists in namespace: ${openshiftProjectId}`);
+            return openshiftApiResult.data;
+        }
     }
 
     public async getSubatomicTemplate(templateName: string, namespace: string = "subatomic"): Promise<OpenshiftResource> {

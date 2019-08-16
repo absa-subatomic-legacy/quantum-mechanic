@@ -16,9 +16,9 @@ import {
     getBuildConfigName,
 } from "../../util/packages/Applications";
 import {
-    getAllPipelineOpenshiftNamespacesForAllPipelines,
+    getAllOpenshiftNamespacesForProject,
     getProjectDevOpsId,
-    } from "../../util/project/Project";
+} from "../../util/project/Project";
 import {QMError} from "../../util/shared/Error";
 import {imageStreamToFullImageStreamTagString} from "../../util/shared/ImageStreamTranformers";
 import {getDevOpsEnvironmentDetails} from "../../util/team/Teams";
@@ -167,7 +167,7 @@ export class ConfigurePackageInOpenshift extends Task {
     }
 
     private async createApplicationOpenshiftResources(tenantName: string, project: QMProject, applicationName: string, sharedResourceNamespace: string): Promise<HandlerResult> {
-        for (const openShiftNamespaceDetails of getAllPipelineOpenshiftNamespacesForAllPipelines(tenantName, project)) {
+        for (const openShiftNamespaceDetails of getAllOpenshiftNamespacesForProject(tenantName, project)) {
             const deploymentNamespace = openShiftNamespaceDetails.namespace;
             const appName = `${_.kebabCase(applicationName).toLowerCase()}`;
             const devOpsProjectId = getProjectDevOpsId(this.packageDetails.teamName);

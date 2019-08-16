@@ -40,17 +40,17 @@ import {
 } from "../../util/jenkins/JenkinsJobTemplates";
 import {ApplicationType} from "../../util/packages/Applications";
 import {
-    getAllPipelineOpenshiftNamespacesForAllPipelines,
+    getAllOpenshiftNamespacesForProject,
     OpenshiftProjectEnvironmentRequest,
     OpenShiftProjectNamespace,
-    } from "../../util/project/Project";
+} from "../../util/project/Project";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
 import {
     DevOpsEnvironmentDetails,
     getDevOpsEnvironmentDetails,
-    } from "../../util/team/Teams";
+} from "../../util/team/Teams";
 import {EventToGluon} from "../../util/transform/EventToGluon";
 import {QMApplication} from "../../util/transform/types/gluon/Application";
 import {QMProject} from "../../util/transform/types/gluon/Project";
@@ -131,7 +131,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
         }
     }
 
-    private async createMigrateTeamToCloudTasks(atomistQMContext: QMContext,  qmMessageClient: SimpleQMMessageClient, team: QMTeam, previousCloud: string) {
+    private async createMigrateTeamToCloudTasks(atomistQMContext: QMContext, qmMessageClient: SimpleQMMessageClient, team: QMTeam, previousCloud: string) {
         const taskListMessage: TaskListMessage = new TaskListMessage(`🚀 Migrating Team to cloud *${team.openShiftCloud}* started:`,
             qmMessageClient);
         const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
@@ -202,7 +202,7 @@ export class TeamOpenShiftCloudMigrated extends BaseQMEvent implements HandleEve
 
         await this.ocService.setOpenShiftDetails(QMConfig.subatomic.openshiftClouds[previousCloud].openshiftNonProd);
 
-        const environmentsForCreation: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespacesForAllPipelines(tenant.name, project);
+        const environmentsForCreation: OpenShiftProjectNamespace[] = getAllOpenshiftNamespacesForProject(tenant.name, project);
 
         const createOpenshiftEnvironmentsDetails: OpenshiftProjectEnvironmentRequest = {
             project,

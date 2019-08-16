@@ -17,9 +17,9 @@ import {CreateOpenshiftEnvironments} from "../../tasks/project/CreateOpenshiftEn
 import {TaskListMessage} from "../../tasks/TaskListMessage";
 import {TaskRunner} from "../../tasks/TaskRunner";
 import {
-    getAllPipelineOpenshiftNamespacesForAllPipelines,
+    getAllOpenshiftNamespacesForProject,
     OpenShiftProjectNamespace,
-    } from "../../util/project/Project";
+} from "../../util/project/Project";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
 import {handleQMError} from "../../util/shared/Error";
 import {QMProject} from "../../util/transform/types/gluon/Project";
@@ -99,7 +99,7 @@ export class ProjectEnvironmentsRequested extends BaseQMEvent implements HandleE
             const taskRunner: TaskRunner = new TaskRunner(taskListMessage);
             const openshiftNonProd = QMConfig.subatomic.openshiftClouds[owningTeam.openShiftCloud].openshiftNonProd;
 
-            const environmentsForCreation: OpenShiftProjectNamespace[] = getAllPipelineOpenshiftNamespacesForAllPipelines(environmentsRequestedEvent.owningTenant.name, project);
+            const environmentsForCreation: OpenShiftProjectNamespace[] = getAllOpenshiftNamespacesForProject(environmentsRequestedEvent.owningTenant.name, project);
 
             taskRunner.addTask(
                 new CreateOpenshiftEnvironments(atomistQMContext, environmentsRequestedEvent, environmentsForCreation, openshiftNonProd, owningTeam),

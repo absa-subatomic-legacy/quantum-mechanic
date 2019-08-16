@@ -191,6 +191,7 @@ export const configuration: any = {
         ingester("OpenShiftProjectEnvironmentCreatedEvent"),
         ingester("MetaData"),
         ingester("MetadataEntries"),
+        ingester("AdditionalEnvironment"),
     ],
     apiKey,
     http,
