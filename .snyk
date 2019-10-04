@@ -1,0 +1,136 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-HTTPSPROXYAGENT-469131:
+    - '@absa-subatomic/openshift-api > npm > libnpmteam > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/automation-client > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > pacote > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpmteam > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpm > pacote > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpmaccess > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libcipm > pacote > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > pacote > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > pacote > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpmorg > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpm > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > npm-profile > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpmsearch > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpmhook > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > pacote > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > pacote > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpmhook > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpm > libnpmaccess > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpm > libnpmorg > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpm > pacote > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpm > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libcipm > pacote > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpmorg > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpm > pacote > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpm > libnpmpublish > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > npm-profile > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpmaccess > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpm > libnpmsearch > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpm > npm-profile > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/automation-client > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libcipm > pacote > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpmsearch > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpm > libnpmhook > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - npm > libnpm > libnpmteam > npm-registry-fetch > make-fetch-happen > https-proxy-agent:
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpm > libnpmorg > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpm > libnpmteam > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpmsearch > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libcipm > pacote > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpmteam > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpm > libnpmsearch > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpm > npm-profile > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpm > pacote > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > pacote > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpm > libnpmpublish > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > npm-profile > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpmorg > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpm > pacote > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpm > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpm > libnpmaccess > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpmhook > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libcipm > pacote > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@absa-subatomic/openshift-api > npm > libnpm > libnpmhook > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpmaccess > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpm > libnpmhook > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpm > libnpmaccess > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpm > libnpmteam > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpm > libnpmorg > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpm > libnpmpublish > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpm > pacote > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpm > npm-profile > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libcipm > pacote > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
+    - '@atomist/cli > @atomist/sdm-core > npm > libnpm > libnpmsearch > npm-registry-fetch > make-fetch-happen > https-proxy-agent':
+        patched: '2019-10-04T01:15:03.680Z'
