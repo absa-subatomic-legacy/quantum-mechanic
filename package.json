@@ -39,7 +39,7 @@
     "@types/power-assert": "^1.5.0",
     "axios-mock-adapter": "^1.16.0",
     "codecov": "^3.3.0",
-    "copyfiles": "^2.1.0",
+    "copyfiles": "^2.1.1",
     "espower-typescript": "^9.0.1",
     "form-data": "^2.3.3",
     "mocha": "^6.1.4",
