@@ -29,7 +29,7 @@
     "strip-json-comments": "^3.0.1",
     "superagent": "^5.1.0",
     "xmlbuilder": "^13.0.2",
-    "@absa-subatomic/openshift-api": "0.0.5"
+    "@absa-subatomic/openshift-api": "0.0.6"
   },
   "devDependencies": {
     "@types/app-root-path": "^1.2.4",
