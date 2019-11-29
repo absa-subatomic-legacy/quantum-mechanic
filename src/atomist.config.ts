@@ -19,6 +19,7 @@ import {CreateApplicationProd} from "./gluon/commands/packages/CreateApplication
 import {LinkExistingApplication} from "./gluon/commands/packages/LinkExistingApplication";
 import {LinkExistingLibrary} from "./gluon/commands/packages/LinkExistingLibrary";
 import {PatchBuildConfigBaseImage} from "./gluon/commands/packages/PatchBuildConfigBaseImage";
+import {SetPackageJenkinsFolder} from "./gluon/commands/packages/SetPackageJenkinsFolder";
 import {AssociateTeam} from "./gluon/commands/project/AssociateTeam";
 import {CreateGenericProd} from "./gluon/commands/project/CreateGenericProd";
 import {CreateProject} from "./gluon/commands/project/CreateProject";
@@ -122,6 +123,7 @@ export const configuration: any = {
         PatchBuildConfigBaseImage,
         RemoveMemberFromTeam,
         ReRunProjectProdRequest,
+        SetPackageJenkinsFolder,
         UpdateProjectProdRequest,
         ReRunMigrateTeamCloud,
         UpdateMemberSlackDetails,

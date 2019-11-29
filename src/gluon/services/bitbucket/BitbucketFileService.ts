@@ -5,6 +5,7 @@ import {
     logger,
 } from "@atomist/automation-client";
 import {execPromise} from "@atomist/automation-client/lib/util/child_process";
+import * as path from "path";
 import {QMConfig} from "../../../config/QMConfig";
 import {GitError} from "../../util/shared/Error";
 
@@ -20,6 +21,10 @@ export class BitbucketFileService {
                 await project.findFile(file.filename);
             } catch (error) {
                 logger.info(`${file.filename} doesnt exist. Adding it!`);
+                const directory = path.dirname(file.filename);
+                if (directory !== ".") {
+                    await project.addDirectory(directory);
+                }
                 await project.addFile(file.filename, file.content);
                 await project.commit(file.commitMessage);
                 filesAdded = true;

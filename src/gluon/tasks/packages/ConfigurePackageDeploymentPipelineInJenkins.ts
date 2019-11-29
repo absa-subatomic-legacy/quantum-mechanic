@@ -1,4 +1,5 @@
 import {HandlerResult, logger, success} from "@atomist/automation-client";
+import * as path from "path";
 import {QMConfig} from "../../../config/QMConfig";
 import {QMContext} from "../../../context/QMContext";
 import {QMFileTemplate} from "../../../template/QMTemplate";
@@ -104,7 +105,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
                     teamDevOpsProjectId,
                     bitbucketProjectKey: project.bitbucketProject.key,
                     bitbucketRepositorySlug: application.bitbucketRepository.slug,
-                    jenkinsfileName: jenkinsJobTemplate.expectedJenkinsfile,
+                    jenkinsfileName: path.join(this.application.jenkinsFolder ? this.application.jenkinsFolder : "", jenkinsJobTemplate.expectedJenkinsfile),
                 },
             );
 
@@ -134,7 +135,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
 
             jenkinsfilesToAddToRepository.push(
                 {
-                    filename: jenkinsDeploymentTemplate.expectedJenkinsfile,
+                    filename: path.join(application.jenkinsFolder ? application.jenkinsFolder : "", jenkinsDeploymentTemplate.expectedJenkinsfile),
                     content,
                     commitMessage,
                 },
@@ -143,7 +144,7 @@ export class ConfigurePackageDeploymentPipelineInJenkins extends Task {
 
         await this.bitbucketFileService.addFilesToBitbucketRepository(bitbucketProjectKey, bitbucketRepositorySlug, jenkinsfilesToAddToRepository);
 
-        return await success();
+        return success();
     }
 
 }

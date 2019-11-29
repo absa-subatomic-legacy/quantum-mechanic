@@ -6,8 +6,9 @@ import {
 } from "@atomist/automation-client";
 import {CommandHandler, Tags} from "@atomist/automation-client/lib/decorators";
 import {
-    SimpleQMMessageClient} from "../../../context/QMMessageClient";
-import {ResponderMessageClient} from "../../../context/QMMessageClient";
+    ResponderMessageClient,
+    SimpleQMMessageClient,
+} from "../../../context/QMMessageClient";
 import {PackageConfigurationRequestedEvent} from "../../events/packages/package-configuration-request/PackageConfigurationRequestedEvent";
 import {GluonService} from "../../services/gluon/GluonService";
 import {OCService} from "../../services/openshift/OCService";
@@ -33,10 +34,9 @@ import {
     OpenshiftTemplateSetter,
 } from "../../util/recursiveparam/OpenshiftParameterSetters";
 import {RecursiveParameterRequestCommand} from "../../util/recursiveparam/RecursiveParameterRequestCommand";
-import {
-    handleQMError,
-    } from "../../util/shared/Error";
+import {handleQMError} from "../../util/shared/Error";
 import {GluonToEvent} from "../../util/transform/GluonToEvent";
+import {QMApplication} from "../../util/transform/types/gluon/Application";
 import {QMProject} from "../../util/transform/types/gluon/Project";
 import {atomistIntent, CommandIntent} from "../CommandIntent";
 
@@ -119,7 +119,7 @@ export class ConfigurePackage extends RecursiveParameterRequestCommand
 
         const project: QMProject = await this.gluonService.projects.gluonProjectFromProjectName(this.projectName);
 
-        const application = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
+        const application: QMApplication = await this.gluonService.applications.gluonApplicationForNameAndProjectName(this.applicationName, this.projectName);
 
         const member = await this.gluonService.members.gluonMemberFromSlackUserId(this.slackUserId);
 
