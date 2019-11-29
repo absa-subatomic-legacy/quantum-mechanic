@@ -13,6 +13,7 @@ import {
 } from "@atomist/automation-client/lib/spi/message/MessageClient";
 import {CommandIntent} from "../../commands/CommandIntent";
 import {ConfigureBasicPackage} from "../../commands/packages/ConfigureBasicPackage";
+import {SetPackageJenkinsFolder} from "../../commands/packages/SetPackageJenkinsFolder";
 import {DocumentationUrlBuilder} from "../../messages/documentation/DocumentationUrlBuilder";
 import {QMColours} from "../../util/QMColour";
 import {BaseQMEvent} from "../../util/shared/BaseQMEvent";
@@ -90,13 +91,14 @@ export class ApplicationCreated extends BaseQMEvent implements HandleEvent<any> 
 
     private async sendConfigurationMessage(ctx: HandlerContext, applicationCreatedEvent) {
         const applicationType = applicationCreatedEvent.application.applicationType.toLowerCase();
-        const attachmentText = `The ${applicationType} can now be configured. This determines what type of ${applicationType} it is and how it should be deployed/built within your environments.`;
+        const configurePackageText = `The ${applicationType} can now be configured. This determines what type of ${applicationType} it is and how it should be deployed/built within your environments.`;
+        const setJenkinsFolderText = `By default, all Jenkinsfiles will be added to the root of your package's source repository. This can be changed before configuring the package. It is advised to do so if multiple packages share the backing repository.`;
         const destination = await addressSlackChannelsFromContext(ctx, applicationCreatedEvent.owningTeam.slackIdentity.teamChannel);
         return await ctx.messageClient.send({
             text: `The *${applicationCreatedEvent.application.name}* ${applicationType} in the project *${applicationCreatedEvent.project.name}* has been created successfully.`,
             attachments: [{
-                text: attachmentText,
-                fallback: attachmentText,
+                text: configurePackageText,
+                fallback: configurePackageText,
                 footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.AddMemberToTeam)}`,
                 color: QMColours.stdGreenyMcAppleStroodle.hex,
                 actions: [
@@ -110,7 +112,24 @@ export class ApplicationCreated extends BaseQMEvent implements HandleEvent<any> 
                             screenName: applicationCreatedEvent.requestedBy.slackIdentity.screenName,
                         }),
                 ],
-            }],
+            },
+                {
+                    text: setJenkinsFolderText,
+                    fallback: setJenkinsFolderText,
+                    footer: `For more information, please read the ${DocumentationUrlBuilder.commandReference(CommandIntent.SetPackageJenkinsFolder)}`,
+                    color: QMColours.stdMuddyYellow.hex,
+                    actions: [
+                        buttonForCommand(
+                            {text: "Set Jenkins Folder"},
+                            new SetPackageJenkinsFolder(),
+                            {
+                                projectName: applicationCreatedEvent.project.name,
+                                applicationName: applicationCreatedEvent.application.name,
+                                teamName: applicationCreatedEvent.owningTeam.name,
+                            }),
+                    ],
+                },
+            ],
         }, destination);
     }
 

@@ -15,6 +15,7 @@ import {CreateApplicationProd} from "../packages/CreateApplicationProd";
 import {LinkExistingApplication} from "../packages/LinkExistingApplication";
 import {LinkExistingLibrary} from "../packages/LinkExistingLibrary";
 import {PatchBuildConfigBaseImage} from "../packages/PatchBuildConfigBaseImage";
+import {SetPackageJenkinsFolder} from "../packages/SetPackageJenkinsFolder";
 import {AssociateTeam} from "../project/AssociateTeam";
 import {CreateGenericProd} from "../project/CreateGenericProd";
 import {CreateProject} from "../project/CreateProject";
@@ -79,6 +80,7 @@ export class HelpCategory {
         PatchBuildConfigBaseImage,
         RemoveMemberFromTeam,
         ReRunProjectProdRequest,
+        SetPackageJenkinsFolder,
         UpdateProjectProdRequest,
         UpdateMemberSlackDetails,
     ];

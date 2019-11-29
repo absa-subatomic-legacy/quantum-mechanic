@@ -16,6 +16,7 @@ export interface QMApplication {
     description: string;
     applicationType: string;
     projectId: string;
+    jenkinsFolder?: string;
     bitbucketRepository: QMBitbucketRepository;
     createdBy: QMMemberBase;
 }

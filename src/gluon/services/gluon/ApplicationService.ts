@@ -115,4 +115,9 @@ Consider linking an existing application called ${applicationName}. Click the bu
         return await this.axiosInstance.post(`${QMConfig.subatomic.gluon.baseUrl}/applications`, applicationDetails);
     }
 
+    public async setApplicationJenkinsFolder(applicationId: string, jenkinsFolder: string): Promise<any> {
+        return await this.axiosInstance.put(`${QMConfig.subatomic.gluon.baseUrl}/applications/${applicationId}`, {
+            jenkinsFolder,
+        });
+    }
 }
