@@ -1,0 +1,36 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  SNYK-JS-LODASH-450202:
+    - '@atomist/cli > @atomist/automation-client > @graphql-codegen/typescript-operations > @graphql-codegen/visitor-plugin-common > relay-compiler > @babel/traverse > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-tag-pluck > @babel/traverse > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-toolkit > graphql-import > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/sdm-core > @kubernetes/client-node > openid-client > node-jose > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-tag-pluck > @babel/traverse > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > @graphql-codegen/typescript > @graphql-codegen/visitor-plugin-common > relay-compiler > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-tag-pluck > @babel/traverse > @babel/generator > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/sdm-core > @kubernetes/client-node > openid-client > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > @graphql-codegen/typescript-operations > @graphql-codegen/typescript > @graphql-codegen/visitor-plugin-common > relay-compiler > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > graphql-tag-pluck > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > @graphql-codegen/typescript-operations > @graphql-codegen/visitor-plugin-common > relay-compiler > @babel/traverse > @babel/generator > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > @graphql-codegen/typescript-operations > @graphql-codegen/typescript > @graphql-codegen/visitor-plugin-common > relay-compiler > @babel/generator > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > @graphql-codegen/typescript > @graphql-codegen/visitor-plugin-common > relay-compiler > @babel/traverse > @babel/helper-function-name > @babel/helper-get-function-arity > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > @graphql-codegen/typescript-operations > @graphql-codegen/typescript > @graphql-codegen/visitor-plugin-common > relay-compiler > @babel/traverse > @babel/helper-function-name > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
+    - '@atomist/cli > @atomist/automation-client > @graphql-codegen/typescript-operations > @graphql-codegen/typescript > @graphql-codegen/visitor-plugin-common > relay-compiler > @babel/traverse > @babel/helper-function-name > @babel/template > @babel/types > lodash':
+        patched: '2019-11-29T08:42:58.548Z'
