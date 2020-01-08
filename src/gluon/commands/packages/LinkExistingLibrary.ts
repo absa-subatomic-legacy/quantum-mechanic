@@ -32,6 +32,7 @@ export class LinkExistingLibrary extends RecursiveParameterRequestCommand
 
     @Parameter({
         description: "library name",
+        pattern: RegExp("^[a-zA-Z0-9-]*$"),
     })
     public name: string;
 

@@ -32,6 +32,7 @@ export class LinkExistingApplication extends RecursiveParameterRequestCommand
 
     @Parameter({
         description: "application name",
+        pattern: RegExp("^[a-zA-Z0-9-]*$"),
     })
     public name: string;
 

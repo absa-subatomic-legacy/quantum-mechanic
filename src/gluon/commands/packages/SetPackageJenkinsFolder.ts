@@ -57,6 +57,7 @@ export class SetPackageJenkinsFolder extends RecursiveParameterRequestCommand
 
     @Parameter({
         description: "jenkins folder, (use . for root, separate paths with a /)",
+        pattern: RegExp("^[a-zA-Z0-9-]*$"),
     })
     public jenkinsFolder: string;
 
