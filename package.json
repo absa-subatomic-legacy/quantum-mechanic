@@ -18,7 +18,7 @@
     "@atomist/sdm-pack-lifecycle": "^0.1.0",
     "@atomist/slack-messages": "^1.1.1",
     "app-root-path": "^2.1.0",
-    "axios": "^0.19.0",
+    "axios": "^0.19.1",
     "graphql": "^0.13.2",
     "murmurhash-js": "^1.0.0",
     "npm": "^6.9.0",
