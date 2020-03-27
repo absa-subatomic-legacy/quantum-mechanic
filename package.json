@@ -28,7 +28,7 @@
     "query-string": "^6.7.0",
     "strip-json-comments": "^3.0.1",
     "superagent": "^5.1.0",
-    "xmlbuilder": "^13.0.2",
+    "xmlbuilder": "^15.1.0",
     "@absa-subatomic/openshift-api": "0.0.5"
   },
   "devDependencies": {
