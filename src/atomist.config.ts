@@ -22,7 +22,6 @@ import {PatchBuildConfigBaseImage} from "./gluon/commands/packages/PatchBuildCon
 import {SetPackageJenkinsFolder} from "./gluon/commands/packages/SetPackageJenkinsFolder";
 import {AssociateTeam} from "./gluon/commands/project/AssociateTeam";
 import {CreateGenericProd} from "./gluon/commands/project/CreateGenericProd";
-import {CreateProject} from "./gluon/commands/project/CreateProject";
 import {CreateProjectJenkinsJob} from "./gluon/commands/project/CreateProjectJenkinsJob";
 import {CreateProjectProdEnvironments} from "./gluon/commands/project/CreateProjectProdEnvironments";
 import {DefineNewProjectEnvironments} from "./gluon/commands/project/DefineNewProjectEnvironments";
@@ -37,7 +36,6 @@ import {AddConfigServer} from "./gluon/commands/team/AddConfigServer";
 import {AddMemberToTeam} from "./gluon/commands/team/AddMemberToTeam";
 import {AddOwnerToTeam} from "./gluon/commands/team/AddOwnerToTeam";
 import {CreateMembershipRequestToTeam} from "./gluon/commands/team/CreateMembershipRequestToTeam";
-import {CreateTeam} from "./gluon/commands/team/CreateTeam";
 import {NewDevOpsEnvironment} from "./gluon/commands/team/DevOpsEnvironment";
 import {JoinTeam} from "./gluon/commands/team/JoinTeam";
 import {LinkExistingTeamSlackChannel} from "./gluon/commands/team/LinkExistingTeamSlackChannel";
@@ -95,10 +93,8 @@ export const configuration: any = {
         CreateApplicationProd,
         CreateGenericProd,
         CreateMembershipRequestToTeam,
-        CreateProject,
         CreateProjectJenkinsJob,
         CreateProjectProdEnvironments,
-        CreateTeam,
         DynamicParameterSetter,
         DefineNewProjectEnvironments,
         Help,
